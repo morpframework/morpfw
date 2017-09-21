@@ -90,7 +90,7 @@ def test_morp_framework():
     assert len(r.json['schema']['properties']) == 2
 
     r = c.post_json(
-        '/+create', {'title': 'Hello world', 'body': 'Lorem ipsum'})
+        '/', {'title': 'Hello world', 'body': 'Lorem ipsum'})
 
     assert r.json['links'][0]['href'].startswith('http://localhost/')
     assert r.json['data']['title'] == 'Hello world'
