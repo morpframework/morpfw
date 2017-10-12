@@ -83,6 +83,7 @@ def create_sqlapp(app, settings, get_identity_policy=get_identity_policy,
     app.verify_identity()(verify_identity)
     # initialize app
     app.init_settings(settings)
+    app._raw_settings = settings
     if 'morp' in settings.keys():
         morpsettings = settings['morp']
 

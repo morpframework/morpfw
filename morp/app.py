@@ -7,12 +7,14 @@ from sqlalchemy.orm import sessionmaker
 from more.transaction import TransactionApp
 from morepath.reify import reify
 from morepath.request import Request
+import webob
 from more import cors
 from morepath.request import Response
 from . import directive
 from . import exc
 from celery import Celery
 import time
+import re
 
 Session = sessionmaker()
 
@@ -32,10 +34,24 @@ class Signal(object):
         tasks = []
         metastore = self.app.get_celery_metastore(request)
         collection = CeleryTaskCollection(request, metastore)
+        envs = {}
+        allcaps = re.compile(r'^[A-Z_]+$')
+        for k, v in request.environ.items():
+            if allcaps.match(k):
+                envs[k] = v
+            elif k in ['wsgi.url_scheme']:
+                envs[k] = v
+
+        req_json = {
+            'headers': dict(request.headers),
+            'environ': envs,
+            'text': request.text,
+        }
+
         subs = self.subscribers()
         for s in subs:
             wrapped = s.__wrapped__
-            task = s.delay(**kwargs)
+            task = s.delay(request=req_json, **kwargs)
             meta = {
                 'task': '.'.join((wrapped.__module__, wrapped.__name__)),
                 'task_id': task.task_id,

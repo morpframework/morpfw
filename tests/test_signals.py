@@ -41,21 +41,21 @@ def index(context, request):
 
 
 @App.celery_subscribe('test_signal')
-def handler1(obj):
+def handler1(request, obj):
     obj['handler'] = 'handler1'
     obj['data'] += 1
     return obj
 
 
 @App.celery_subscribe('test_signal')
-def handler2(obj):
+def handler2(request, obj):
     obj['handler'] = 'handler2'
     obj['data'] += 5
     return obj
 
 
 @App.celery_subscribe('test_signal')
-def handler3(obj):
+def handler3(request, obj):
     obj['handler'] = 'handler3'
     raise Exception('Error')
 
