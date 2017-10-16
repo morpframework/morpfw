@@ -13,6 +13,7 @@ from morepath.request import Response
 from . import directive
 from . import exc
 from celery import Celery
+from celery import shared_task
 import time
 import re
 
@@ -83,9 +84,9 @@ class BaseApp(authmanager.App, cors.CORSApp):
         raise NotImplementedError
 
     @classmethod
-    def celery_subscribe(klass, signal):
+    def celery_subscribe(klass, signal, task_name=None):
         def wrapper(wrapped):
-            task = klass.celery.task(wrapped)
+            task = shared_task(name=task_name)(wrapped)
             klass._celery_subscribe(signal)(task)
             return task
         return wrapper
