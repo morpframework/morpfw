@@ -43,6 +43,21 @@ class CeleryTaskModel(jslcrud.CRUDModel):
 class CeleryTaskCollection(jslcrud.CRUDCollection):
     schema = CeleryTaskSchema
 
+    def search(self, *args, **kwargs):
+        objs = super(CeleryTaskCollection, self).search(*args, **kwargs)
+        for o in objs:
+            if o.data['status'] in ['SUBMITTED']:
+                meta = AsyncResult(o.data['task_id'])._get_task_meta()
+                if meta['status'] == 'SUCCESS':
+                    o.data['status'] = 'SUCCESS'
+                    o.data['traceback'] = None
+                    o.data['result'] = meta['result']
+                elif meta['status'] == 'FAILURE':
+                    o.data['status'] = 'FAILURE'
+                    o.data['traceback'] = meta['traceback']
+                    o.data['result'] = None
+        return objs
+
 
 class CeleryTaskMemoryStorage(MemoryStorage):
     model = CeleryTaskModel
@@ -78,17 +93,6 @@ def search_task(context, request):
     if limit > 100:
         limit = 100
     objs = context.search(query, limit=limit)
-    for o in objs:
-        if o.data['status'] in ['SUBMITTED']:
-            meta = AsyncResult(o.data['task_id'])._get_task_meta()
-            if meta['status'] == 'SUCCESS':
-                o.data['status'] = 'SUCCESS'
-                o.data['traceback'] = None
-                o.data['result'] = meta['result']
-            elif meta['status'] == 'FAILURE':
-                o.data['status'] = 'FAILURE'
-                o.data['traceback'] = meta['traceback']
-                o.data['result'] = None
     return {'results': [obj.json() for obj in objs],
             'total': len(objs),
             'q': query}
