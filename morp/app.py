@@ -16,6 +16,15 @@ from celery import Celery
 from celery import shared_task
 import time
 import re
+import sqlalchemy
+from .sql import Base
+from authmanager.model.user import UserCollection, UserSchema
+from authmanager.model.group import GroupCollection, GroupSchema
+from authmanager.exc import UserExistsError
+import transaction
+import os
+from zope.sqlalchemy import register as register_session
+from morp.exc import ConfigurationError
 
 Session = sessionmaker()
 
@@ -78,6 +87,7 @@ class BaseApp(authmanager.App, cors.CORSApp):
     celery_task = dectate.directive(directive.CeleryTaskAction)
     celery_metastore = dectate.directive(directive.CeleryMetastoreAction)
     _celery_subscribe = dectate.directive(directive.CelerySubscriberAction)
+    _raw_settings = {}
 
     @reg.dispatch_method(reg.match_key('name', lambda self, name: name))
     def get_celery_task(self, name):
@@ -117,6 +127,56 @@ class BaseApp(authmanager.App, cors.CORSApp):
                                               self.__class__.__name__)
 
 
+def create_admin(app, username, password, session=Session):
+    request = app.request_class(
+        app=app, environ={'PATH_INFO': '/'})
+
+    transaction.manager.begin()
+    context = UserCollection(
+        request, app.get_authmanager_storage(request, UserSchema))
+    userobj = context.create({'username': username,
+                              'password': password,
+                              'state': 'active'})
+    gstorage = app.get_authmanager_storage(
+        request, GroupSchema)
+    group = gstorage.get('__default__')
+    group.add_members([username])
+    group.grant_member_role(username, 'administrator')
+    transaction.manager.commit()
+    return userobj
+
+
 class SQLApp(TransactionApp, BaseApp):
 
     request_class = DBSessionRequest
+
+    _engine = None
+
+    def __init__(self, *args, **kwargs):
+        super(SQLApp, self).__init__(*args, **kwargs)
+        self._init_engine()
+
+    def _init_engine(self, session=Session):
+
+        settings = self._raw_settings
+
+        if self._engine is not None:
+            return self._engine
+
+        register_session(session)
+
+        # initialize SQLAlchemy
+        if 'sqlalchemy' not in settings:
+            raise ConfigurationError('SQLAlchemy settings not found')
+        if 'sqlalchemy' in settings:
+            cwd = os.environ.get('MORP_WORKDIR', os.getcwd())
+            os.chdir(cwd)
+            dburi = settings['sqlalchemy']['dburi'] % {'here': cwd}
+            engine = sqlalchemy.create_engine(dburi)
+            session.configure(bind=engine)
+
+        self._engine = engine
+        return engine
+
+    def initdb(self, session=Session):
+        Base.metadata.create_all(self._engine)

@@ -5,6 +5,8 @@ from webtest import TestApp as Client
 from more.jwtauth import JWTIdentityPolicy
 from more.basicauth import BasicAuthIdentityPolicy
 from morp.main import create_app
+from morp.app import create_admin
+from authmanager.exc import UserExistsError
 
 DEFAULT_SETTINGS = {
     'authmanager': {
@@ -42,9 +44,12 @@ def get_settings(config):
 
 
 def get_client(app, config='settings.yml', **kwargs):
-
     settings = get_settings(config)
-
     appobj = create_app(app, settings, **kwargs)
+    appobj.initdb()
+    try:
+        create_admin(appobj, username='defaultuser', password='password')
+    except UserExistsError:
+        pass
     c = Client(appobj)
     return c

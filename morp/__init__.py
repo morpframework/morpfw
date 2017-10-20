@@ -8,6 +8,7 @@ import authmanager
 import jsl
 from .app import SQLApp
 from .main import create_app
+from .app import create_admin
 from morepath import run
 from jslcrud import signals as crudsignals
 from .util import get_group, get_user
