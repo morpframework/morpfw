@@ -68,7 +68,7 @@ def celery_config():
     }
 
 
-def test_signal(celery_worker):
+def test_signal(celery_worker, pgsql_db):
     c = get_client(App, get_identity_policy=get_identity_policy,
                    verify_identity=verify_identity)
     c.authorization = ('Basic', ('dummy', 'dummy'))

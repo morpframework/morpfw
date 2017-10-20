@@ -76,7 +76,7 @@ if __name__ == '__main__':
     morp.run(app)
 
 
-def test_morp_framework():
+def test_morp_framework(pgsql_db):
     c = get_client(App)
 
     r = c.post_json(

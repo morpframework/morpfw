@@ -17,7 +17,7 @@ DEFAULT_SETTINGS = {
         'leeway': 10
     },
     'sqlalchemy': {
-        'dburi': 'sqlite://'
+        'dburi': 'postgresql://postgres@localhost:45678/morp_tests'
     },
     'morp': {
         'use_celery': True,

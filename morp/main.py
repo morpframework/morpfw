@@ -30,13 +30,15 @@ def verify_identity(app, identity):
 
 
 @reg.dispatch(reg.match_class('app', lambda app, *args, **kwargs: app))
-def create_app(app, settings, get_identity_policy=get_identity_policy,
+def create_app(app, settings, scan=True,
+               get_identity_policy=get_identity_policy,
                verify_identity=verify_identity, **kwargs):
     raise NotImplementedError
 
 
 @create_app.register(app=BaseApp)
-def create_baseapp(app, settings, get_identity_policy=get_identity_policy,
+def create_baseapp(app, settings, scan=True,
+                   get_identity_policy=get_identity_policy,
                    verify_identity=verify_identity, **kwargs):
     app.identity_policy()(get_identity_policy)
     app.verify_identity()(verify_identity)
@@ -55,14 +57,15 @@ def create_baseapp(app, settings, get_identity_policy=get_identity_policy,
                     del celery_settings[exclude]
             app.celery.conf.update(**celery_settings)
     morepath.commit(app)
-    morepath.autoscan()
-    app.commit()
+    if scan:
+        morepath.autoscan()
+        app.commit()
     application = app()
     return application
 
 
 @create_app.register(app=SQLApp)
-def create_sqlapp(app, settings, get_identity_policy=get_identity_policy,
+def create_sqlapp(app, settings, scan=True, get_identity_policy=get_identity_policy,
                   verify_identity=verify_identity, **kwargs):
 
     sqlalchemy_session = kwargs.get('sqalchemy_session', Session)
@@ -99,8 +102,9 @@ def create_sqlapp(app, settings, get_identity_policy=get_identity_policy,
             app.celery.conf.update(**celery_settings)
 
     morepath.commit(app)
-    morepath.autoscan()
-    app.commit()
+    if scan:
+        morepath.autoscan()
+        app.commit()
     application = app()
 
     # create tables

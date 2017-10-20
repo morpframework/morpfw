@@ -29,7 +29,7 @@ class CeleryTask(Base):
     __tablename__ = 'celery_tasks'
     task = sa.Column(sa.String(length=1024))
     task_id = sa.Column(sa.String(length=1024))
-    created_ts = sa.Column(sa.Integer)
+    created_ts = sa.Column(sa.BigInteger)
     status = sa.Column(sa.String(length=256))
     input = sa.Column(sajson.JSONField())
     result = sa.Column(sajson.JSONField())
