@@ -4,6 +4,7 @@ import jslcrud
 from jslcrud import CRUDCollection, CRUDModel, CRUDAdapter, CRUDSchema
 from jslcrud import CRUDStateMachine
 from jslcrud.storage.sqlstorage import SQLStorage
+from jslcrud.storage.elasticsearchstorage import ElasticSearchStorage
 import authmanager
 import jsl
 from .app import SQLApp
