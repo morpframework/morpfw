@@ -27,6 +27,8 @@ DEFAULT_SETTINGS = {
     },
     'celery': {
         'metastore': 'sqlstorage',
+        'broker_url': 'amqp://guest:guest@localhost:38567/',
+        'result_backend': 'rpc://'
     }
 }
 

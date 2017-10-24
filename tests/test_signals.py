@@ -63,12 +63,12 @@ def handler3(request, obj):
 @pytest.fixture(scope='session')
 def celery_config():
     return {
-        'broker_url': 'redis://',
-        'result_backend': 'redis://'
+        'broker_url': 'amqp://guest:guest@localhost:34567/',
+        'result_backend': 'db+postgresql://postgres@localhost:45678/morp_tests'
     }
 
 
-def test_signal(celery_worker, pgsql_db):
+def test_signal(pika_connection_channel, pgsql_db, celery_worker):
     c = get_client(App, get_identity_policy=get_identity_policy,
                    verify_identity=verify_identity)
     c.authorization = ('Basic', ('dummy', 'dummy'))
