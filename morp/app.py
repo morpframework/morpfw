@@ -14,6 +14,7 @@ from . import directive
 from . import exc
 from celery import Celery
 from celery import shared_task
+from celery.schedules import crontab
 import time
 import re
 import sqlalchemy
@@ -84,7 +85,6 @@ class DBSessionRequest(Request):
 class BaseApp(authmanager.App, cors.CORSApp):
 
     celery = Celery()
-    celery_task = dectate.directive(directive.CeleryTaskAction)
     celery_metastore = dectate.directive(directive.CeleryMetastoreAction)
     _celery_subscribe = dectate.directive(directive.CelerySubscriberAction)
     _raw_settings = {}
@@ -98,6 +98,21 @@ class BaseApp(authmanager.App, cors.CORSApp):
         def wrapper(wrapped):
             task = shared_task(name=task_name)(wrapped)
             klass._celery_subscribe(signal)(task)
+            return task
+        return wrapper
+
+    @classmethod
+    def celery_cron(klass, name, minute='*', hour='*', day_of_week='*',
+                    day_of_month='*', month_of_year='*'):
+        def wrapper(wrapped):
+            task = shared_task()(wrapped)
+            klass.celery.conf.beat_schedule[name] = {
+                'task': '.'.join([wrapped.__module__, wrapped.__name__]),
+                'schedule': crontab(minute=minute, hour=hour,
+                                    day_of_week=day_of_week,
+                                    day_of_month=day_of_month,
+                                    month_of_year=month_of_year)
+            }
             return task
         return wrapper
 

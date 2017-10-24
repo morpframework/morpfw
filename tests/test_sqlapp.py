@@ -55,26 +55,6 @@ def get_page(request, identifier):
 
 App.authmanager_register(basepath='')
 
-SETTINGS = {
-    'authmanager': {
-        'storage': 'sqlstorage',
-        'default_user': 'defaultuser',
-        'default_password': 'password'
-    },
-    'jwtauth': {
-        'master_secret': 'secret',
-        'leeway': 10
-    },
-    'sqlalchemy': {
-        'dburi': 'sqlite:///%(here)s/app.db'
-    }
-}
-
-
-if __name__ == '__main__':
-    app = morp.create_app(App, SETTINGS)
-    morp.run(app)
-
 
 def test_morp_framework(pgsql_db):
     c = get_client(App)

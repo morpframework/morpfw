@@ -4,23 +4,6 @@ import celery
 from uuid import uuid4
 
 
-class CeleryTaskAction(dectate.Action):
-
-    app_class_arg = True
-
-    def __init__(self, name):
-        self.name = name
-
-    def identifier(self, app_class):
-        return str((app_class, self.name))
-
-    def perform(self, obj, app_class):
-
-        task = app_class.celery.task(obj)
-        app_class.celery_task.register(
-            reg.methodify(lambda name: task), name=self.name)
-
-
 class CelerySubscriberAction(dectate.Action):
 
     app_class_arg = True
