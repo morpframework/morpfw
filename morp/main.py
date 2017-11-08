@@ -4,7 +4,7 @@ from .app import SQLApp, Session, BaseApp
 from .sql import Base
 import os
 from zope.sqlalchemy import register as register_session
-from more.jwtauth import JWTIdentityPolicy
+from authmanager.authpolicy import JWTWithAPIKeyIdentityPolicy
 from more.basicauth import BasicAuthIdentityPolicy
 from morp.exc import ConfigurationError
 import transaction
@@ -16,7 +16,7 @@ def get_identity_policy(settings):
     jwtauth_settings = getattr(settings, 'jwtauth', None)
     if jwtauth_settings:
         # Pass the settings dictionary to the identity policy.
-        return JWTIdentityPolicy(**jwtauth_settings.__dict__.copy())
+        return JWTWithAPIKeyIdentityPolicy(**jwtauth_settings.__dict__.copy())
     raise Exception('JWTAuth configuration is not set')
 
 
