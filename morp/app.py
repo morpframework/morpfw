@@ -4,6 +4,7 @@ import reg
 import authmanager
 from jslcrud.provider.base import Provider
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import NullPool
 from more.transaction import TransactionApp
 from morepath.reify import reify
 from morepath.request import Request
@@ -167,11 +168,11 @@ class SQLApp(TransactionApp, BaseApp):
 
     _engine = None
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, poolclass=NullPool, *args, **kwargs):
         super(SQLApp, self).__init__(*args, **kwargs)
-        self._init_engine()
+        self._init_engine(poolclass)
 
-    def _init_engine(self, session=Session):
+    def _init_engine(self, session=Session, poolclass=NullPool):
 
         settings = self._raw_settings
 
@@ -187,7 +188,7 @@ class SQLApp(TransactionApp, BaseApp):
             cwd = os.environ.get('MORP_WORKDIR', os.getcwd())
             os.chdir(cwd)
             dburi = settings['sqlalchemy']['dburi'] % {'here': cwd}
-            engine = sqlalchemy.create_engine(dburi)
+            engine = sqlalchemy.create_engine(dburi, poolclass=poolclass)
             session.configure(bind=engine)
 
         self._engine = engine
