@@ -33,9 +33,10 @@ Session = sessionmaker()
 
 class Signal(object):
 
-    def __init__(self, app, signal):
+    def __init__(self, app, signal, **kwargs):
         self.app = app
         self.signal = signal
+        self.signal_opts = kwargs
 
     def subscribers(self):
         self.app.config.celery_subscriber_registry.setdefault(self.signal, [])
@@ -63,7 +64,8 @@ class Signal(object):
         subs = self.subscribers()
         for s in subs:
             wrapped = s.__wrapped__
-            task = s.delay(request=req_json, **kwargs)
+            task = s.apply_async(kwargs=dict(request=req_json, **kwargs), 
+                            **self.signal_opts)
             meta = {
                 'task': '.'.join((wrapped.__module__, wrapped.__name__)),
                 'task_id': task.task_id,
