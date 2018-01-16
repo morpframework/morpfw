@@ -20,8 +20,6 @@ setup(name='morp',
       zip_safe=False,
       install_requires=[
           # -*- Extra requirements: -*-
-          'jslcrud',
-          'authmanager',
           'rulez',
           'more.cors',
           'celery',
