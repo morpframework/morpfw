@@ -2,8 +2,8 @@ import os
 import morepath
 import yaml
 from webtest import TestApp as Client
-from morp.jslcrud.model import CRUDCollection, CRUDModel, CRUDSchema
-from morp.jslcrud.model import CRUDStateMachine
+from morp.jslcrud.model import Collection, Model, Schema
+from morp.jslcrud.model import StateMachine
 from morp.jslcrud.app import App as BaseApp
 import morp.jslcrud.signals as signals
 import jsl
@@ -49,15 +49,15 @@ def page_default_identifier(schema, obj, request):
     return str(uuid4())
 
 
-class PageCollection(CRUDCollection):
+class PageCollection(Collection):
     schema = PageSchema
 
 
-class PageModel(CRUDModel):
+class PageModel(Model):
     schema = PageSchema
 
 
-class ObjectSchema(CRUDSchema):
+class ObjectSchema(Schema):
 
     id = jsl.IntField(required=False)
     uuid = jsl.StringField(required=False)
@@ -76,11 +76,11 @@ def object_default_identifier(schema, obj, request):
     return None
 
 
-class ObjectCollection(CRUDCollection):
+class ObjectCollection(Collection):
     schema = ObjectSchema
 
 
-class ObjectModel(CRUDModel):
+class ObjectModel(Model):
     schema = ObjectSchema
 
 
@@ -100,7 +100,7 @@ def object_updated(app, request, obj, signal):
     obj.data['updated_flag'] = True
 
 
-class PageStateMachine(CRUDStateMachine):
+class PageStateMachine(StateMachine):
 
     states = ['new', 'pending', 'approved']
     transitions = [
@@ -133,11 +133,11 @@ def namedobject_default_identifier(schema, obj, request):
     return obj['name']
 
 
-class NamedObjectCollection(CRUDCollection):
+class NamedObjectCollection(Collection):
     schema = NamedObjectSchema
 
 
-class NamedObjectModel(CRUDModel):
+class NamedObjectModel(Model):
     schema = NamedObjectSchema
 
 

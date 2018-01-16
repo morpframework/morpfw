@@ -78,6 +78,3 @@ class App(JsonSchemaApp, signals.SignalApp):
     def jslcrud_join_identifier(self, *args):
         separator = self.get_jslcrud_compositekey_separator()
         return separator.join(args)
-
-
-CRUDApp = App

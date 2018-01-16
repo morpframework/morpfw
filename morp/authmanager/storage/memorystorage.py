@@ -1,5 +1,5 @@
 from ..app import App
-from ...jslcrud.storage.memorystorage import MemoryStorage as CRUDMemoryStorage
+from ...jslcrud.storage.memorystorage import MemoryStorage
 from ..model.user import User, UserModel, UserSchema
 from ..model.group import Group, GroupModel, GroupSchema
 from ..model.apikey import APIKey, APIKeyModel, APIKeySchema
@@ -14,7 +14,7 @@ DB = {
 }
 
 
-class UserMemoryStorage(CRUDMemoryStorage):
+class UserMemoryStorage(MemoryStorage):
     model = UserModel
 
     def change_password(self, username, new_password):
@@ -31,11 +31,11 @@ class UserMemoryStorage(CRUDMemoryStorage):
         return user.data['password'] == password
 
 
-class APIKeyMemoryStorage(CRUDMemoryStorage):
+class APIKeyMemoryStorage(MemoryStorage):
     model = APIKeyModel
 
 
-class GroupMemoryStorage(CRUDMemoryStorage):
+class GroupMemoryStorage(MemoryStorage):
     model = GroupModel
 
     def get_user_groups(self, username):

@@ -6,10 +6,10 @@ import argparse
 import yaml
 import sqlalchemy
 import os
-from .model import CRUDCollection, CRUDModel, CRUDAdapter, CRUDSchema
-from .model import CRUDStateMachine
+from .model import Collection, Model, Adapter, Schema
+from .model import StateMachine
 from .util import resolve_model
-from .app import CRUDApp
+from .app import App
 from .storage.sqlstorage import SQLStorage
 from .errors import NotFoundError
 from zope.sqlalchemy import register as register_session

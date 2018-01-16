@@ -28,11 +28,11 @@ def page_schema_identifier(schema):
     return ['uuid']
 
 
-class PageCollection(morp.CRUDCollection):
+class PageCollection(morp.Collection):
     schema = PageSchema
 
 
-class PageModel(morp.CRUDModel):
+class PageModel(morp.Model):
     schema = PageSchema
 
 

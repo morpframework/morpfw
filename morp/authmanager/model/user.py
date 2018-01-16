@@ -1,4 +1,4 @@
-from ...jslcrud import CRUDCollection, CRUDModel, CRUDStateMachine
+from ...jslcrud import Collection, Model, StateMachine
 from ...jslcrud import errors as cruderrors
 from jsonschema import validate
 from ..dbmodel.user import User
@@ -43,7 +43,7 @@ def user_identifierfields(schema):
     return ['username']
 
 
-class UserCollection(CRUDCollection):
+class UserCollection(Collection):
     schema = UserSchema
 
     def authenticate(self, username, password):
@@ -83,7 +83,7 @@ class UserCollection(CRUDCollection):
         return super(UserCollection, self)._create(data)
 
 
-class UserModel(CRUDModel):
+class UserModel(Model):
 
     schema = UserSchema
 
@@ -108,7 +108,7 @@ class UserModel(CRUDModel):
         return group_roles
 
 
-class UserStateMachine(CRUDStateMachine):
+class UserStateMachine(StateMachine):
 
     states = ['active', 'inactive', 'deleted']
     transitions = [

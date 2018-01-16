@@ -36,11 +36,11 @@ class CeleryTask(Base):
     traceback = sa.Column(sa.Text)
 
 
-class CeleryTaskModel(jslcrud.CRUDModel):
+class CeleryTaskModel(jslcrud.Model):
     schema = CeleryTaskSchema
 
 
-class CeleryTaskCollection(jslcrud.CRUDCollection):
+class CeleryTaskCollection(jslcrud.Collection):
     schema = CeleryTaskSchema
 
     def search(self, *args, **kwargs):

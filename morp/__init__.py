@@ -1,8 +1,8 @@
 #
 import morepath
 from . import jslcrud
-from .jslcrud import CRUDCollection, CRUDModel, CRUDAdapter, CRUDSchema
-from .jslcrud import CRUDStateMachine
+from .jslcrud import Collection, Model, Adapter, Schema
+from .jslcrud import StateMachine
 from .jslcrud.storage.sqlstorage import SQLStorage
 from .jslcrud.storage.elasticsearchstorage import ElasticSearchStorage
 from . import authmanager

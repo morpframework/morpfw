@@ -1,4 +1,4 @@
-from ...jslcrud import CRUDSchema, CRUDCollection, CRUDModel
+from ...jslcrud import Schema, Collection, Model
 import jsl
 from ..app import App
 from ..dbmodel.apikey import APIKey
@@ -6,7 +6,7 @@ from uuid import uuid4
 import rulez
 
 
-class APIKeySchema(CRUDSchema):
+class APIKeySchema(Schema):
 
     username = jsl.StringField()
     label = jsl.StringField()
@@ -14,11 +14,11 @@ class APIKeySchema(CRUDSchema):
     api_secret = jsl.StringField()
 
 
-class APIKeyModel(CRUDModel):
+class APIKeyModel(Model):
     schema = APIKeySchema
 
 
-class APIKeyCollection(CRUDCollection):
+class APIKeyCollection(Collection):
     schema = APIKeySchema
 
     def search(self, query=None, *args, **kwargs):

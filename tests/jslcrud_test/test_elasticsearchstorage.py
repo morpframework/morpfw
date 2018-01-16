@@ -1,6 +1,6 @@
 import jsl
 from jslcrud_common import App as BaseApp
-from morp.jslcrud.model import CRUDCollection, CRUDModel, CRUDSchema
+from morp.jslcrud.model import Collection, Model, Schema
 from morp.jslcrud.storage.elasticsearchstorage import ElasticSearchStorage
 from jslcrud_common import get_client, run_jslcrud_test, PageCollection, PageModel
 from jslcrud_common import NamedObjectCollection, NamedObjectModel
@@ -61,7 +61,7 @@ def model_factory(request, identifier):
     return storage.get(identifier)
 
 
-class ObjectSchema(CRUDSchema):
+class ObjectSchema(Schema):
 
     id = jsl.StringField(required=False)
     uuid = jsl.StringField(required=False)
@@ -80,11 +80,11 @@ def object_default_identifier(schema, obj, request):
     return None
 
 
-class ObjectModel(CRUDModel):
+class ObjectModel(Model):
     schema = ObjectSchema
 
 
-class ObjectCollection(CRUDCollection):
+class ObjectCollection(Collection):
     schema = ObjectSchema
 
 

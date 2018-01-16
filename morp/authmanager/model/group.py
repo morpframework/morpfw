@@ -1,6 +1,6 @@
 from ..dbmodel import Group, Membership, RoleAssignment
 from .base import BaseSchema, NAME_PATTERN
-from ...jslcrud import CRUDCollection, CRUDModel
+from ...jslcrud import Collection, Model
 from ..app import App
 import jsl
 from ...jslcrud import errors as cruderrors
@@ -27,7 +27,7 @@ class MemberSchema(BaseSchema):
     users = jsl.ArrayField(items=jsl.StringField(), required=True)
 
 
-class GroupCollection(CRUDCollection):
+class GroupCollection(Collection):
     schema = GroupSchema
 
     def _create(self, data):
@@ -41,7 +41,7 @@ class GroupCollection(CRUDCollection):
         return super(GroupCollection, self)._create(data)
 
 
-class GroupModel(CRUDModel):
+class GroupModel(Model):
     schema = GroupSchema
 
     def members(self):

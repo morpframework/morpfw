@@ -3,7 +3,7 @@ from ..model.user import User, UserSchema, UserModel
 from ..model.group import Group, GroupSchema, GroupModel
 from ..model.base import BaseSchema
 from ..model.apikey import APIKeyModel, APIKeySchema, APIKey
-from ...jslcrud.storage.sqlstorage import SQLStorage as CRUDSQLStorage
+from ...jslcrud.storage.sqlstorage import SQLStorage
 from .. import dbmodel as db
 from .interfaces import IStorage
 import hashlib
@@ -15,7 +15,7 @@ def hash(data):
     return hashlib.sha256(data.encode('utf-8')).hexdigest()
 
 
-class UserSQLStorage(CRUDSQLStorage):
+class UserSQLStorage(SQLStorage):
     model = UserModel
     orm_model = User
 
@@ -53,12 +53,12 @@ class UserSQLStorage(CRUDSQLStorage):
         return u.password == hash(password)
 
 
-class APIKeySQLStorage(CRUDSQLStorage):
+class APIKeySQLStorage(SQLStorage):
     model = APIKeyModel
     orm_model = APIKey
 
 
-class GroupSQLStorage(CRUDSQLStorage):
+class GroupSQLStorage(SQLStorage):
     model = GroupModel
     orm_model = Group
 

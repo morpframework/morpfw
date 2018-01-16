@@ -1,6 +1,6 @@
 import jsl
 from jslcrud_common import App as BaseApp
-from morp.jslcrud.model import CRUDCollection, CRUDModel
+from morp.jslcrud.model import Collection, Model
 from morp.jslcrud.storage.sqlstorage import SQLStorage, Base, GUID
 from jslcrud_common import get_client, run_jslcrud_test, PageCollection, PageModel
 from jslcrud_common import ObjectCollection, ObjectModel

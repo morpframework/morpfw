@@ -25,19 +25,19 @@ def default_jsontransform(request, context, data):
     return data
 
 
-class CRUDSchema(jsl.Document):
+class Schema(jsl.Document):
 
     uuid = jsl.StringField(required=False)
     created = jsl.DateTimeField(required=False)
     last_modified = jsl.DateTimeField(required=False)
 
 
-@App.jslcrud_identifierfields(schema=CRUDSchema)
+@App.jslcrud_identifierfields(schema=Schema)
 def default_identifierfields(schema):
     return ['uuid']
 
 
-@App.jslcrud_default_identifier(schema=CRUDSchema)
+@App.jslcrud_default_identifier(schema=Schema)
 def default_identifier(schema, obj, request):
     if obj.get('uuid', None) is None:
         return uuid4().hex
@@ -49,7 +49,7 @@ def permits(request, obj, permission, app=None):
     return app._permits(request.identity, obj, permission)
 
 
-class CRUDCollection(object):
+class Collection(object):
 
     create_view_enabled = True
     search_view_enabled = True
@@ -113,10 +113,10 @@ class CRUDCollection(object):
     def links(self):
         request = self.request
         links = [{'rel': 'create',
-                 'href': request.link(self, '+create'),
-                 'method': 'POST'},
-                {'rel': 'search',
-                 'href': request.link(self, '+search')}]
+                  'href': request.link(self, '+create'),
+                  'method': 'POST'},
+                 {'rel': 'search',
+                  'href': request.link(self, '+search')}]
         links += self._links()
         return links
 
@@ -124,7 +124,7 @@ class CRUDCollection(object):
         return []
 
 
-class CRUDModel(object):
+class Model(object):
 
     linkable = True
     update_view_enabled = True
@@ -254,8 +254,6 @@ class CRUDModel(object):
     def _links(self):
         return []
 
-
-
     def rules_adapter(self):
         return self.app._jslcrud_rulesadapter(self)
 
@@ -268,9 +266,9 @@ class CRUDModel(object):
         self.state_machine()
 
 
-class CRUDAdapter(object):
+class Adapter(object):
 
-    def __init__(self, model: CRUDModel):
+    def __init__(self, model: Model):
         self.model = model
         self.request = model.request
         self.app = model.app
@@ -303,7 +301,7 @@ class CRUDAdapter(object):
         return "<Adapted %s:(%s)>" % (self.__class__.__name__, self.model)
 
 
-class CRUDStateMachine(object):
+class StateMachine(object):
 
     @property
     def states(self):
@@ -334,6 +332,6 @@ class CRUDStateMachine(object):
         self._context.data['state'] = val
 
 
-@App.jslcrud_rulesadapter(model=CRUDModel)
+@App.jslcrud_rulesadapter(model=Model)
 def get_default_rulesadapter(obj):
-    return CRUDAdapter(obj)
+    return Adapter(obj)

@@ -1,5 +1,5 @@
 from .app import App
-from .model import CRUDModel, CRUDCollection
+from .model import Model, Collection
 from .validator import validate_schema, get_data
 from .errors import ValidationError, NotFoundError, StateUpdateProhibitedError
 from .errors import AlreadyExistsError
@@ -17,17 +17,17 @@ import logging
 logger = logging.getLogger('jslcrud')
 
 
-@get_data.register(model=CRUDCollection, request=Request)
+@get_data.register(model=Collection, request=Request)
 def get_collection_data(model, request):
     return request.json
 
 
-@App.json(model=CRUDCollection, permission=permission.View)
+@App.json(model=Collection, permission=permission.View)
 def schema(context, request):
     return context.json()
 
 
-@App.json(model=CRUDCollection, name='search', permission=permission.Search)
+@App.json(model=Collection, name='search', permission=permission.Search)
 def search(context, request):
     if not context.search_view_enabled:
         raise HTTPForbidden()
@@ -81,7 +81,7 @@ def search(context, request):
     return res
 
 
-@App.json(model=CRUDCollection, request_method='POST',
+@App.json(model=Collection, request_method='POST',
           load=validate_schema(), permission=permission.Create)
 def create(context, request, json):
     if not context.create_view_enabled:
@@ -91,14 +91,14 @@ def create(context, request, json):
     return obj.json()
 
 
-@get_data.register(model=CRUDModel, request=Request)
+@get_data.register(model=Model, request=Request)
 def get_obj_data(model, request):
     data = model.json()['data']
     data.update(request.json)
     return data
 
 
-@App.json(model=CRUDModel, permission=permission.View)
+@App.json(model=Model, permission=permission.View)
 def read(context, request):
     select = request.GET.get('select', None)
     obj = context.json()
@@ -109,7 +109,7 @@ def read(context, request):
     return obj
 
 
-@App.json(model=CRUDModel, request_method='PATCH', load=validate_schema(),
+@App.json(model=Model, request_method='PATCH', load=validate_schema(),
           permission=permission.Edit)
 def update(context, request, json):
     if not context.update_view_enabled:
@@ -119,7 +119,7 @@ def update(context, request, json):
     return {'status': 'success'}
 
 
-@App.json(model=CRUDModel, name='statemachine', request_method='POST',
+@App.json(model=Model, name='statemachine', request_method='POST',
           permission=permission.Edit)
 def statemachine(context, request):
     if not context.statemachine_view_enabled:
@@ -142,7 +142,7 @@ def statemachine(context, request):
     return context.json()
 
 
-@App.json(model=CRUDModel, request_method='DELETE',
+@App.json(model=Model, request_method='DELETE',
           permission=permission.Delete)
 def delete(context, request):
     if not context.delete_view_enabled:

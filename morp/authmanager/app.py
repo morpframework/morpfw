@@ -1,6 +1,6 @@
 import morepath
 from more.jwtauth import JWTIdentityPolicy
-from ..jslcrud import CRUDApp
+from ..jslcrud import App as CRUDApp
 import reg
 import dectate
 from . import action
@@ -34,7 +34,7 @@ class App(CRUDApp):
                              username=None,  groupname='__default__'):
         if username is None:
             username = request.identity.userid
-        from authmanager.model.group import GroupSchema
+        from morp.authmanager.model.group import GroupSchema
         storage = self.get_authmanager_storage(request, GroupSchema)
         return rolename in storage.get_group_user_roles(groupname, username)
 
