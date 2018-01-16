@@ -1,8 +1,8 @@
 import morepath
 import dectate
 import reg
-import authmanager
-from jslcrud.provider.base import Provider
+from . import authmanager
+from .jslcrud.provider.base import Provider
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool, QueuePool
 from more.transaction import TransactionApp
@@ -20,9 +20,9 @@ import time
 import re
 import sqlalchemy
 from .sql import Base
-from authmanager.model.user import UserCollection, UserSchema
-from authmanager.model.group import GroupCollection, GroupSchema
-from authmanager.exc import UserExistsError
+from .authmanager.model.user import UserCollection, UserSchema
+from .authmanager.model.group import GroupCollection, GroupSchema
+from .authmanager.exc import UserExistsError
 import transaction
 import os
 from zope.sqlalchemy import register as register_session
@@ -64,8 +64,8 @@ class Signal(object):
         subs = self.subscribers()
         for s in subs:
             wrapped = s.__wrapped__
-            task = s.apply_async(kwargs=dict(request=req_json, **kwargs), 
-                            **self.signal_opts)
+            task = s.apply_async(kwargs=dict(request=req_json, **kwargs),
+                                 **self.signal_opts)
             meta = {
                 'task': '.'.join((wrapped.__module__, wrapped.__name__)),
                 'task_id': task.task_id,

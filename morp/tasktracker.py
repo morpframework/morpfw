@@ -1,11 +1,11 @@
 import jsl
-import jslcrud
-from jslcrud.storage.sqlstorage import Base
+from . import jslcrud
+from .jslcrud.storage.sqlstorage import Base
 import sqlalchemy as sa
 import sqlalchemy_jsonfield as sajson
 from .app import BaseApp
-from jslcrud.storage.memorystorage import MemoryStorage
-from jslcrud.storage.sqlstorage import SQLStorage
+from .jslcrud.storage.memorystorage import MemoryStorage
+from .jslcrud.storage.sqlstorage import SQLStorage
 import json
 from celery.result import AsyncResult
 

@@ -1,0 +1,10 @@
+jwtauth:
+  master_secret: secret
+  leeway: 10
+  allow_refresh: true
+
+authmanager:
+  storage: sqlstorage
+
+sqlalchemy:
+  dburi: 'postgresql://postgres@localhost:45678/morp_tests'

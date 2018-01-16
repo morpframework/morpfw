@@ -6,7 +6,7 @@ from more.jwtauth import JWTIdentityPolicy
 from more.basicauth import BasicAuthIdentityPolicy
 from morp.main import create_app
 from morp.app import create_admin
-from authmanager.exc import UserExistsError
+from morp.authmanager.exc import UserExistsError
 
 DEFAULT_SETTINGS = {
     'authmanager': {

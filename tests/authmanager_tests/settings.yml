@@ -1,0 +1,7 @@
+jwtauth:
+  master_secret: secret
+  leeway: 10
+  allow_refresh: true
+
+authmanager:
+  storage: memorystorage
