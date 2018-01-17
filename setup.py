@@ -23,7 +23,8 @@ setup(name='morp',
           'rulez',
           'more.cors',
           'celery',
-          'redis'
+          'redis',
+          'jsonobject',
       ],
       extras_require={
           'test': [
