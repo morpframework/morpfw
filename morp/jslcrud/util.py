@@ -13,6 +13,10 @@ def resolve_model(request):
 
 def jsonobject_property_to_jsl_property(
         prop: jsonobject.JsonProperty) -> jsl.Document:
+    if isinstance(prop, jsonobject.DateProperty):
+        return jsl.DateTimeField(name=prop.name, required=prop.required)
+    if isinstance(prop, jsonobject.DateTimeProperty):
+        return jsl.DateTimeField(name=prop.name, required=prop.required)
     if isinstance(prop, jsonobject.StringProperty):
         return jsl.StringField(name=prop.name, required=prop.required)
     if isinstance(prop, jsonobject.IntegerProperty):

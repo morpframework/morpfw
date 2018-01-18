@@ -15,6 +15,8 @@ class SampleSchema(jsonobject.JsonObject):
     arrayfield = jsonobject.ListProperty()
     documentarrayfield = jsonobject.ListProperty(item_type=SubSchema)
     documentfield = jsonobject.DictProperty(item_type=SubSchema)
+    datefield = jsonobject.DateProperty()
+    datetimefield = jsonobject.DateTimeProperty()
 
 
 def test_jsonobject_convert():
@@ -43,5 +45,11 @@ def test_jsonobject_convert():
     field = getattr(schema, 'documentfield')
     assert isinstance(field, jsl.DocumentField)
     assert isinstance(field.document_cls.stringfield, jsl.StringField)
+
+    field = getattr(schema, 'datetimefield')
+    assert isinstance(field, jsl.DateTimeField)
+
+    field = getattr(schema, 'datefield')
+    assert isinstance(field, jsl.DateTimeField)
 
     assert schema.get_schema()
