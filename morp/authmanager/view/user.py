@@ -39,17 +39,6 @@ def register(context, request):
     return {'status': 'success'}
 
 
-@App.permission_rule(model=UserCollection, permission=permission.Register,
-                     identity=None)
-def register_rule_anon(identity, context, permission):
-    return True
-
-
-@App.permission_rule(model=UserCollection, permission=permission.Register)
-def register_rule(identity, context, permission):
-    return True
-
-
 @App.json(model=UserCollection, name='login')
 def login(context, request):
     return {
@@ -180,10 +169,13 @@ def roles(context, request):
 def change_password(context, request):
     data = request.json
     error = None
-    if data['new_password'] != data['new_password_validate']:
+    current_password = data.get('password', '')
+    if not request.app.authmanager_has_role(request, 'administrator'):
+        if not context.validate(current_password, check_state=False):
+            error = 'Invalid password'
+
+    if not error and data['new_password'] != data['new_password_validate']:
         error = 'Password confirmation does not match'
-    elif not context.validate(data['password'], check_state=False):
-        error = 'Invalid password'
 
     if error:
         @request.after
@@ -194,7 +186,7 @@ def change_password(context, request):
             'message': error
         }
 
-    context.change_password(data['password'], data['new_password'])
+    context.change_password(current_password, data['new_password'])
     return {'status': 'success'}
 
 

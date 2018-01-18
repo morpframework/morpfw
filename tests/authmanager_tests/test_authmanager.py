@@ -4,6 +4,7 @@ from webtest import TestApp as Client
 from morp.authmanager.app import App
 from morp.authmanager import create_app
 from morp.authmanager.authpolicy import JWTWithAPIKeyIdentityPolicy
+from morp.authmanager.model.user import UserCollection, UserSchema, GroupSchema
 from more.jwtauth import JWTIdentityPolicy
 import json
 import yaml
@@ -11,6 +12,7 @@ import os
 import copy
 from more.basicauth import BasicAuthIdentityPolicy
 import time
+import transaction
 
 
 def get_client(app, config='settings.yml', **kwargs):
@@ -30,37 +32,70 @@ def get_client(app, config='settings.yml', **kwargs):
     kwargs = {}
     appobj = create_app(app, settings, get_identity_policy=get_identity_policy,
                         verify_identity=verify_identity, **kwargs)
+    request = appobj.request_class(
+        app=appobj, environ={'PATH_INFO': '/'})
+
+    username = 'admin'
+    password = 'password'
+    transaction.manager.begin()
+    context = UserCollection(
+        request, appobj.get_authmanager_storage(request, UserSchema))
+    userobj = context.create({'username': username,
+                              'password': password,
+                              'state': 'active'})
+    gstorage = appobj.get_authmanager_storage(
+        request, GroupSchema)
+    group = gstorage.get('__default__')
+    group.add_members([username])
+    group.grant_member_role(username, 'administrator')
+    transaction.commit()
     c = Client(appobj)
     return c
 
 
+def login(c, username, password='password'):
+
+    r = c.post_json('/api/v1/user/+login', {
+        'username': username,
+        'password': password
+    })
+
+    assert r.status_code == 200
+
+    token = r.headers.get('Authorization').split()[1]
+
+    c.authorization = ('JWT', token)
+
+    return r.json
+
+
+def logout(c):
+    c.authorization = None
+
+
 def _test_authentication(c):
-    r = c.post_json('/api/v1/user/+register',
-                    {'username': 'admin',
-                     'password': 'admin',
-                     'password_validate': 'admin'})
-
-    assert r.json == {'status': 'success'}
-
     r = c.get('/api/v1/user/+login')
+
+    # test schema access
 
     assert r.json['schema']['title'] == 'credential'
 
-    login = r.json['links'][0]
-    assert login['rel'] == 'login'
-    assert login['type'] == 'POST'
+    ll = r.json['links'][0]
+    assert ll['rel'] == 'login'
+    assert ll['type'] == 'POST'
 
-    r = c.post_json(login['href'], {
+    r = c.post_json(ll['href'], {
         'username': 'admin',
-        'password': 'admin'
+        'password': 'password'
     })
 
     assert r.json == {
         'status': 'success'
     }
 
-    jwttoken = r.headers.get('Authorization').split()[1]
+    logout(c)
 
+    # test wrong login
     r = c.post_json('/api/v1/user/+login', {
         'username': 'invaliduser',
         'password': 'invalidpassword'
@@ -89,9 +124,9 @@ def _test_authentication(c):
 
     # from now on we login as admin
 
-    c.authorization = ('JWT', jwttoken)
+    login(c, 'admin')
 
-    # lets test refreshing token
+    # test refreshing token
     time.sleep(2)
 
     r = c.get('/api/v1/user/+refresh_token')
@@ -108,6 +143,8 @@ def _test_authentication(c):
     assert r.json['data']['groups'] == ['__default__']
     assert r.json['data']['state'] == 'active'
 
+    # query for nonexistent user
+
     r = c.get('/api/v1/user/unknownuser', expect_errors=True)
 
     assert r.status_code == 404
@@ -116,10 +153,26 @@ def _test_authentication(c):
 
     assert r.json['schema']['title'] == 'user'
 
+    logout(c)
+
+    # register new user, you shouldnt be allowed to if not logged in
+    # as admin
+
     r = c.post_json('/api/v1/user/+register',
                     {'username': 'user1',
                      'password': 'password',
-                     'password_validate': 'password'})
+                     'password_validate': 'password'}, expect_errors=True)
+
+    assert r.status_code == 403
+
+    # register new user
+
+    login(c, 'admin')
+
+    r = c.post_json('/api/v1/user/+register',
+                    {'username': 'user1',
+                     'password': 'password',
+                     'password_validate': 'password'}, expect_errors=True)
 
     assert r.json == {'status': 'success'}
 
@@ -130,12 +183,15 @@ def _test_authentication(c):
 
     assert r.json == {'status': 'success'}
 
+    # fail if password is not string
     r = c.post_json('/api/v1/user/+register',
-                    {'username': 'user1',
+                    {'username': 'user3',
                      'password': {'hello': 'world'}},
                     expect_errors=True)
 
     assert r.status_code == 422
+
+    # fail if duplicate user
 
     r = c.post_json('/api/v1/user/+register',
                     {'username': 'user1',
@@ -154,13 +210,10 @@ def _test_authentication(c):
     assert r.json['data']['state'] == 'active'
     assert 'password' not in r.json['data'].keys()
 
-    r = c.post_json('/api/v1/user/+login', {
-        'username': 'user1',
-        'password': 'password'
-    })
+    # attempt to login as user1
+    login(c, 'user1')
 
-    assert r.status_code == 200
-
+    login(c, 'admin')
     r = c.post_json(
         '/api/v1/user/user1/+statemachine', {'transition': 'deactivate'})
 
@@ -180,6 +233,10 @@ def _test_authentication(c):
     r = c.post_json(
         '/api/v1/user/user1/+statemachine', {'transition': 'activate'})
 
+    login(c, 'user1')
+
+    # reject setting password through the update API
+
     r = c.post_json('/api/v1/user/user1/',
                     {'password': 'newpass'}, expect_errors=True)
 
@@ -190,23 +247,40 @@ def _test_authentication(c):
 
     assert r.status_code == 422
 
+    login(c, 'admin')
+
+    # admin should be allowed to set password without requiring current password
     r = c.post_json('/api/v1/user/user1/+change_password', {
-        'password': 'password', 'new_password': 'newpass',
+        'new_password': 'newpass',
         'new_password_validate': 'newpass'
     })
 
     assert r.status_code == 200
 
-    r = c.post_json('/api/v1/user/+login', {
-        'username': 'user1',
-        'password': 'newpass'
-    })
+    login(c, 'user1', 'newpass')
+
+    # user require current password
+    r = c.post_json('/api/v1/user/user1/+change_password', {
+        'new_password': 'password',
+        'new_password_validate': 'password'
+    }, expect_errors=True)
+
+    assert r.status_code == 422
+
+    # user require current password
+    r = c.post_json('/api/v1/user/user1/+change_password', {
+        'password': 'newpass',
+        'new_password': 'password',
+        'new_password_validate': 'password'
+    }, expect_errors=True)
 
     assert r.status_code == 200
 
+    login(c, 'admin')
+
     # api keys
     r = c.post_json('/api/v1/apikey/',
-                    {'label': 'samplekey', 'password': 'admin'})
+                    {'label': 'samplekey', 'password': 'password'})
 
     key_identity = r.json['data']['api_identity']
     key_secret = r.json['data']['api_secret']
@@ -221,22 +295,17 @@ def _test_authentication(c):
     assert key_secret == r.json['data']['api_secret']
     assert key_uuid == r.json['data']['uuid']
 
-    c.authorization = None
-
     # user1 shouldnt see admin's apikey
-    r = c.post_json(login['href'], {
-        'username': 'user1',
-        'password': 'newpass'
-    })
 
-    c.authorization = ('JWT', r.headers.get('Authorization').split()[1])
+    login(c, 'user1')
 
     r = c.get('/api/v1/apikey/+search')
 
     assert len(r.json['results']) == 0
 
-    c.authorization = None
+    logout(c)
 
+    # lets try deactivating user1 using API key
     r = c.post_json(
         '/api/v1/user/user1/+statemachine', {'transition': 'deactivate'},
         expect_errors=True)
@@ -251,7 +320,8 @@ def _test_authentication(c):
 
     assert r.status_code == 200
 
-    c.authorization = ('JWT', jwttoken)
+    login(c, 'admin')
+
     r = c.get('/api/v1/group/')
 
     assert r.json['schema']['title'] == 'group'

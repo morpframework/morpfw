@@ -88,8 +88,9 @@ class UserModel(Model):
     schema = UserSchema
 
     def change_password(self, password, new_password):
-        if not self.validate(password, check_state=False):
-            raise exc.InvalidPasswordError(self.data['username'])
+        if not self.app.authmanager_has_role(self.request, 'administrator'):
+            if not self.validate(password, check_state=False):
+                raise exc.InvalidPasswordError(self.data['username'])
         self.storage.change_password(self.data['username'], new_password)
 
     def validate(self, password, check_state=True):

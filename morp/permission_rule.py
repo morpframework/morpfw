@@ -1,4 +1,4 @@
-from .app import BaseApp as App
+from .authmanager.app import App
 from .authmanager import UserCollection
 from .authmanager import GroupCollection
 from .authmanager import permission as authperm
