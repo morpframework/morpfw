@@ -1,4 +1,5 @@
 from morp.jslcrud.util import jsonobject_to_jsl
+from morp.jslcrud.util import jsl_to_jsonobject
 import jsonobject
 import jsl
 
@@ -53,3 +54,5 @@ def test_jsonobject_convert():
     assert isinstance(field, jsl.DateTimeField)
 
     assert schema.get_schema()
+
+    sschema = jsl_to_jsonobject(schema)
