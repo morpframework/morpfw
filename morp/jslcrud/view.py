@@ -14,7 +14,7 @@ import traceback
 import os
 import sys
 import logging
-logger = logging.getLogger('jslcrud')
+logger = logging.getLogger('morp')
 
 
 @get_data.register(model=Collection, request=Request)
@@ -30,7 +30,7 @@ def schema(context, request):
 @App.json(model=Collection, name='search', permission=permission.Search)
 def search(context, request):
     if not context.search_view_enabled:
-        raise HTTPForbidden()
+        raise HTTPNotFound()
     query = json.loads(request.GET.get('q', '{}'))
     if not query:
         query = None
@@ -85,7 +85,7 @@ def search(context, request):
           load=validate_schema(), permission=permission.Create)
 def create(context, request, json):
     if not context.create_view_enabled:
-        raise HTTPForbidden()
+        raise HTTPNotFound()
     obj = context.create(request.json)
     obj.save()
     return obj.json()
@@ -113,7 +113,7 @@ def read(context, request):
           permission=permission.Edit)
 def update(context, request, json):
     if not context.update_view_enabled:
-        raise HTTPForbidden()
+        raise HTTPNotFound()
 
     context.update(request.json)
     return {'status': 'success'}
@@ -123,7 +123,7 @@ def update(context, request, json):
           permission=permission.Edit)
 def statemachine(context, request):
     if not context.statemachine_view_enabled:
-        raise HTTPForbidden()
+        raise HTTPNotFound()
 
     sm = context.state_machine()
     transition = request.json['transition']
@@ -146,7 +146,7 @@ def statemachine(context, request):
           permission=permission.Delete)
 def delete(context, request):
     if not context.delete_view_enabled:
-        raise HTTPForbidden()
+        raise HTTPNotFound()
 
     context.delete()
     return {'status': 'success'}
@@ -177,6 +177,8 @@ def forbidden_error(context, request):
     @request.after
     def adjust_status(response):
         response.status = 403
+#   FIXME: should log this when a config for DEBUG_SECURITY is enabled
+#    logger.error(traceback.format_exc())
     return {'status': 'error',
             'message': 'Access Denied : %s' % request.path}
 
