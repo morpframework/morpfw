@@ -28,6 +28,7 @@ def default_jsontransform(request, context, data):
 class Schema(jsl.Document):
 
     uuid = jsl.StringField(required=False)
+    creator = jsl.StringField(required=False)
     created = jsl.DateTimeField(required=False)
     last_modified = jsl.DateTimeField(required=False)
 

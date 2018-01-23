@@ -21,6 +21,12 @@ def set_created(app, request, obj, signal):
         obj.data['last_modified'] = now
 
 
+@App.jslcrud_subscribe(signal=signals.OBJECT_CREATED, model=model.Model)
+def set_creator(app, request, obj, signal):
+    if getattr(obj.schema, 'creator', None):
+        obj.data['creator'] = request.remote_user or ''
+
+
 @App.jslcrud_subscribe(signal=signals.OBJECT_UPDATED, model=model.Model)
 def set_modified(app, request, obj, signal):
     if getattr(obj.schema, 'last_modified', None):
