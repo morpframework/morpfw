@@ -314,6 +314,7 @@ def run_jslcrud_test(app):
     assert r.json['data']['id']
     assert r.json['data']['created_flag'] is True
     assert r.json['data']['created']
+    assert r.json['data']['creator'] == 'admin'
     uuid = r.json['data']['uuid']
     original_object = r.json['data']
     assert len(uuid) == 32

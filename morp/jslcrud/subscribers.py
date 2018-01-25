@@ -24,7 +24,7 @@ def set_created(app, request, obj, signal):
 @App.jslcrud_subscribe(signal=signals.OBJECT_CREATED, model=model.Model)
 def set_creator(app, request, obj, signal):
     if getattr(obj.schema, 'creator', None):
-        obj.data['creator'] = request.remote_user or ''
+        obj.data['creator'] = request.identity.userid or ''
 
 
 @App.jslcrud_subscribe(signal=signals.OBJECT_UPDATED, model=model.Model)
