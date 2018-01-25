@@ -34,7 +34,7 @@ class UserSchema(BaseSchema):
     attrs = jsl.DictField(required=False)
     state = jsl.StringField(required=False)
     created = jsl.StringField(required=False)
-    last_modified = jsl.StringField(required=False)
+    modified = jsl.StringField(required=False)
     nonce = jsl.StringField(required=False)
 
 

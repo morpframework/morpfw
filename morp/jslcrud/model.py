@@ -30,7 +30,7 @@ class Schema(jsl.Document):
     uuid = jsl.StringField(required=False)
     creator = jsl.StringField(required=False)
     created = jsl.DateTimeField(required=False)
-    last_modified = jsl.DateTimeField(required=False)
+    modified = jsl.DateTimeField(required=False)
 
 
 @App.jslcrud_identifierfields(schema=Schema)

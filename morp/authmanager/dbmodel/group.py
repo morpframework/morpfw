@@ -11,7 +11,7 @@ class Group(Base):
     groupname = sa.Column(sa.String(length=256))
     attrs = sa.Column(sajson.JSONField)
     created = sa.Column(sa.DateTime)
-    last_modified = sa.Column(sa.DateTime)
+    modified = sa.Column(sa.DateTime)
 
 
 class Membership(Base):

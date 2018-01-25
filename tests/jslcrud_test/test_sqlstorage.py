@@ -54,7 +54,7 @@ class Page(Base):
     body = sa.Column(sa.Text(), default='')
     footer = sa.Column(sa.String(length=1024), default='')
     created = sa.Column(sa.DateTime)
-    last_modified = sa.Column(sa.DateTime)
+    modified = sa.Column(sa.DateTime)
     state = sa.Column(sa.String)
 
 

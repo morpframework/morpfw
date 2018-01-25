@@ -30,7 +30,7 @@ class PageSchema(jsl.Document):
     body = jsl.StringField(required=True, default='')
     footer = jsl.StringField(required=False, default='')
     created = jsl.DateTimeField(required=False)
-    last_modified = jsl.DateTimeField(required=False)
+    modified = jsl.DateTimeField(required=False)
     state = jsl.StringField(required=False)
 
 

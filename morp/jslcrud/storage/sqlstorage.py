@@ -158,7 +158,7 @@ class BaseMixin(object):
     uuid = sa.Column(GUID, primary_key=True, default=uuid.uuid4)
     created = sa.Column(sa.DateTime, default=datetime.utcnow)
     creator = sa.Column(sa.String(length=1024))
-    last_modified = sa.Column(sa.DateTime, default=datetime.utcnow)
+    modified = sa.Column(sa.DateTime, default=datetime.utcnow)
 
 
 Base = declarative_base(cls=BaseMixin)

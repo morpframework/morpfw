@@ -12,4 +12,4 @@ class User(Base):
     attrs = sa.Column(sajson.JSONField)
     state = sa.Column(sa.String(length=64))
     created = sa.Column(sa.DateTime)
-    last_modified = sa.Column(sa.DateTime)
+    modified = sa.Column(sa.DateTime)

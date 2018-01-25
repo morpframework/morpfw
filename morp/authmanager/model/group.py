@@ -15,7 +15,7 @@ class GroupSchema(BaseSchema):
     members = jsl.ArrayField(items=jsl.StringField(), required=False)
     attrs = jsl.DictField(required=False)
     created = jsl.StringField(required=False)
-    last_modified = jsl.StringField(required=False)
+    modified = jsl.StringField(required=False)
 
 
 @App.jslcrud_identifierfields(schema=GroupSchema)

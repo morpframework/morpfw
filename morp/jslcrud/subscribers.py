@@ -18,7 +18,7 @@ def set_created(app, request, obj, signal):
     if getattr(obj.schema, 'created', None):
         now = datetime.utcnow().isoformat()
         obj.data['created'] = now
-        obj.data['last_modified'] = now
+        obj.data['modified'] = now
 
 
 @App.jslcrud_subscribe(signal=signals.OBJECT_CREATED, model=model.Model)
@@ -29,5 +29,5 @@ def set_creator(app, request, obj, signal):
 
 @App.jslcrud_subscribe(signal=signals.OBJECT_UPDATED, model=model.Model)
 def set_modified(app, request, obj, signal):
-    if getattr(obj.schema, 'last_modified', None):
-        obj.data['last_modified'] = datetime.utcnow().isoformat()
+    if getattr(obj.schema, 'modified', None):
+        obj.data['modified'] = datetime.utcnow().isoformat()
