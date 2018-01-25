@@ -1,6 +1,7 @@
 from functools import partial
 from .errors import ValidationError, FormValidationError
 from jsonschema import Draft4Validator
+from .util import jsl_to_jsonobject, jsonobject_to_jsl
 import reg
 from morepath.publish import resolve_model
 import urllib
@@ -17,7 +18,9 @@ def load(validator, request):
         path_info=urllib.parse.unquote(request.path))
     context = resolve_model(newreq)
     context.request = request
-    schema = context.schema.get_schema(ordered=True)
+    jso = jsl_to_jsonobject(context.schema)
+    jslschema = jsonobject_to_jsl(jso)
+    schema = jslschema.get_schema(ordered=True)
     form_validators = request.app.get_jslcrud_formvalidators(context.schema)
     params = {}
 

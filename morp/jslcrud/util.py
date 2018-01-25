@@ -1,6 +1,7 @@
 from morepath.publish import resolve_model as _resolve_model
 import jsl
 import jsonobject
+from copy import copy
 
 
 def resolve_model(request):
@@ -12,7 +13,7 @@ def resolve_model(request):
 
 
 def jsonobject_property_to_jsl_field(
-        prop: jsonobject.JsonProperty) -> jsl.BaseField:
+        prop: jsonobject.JsonProperty, nullable=False) -> jsl.BaseField:
     if isinstance(prop, jsonobject.DateProperty):
         return jsl.DateTimeField(name=prop.name, required=prop.required)
     if isinstance(prop, jsonobject.DateTimeProperty):
@@ -21,9 +22,13 @@ def jsonobject_property_to_jsl_field(
         return jsl.StringField(name=prop.name, required=prop.required)
     if isinstance(prop, jsonobject.IntegerProperty):
         return jsl.IntField(name=prop.name, required=prop.required)
+    if isinstance(prop, jsonobject.FloatProperty):
+        return jsl.NumberField(name=prop.name, required=prop.required)
+    if isinstance(prop, jsonobject.BooleanProperty):
+        return jsl.BooleanField(name=prop.name, required=prop.required)
     if isinstance(prop, jsonobject.DictProperty):
         if prop.item_type:
-            subtype = jsonobject_to_jsl(prop.item_type)
+            subtype = jsonobject_to_jsl(prop.item_type, nullable=nullable)
             return jsl.DocumentField(name=prop.name,
                                      document_cls=subtype,
                                      required=prop.required)
@@ -32,16 +37,16 @@ def jsonobject_property_to_jsl_field(
         if prop.item_type:
             if issubclass(prop.item_type, jsonobject.JsonObject):
                 subtype = jsl.DocumentField(
-                    document_cls=jsonobject_to_jsl(prop.item_type))
+                    document_cls=jsonobject_to_jsl(prop.item_type), nullable=nullable)
             elif isinstance(prop.item_type, jsonobject.JsonProperty):
                 subtype = jsonobject_property_to_jsl_field(prop.item_type)
-            elif isinstance(prop.item_type, str):
+            elif prop.item_type is str:
                 subtype = jsl.StringField(name=prop.name)
-            elif isinstance(prop.item_type, int):
+            elif prop.item_type is int:
                 subtype = jsl.IntField(name=prop.name)
-            elif isinstance(prop.item_type, float):
+            elif prop.item_type is float:
                 subtype = jsl.NumberField(name=prop.name)
-            elif isinstance(prop.item_type, dict):
+            elif prop.item_type is dict:
                 subtype = jsl.DictField(name=prop.name)
             else:
                 raise KeyError(prop.item_type)
@@ -51,15 +56,34 @@ def jsonobject_property_to_jsl_field(
     raise KeyError(prop)
 
 
-def jsonobject_to_jsl(schema):
+def _set_nullable(prop):
+    if not prop.required:
+        return jsl.OneOfField([prop, jsl.NullField(name=prop.name)])
+    return prop
+
+
+def jsonobject_to_jsl(schema, nullable=False):
     # output jsl schema from jsonobject schema
     attrs = {}
-    for attr, prop in schema._properties_by_attr.items():
-        attrs[attr] = jsonobject_property_to_jsl_field(prop)
 
+    class Options(object):
+        additional_properties = True
+
+    for attr, prop in schema._properties_by_attr.items():
+        prop = jsonobject_property_to_jsl_field(prop, nullable=nullable)
+        if nullable:
+            attrs[attr] = _set_nullable(prop)
+        else:
+            attrs[attr] = prop
+
+    attrs['Options'] = Options
     Schema = type("Schema", (jsl.Document, ), attrs)
 
     return Schema
+
+
+def jsl_nullable(schema):
+    return jsonobject_to_jsl(jsl_to_jsonobject(schema), nullable=True)
 
 
 def jsl_field_to_jsonobject_property(
@@ -75,7 +99,11 @@ def jsl_field_to_jsonobject_property(
                                           required=prop.required)
     if isinstance(prop, jsl.DictField):
         return jsonobject.DictProperty(name=prop.name, required=prop.required)
-
+    if isinstance(prop, jsl.NumberField):
+        return jsonobject.FloatProperty(name=prop.name, required=prop.required)
+    if isinstance(prop, jsl.BooleanField):
+        return jsonobject.BooleanProperty(name=prop.name,
+                                          required=prop.required)
     if isinstance(prop, jsl.DocumentField):
         if prop.document_cls:
             subtype = jsl_to_jsonobject(prop.document_cls)
@@ -88,7 +116,7 @@ def jsl_field_to_jsonobject_property(
             if isinstance(prop.items, jsl.DocumentField):
                 subtype = jsl_to_jsonobject(prop.items.document_cls)
             elif isinstance(prop.items, jsl.BaseField):
-                subtype = jsl_field_to_jsonobject_property(prop.item_type)
+                subtype = jsl_field_to_jsonobject_property(prop.items)
             else:
                 raise KeyError(prop.items)
             return jsonobject.ListProperty(item_type=subtype,
@@ -122,10 +150,10 @@ def generate_default(schema):
             data[n] = f.get_default()
             if data[n] is None:
                 if isinstance(f, jsl.StringField):
-                    data[n] = ''
+                    data[n] = None
                 elif (isinstance(f, jsl.IntField) or
                       isinstance(f, jsl.NumberField)):
-                    data[n] = 0
+                    data[n] = None
                 elif isinstance(f, jsl.DictField):
                     data[n] = {}
                 elif isinstance(f, jsl.ArrayField):

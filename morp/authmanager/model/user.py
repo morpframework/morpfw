@@ -1,6 +1,5 @@
 from ...jslcrud import Collection, Model, StateMachine
 from ...jslcrud import errors as cruderrors
-from jsonschema import validate
 from ..dbmodel.user import User
 from ..app import App
 import jsl

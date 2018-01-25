@@ -2,6 +2,7 @@ from .app import App
 import jsl
 from jsonschema.validators import Draft4Validator
 from jsonschema import validate, ValidationError
+from .util import jsl_nullable
 from .const import SEPARATOR
 from . import permission
 from . import signals
@@ -184,7 +185,7 @@ class Model(object):
             raise StateUpdateProhibitedError()
         data = self._raw_json()
         data.update(newdata)
-        schema = self.schema.get_schema(ordered=True)
+        schema = jsl_nullable(self.schema).get_schema(ordered=True)
         validate(data, schema)
         self.storage.update(self.identifier, data)
         self.request.app.jslcrud_publish(
@@ -198,12 +199,12 @@ class Model(object):
     def save(self):
         if self.data.changed:
             data = self._raw_json()
-            schema = self.schema.get_schema(ordered=True)
+            schema = jsl_nullable(self.schema).get_schema(ordered=True)
             validate(data, schema)
             self.storage.update(self.identifier, data)
 
     def _raw_json(self):
-        schema = self.schema.get_schema(ordered=True)
+        schema = jsl_nullable(self.schema).get_schema(ordered=True)
         jsondata = self.app.get_jslcrud_jsonprovider(self.data)
         jsondata = self.app.get_jslcrud_jsontransform(
             self.schema)(self.request, self, copy.deepcopy(jsondata))
