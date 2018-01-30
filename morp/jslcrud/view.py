@@ -2,7 +2,7 @@ from .app import App
 from .model import Model, Collection
 from .validator import validate_schema, get_data
 from .errors import ValidationError, NotFoundError, StateUpdateProhibitedError
-from .errors import AlreadyExistsError
+from .errors import AlreadyExistsError, UnprocessableError
 from . import permission
 import json
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
@@ -253,3 +253,13 @@ def internalserver_error(context, request):
         'status': 'error',
         'message': "Internal server error"
     }
+
+@App.json(model=UnprocessableError)
+def unprocessable_error(context, request):
+    @request.after
+    def adjust_status(response):
+        response.status = 422
+    return {'status': 'error',
+            'message': '%s' % (context.message)}
+
+

@@ -345,6 +345,12 @@ def _test_authentication(c):
 
     assert r.json == {'status': 'success'}
 
+    r = c.post_json('/api/v1/group/group1/+grant',
+                    {'mapping': {'dummyuser': ['member']}},
+                    expect_errors=True)
+
+    assert r.status_code == 422
+
     r = c.get('/api/v1/user/user1')
 
     assert list(sorted(r.json['data']['groups'])) == [
