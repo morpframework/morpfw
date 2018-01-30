@@ -1,5 +1,6 @@
 from ...jslcrud.storage.sqlstorage import Base
 import sqlalchemy as sa
+from sqlalchemy.orm import relationship
 import sqlalchemy.orm as saorm
 import sqlalchemy_jsonfield as sajson
 
@@ -12,6 +13,8 @@ class Group(Base):
     attrs = sa.Column(sajson.JSONField)
     created = sa.Column(sa.DateTime)
     modified = sa.Column(sa.DateTime)
+
+    memberships = relationship('Membership', cascade='all')
 
 
 class Membership(Base):
