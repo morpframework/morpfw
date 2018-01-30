@@ -201,7 +201,7 @@ def _test_authentication(c):
 
     assert r.status_code == 422
     assert r.json['status'] == 'error'
-    assert r.json['error']['type'] == 'UserExistsError'
+    assert r.json['type'] == 'UserExistsError'
 
     r = c.get('/api/v1/user/user1')
 
@@ -334,7 +334,7 @@ def _test_authentication(c):
                     expect_errors=True)
 
     assert r.json['status'] == 'error'
-    assert r.json['error']['type'] == 'GroupExistsError'
+    assert r.json['type'] == 'GroupExistsError'
 
     r = c.get('/api/v1/group/group1')
 

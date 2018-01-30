@@ -10,8 +10,8 @@ def exception_view(context, request):
         response.status = 422
     return {
         'status': 'error',
-        'error': {
-            'type': context.__class__.__name__,
-            'message': str(context)
-        }
+        'type': context.__class__.__name__,
+        'message': '%s ( %s )' % (
+            context.__class__.__name__,
+            str(context))
     }
