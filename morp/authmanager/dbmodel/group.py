@@ -28,6 +28,9 @@ class Membership(Base):
     created = sa.Column(sa.DateTime)
     sa.UniqueConstraint('group_id', 'user_id')
 
+    roles_assignment = relationship('RoleAssignment', cascade='all')
+
+
 
 class RoleAssignment(Base):
 
