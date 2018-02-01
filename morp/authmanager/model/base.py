@@ -1,8 +1,6 @@
 import jsl
 import re
+from ... import Schema as BaseSchema
 
 NAME_PATTERN = r'^[a-z0-9_@:\.]+$'
-
-
-class BaseSchema(jsl.Document):
-    pass
+EMAIL_PATTERN = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"

@@ -5,7 +5,9 @@ from ..model.group import Group, GroupModel, GroupSchema
 from ..model.apikey import APIKey, APIKeyModel, APIKeySchema
 from .interfaces import IStorage
 from ..model.base import BaseSchema
+from ...jslcrud import errors as cruderrors
 from .. import exc
+import rulez
 
 DB = {
     'users': {},
@@ -16,6 +18,12 @@ DB = {
 
 class UserMemoryStorage(MemoryStorage):
     model = UserModel
+
+    def get_by_email(self, email):
+        users = self.search(rulez.field['email'] == email)
+        if not users:
+            raise cruderrors.NotFoundError(self.model, email)
+        return users[0]
 
     def change_password(self, username, new_password):
         user = self.get(username)

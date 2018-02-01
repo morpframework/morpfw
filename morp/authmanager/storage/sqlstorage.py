@@ -4,6 +4,7 @@ from ..model.group import Group, GroupSchema, GroupModel
 from ..model.base import BaseSchema
 from ..model.apikey import APIKeyModel, APIKeySchema, APIKey
 from ...jslcrud.storage.sqlstorage import SQLStorage
+from ...jslcrud import errors as cruderrors
 from .. import dbmodel as db
 from .interfaces import IStorage
 import hashlib
@@ -22,6 +23,13 @@ class UserSQLStorage(SQLStorage):
     def create(self, data):
         data['password'] = hash(data['password'])
         return super(UserSQLStorage, self).create(data)
+
+    def get_by_email(self, email):
+        q = self.session.query(db.User).filter(db.User.email == email)
+        u = q.first()
+        if not u:
+            raise cruderrors.NotFoundError(self.model, email)
+        return self.model(self.request, self, u)
 
     def change_password(self, username, new_password):
         q = self.session.query(db.User).filter(db.User.username == username)

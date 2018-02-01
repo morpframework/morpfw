@@ -2,6 +2,7 @@ from ..app import App
 from ..model.user import UserCollection, UserModel
 from ..path import user_collection_factory
 from ..model.user import UserSchema, LoginSchema
+from ..model.user import RegistrationSchema
 import morepath
 from ..validator import validate
 from ..utils import rellink
@@ -17,7 +18,7 @@ from more.jwtauth import (
 def register(context, request):
     """Validate the username and password and create the user."""
     data = request.json
-    res = validate(data, LoginSchema.get_schema())
+    res = validate(data, RegistrationSchema.get_schema())
     if res:
         @request.after
         def set_error(response):

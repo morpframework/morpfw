@@ -171,13 +171,15 @@ def _test_authentication(c):
 
     r = c.post_json('/api/v1/user/+register',
                     {'username': 'user1',
+                     'email': 'user1@localhost.com',
                      'password': 'password',
-                     'password_validate': 'password'}, expect_errors=True)
+                     'password_validate': 'password'})
 
     assert r.json == {'status': 'success'}
 
     r = c.post_json('/api/v1/user/+register',
                     {'username': 'user2',
+                     'email': 'user2@localhost.com',
                      'password': 'password',
                      'password_validate': 'password'})
 
@@ -186,6 +188,7 @@ def _test_authentication(c):
     # fail if password is not string
     r = c.post_json('/api/v1/user/+register',
                     {'username': 'user3',
+                     'email': 'user3@localhost.com',
                      'password': {'hello': 'world'}},
                     expect_errors=True)
 
@@ -195,6 +198,7 @@ def _test_authentication(c):
 
     r = c.post_json('/api/v1/user/+register',
                     {'username': 'user1',
+                     'email': 'user1@localhost.com',
                      'password': 'password',
                      'password_validate': 'password'},
                     expect_errors=True)
@@ -202,6 +206,17 @@ def _test_authentication(c):
     assert r.status_code == 422
     assert r.json['status'] == 'error'
     assert r.json['type'] == 'UserExistsError'
+
+    # fail if invalid email
+
+    r = c.post_json('/api/v1/user/+register',
+                    {'username': 'user4',
+                     'email': 'user4',
+                     'password': 'password',
+                     'password_validate': 'password'},
+                    expect_errors=True)
+
+    assert r.status_code == 422
 
     r = c.get('/api/v1/user/user1')
 
@@ -212,6 +227,9 @@ def _test_authentication(c):
 
     # attempt to login as user1
     login(c, 'user1')
+
+    # attempt to login as user1 with user1 email
+    login(c, 'user1@localhost.com')
 
     login(c, 'admin')
     r = c.post_json(

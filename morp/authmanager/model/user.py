@@ -6,20 +6,30 @@ import jsl
 from .. import exc
 import sqlalchemy as sa
 import sqlalchemy_jsonfield as sajson
-from .base import BaseSchema, NAME_PATTERN
+from .base import BaseSchema, NAME_PATTERN, EMAIL_PATTERN
 from ...jslcrud import signals as crudsignal
 from ...jslcrud import errors as cruderrors
 from .group import GroupCollection, GroupSchema
 from uuid import uuid4
+import re
+
+
+class RegistrationSchema(jsl.Document):
+    class Options(object):
+        title = 'credential'
+
+    username = jsl.StringField(required=True, pattern=NAME_PATTERN)
+    email = jsl.StringField(required=True, pattern=EMAIL_PATTERN)
+    password = jsl.StringField(required=True)
+    password_validate = jsl.StringField(required=True)
 
 
 class LoginSchema(jsl.Document):
     class Options(object):
         title = 'credential'
 
-    username = jsl.StringField(required=True, pattern=NAME_PATTERN)
+    username = jsl.StringField(required=True)
     password = jsl.StringField(required=True)
-    password_validate = jsl.StringField(required=True)
 
 
 class UserSchema(BaseSchema):
@@ -27,6 +37,7 @@ class UserSchema(BaseSchema):
         title = 'user'
         additional_properties = True
     username = jsl.StringField(required=True, pattern=NAME_PATTERN)
+    email = jsl.StringField(required=True, pattern=EMAIL_PATTERN)
     password = jsl.StringField(required=False)
     groups = jsl.ArrayField(items=jsl.StringField(
         pattern=NAME_PATTERN), required=False)
@@ -46,6 +57,13 @@ class UserCollection(Collection):
     schema = UserSchema
 
     def authenticate(self, username, password):
+        if re.match(EMAIL_PATTERN, username):
+            try:
+                user = self.storage.get_by_email(username)
+            except cruderrors.NotFoundError:
+                return False
+            return user.validate(password)
+
         try:
             user = self.storage.get(username)
         except cruderrors.NotFoundError:
