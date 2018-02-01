@@ -74,7 +74,13 @@ def jsonobject_to_jsl(schema, nullable=False):
         if nullable:
             attrs[attr] = _set_nullable(prop)
         else:
-            attrs[attr] = prop
+            if not prop.required:
+                attrs[attr] = prop
+            else:
+                if isinstance(prop, jsl.StringField):
+                    if not prop.pattern:
+                        prop.pattern = '.+'
+                attrs[attr] = prop
 
     attrs['Options'] = Options
     Schema = type("Schema", (jsl.Document, ), attrs)
