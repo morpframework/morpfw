@@ -251,6 +251,7 @@ class Model(object):
                 'method': 'POST'
             })
         links += self._links()
+        links += self.rules_adapter().links()
         return links
 
     def _links(self):
@@ -298,6 +299,9 @@ class Adapter(object):
 
     def transform_json(self, data):
         return data
+
+    def links(self):
+        return []
 
     def __repr__(self):
         return "<Adapted %s:(%s)>" % (self.__class__.__name__, self.model)
