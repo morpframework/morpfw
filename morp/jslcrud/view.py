@@ -53,7 +53,7 @@ def search(context, request):
     query = json.loads(request.GET.get('q', '{}'))
     if not query:
         query = None
-    limit = int(request.GET.get('limit', 20))
+    limit = int(request.GET.get('limit', 0)) or None
     offset = int(request.GET.get('offset', 0))
     order_by = request.GET.get('order_by', None)
     select = request.GET.get('select', None)
@@ -61,8 +61,6 @@ def search(context, request):
         order_by = order_by.split(':')
         if len(order_by) == 1:
             order_by = order_by + ['asc']
-    if limit > 100:
-        limit = 100
     objs = context.search(query, offset=offset, limit=limit, order_by=order_by)
     objs = [obj.json() for obj in objs]
     if select:
@@ -77,17 +75,17 @@ def search(context, request):
         params['select'] = select
     if limit:
         params['limit'] = limit
-    params['offset'] = offset + limit
+    params['offset'] = offset + (limit or 0)
     qs = urlencode(params)
     res = {'results': results, 'q': query}
-    if len(results):
+    if limit and len(results) < limit:
         res.setdefault('links', [])
         res['links'].append({
             'rel': 'next',
             'href': request.link(context, '+search?%s' % qs)
         })
     if offset > 0:
-        prev_offset = offset - limit
+        prev_offset = offset - (limit or 0)
         if prev_offset < 0:
             prev_offset = 0
         params['offset'] = prev_offset

@@ -56,6 +56,8 @@ class ElasticSearchStorage(BaseStorage):
         return m
 
     def search(self, query=None, offset=None, limit=None, order_by=None):
+        if limit is None:
+            limit = 9999
         if query:
             q = {'query': compile_condition('elasticsearch', query)()}
         else:
