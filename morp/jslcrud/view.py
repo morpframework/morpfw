@@ -126,9 +126,8 @@ def read(context, request):
     return obj
 
 
-@App.json(model=Model, request_method='PATCH', load=validate_schema(),
-          permission=permission.Edit)
-def update(context, request, json):
+@App.json(model=Model, request_method='PATCH', permission=permission.Edit)
+def update(context, request):
     if not context.update_view_enabled:
         raise HTTPNotFound()
 
