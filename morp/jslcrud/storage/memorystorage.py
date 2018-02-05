@@ -32,6 +32,9 @@ class MemoryStorage(BaseStorage):
         DATA[self.typekey][identifier] = obj
         return obj
 
+    def aggregate(self, query=None, group=None, order_by=None):
+        raise NotImplementedError
+
     def search(self, query=None, offset=None, limit=None, order_by=None):
         res = []
         if query:

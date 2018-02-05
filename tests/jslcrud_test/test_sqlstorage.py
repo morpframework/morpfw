@@ -52,6 +52,7 @@ class Page(Base):
     uuid = sa.Column(sa.String(length=1024), default='')
     title = sa.Column(sa.String(length=1024), default='')
     body = sa.Column(sa.Text(), default='')
+    value = sa.Column(sa.Integer)
     footer = sa.Column(sa.String(length=1024), default='')
     created = sa.Column(sa.DateTime)
     modified = sa.Column(sa.DateTime)

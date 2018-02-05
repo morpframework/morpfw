@@ -20,3 +20,7 @@ class Delete(All):
 
 class Search(All):
     pass
+
+
+class Aggregate(All):
+    pass

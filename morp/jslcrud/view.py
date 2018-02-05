@@ -27,6 +27,25 @@ def schema(context, request):
     return context.json()
 
 
+@App.json(model=Collection, name='aggregate', permission=permission.Aggregate)
+def aggregate(context, request):
+    if not context.aggregate_view_enabled:
+        raise HTTPNotFound()
+
+    query = json.loads(request.GET.get('q', '{}'))
+    if not query:
+        query = None
+
+    order_by = request.GET.get('order_by', None)
+    group = json.loads(request.GET.get('group', '{}'))
+    if order_by:
+        order_by = order_by.split(':')
+        if len(order_by) == 1:
+            order_by = order_by + ['asc']
+    objs = context.aggregate(query, group=group, order_by=order_by)
+    return objs
+
+
 @App.json(model=Collection, name='search', permission=permission.Search)
 def search(context, request):
     if not context.search_view_enabled:
@@ -254,6 +273,7 @@ def internalserver_error(context, request):
         'message': "Internal server error"
     }
 
+
 @App.json(model=UnprocessableError)
 def unprocessable_error(context, request):
     @request.after
@@ -261,5 +281,3 @@ def unprocessable_error(context, request):
         response.status = 422
     return {'status': 'error',
             'message': '%s' % (context.message)}
-
-

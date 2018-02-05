@@ -4,7 +4,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from rulez import compile_condition
 from sqlalchemy.types import TypeDecorator, CHAR
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import func
 from datetime import datetime
+from decimal import Decimal
 from .base import BaseStorage
 from ..app import App
 import jsl
@@ -35,6 +37,74 @@ class SQLStorage(BaseStorage):
         self.session.flush()
         self.session.refresh(o)
         return m
+
+    def aggregate(self, query=None, group=None, order_by=None):
+        group_bys = []
+
+        if group:
+            fields = []
+            for k, v in group.items():
+                if isinstance(v, str):
+                    c = getattr(self.orm_model, v)
+                    fields.append(c)
+                    group_bys.append(c)
+                elif isinstance(v, dict):
+                    ff = v['function']
+                    f = v['field']
+                    c = getattr(self.orm_model, f)
+                    if ff == 'sum':
+                        fields.append(func.sum(c).label(k))
+                    elif ff == 'avg':
+                        fields.append(func.avg(c).label(k))
+                    elif ff == 'year':
+                        op = func.date_part('YEAR', c).label(k)
+                        fields.append(op)
+                        group_bys.append(op)
+                    elif ff == 'month':
+                        op = func.date_part('MONTH', c).label(k)
+                        fields.append(op)
+                        group_bys.append(op)
+                    elif ff == 'day':
+                        op = func.date_part('DAY', c).label(k)
+                        fields.append(op)
+                        group_bys.append(op)
+                    else:
+                        raise ValueError('Unknown function %s' % ff)
+        else:
+            fields = [self.orm_model]
+
+        if query:
+            f = compile_condition('sqlalchemy', query)
+            filterquery = f(self.orm_model)
+            q = self.session.query(*fields).filter(filterquery)
+        else:
+            q = self.session.query(*fields)
+
+        if order_by is not None:
+            col = order_by[0]
+            d = order_by[1]
+            if d not in ['asc', 'desc']:
+                raise KeyError(d)
+            colattr = getattr(self.orm_model, col)
+            if d == 'desc':
+                q = q.order_by(colattr.desc())
+            else:
+                q = q.order_by(colattr)
+
+        if group_bys:
+            q = q.group_by(*group_bys)
+
+        results = []
+        for o in q.all():
+            d = o._asdict()
+            for k, v in d.items():
+                if isinstance(v, datetime):
+                    d[k] = v.isoformat()
+                elif isinstance(v, Decimal):
+                    d[k] = float(v)
+
+            results.append(d)
+        return results
 
     def search(self, query=None, offset=None, limit=None, order_by=None):
         if query:

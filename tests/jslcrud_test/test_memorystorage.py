@@ -76,4 +76,4 @@ def namedobject_model_factory(request, identifier):
 
 
 def test_memorystorage():
-    run_jslcrud_test(App)
+    run_jslcrud_test(App, skip_aggregate=True)

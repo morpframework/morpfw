@@ -55,6 +55,7 @@ class Collection(object):
 
     create_view_enabled = True
     search_view_enabled = True
+    aggregate_view_enabled = True
 
     @property
     def schema(self):
@@ -78,6 +79,12 @@ class Collection(object):
         if secure:
             objs = list([obj for obj in objs if permits(
                 self.request, obj, permission.View)])
+        return list(objs)
+
+    def aggregate(self, query=None, group=None, order_by=None):
+        if query:
+            validate_condition(query, ALLOWED_SEARCH_OPERATORS)
+        objs = self.storage.aggregate(query, group=group, order_by=order_by)
         return list(objs)
 
     def create(self, data):

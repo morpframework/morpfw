@@ -9,6 +9,7 @@ import morp.jslcrud.signals as signals
 import jsl
 import json
 from uuid import uuid4
+from datetime import datetime
 
 
 class App(BaseApp):
@@ -28,6 +29,7 @@ class PageSchema(jsl.Document):
     uuid = jsl.StringField(required=False, default='')
     title = jsl.StringField(required=True, default='')
     body = jsl.StringField(required=True, default='')
+    value = jsl.IntField(required=False)
     footer = jsl.StringField(required=False, default='')
     created = jsl.DateTimeField(required=False)
     modified = jsl.DateTimeField(required=False)
@@ -155,7 +157,7 @@ def get_client(app, config='settings.yml'):
     return c
 
 
-def run_jslcrud_test(app):
+def run_jslcrud_test(app, skip_aggregate=False):
     c = get_client(app)
 
     c.authorization = ('Basic', ('admin', 'admin'))
@@ -180,7 +182,37 @@ def run_jslcrud_test(app):
 
     for i in range(10):
         r = c.post_json(
-            '/pages/', {'title': 'page%s' % i, 'body': 'page%sbody' % i})
+            '/pages/', {'title': 'page%s' % i, 'body': 'page%sbody' % i, 'value': i})
+
+    if not skip_aggregate:
+        r = c.get('/pages/+aggregate', {'group': json.dumps({
+            'year': {
+                'function': 'year',
+                'field': 'created'
+            },
+            'month': {
+                'function': 'month',
+                'field': 'created'
+            },
+            'day': {
+                'function': 'day',
+                'field': 'created'
+            },
+            'sum': {
+                'function': 'sum',
+                'field': 'value'
+            },
+            'avg': {
+                'function': 'avg',
+                'field': 'value'
+            }
+        })})
+
+        now = datetime.utcnow()
+        assert r.json[0]['year'] == now.year
+        assert r.json[0]['month'] == now.month
+        assert r.json[0]['day'] == now.day
+        assert r.json[0]['sum'] == 45
 
     r = c.get('/pages/+search',
               {'q': json.dumps({'operator': 'in',
