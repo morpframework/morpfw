@@ -190,16 +190,9 @@ class Model(object):
     def update(self, newdata):
         if 'state' in newdata:
             raise StateUpdateProhibitedError()
-        def _remove_none(d):
-            for k, v in list(d.items()):
-                if v is None:
-                    del d[k]
-                if isinstance(v, dict):
-                    _remove_none(v)
 
         data = self._raw_json()
         data.update(newdata)
-        _remove_none(data)
         schema = jsl_nullable(self.schema).get_schema(ordered=True)
         validate(data, schema)
         self.storage.update(self.identifier, data)
