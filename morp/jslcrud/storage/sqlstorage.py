@@ -52,7 +52,9 @@ class SQLStorage(BaseStorage):
                     ff = v['function']
                     f = v['field']
                     c = getattr(self.orm_model, f)
-                    if ff == 'sum':
+                    if ff == 'count':
+                        fields.append(func.count(c).label(k))
+                    elif ff == 'sum':
                         fields.append(func.sum(c).label(k))
                     elif ff == 'avg':
                         fields.append(func.avg(c).label(k))

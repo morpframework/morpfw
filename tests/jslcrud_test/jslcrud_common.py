@@ -186,6 +186,10 @@ def run_jslcrud_test(app, skip_aggregate=False):
 
     if not skip_aggregate:
         r = c.get('/pages/+aggregate', {'group': json.dumps({
+            'count': {
+                'function': 'count',
+                'field': 'uuid'
+            },
             'year': {
                 'function': 'year',
                 'field': 'created'
@@ -213,6 +217,7 @@ def run_jslcrud_test(app, skip_aggregate=False):
         assert r.json[0]['month'] == now.month
         assert r.json[0]['day'] == now.day
         assert r.json[0]['sum'] == 45
+        assert r.json[0]['count'] == 11
 
     r = c.get('/pages/+search',
               {'q': json.dumps({'operator': 'in',
