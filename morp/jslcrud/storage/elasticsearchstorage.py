@@ -32,7 +32,7 @@ class AggGroup(object):
                 values = copy.copy(parents)
                 for c in self.children:
                     if c.function == 'count':
-                        values['count'] = r['doc_count']
+                        values[c.key] = r['doc_count']
                     else:
                         values.update(c.parse(r, parents=parents))
                 results.append(values)
