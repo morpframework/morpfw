@@ -159,4 +159,4 @@ def test_elasticsearchstorage(es_client):
                                                 }
                                             }
                                         })
-    run_jslcrud_test(App, skip_aggregate=True)
+    run_jslcrud_test(App)

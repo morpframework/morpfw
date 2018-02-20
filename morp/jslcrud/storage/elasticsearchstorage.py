@@ -3,6 +3,143 @@ from .base import BaseStorage
 from rulez import compile_condition
 import elasticsearch.exceptions as es_exc
 from ..app import App
+from pprint import pprint as print
+import copy
+
+
+class AggGroup(object):
+
+    def __init__(self, key, field, type='terms', opts=None, children=None):
+        self.key = key
+        self.field = field
+        self.type = type
+        self.children = children or []
+        self.parent = None
+        self.is_leaf = False
+        self.opts = opts or {}
+
+    def parse(self, result, parents=None):
+        parents = parents or {}
+        records = result[self.key]['buckets']
+        results = []
+        for r in records:
+            key = r['key_as_string']
+            if self.type == 'date_histogram':
+                if self.opts.get('format', None) in ['yyyy', 'MM', 'dd']:
+                    key = int(key)
+            parents[self.key] = key
+            if self.is_leaf:
+                values = copy.copy(parents)
+                for c in self.children:
+                    if c.function == 'count':
+                        values['count'] = r['doc_count']
+                    else:
+                        values.update(c.parse(r, parents=parents))
+                results.append(values)
+            else:
+                values = []
+                for c in self.children:
+                    values += c.parse(r, parents=parents)
+                results += values
+        return results
+
+    def json(self):
+        res = {
+            self.type: {
+                'field': self.field
+            }
+        }
+
+        if self.opts:
+            res[self.type].update(self.opts)
+
+        if self.children:
+            for c in self.children:
+                res.setdefault('aggs', {})
+                res['aggs'].update(c.json())
+
+        return {
+            self.key: res
+        }
+
+
+class AggValue(object):
+
+    def __init__(self, key, function, field):
+        self.key = key
+        self.function = function
+        self.field = field
+        self.parent = None
+
+    def parse(self, result, parents=None):
+        if self.function == 'count':
+            return {}
+        parents = parents or {}
+        p = copy.copy(parents)
+        p[self.key] = result[self.key][self.field]
+        return p
+
+    def json(self):
+        if self.function == 'count':
+            return {}
+        return {
+            self.key: {
+                self.function: {
+                    'field': self.field
+                }
+            }
+        }
+
+
+class Aggregate(object):
+
+    def __init__(self):
+        self.groups = []
+        self.values = []
+        self.first_group = None
+        self._finalized = False
+
+    def add_group(self, key, field, type='terms', opts=None):
+        if self._finalized:
+            raise ValueError('Aggregate has been finalized')
+        self.groups.append(AggGroup(key, field, type, opts))
+
+    def add(self, key, function, field):
+        if self._finalized:
+            raise ValueError('Aggregate has been finalized')
+        self.values.append(AggValue(key, function, field))
+
+    def finalize(self):
+        if self._finalized:
+            raise ValueError('Aggregate has been finalized')
+
+        prev = None
+        first = None
+        for g in self.groups:
+            if prev is None:
+                prev = g
+                continue
+            if g not in prev.children:
+                prev.children.append(g)
+                g.parent = prev
+            prev = g
+        prev.is_leaf = True
+        for v in self.values:
+            if v not in prev.children:
+                prev.children.append(v)
+                v.parent = prev
+
+        self._finalized = True
+
+    def json(self):
+        if not self._finalized:
+            self.finalize()
+        return self.groups[0].json()
+
+    def parse(self, result):
+        if not self._finalized:
+            self.finalize()
+        return self.groups[0].parse(result)
 
 
 class ElasticSearchStorage(BaseStorage):
@@ -79,6 +216,61 @@ class ElasticSearchStorage(BaseStorage):
 
         data = [self.model(self.request, self, o['_source'])
                 for o in res['hits']['hits']]
+
+        return list(data)
+
+    def aggregate(self, query=None, group=None, order_by=None):
+        if query:
+            q = {'query': compile_condition('elasticsearch', query)()}
+        else:
+            q = {'query': {'match_all': {}}}
+
+        q['size'] = 0
+
+        self.create_index()
+        params = {}
+        if order_by:
+            params['sort'] = [':'.join(order_by)]
+
+        if group:
+            aggs = Aggregate()
+
+            for k, v in group.items():
+                if isinstance(v, str):
+                    aggs.add_group(k, v)
+
+                elif isinstance(v, dict):
+                    ff = v['function']
+                    f = v['field']
+                    if ff == 'count':
+                        aggs.add(k, 'count', f)
+                    elif ff == 'sum':
+                        aggs.add(k, 'sum', f)
+                    elif ff == 'avg':
+                        aggs.add(k, 'avg', f)
+                    elif ff == 'year':
+                        aggs.add_group(k, f, type='date_histogram', opts={
+                            'interval': 'year',
+                            'format': 'yyyy'
+                        })
+                    elif ff == 'month':
+                        aggs.add_group(k, f, type='date_histogram', opts={
+                            'interval': 'month',
+                            'format': 'MM'
+                        })
+                    elif ff == 'day':
+                        aggs.add_group(k, f, type='date_histogram', opts={
+                            'interval': 'day',
+                            'format': 'dd'
+                        })
+                    else:
+                        raise ValueError('Unknown function %s' % ff)
+
+        aggs.finalize()
+        q['aggs'] = aggs.json()
+        res = self.client.search(index=self.index_name, doc_type=self.doc_type,
+                                 body=q, **params)
+        data = aggs.parse(res['aggregations'])
 
         return list(data)
 

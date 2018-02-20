@@ -218,6 +218,7 @@ def run_jslcrud_test(app, skip_aggregate=False):
         assert r.json[0]['day'] == now.day
         assert r.json[0]['sum'] == 45
         assert r.json[0]['count'] == 11
+        assert r.json[0]['avg'] == 4.5
 
     r = c.get('/pages/+search',
               {'q': json.dumps({'operator': 'in',
