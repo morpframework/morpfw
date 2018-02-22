@@ -220,7 +220,7 @@ class Model(object):
         try:
             validate(jsondata, schema)
         except ValidationError as e:
-            logger.warn(e.message)
+            logger.warn('%s(%s) : %s' % (self.schema.__name__, '/'.join(list(e.path)), e.message))
         return jsondata
 
     def _json(self):
