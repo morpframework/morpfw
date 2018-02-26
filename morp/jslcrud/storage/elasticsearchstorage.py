@@ -268,6 +268,21 @@ class ElasticSearchStorage(BaseStorage):
                             'interval': '1m',
                             'format': "yyyy-MM-dd'T'HH:mm"
                         })
+                    elif ff == 'interval-15m':
+                        aggs.add_group(k, f, type='date_histogram', opts={
+                            'interval': '15m',
+                            'format': "yyyy-MM-dd'T'HH:mm"
+                        })
+                    elif ff == 'interval-30m':
+                        aggs.add_group(k, f, type='date_histogram', opts={
+                            'interval': '30m',
+                            'format': "yyyy-MM-dd'T'HH:mm"
+                        })
+                    elif ff == 'interval-1h':
+                        aggs.add_group(k, f, type='date_histogram', opts={
+                            'interval': '1h',
+                            'format': "yyyy-MM-dd'T'HH:mm"
+                        })
                     else:
                         raise ValueError('Unknown function %s' % ff)
 
