@@ -271,8 +271,8 @@ class ElasticSearchStorage(BaseStorage):
                     else:
                         raise ValueError('Unknown function %s' % ff)
 
-        aggs.finalize()
-        q['aggs'] = aggs.json()
+            aggs.finalize()
+            q['aggs'] = aggs.json()
         res = self.client.search(index=self.index_name, doc_type=self.doc_type,
                                  body=q, **params)
         data = aggs.parse(res['aggregations'])
