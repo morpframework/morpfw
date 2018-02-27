@@ -78,7 +78,7 @@ def search(context, request):
     params['offset'] = offset + (limit or 0)
     qs = urlencode(params)
     res = {'results': results, 'q': query}
-    if limit and len(results) < limit:
+    if limit and len(results) > limit:
         res.setdefault('links', [])
         res['links'].append({
             'rel': 'next',
