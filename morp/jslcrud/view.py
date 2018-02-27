@@ -61,8 +61,9 @@ def search(context, request):
         order_by = order_by.split(':')
         if len(order_by) == 1:
             order_by = order_by + ['asc']
-    objs = context.search(query, offset=offset, limit=limit, order_by=order_by)
-    objs = [obj.json() for obj in objs]
+    # HACK: +1 to ensure next page links is triggered
+    objs = context.search(query, offset=offset, limit=limit + 1, order_by=order_by)
+    objs = [obj.json() for obj in objs][:limit] # and limit back to actual limit
     if select:
         expr = jsonpath_parse(select)
         results = []
