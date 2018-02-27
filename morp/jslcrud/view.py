@@ -70,7 +70,10 @@ def search(context, request):
                           order_by=order_by)
     # and limit back to actual limit
     objs = [obj.json() for obj in objs]
+    has_next = False
     if limit:
+        if len(objs) > limit:
+            has_next = True
         objs = objs[:limit]
     if select:
         expr = jsonpath_parse(select)
@@ -87,7 +90,7 @@ def search(context, request):
     params['offset'] = offset + (limit or 0)
     qs = urlencode(params)
     res = {'results': results, 'q': query}
-    if limit and len(results) > limit:
+    if has_next:
         res.setdefault('links', [])
         res['links'].append({
             'rel': 'next',
