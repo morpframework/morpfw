@@ -62,8 +62,16 @@ def search(context, request):
         if len(order_by) == 1:
             order_by = order_by + ['asc']
     # HACK: +1 to ensure next page links is triggered
-    objs = context.search(query, offset=offset, limit=limit + 1, order_by=order_by)
-    objs = [obj.json() for obj in objs][:limit] # and limit back to actual limit
+    searchlimit = limit
+    if limit:
+        searchlimit = limit + 1
+    objs = context.search(query, offset=offset,
+                          limit=searchlimit,
+                          order_by=order_by)
+    # and limit back to actual limit
+    objs = [obj.json() for obj in objs]
+    if limit:
+        objs = objs[:limit]
     if select:
         expr = jsonpath_parse(select)
         results = []
