@@ -119,8 +119,8 @@ class BaseApp(authmanager.App, cors.CORSApp):
             return task
         return wrapper
 
-    def celery_signal(self, signal):
-        return Signal(self, signal)
+    def celery_signal(self, signal, **kwargs):
+        return Signal(self, signal, **kwargs)
 
     def get_celery_metastore(self, request):
         from .tasktracker import CeleryTaskSchema
