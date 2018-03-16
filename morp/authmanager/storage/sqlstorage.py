@@ -76,8 +76,9 @@ class GroupSQLStorage(SQLStorage):
              .join(db.Group)
              .filter(db.Group.groupname == groupname))
         members = []
+        user_storage = UserSQLStorage(self.request)
         for m in q.all():
-            members.append(UserModel(self.request, self, m))
+            members.append(UserModel(self.request, user_storage, m))
         return members
 
     def add_group_members(self, groupname, usernames):
