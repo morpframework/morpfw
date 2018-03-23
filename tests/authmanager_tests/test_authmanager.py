@@ -218,6 +218,16 @@ def _test_authentication(c):
 
     assert r.status_code == 422
 
+    r = c.post_json('/api/v1/user/+register',
+                    {'username': 'user4',
+                     'email': 'user4@localhost',
+                     'password': 'password',
+                     'password_validate': 'password'},
+                    expect_errors=True)
+
+    print(r.json)
+    assert r.status_code == 422
+
     r = c.get('/api/v1/user/user1')
 
     assert r.json['data']['username'] == 'user1'
