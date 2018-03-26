@@ -46,7 +46,9 @@ class GroupModel(Model):
 
     def members(self):
         members = self.storage.get_members(self.identifier)
-        return members
+        active_members = [
+            member for member in members if member.data.get('state') == 'active']
+        return active_members
 
     def add_members(self, usernames):
         self.storage.add_group_members(self.identifier, usernames)
