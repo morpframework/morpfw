@@ -4,10 +4,19 @@ from .dictprovider import DictProvider
 from ..app import App
 from .base import Provider
 import sqlalchemy as sa
-from dateutil.parser import parse as parse_date
+from dateutil.parser import parse as _parse_date
 import uuid
 from ..types import datestr
+import pytz
 _MARKER = []
+
+
+def parse_date(datestr):
+    d = _parse_date(datestr)
+    if d.tzinfo is None:
+        d = d.replace(tzinfo=pytz.UTC)
+    d = d.astimezone(pytz.UTC)
+    return d.replace(tzinfo=None)
 
 
 class SQLAlchemyModelProvider(Provider):
