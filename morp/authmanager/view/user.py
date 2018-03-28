@@ -23,7 +23,10 @@ def register(context, request):
         @request.after
         def set_error(response):
             response.status = 422
-        return res
+        return {
+            'status': 'error',
+            'field_errors': [{'message': res[x]} for x in res.keys()]
+        }
 
     if data['password'] != data['password_validate']:
         @request.after
