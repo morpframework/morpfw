@@ -27,14 +27,14 @@ def jsonobject_property_to_jsl_field(
     if isinstance(prop, jsonobject.BooleanProperty):
         return jsl.BooleanField(name=prop.name, required=prop.required)
     if isinstance(prop, jsonobject.DictProperty):
-        if prop.item_type:
+        if getattr(prop, 'item_type', None):
             subtype = jsonobject_to_jsl(prop.item_type, nullable=nullable)
             return jsl.DocumentField(name=prop.name,
                                      document_cls=subtype,
                                      required=prop.required)
         return jsl.DictField(name=prop.name, required=prop.required)
     if isinstance(prop, jsonobject.ListProperty):
-        if prop.item_type:
+        if getattr(prop, 'item_type', None):
             if issubclass(prop.item_type, jsonobject.JsonObject):
                 subtype = jsl.DocumentField(
                     document_cls=jsonobject_to_jsl(prop.item_type), nullable=nullable)
