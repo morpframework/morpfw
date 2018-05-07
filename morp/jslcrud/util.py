@@ -34,7 +34,7 @@ def jsonobject_property_to_jsl_field(
                                      required=prop.required)
         return jsl.DictField(name=prop.name, required=prop.required)
     if isinstance(prop, jsonobject.ListProperty):
-        if prop.item_type:
+        if getattr(prop, 'item_type', None):
             if issubclass(prop.item_type, jsonobject.JsonObject):
                 subtype = jsl.DocumentField(
                     document_cls=jsonobject_to_jsl(prop.item_type), nullable=nullable)
