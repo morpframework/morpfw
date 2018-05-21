@@ -225,7 +225,6 @@ def _test_authentication(c):
                      'password_validate': 'password'},
                     expect_errors=True)
 
-    print(r.json)
     assert r.status_code == 422
 
     r = c.get('/api/v1/user/user1')
@@ -260,6 +259,12 @@ def _test_authentication(c):
 
     r = c.post_json(
         '/api/v1/user/user1/+statemachine', {'transition': 'activate'})
+
+    r = c.get('/api/v1/user/user1')
+
+    assert r.json['data']['username'] == 'user1'
+    assert r.json['data']['groups'] == ['__default__']
+    assert r.json['data']['state'] == 'active'
 
     login(c, 'user1')
 
@@ -343,6 +348,15 @@ def _test_authentication(c):
     r = c.post_json(
         '/api/v1/user/user1/+statemachine',
         {'transition': 'deactivate'}, headers=[
+            ('X-API-KEY', '.'.join([key_identity, key_secret]))
+        ])
+
+    assert r.status_code == 200
+
+    # activate back
+    r = c.post_json(
+        '/api/v1/user/user1/+statemachine',
+        {'transition': 'activate'}, headers=[
             ('X-API-KEY', '.'.join([key_identity, key_secret]))
         ])
 

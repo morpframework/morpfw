@@ -172,7 +172,8 @@ class SQLStorage(BaseStorage):
 
         d = self.app.get_jslcrud_dataprovider(self.model.schema, r, self)
         for k, v in data.items():
-            d[k] = v
+            if d.get(k, None) != v:
+                d[k] = v
 
         return self.model(self.request, self, r)
 
