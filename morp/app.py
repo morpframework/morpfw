@@ -3,7 +3,7 @@ import dectate
 import reg
 from . import authmanager
 from .jslcrud.provider.base import Provider
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.pool import NullPool, QueuePool
 from more.transaction import TransactionApp
 from morepath.reify import reify
@@ -13,7 +13,7 @@ from more import cors
 from morepath.request import Response
 from . import directive
 from . import exc
-from celery import Celery
+from celery import Celery, Task
 from celery import shared_task
 from celery.schedules import crontab
 import time
@@ -29,6 +29,13 @@ from zope.sqlalchemy import register as register_session
 from morp.exc import ConfigurationError
 
 Session = sessionmaker()
+
+
+class SqlAlchemyTask(Task):
+    abstract = True
+
+    def after_return(self, status, retval, task_id, args, kwargs, einfo):
+        Session().close()
 
 
 class Signal(object):
@@ -99,7 +106,7 @@ class BaseApp(authmanager.App, cors.CORSApp):
     @classmethod
     def celery_subscribe(klass, signal, task_name=None):
         def wrapper(wrapped):
-            task = shared_task(name=task_name)(wrapped)
+            task = shared_task(name=task_name,  base=SqlAlchemyTask)(wrapped)
             klass._celery_subscribe(signal)(task)
             return task
         return wrapper
