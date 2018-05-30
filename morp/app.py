@@ -26,16 +26,18 @@ from .authmanager.exc import UserExistsError
 import transaction
 import os
 from zope.sqlalchemy import register as register_session
+import transaction
+from zope.sqlalchemy import ZopeTransactionExtension
 from morp.exc import ConfigurationError
 
-Session = sessionmaker()
+Session = sessionmaker(extension=ZopeTransactionExtension())
 
 
 class SqlAlchemyTask(Task):
     abstract = True
 
     def after_return(self, status, retval, task_id, args, kwargs, einfo):
-        Session().close()
+        pass
 
 
 class Signal(object):
