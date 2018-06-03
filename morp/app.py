@@ -89,9 +89,13 @@ class Signal(object):
 
 class DBSessionRequest(Request):
 
-    @reify
+    _db_session = None
+
+    @property
     def db_session(self):
-        return Session()
+        if self._db_session is None:
+            self._db_session = Session()
+        return self._db_session
 
 
 class BaseApp(authmanager.App, cors.CORSApp):
@@ -199,7 +203,7 @@ class SQLApp(TransactionApp, BaseApp):
             cwd = os.environ.get('MORP_WORKDIR', os.getcwd())
             os.chdir(cwd)
             dburi = settings['sqlalchemy']['dburi'] % {'here': cwd}
-            engine = sqlalchemy.create_engine(dburi)
+            engine = sqlalchemy.create_engine(dburi, poolclass=NullPool)
             session.configure(bind=engine)
 
         self._engine = engine
