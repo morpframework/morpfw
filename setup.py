@@ -2,11 +2,11 @@ from setuptools import setup, find_packages
 import sys
 import os
 
-version = '0.0'
+version = '0.1a1'
 
 setup(name='morpfw',
       version=version,
-      description="Web framework with weird powers",
+      description="Web framework based on morepath",
       long_description="""\
 """,
       classifiers=[],  # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
