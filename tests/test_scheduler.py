@@ -10,7 +10,7 @@ class App(SQLApp):
     pass
 
 
-@App.celery_cron(name='test-cron')
+@App.cron(name='test-cron')
 def tick():
     print('tick!')
 

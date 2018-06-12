@@ -28,7 +28,7 @@ def get_root(request):
 
 @App.json(model=Root)
 def index(context, request):
-    subs = request.app.celery_signal(
+    subs = request.app.signal(
         'test_signal').send(request, obj={'data': 10})
     cel = request.app.celery
     res = []
@@ -40,21 +40,21 @@ def index(context, request):
     return res
 
 
-@App.celery_subscribe('test_signal')
+@App.async_subscribe('test_signal')
 def handler1(request, obj):
     obj['handler'] = 'handler1'
     obj['data'] += 1
     return obj
 
 
-@App.celery_subscribe('test_signal')
+@App.async_subscribe('test_signal')
 def handler2(request, obj):
     obj['handler'] = 'handler2'
     obj['data'] += 5
     return obj
 
 
-@App.celery_subscribe('test_signal')
+@App.async_subscribe('test_signal')
 def handler3(request, obj):
     obj['handler'] = 'handler3'
     raise Exception('Error')

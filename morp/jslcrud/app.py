@@ -5,23 +5,83 @@ import dectate
 import reg
 from more.signals import SignalApp
 from . import component as actions
+import warnings
 
 Session = sessionmaker()
 
 
 class App(JsonSchemaApp, signals.SignalApp):
-    jslcrud_dataprovider = dectate.directive(actions.DataProviderAction)
-    jslcrud_jsonprovider = dectate.directive(actions.JSONProviderAction)
-    jslcrud_jsontransfrom = dectate.directive(actions.JSONTransformAction)
-    jslcrud_formvalidators = dectate.directive(actions.FormValidatorAction)
-    jslcrud_identifierfields = dectate.directive(
-        actions.IdentifierFieldsAction)
-    jslcrud_default_identifier = dectate.directive(
-        actions.DefaultIdentifierAction)
+    @classmethod
+    def jslcrud_dataprovider(klass, *args, **kwargs):
+        warnings.warn(
+            "jslcrud_dataprovider is deprecated, use dataprovider", DeprecationWarning)
+        return klass.dataprovider(*args, **kwargs)
 
-    jslcrud_rulesadapter = dectate.directive(actions.RulesAdapterAction)
-    jslcrud_uuidfield = dectate.directive(actions.UUIDFieldAction)
-    jslcrud_statemachine = dectate.directive(actions.StateMachineAction)
+    dataprovider = dectate.directive(actions.DataProviderAction)
+
+    @classmethod
+    def jslcrud_jsonprovider(klass, *args, **kwargs):
+        warnings.warn(
+            "jslcrud_jsonprovider is deprecated, use jsonprovider", DeprecationWarning)
+        return klass.jsonprovider(*args, **kwargs)
+
+    jsonprovider = dectate.directive(actions.JSONProviderAction)
+
+    @classmethod
+    def jslcrud_jsontransfrom(klass, *args, **kwargs):
+        warnings.warn(
+            "jslcrud_jsontransform is deprecated, use jsontransform", DeprecationWarning)
+        return klass.jsontransform(*args, **kwargs)
+
+    jsontransform = dectate.directive(actions.JSONTransformAction)
+
+    @classmethod
+    def jslcrud_formvalidators(klass, *args, **kwargs):
+        warnings.warn(
+            "jslcrud_formvalidators is deprecated, use formvalidators", DeprecationWarning)
+        return klass.formvalidators(*args, **kwargs)
+
+    formvalidators = dectate.directive(actions.FormValidatorAction)
+
+    @classmethod
+    def jslcrud_identifierfields(klass, *args, **kwargs):
+        warnings.warn(
+            "jslcrud_identifierfields is deprecated, use identifierfields", DeprecationWarning)
+        return klass.identifierfields(*args, **kwargs)
+
+    identifierfields = dectate.directive(actions.IdentifierFieldsAction)
+
+    @classmethod
+    def jslcrud_default_identifier(klass, *args, **kwargs):
+        warnings.warn(
+            "jslcrud_default_identifier is deprecated, use default_identifier", DeprecationWarning)
+        return klass.default_identifier(*args, **kwargs)
+
+    default_identifier = dectate.directive(actions.DefaultIdentifierAction)
+
+    @classmethod
+    def jslcrud_rulesadapter(klass, *args, **kwargs):
+        warnings.warn(
+            "jslcrud_rulesadapter is deprecated, use rulesadapter", DeprecationWarning)
+        return klass.rulesadapter(*args, **kwargs)
+
+    rulesadapter = dectate.directive(actions.RulesAdapterAction)
+
+    @classmethod
+    def jslcrud_uuidfield(klass, *args, **kwargs):
+        warnings.warn(
+            "jslcrud_uuidfield is deprecated, use uuidfield", DeprecationWarning)
+        return klass.uuidfield(*args, **kwargs)
+
+    uuidfield = dectate.directive(actions.UUIDFieldAction)
+
+    @classmethod
+    def jslcrud_statemachine(klass, *args, **kwargs):
+        warnings.warn(
+            "jslcrud_statemachine is deprecated, use statemachine", DeprecationWarning)
+        return klass.statemachine(*args, **kwargs)
+
+    statemachine = dectate.directive(actions.StateMachineAction)
 
     @reg.dispatch_method(
         reg.match_class('schema',

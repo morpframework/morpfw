@@ -29,6 +29,8 @@ from zope.sqlalchemy import register as register_session
 import transaction
 from zope.sqlalchemy import ZopeTransactionExtension
 from morp.exc import ConfigurationError
+import warnings
+
 
 Session = sessionmaker(extension=ZopeTransactionExtension())
 
@@ -111,6 +113,13 @@ class BaseApp(authmanager.App, cors.CORSApp):
 
     @classmethod
     def celery_subscribe(klass, signal, task_name=None):
+        warnings.warn(
+            "celery_subscibe is deprecated, use async_subscribe",
+            DeprecationWarning)
+        return klass.async_subscribe(signal, task_name)
+
+    @classmethod
+    def async_subscribe(klass, signal, task_name=None):
         def wrapper(wrapped):
             task = shared_task(name=task_name,  base=SqlAlchemyTask)(wrapped)
             klass._celery_subscribe(signal)(task)
@@ -120,6 +129,14 @@ class BaseApp(authmanager.App, cors.CORSApp):
     @classmethod
     def celery_cron(klass, name, minute='*', hour='*', day_of_week='*',
                     day_of_month='*', month_of_year='*'):
+        warnings.warn("celery_cron is deprecated, use cron",
+                      DeprecationWarning)
+        return klass.cron(name, minute, hour, day_of_week,
+                          day_of_month, month_of_year)
+
+    @classmethod
+    def cron(klass, name, minute='*', hour='*', day_of_week='*',
+             day_of_month='*', month_of_year='*'):
         def wrapper(wrapped):
             task = shared_task()(wrapped)
             klass.celery.conf.beat_schedule[name] = {
@@ -133,6 +150,11 @@ class BaseApp(authmanager.App, cors.CORSApp):
         return wrapper
 
     def celery_signal(self, signal, **kwargs):
+        warnings.warn("celery_signal is deprecated, use signal",
+                      DeprecationWarning)
+        return self.signal(signal, **kwargs)
+
+    def signal(self, signal, **kwargs):
         return Signal(self, signal, **kwargs)
 
     def get_celery_metastore(self, request):
