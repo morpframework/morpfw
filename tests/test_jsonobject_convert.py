@@ -1,5 +1,5 @@
-from morp.jslcrud.util import jsonobject_to_jsl
-from morp.jslcrud.util import jsl_to_jsonobject
+from morpfw.jslcrud.util import jsonobject_to_jsl
+from morpfw.jslcrud.util import jsl_to_jsonobject
 import jsonobject
 import jsl
 

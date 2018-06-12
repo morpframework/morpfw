@@ -1,10 +1,10 @@
 import nose
 import morepath
 from webtest import TestApp as Client
-from morp.authmanager.app import App
-from morp.authmanager import create_app
-from morp.authmanager.authpolicy import JWTWithAPIKeyIdentityPolicy
-from morp.authmanager.model.user import UserCollection, UserSchema, GroupSchema
+from morpfw.authmanager.app import App
+from morpfw.authmanager import create_app
+from morpfw.authmanager.authpolicy import JWTWithAPIKeyIdentityPolicy
+from morpfw.authmanager.model.user import UserCollection, UserSchema, GroupSchema
 from more.jwtauth import JWTIdentityPolicy
 import json
 import yaml

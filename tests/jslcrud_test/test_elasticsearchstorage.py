@@ -1,7 +1,7 @@
 import jsl
 from jslcrud_common import App as BaseApp
-from morp.jslcrud.model import Collection, Model, Schema
-from morp.jslcrud.storage.elasticsearchstorage import ElasticSearchStorage
+from morpfw.jslcrud.model import Collection, Model, Schema
+from morpfw.jslcrud.storage.elasticsearchstorage import ElasticSearchStorage
 from jslcrud_common import get_client, run_jslcrud_test, PageCollection, PageModel
 from jslcrud_common import NamedObjectCollection, NamedObjectModel
 import pprint
@@ -11,7 +11,7 @@ from morepath.request import Request
 from more.basicauth import BasicAuthIdentityPolicy
 from sqlalchemy.orm import sessionmaker
 from zope.sqlalchemy import register as register_session
-import morp.jslcrud.signals as signals
+import morpfw.jslcrud.signals as signals
 from elasticsearch import Elasticsearch
 
 Session = sessionmaker()

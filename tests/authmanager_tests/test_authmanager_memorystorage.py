@@ -1,6 +1,6 @@
 from test_authmanager import _test_authentication, get_client
 from more.jwtauth import JWTIdentityPolicy
-from morp.authmanager.app import App
+from morpfw.authmanager.app import App
 
 
 class MemoryStorageApp(App):

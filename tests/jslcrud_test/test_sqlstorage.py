@@ -1,7 +1,7 @@
 import jsl
 from jslcrud_common import App as BaseApp
-from morp.jslcrud.model import Collection, Model
-from morp.jslcrud.storage.sqlstorage import SQLStorage, Base, GUID
+from morpfw.jslcrud.model import Collection, Model
+from morpfw.jslcrud.storage.sqlstorage import SQLStorage, Base, GUID
 from jslcrud_common import get_client, run_jslcrud_test, PageCollection, PageModel
 from jslcrud_common import ObjectCollection, ObjectModel
 from jslcrud_common import NamedObjectCollection, NamedObjectModel
@@ -12,7 +12,7 @@ from morepath.request import Request
 from more.basicauth import BasicAuthIdentityPolicy
 from sqlalchemy.orm import sessionmaker
 from zope.sqlalchemy import register as register_session
-import morp.jslcrud.signals as signals
+import morpfw.jslcrud.signals as signals
 import sqlalchemy as sa
 
 

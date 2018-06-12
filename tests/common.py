@@ -4,9 +4,9 @@ import yaml
 from webtest import TestApp as Client
 from more.jwtauth import JWTIdentityPolicy
 from more.basicauth import BasicAuthIdentityPolicy
-from morp.main import create_app
-from morp.app import create_admin
-from morp.authmanager.exc import UserExistsError
+from morpfw.main import create_app
+from morpfw.app import create_admin
+from morpfw.authmanager.exc import UserExistsError
 
 DEFAULT_SETTINGS = {
     'authmanager': {

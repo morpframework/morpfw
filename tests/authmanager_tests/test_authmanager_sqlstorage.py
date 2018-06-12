@@ -2,13 +2,13 @@ import yaml
 import os
 from test_authmanager import _test_authentication, get_client
 from more.jwtauth import JWTIdentityPolicy
-from morp.authmanager.app import App
+from morpfw.authmanager.app import App
 
 from more.transaction import TransactionApp
 from morepath.reify import reify
 from morepath.request import Request
 
-from morp.authmanager import Session
+from morpfw.authmanager import Session
 
 
 class DBSessionRequest(Request):

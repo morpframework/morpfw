@@ -6,7 +6,7 @@ import os
 from zope.sqlalchemy import register as register_session
 from .authmanager.authpolicy import JWTWithAPIKeyIdentityPolicy
 from more.basicauth import BasicAuthIdentityPolicy
-from morp.exc import ConfigurationError
+from .exc import ConfigurationError
 import transaction
 import sqlalchemy
 from celery import Celery

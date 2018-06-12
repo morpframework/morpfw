@@ -1,11 +1,11 @@
-import morp
-from morp import sql as morpsql
+import morpfw
+from morpfw import sql as morpsql
 import sqlalchemy as sa
 import jsl
 from common import get_client
 
 
-class App(morp.SQLApp):
+class App(morpfw.SQLApp):
     pass
 
 
@@ -28,15 +28,15 @@ def page_schema_identifier(schema):
     return ['uuid']
 
 
-class PageCollection(morp.Collection):
+class PageCollection(morpfw.Collection):
     schema = PageSchema
 
 
-class PageModel(morp.Model):
+class PageModel(morpfw.Model):
     schema = PageSchema
 
 
-class PageStorage(morp.SQLStorage):
+class PageStorage(morpfw.SQLStorage):
     model = PageModel
     orm_model = Page
 

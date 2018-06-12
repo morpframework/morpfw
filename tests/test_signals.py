@@ -1,5 +1,5 @@
 from common import get_client
-from morp.app import SQLApp
+from morpfw.app import SQLApp
 from more.basicauth import BasicAuthIdentityPolicy
 import time
 import pytest

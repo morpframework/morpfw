@@ -28,7 +28,7 @@ import os
 from zope.sqlalchemy import register as register_session
 import transaction
 from zope.sqlalchemy import ZopeTransactionExtension
-from morp.exc import ConfigurationError
+from .exc import ConfigurationError
 import warnings
 
 

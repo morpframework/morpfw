@@ -4,7 +4,7 @@ import os
 
 version = '0.0'
 
-setup(name='morp',
+setup(name='morpfw',
       version=version,
       description="Web framework with weird powers",
       long_description="""\
@@ -13,7 +13,7 @@ setup(name='morp',
       keywords='',
       author='Izhar Firdaus',
       author_email='izhar@abyres.net',
-      url='http://github.com/abyres/ccis',
+      url='http://github.com/morpframework/morpfw',
       license='MIT',
       packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
       include_package_data=True,
@@ -69,5 +69,5 @@ setup(name='morp',
               'elasticsearch>=5.0.0,<6.0.0'
           ]
       },
-      entry_points={'morepath': ['scan=morp']}
+      entry_points={'morepath': ['scan=morpfw']}
       )
