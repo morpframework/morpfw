@@ -23,14 +23,5 @@ class AlreadyExistsError(Exception):
         self.message = message
 
 
-class NotFoundError(Exception):
-
-    def __init__(self, model, identifier):
-        self.model = model
-        self.identifier = identifier
-        self.message = "%s:%s:%s" % (
-            model.__module__, model.__name__, identifier)
-
-
 class StateUpdateProhibitedError(Exception):
     pass

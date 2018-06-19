@@ -1,4 +1,3 @@
-from ..errors import NotFoundError
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
 from rulez import compile_condition
@@ -142,7 +141,7 @@ class SQLStorage(BaseStorage):
         q = self.session.query(self.orm_model).filter(sa.and_(*qs))
         r = q.first()
         if not r:
-            raise NotFoundError(self.model, identifier)
+            return None
         return self.model(self.request, self, r)
 
     def get_by_uuid(self, uuid):
@@ -154,7 +153,7 @@ class SQLStorage(BaseStorage):
         q = self.session.query(self.orm_model).filter(qs)
         r = q.first()
         if not r:
-            raise NotFoundError(self.model, uuid)
+            return None
         return self.model(self.request, self, r)
 
     def update(self, identifier, data):

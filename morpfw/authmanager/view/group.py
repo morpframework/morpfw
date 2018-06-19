@@ -5,7 +5,7 @@ from ..validator import validate
 from ..utils import rellink
 from ...util import get_user
 from ...jslcrud import permission
-from ...jslcrud.errors import NotFoundError, UnprocessableError
+from ...jslcrud.errors import UnprocessableError
 
 
 @App.json(model=GroupModel,
@@ -31,9 +31,8 @@ def grant_member(context, request):
     for username, roles in mapping.items():
         for rolename in roles:
             # check if user exists
-            try:
-                get_user(request, username)
-            except NotFoundError as e:
+            user = get_user(request, username)
+            if user is None:
                 raise UnprocessableError('User %s does not exists' % username)
             context.grant_member_role(username, rolename)
     return {'status': 'success'}

@@ -11,7 +11,6 @@ from .model import StateMachine
 from .util import resolve_model
 from .app import App
 from .storage.sqlstorage import SQLStorage
-from .errors import NotFoundError
 from zope.sqlalchemy import register as register_session
 
 

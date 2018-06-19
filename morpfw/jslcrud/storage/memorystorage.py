@@ -1,4 +1,3 @@
-from ..errors import NotFoundError
 from morepath.request import Request
 from rulez import compile_condition
 from .base import BaseStorage
@@ -59,7 +58,7 @@ class MemoryStorage(BaseStorage):
 
     def get(self, identifier):
         if identifier not in DATA[self.typekey].keys():
-            raise NotFoundError(self.model, identifier)
+            return None
         res = DATA[self.typekey][identifier]
         res.request = self.request
         return res
@@ -74,7 +73,7 @@ class MemoryStorage(BaseStorage):
             data_by_uuid[v.data[uuid_field]] = v
 
         if uuid not in data_by_uuid.keys():
-            raise NotFoundError(self.model, uuid)
+            return None
         res = data_by_uuid[uuid]
         res.request = self.request
         return res

@@ -15,11 +15,10 @@ from uuid import uuid4
 from transitions import Machine
 import copy
 from .errors import StateUpdateProhibitedError, AlreadyExistsError
-from .errors import NotFoundError
 
 
 ALLOWED_SEARCH_OPERATORS = [
-    'and', 'or', '==', 'in', 
+    'and', 'or', '==', 'in',
     '~', '!=', '>', '<', '>=',
     '<='
 ]
@@ -94,11 +93,8 @@ class Collection(object):
     def create(self, data):
         identifier = self.app.get_jslcrud_default_identifier(
             self.schema, data, self.request)
-        try:
-            if identifier and self.get(identifier):
-                raise AlreadyExistsError(identifier)
-        except NotFoundError:
-            pass
+        if identifier and self.get(identifier):
+            raise AlreadyExistsError(identifier)
         obj = self._create(data)
         obj.set_initial_state()
         self.request.app.jslcrud_publish(self.request,
@@ -224,7 +220,8 @@ class Model(object):
         try:
             validate(jsondata, schema)
         except ValidationError as e:
-            logger.warn('%s(%s) : %s' % (self.schema.__name__, '/'.join(list(e.path)), e.message))
+            logger.warn('%s(%s) : %s' % (self.schema.__name__,
+                                         '/'.join(list(e.path)), e.message))
         return jsondata
 
     def _json(self):

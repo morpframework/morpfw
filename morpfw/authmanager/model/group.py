@@ -31,11 +31,7 @@ class GroupCollection(Collection):
     schema = GroupSchema
 
     def _create(self, data):
-        exists = None
-        try:
-            exists = self.storage.get(data['groupname'])
-        except cruderrors.NotFoundError:
-            pass
+        exists = self.storage.get(data['groupname'])
         if exists:
             raise exc.GroupExistsError(data['groupname'])
         return super(GroupCollection, self)._create(data)

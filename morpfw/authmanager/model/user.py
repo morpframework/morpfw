@@ -58,15 +58,13 @@ class UserCollection(Collection):
 
     def authenticate(self, username, password):
         if re.match(EMAIL_PATTERN, username):
-            try:
-                user = self.storage.get_by_email(username)
-            except cruderrors.NotFoundError:
+            user = self.storage.get_by_email(username)
+            if user is None:
                 return False
             return user.validate(password)
 
-        try:
-            user = self.storage.get(username)
-        except cruderrors.NotFoundError:
+        user = self.storage.get(username)
+        if user is None:
             return False
         return user.validate(password)
 
@@ -76,25 +74,23 @@ class UserCollection(Collection):
 
     def get(self, identifier):
         obj = super(UserCollection, self).get(identifier)
+        if not obj:
+            return None
         if obj.data['state'] == 'deleted':
-            raise cruderrors.NotFoundError(
-                self.storage.model, identifier)
+            return None
         return obj
 
     def get_by_uuid(self, uuid):
         obj = super(UserCollection, self).get_by_uuid(uuid)
+        if not obj:
+            return None
         if obj.data['state'] == 'deleted':
-            raise cruderrors.NotFoundError(
-                self.storage.model, uuid)
+            return None
         return obj
 
     def _create(self, data):
-        exists = None
         data['nonce'] = uuid4().hex
-        try:
-            exists = self.storage.get(data['username'])
-        except cruderrors.NotFoundError:
-            pass
+        exists = self.storage.get(data['username'])
         if exists:
             raise exc.UserExistsError(data['username'])
         return super(UserCollection, self)._create(data)
@@ -156,9 +152,8 @@ def jsontransform(request, context, data):
 def add_user_to_default_group(app, request, obj, signal):
     request = obj.request
     storage = app.get_authmanager_storage(request, GroupSchema)
-    try:
-        g = storage.get('__default__')
-    except cruderrors.NotFoundError:
+    g = storage.get('__default__')
+    if g is None:
         gcol = GroupCollection(request, storage)
         g = gcol.create({'groupname': '__default__'})
     g.add_members([obj.data['username']])

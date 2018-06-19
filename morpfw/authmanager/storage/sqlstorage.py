@@ -28,7 +28,7 @@ class UserSQLStorage(SQLStorage):
         q = self.session.query(db.User).filter(db.User.email == email)
         u = q.first()
         if not u:
-            raise cruderrors.NotFoundError(self.model, email)
+            return None
         return self.model(self.request, self, u)
 
     def change_password(self, username, new_password):

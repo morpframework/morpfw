@@ -22,7 +22,7 @@ class UserMemoryStorage(MemoryStorage):
     def get_by_email(self, email):
         users = self.search(rulez.field['email'] == email)
         if not users:
-            raise cruderrors.NotFoundError(self.model, email)
+            return None
         return users[0]
 
     def change_password(self, username, new_password):

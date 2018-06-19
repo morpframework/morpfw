@@ -1,4 +1,3 @@
-from ..errors import NotFoundError
 from .base import BaseStorage
 from rulez import compile_condition
 import elasticsearch.exceptions as es_exc
@@ -301,14 +300,14 @@ class ElasticSearchStorage(BaseStorage):
                                   doc_type=self.doc_type, id=identifier,
                                   refresh=self.refresh)
         except es_exc.NotFoundError as e:
-            raise NotFoundError(self.model, identifier)
+            return None
         return self.model(self.request, self, res['_source'])
 
     def get_by_uuid(self, uuid):
         res = self.search({'field': 'uuid', 'operator': '==', 'value': uuid})
         if res:
             return self.model(self.request, self, res[0].json()['data'])
-        raise NotFoundError(self.model, uuid)
+        return None
 
     def update(self, identifier, data):
         self.create_index()
