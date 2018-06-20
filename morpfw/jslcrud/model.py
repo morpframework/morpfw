@@ -74,7 +74,7 @@ class Collection(object):
                                                              self.storage)
 
     def search(self, query=None, offset=0, limit=None, order_by=None,
-               secure=True):
+               secure=False):
         if query:
             validate_condition(query, ALLOWED_SEARCH_OPERATORS)
         objs = self.storage.search(
