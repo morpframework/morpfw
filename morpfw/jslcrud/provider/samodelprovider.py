@@ -4,10 +4,12 @@ from .dictprovider import DictProvider
 from ..app import App
 from .base import Provider
 import sqlalchemy as sa
+import sqlalchemy_jsonfield as sajson
 from dateutil.parser import parse as _parse_date
 import uuid
 from ..types import datestr
 import pytz
+import copy
 _MARKER = []
 
 
@@ -46,7 +48,14 @@ class SQLAlchemyModelProvider(Provider):
             if data:
                 return data.hex
             return None
-
+        if isinstance(self.columns[key].type, sajson.JSONField):
+            try:
+                data = getattr(self.data, key)
+            except AttributeError:
+                raise KeyError(key)
+            if data is not None:
+                return copy.deepcopy(data)
+            return None
         try:
             return getattr(self.data, key)
         except AttributeError:
