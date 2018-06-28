@@ -1,4 +1,5 @@
 import sqlalchemy as sa
+import uuid
 from sqlalchemy.ext.declarative import declarative_base
 from rulez import compile_condition
 from sqlalchemy.types import TypeDecorator, CHAR
@@ -103,6 +104,8 @@ class SQLStorage(BaseStorage):
                     d[k] = v.isoformat()
                 elif isinstance(v, Decimal):
                     d[k] = float(v)
+                elif isinstance(v, uuid.UUID):
+                    d[k] = v.hex
 
             results.append(d)
         return results
