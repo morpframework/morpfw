@@ -8,6 +8,9 @@ from .jslcrud.storage.memorystorage import MemoryStorage
 from .jslcrud.storage.sqlstorage import SQLStorage
 import json
 from celery.result import AsyncResult
+import transaction
+import time
+import rulez
 
 
 class CeleryTaskSchema(jsl.Document):
@@ -45,17 +48,6 @@ class CeleryTaskCollection(jslcrud.Collection):
 
     def search(self, *args, **kwargs):
         objs = super(CeleryTaskCollection, self).search(*args, **kwargs)
-        for o in objs:
-            if o.data['status'] in ['SUBMITTED']:
-                meta = AsyncResult(o.data['task_id'])._get_task_meta()
-                if meta['status'] == 'SUCCESS':
-                    o.data['status'] = 'SUCCESS'
-                    o.data['traceback'] = None
-                    o.data['result'] = meta['result']
-                elif meta['status'] == 'FAILURE':
-                    o.data['status'] = 'FAILURE'
-                    o.data['traceback'] = meta['traceback']
-                    o.data['result'] = None
         return objs
 
 
@@ -102,3 +94,50 @@ def search_task(context, request):
 def get_task(app, request, identifier):
     storage = app.get_celery_metastore(request)
     return storage.get(identifier)
+
+
+def cleanup(appClass, age_minutes=60):
+    app = appClass()
+    request = app.request_class(app=app, environ={'PATH_INFO': '/'})
+    transaction.begin()
+    now = int(time.time() * 1000)
+    try:
+        collection = get_task_collection(app, request)
+        oldtasks = collection.search(
+            query=rulez.field['created_ts'] < (
+                now - (age_minutes * 60 * 1000))
+        )
+        for t in oldtasks:
+            t.delete()
+        transaction.commit()
+    except:
+        transaction.abort()
+        raise
+
+
+def refresh(appClass):
+    app = appClass()
+    request = app.request_class(app=app, environ={'PATH_INFO': '/'})
+    transaction.begin()
+    now = int(time.time() * 1000)
+    try:
+        collection = get_task_collection(app, request)
+        objs = collection.search(
+            query=rulez.and_(
+                rulez.field['created_ts'] > (now - (60 * 60 * 1000)),
+                rulez.field['state'] == 'SUBMITTED')
+        )
+        for o in objs:
+            meta = AsyncResult(o.data['task_id'])._get_task_meta()
+            if meta['status'] == 'SUCCESS':
+                o.data['status'] = 'SUCCESS'
+                o.data['traceback'] = None
+                o.data['result'] = meta['result']
+            elif meta['status'] == 'FAILURE':
+                o.data['status'] = 'FAILURE'
+                o.data['traceback'] = meta['traceback']
+                o.data['result'] = None
+        transaction.commit()
+    except:
+        transaction.abort()
+        raise

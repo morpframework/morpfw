@@ -163,7 +163,8 @@ class BaseApp(authmanager.App, cors.CORSApp):
             'metastore': 'sqlstorage'
         }
         celery_config_settings = getattr(self.settings, 'celery', {})
-        celery_settings.update(celery_config_settings.__dict__)
+        if celery_config_settings:
+            celery_settings.update(celery_config_settings.__dict__)
         metastore = celery_settings.get('metastore')
         metastore_options = celery_settings.get('metastore_opts', {})
         return self._get_celery_metastore(
