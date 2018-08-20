@@ -125,7 +125,7 @@ def refresh(appClass):
         objs = collection.search(
             query=rulez.and_(
                 rulez.field['created_ts'] > (now - (60 * 60 * 1000)),
-                rulez.field['state'] == 'SUBMITTED')
+                rulez.field['status'] == 'SUBMITTED')
         )
         for o in objs:
             meta = AsyncResult(o.data['task_id'])._get_task_meta()
