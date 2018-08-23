@@ -144,10 +144,12 @@ def refresh(appClass):
                 o.data['status'] = 'SUCCESS'
                 o.data['traceback'] = None
                 o.data['result'] = meta['result']
+                meta.forget()
             elif meta['status'] == 'FAILURE':
                 o.data['status'] = 'FAILURE'
                 o.data['traceback'] = meta['traceback']
                 o.data['result'] = None
+                meta.forget()
         transaction.commit()
     except:
         transaction.abort()
