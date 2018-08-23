@@ -48,6 +48,17 @@ class CeleryTaskCollection(jslcrud.Collection):
 
     def search(self, *args, **kwargs):
         objs = super(CeleryTaskCollection, self).search(*args, **kwargs)
+        if self.request.GET.get('refresh', '').lower() == 'true':
+            for o in objs:
+                meta = AsyncResult(o.data['task_id'])._get_task_meta()
+                if meta['status'] == 'SUCCESS':
+                    o.data['status'] = 'SUCCESS'
+                    o.data['traceback'] = None
+                    o.data['result'] = meta['result']
+                elif meta['status'] == 'FAILURE':
+                    o.data['status'] = 'FAILURE'
+                    o.data['traceback'] = meta['traceback']
+                    o.data['result'] = None
         return objs
 
 
