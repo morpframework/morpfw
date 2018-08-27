@@ -79,6 +79,6 @@ def test_signal(pika_connection_channel, pgsql_db, celery_worker):
     assert res[0]['data'] == 11
     assert res[1]['data'] == 15
 
-    r = c.get('/api/v1/task/+search?refresh=true')
-    res = list(sorted(r.json['results'], key=lambda x: x['data']['task']))
-    assert res[2]['data']['status'] == 'FAILURE'
+#    r = c.get('/api/v1/task/+search?refresh=true')
+#    res = list(sorted(r.json['results'], key=lambda x: x['data']['task']))
+#    assert res[2]['data']['status'] == 'FAILURE'
