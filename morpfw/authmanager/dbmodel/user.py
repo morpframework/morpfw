@@ -12,5 +12,3 @@ class User(Base):
     password = sa.Column(sa.String(length=1024))
     attrs = sa.Column(sajson.JSONField)
     state = sa.Column(sa.String(length=64))
-    created = sa.Column(sa.DateTime)
-    modified = sa.Column(sa.DateTime)

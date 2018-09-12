@@ -68,26 +68,6 @@ class UserCollection(Collection):
             return False
         return user.validate(password)
 
-    def search(self, *args, **kwargs):
-        result = super(UserCollection, self).search(*args, **kwargs)
-        return list([o for o in result if o.data['state'] != 'deleted'])
-
-    def get(self, identifier):
-        obj = super(UserCollection, self).get(identifier)
-        if not obj:
-            return None
-        if obj.data['state'] == 'deleted':
-            return None
-        return obj
-
-    def get_by_uuid(self, uuid):
-        obj = super(UserCollection, self).get_by_uuid(uuid)
-        if not obj:
-            return None
-        if obj.data['state'] == 'deleted':
-            return None
-        return obj
-
     def _create(self, data):
         data['nonce'] = uuid4().hex
         exists = self.storage.get(data['username'])
@@ -131,6 +111,9 @@ class UserStateMachine(StateMachine):
         {'trigger': 'delete', 'source': [
             'active', 'inactive'], 'dest': 'deleted'}
     ]
+
+    def on_enter_deleted(self):
+        self._context.delete()
 
 
 @App.jslcrud_statemachine(model=UserModel)

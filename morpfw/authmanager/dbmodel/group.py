@@ -11,9 +11,6 @@ class Group(Base):
 
     groupname = sa.Column(sa.String(length=256))
     attrs = sa.Column(sajson.JSONField)
-    created = sa.Column(sa.DateTime)
-    modified = sa.Column(sa.DateTime)
-
     memberships = relationship('Membership', cascade='all')
 
 
@@ -29,7 +26,6 @@ class Membership(Base):
     sa.UniqueConstraint('group_id', 'user_id')
 
     roles_assignment = relationship('RoleAssignment', cascade='all')
-
 
 
 class RoleAssignment(Base):

@@ -208,5 +208,4 @@ def delete(context, request):
             'status': 'error',
             'message': 'User no longer exists'
         }
-    context.save()
     return {'status': 'success'}
