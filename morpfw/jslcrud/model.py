@@ -84,10 +84,25 @@ class Collection(object):
 
     def search(self, query=None, offset=0, limit=None, order_by=None,
                secure=False):
+        objs = self._search(query, offset, limit, order_by, secure)
+        if secure and limit:
+            nextpage = {'query': query, 'offset': offset +
+                        limit, 'limit': limit, 'order_by': order_by}
+            while len(objs) < limit:
+                nextobjs = self._search(secure=True, **nextpage)
+                if len(nextobjs) == 0:
+                    return list(objs[:limit])
+                nextpage['offset'] = nextpage['offset'] + limit
+                objs = objs + nextobjs
+        return objs
+
+    def _search(self, query=None, offset=0, limit=None, order_by=None,
+                secure=False):
         if query:
             validate_condition(query, ALLOWED_SEARCH_OPERATORS)
         objs = self.storage.search(
             query, offset=offset, limit=limit, order_by=order_by)
+
         if secure:
             objs = list([obj for obj in objs if permits(
                 self.request, obj, permission.View)])
