@@ -336,11 +336,19 @@ def run_jslcrud_test(app, skip_aggregate=False):
 
     # lets delete the entry
 
+    r = c.get('/pages/+search')
+
+    assert len(r.json['results']) == 11
+
     r = c.delete('/pages/%s' % uuid)
 
     assert r.json['status'] == 'success'
 
     r = c.get('/pages/%s' % uuid, expect_errors=True)
+
+    r = c.get('/pages/+search')
+
+    assert len(r.json['results']) == 10
 
     r = c.get('/objects')
 

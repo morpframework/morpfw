@@ -42,5 +42,5 @@ class BaseStorage(object):
     def update(self, identifier, data):
         raise NotImplementedError
 
-    def delete(self, identifier):
+    def delete(self, identifier, model):
         raise NotImplementedError

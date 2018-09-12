@@ -235,7 +235,7 @@ class Model(object):
     def delete(self):
         self.request.app.jslcrud_publish(
             self.request, self, signals.OBJECT_TOBEDELETED)
-        self.storage.delete(self.identifier)
+        self.storage.delete(self.identifier, model=self)
 
     def save(self):
         if self.data.changed:

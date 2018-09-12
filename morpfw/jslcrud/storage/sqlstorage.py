@@ -78,9 +78,12 @@ class SQLStorage(BaseStorage):
         if query:
             f = compile_condition('sqlalchemy', query)
             filterquery = f(self.orm_model)
+            filterquery = sa.and_(
+                self.orm_model.deleted.is_(None), filterquery)
             q = self.session.query(*fields).filter(filterquery)
         else:
-            q = self.session.query(*fields)
+            q = self.session.query(
+                *fields).filter(self.orm_model.deleted.is_(None))
 
         if order_by is not None:
             col = order_by[0]
@@ -114,9 +117,11 @@ class SQLStorage(BaseStorage):
         if query:
             f = compile_condition('sqlalchemy', query)
             filterquery = f(self.orm_model)
-            q = self.session.query(self.orm_model).filter(filterquery)
+            q = self.session.query(self.orm_model).filter(sa.and_(
+                self.orm_model.deleted.is_(None), filterquery))
         else:
-            q = self.session.query(self.orm_model)
+            q = self.session.query(self.orm_model).filter(
+                self.orm_model.deleted.is_(None))
 
         if order_by is not None:
             col = order_by[0]
@@ -141,7 +146,8 @@ class SQLStorage(BaseStorage):
                 self.app.get_jslcrud_identifierfields(self.model.schema),
                 identifier.split(self.app.get_jslcrud_compositekey_separator())):
             qs.append(getattr(self.orm_model, f) == v)
-        q = self.session.query(self.orm_model).filter(sa.and_(*qs))
+        q = self.session.query(self.orm_model).filter(
+            sa.and_(self.orm_model.deleted.is_(None), *qs))
         r = q.first()
         if not r:
             return None
@@ -179,19 +185,8 @@ class SQLStorage(BaseStorage):
 
         return self.model(self.request, self, r)
 
-    def delete(self, identifier):
-        qs = []
-        for f, v in zip(
-                self.app.get_jslcrud_identifierfields(self.model.schema),
-                identifier.split(self.app.get_jslcrud_compositekey_separator())):
-            qs.append(getattr(self.orm_model, f) == v)
-        q = self.session.query(self.orm_model).filter(sa.and_(*qs))
-
-        r = q.first()
-        if not r:
-            raise ValueError(identifier)
-
-        self.session.delete(r)
+    def delete(self, identifier, model):
+        model['deleted'] = datetime.utcnow().isoformat()
 
 
 class GUID(TypeDecorator):
@@ -234,6 +229,7 @@ class BaseMixin(object):
     created = sa.Column(sa.DateTime, default=datetime.utcnow)
     creator = sa.Column(sa.String(length=1024))
     modified = sa.Column(sa.DateTime, default=datetime.utcnow)
+    deleted = sa.Column(sa.DateTime)
 
 
 Base = declarative_base(cls=BaseMixin)
