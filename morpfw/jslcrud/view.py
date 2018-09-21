@@ -67,7 +67,7 @@ def search(context, request):
         searchlimit = limit + 1
     objs = context.search(query, offset=offset,
                           limit=searchlimit,
-                          order_by=order_by, 
+                          order_by=order_by,
                           secure=True)
     # and limit back to actual limit
     objs = [obj.json() for obj in objs]
