@@ -86,11 +86,7 @@ class DBSessionRequest(Request):
     def db_session(self):
         if self._db_session is None:
             self._db_session = Session()
-            self._db_savepoint = transaction.savepoint()
         return self._db_session
-
-    def db_rollback(self):
-        self._db_savepoint.rollback()
 
 
 class BaseApp(authmanager.App, cors.CORSApp):
