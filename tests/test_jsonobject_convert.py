@@ -55,4 +55,4 @@ def test_jsonobject_convert():
 
     assert schema.get_schema()
 
-    sschema = jsl_to_jsonobject(schema)
+    schema = jsl_to_jsonobject(schema)
