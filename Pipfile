@@ -1,0 +1,19 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[dev-packages]
+pytest = "*"
+pytest-html = "*"
+rulez = {git = "https://github.com/morpframework/rulez.git"}
+"e1839a8" = {path = ".", extras = ["test"], editable = true}
+"pep8" = "*"
+pylint = "*"
+"autopep8" = "*"
+pydocstyle = "*"
+
+[packages]
+
+[requires]
+python_version = "3.6"
