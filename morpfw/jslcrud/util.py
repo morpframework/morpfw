@@ -36,22 +36,25 @@ def jsonobject_property_to_jsl_field(
         return jsl.DictField(name=prop.name, required=prop.required)
     if isinstance(prop, jsonobject.ListProperty):
         if prop.item_wrapper:
-            if issubclass(prop.item_wrapper.item_type, jsonobject.JsonObject):
-                subtype = jsl.DocumentField(
-                    document_cls=jsonobject_to_jsl(prop.item_wrapper.item_type), nullable=nullable)
-            elif isinstance(prop.item_wrapper.item_type, jsonobject.JsonProperty):
-                subtype = jsonobject_property_to_jsl_field(
-                    prop.item_wrapper.item_type)
-            elif prop.item_wrapper.item_type is str:
+            if isinstance(prop.item_wrapper, jsonobject.ObjectProperty):
+                if issubclass(prop.item_wrapper.item_type, jsonobject.JsonObject):
+                    subtype = jsl.DocumentField(
+                        document_cls=jsonobject_to_jsl(prop.item_wrapper.item_type), nullable=nullable)
+                elif isinstance(prop.item_wrapper.item_type, jsonobject.JsonProperty):
+                    subtype = jsonobject_property_to_jsl_field(
+                        prop.item_wrapper.item_type)
+                else:
+                    raise KeyError(prop.item_wrapper.item_type)
+            elif isinstance(prop.item_wrapper, jsonobject.StringProperty):
                 subtype = jsl.StringField(name=prop.name)
-            elif prop.item_wrapper.item_type is int:
+            elif isinstance(prop.item_wrapper, jsonobject.IntegerProperty):
                 subtype = jsl.IntField(name=prop.name)
-            elif prop.item_wrapper.item_type is float:
+            elif isinstance(prop.item_wrapper, jsonobject.FloatProperty):
                 subtype = jsl.NumberField(name=prop.name)
-            elif prop.item_wrapper.item_type is dict:
+            elif isinstance(prop.item_wrapper, jsonobject.DictProperty):
                 subtype = jsl.DictField(name=prop.name)
             else:
-                raise KeyError(prop.item_wrapper.item_type)
+                raise KeyError(prop.item_wrapper)
             return jsl.ArrayField(items=subtype, required=prop.required)
         return jsl.ArrayField(name=prop.name, required=prop.required)
 
