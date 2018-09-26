@@ -1,4 +1,4 @@
-import jsl
+import jsonobject
 from ..storage.sqlstorage import Base, GUID, SQLStorage
 from .dictprovider import DictProvider
 from ..app import App
@@ -83,10 +83,10 @@ class SQLAlchemyModelProvider(Provider):
         if default is _MARKER:
             attr = getattr(self.schema, key, None)
             if attr:
-                if isinstance(attr, jsl.DocumentField):
+                if isinstance(attr, jsonobject.ListProperty):
                     default = []
                 else:
-                    default = getattr(self.schema, key).get_default()
+                    default = getattr(self.schema, key).default()
 
         if default is not _MARKER:
             try:
@@ -109,19 +109,20 @@ class SQLAlchemyModelProvider(Provider):
         return self.schema._fields.keys()
 
 
-@App.jslcrud_dataprovider(schema=jsl.Document, obj=Base, storage=SQLStorage)
+@App.jslcrud_dataprovider(schema=jsonobject.JsonObject, obj=Base, storage=SQLStorage)
 def get_provider(schema, obj, storage):
     return SQLAlchemyModelProvider(schema, obj, storage)
 
 
-@App.jslcrud_dataprovider(schema=jsl.Document, obj=dict, storage=SQLStorage)
+@App.jslcrud_dataprovider(schema=jsonobject.JsonObject, obj=dict, storage=SQLStorage)
 def get_dict_provider(schema, obj, storage):
     return DictProvider(schema, obj, storage)
 
 
 @App.jslcrud_jsonprovider(obj=SQLAlchemyModelProvider)
 def get_jsonprovider(obj):
-    fields = obj.schema._fields.items()
+    jsonobj = obj.schema()
+    fields = obj.schema.properties().items()
     result = {}
     for n, f in fields:
         v = obj.get(n)

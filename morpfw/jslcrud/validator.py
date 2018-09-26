@@ -18,7 +18,7 @@ def load(validator, request):
         path_info=urllib.parse.unquote(request.path))
     context = resolve_model(newreq)
     context.request = request
-    jso = jsl_to_jsonobject(context.schema)
+    jso = context.schema
     jslschema = jsonobject_to_jsl(jso, nullable=True)
     schema = jslschema.get_schema(ordered=True)
     form_validators = request.app.get_jslcrud_formvalidators(context.schema)

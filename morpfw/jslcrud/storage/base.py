@@ -21,11 +21,8 @@ class BaseStorage(object):
             obj[f] = v
 
     def set_schema_defaults(self, data):
-        data = copy.deepcopy(data)
-        for fieldname, field in self.model.schema._fields.items():
-            if field.required and fieldname not in data.keys():
-                data[fieldname] = field.get_default()
-        return data
+        obj = self.model.schema(data)
+        return obj.to_json()
 
     def create(self, data):
         raise NotImplementedError

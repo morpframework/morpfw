@@ -1,4 +1,3 @@
-import jsl
 from jslcrud_common import App as BaseApp
 from morpfw.jslcrud.model import Collection, Model, Schema
 from morpfw.jslcrud.storage.elasticsearchstorage import ElasticSearchStorage
@@ -13,6 +12,7 @@ from sqlalchemy.orm import sessionmaker
 from zope.sqlalchemy import register as register_session
 import morpfw.jslcrud.signals as signals
 from elasticsearch import Elasticsearch
+import jsonobject
 
 Session = sessionmaker()
 register_session(Session)
@@ -63,11 +63,11 @@ def model_factory(request, identifier):
 
 class ObjectSchema(Schema):
 
-    id = jsl.StringField(required=False)
-    uuid = jsl.StringField(required=False)
-    body = jsl.StringField(required=True, default='')
-    created_flag = jsl.BooleanField(required=False, default=False)
-    updated_flag = jsl.BooleanField(required=False, default=False)
+    id = jsonobject.StringProperty(required=False)
+    uuid = jsonobject.StringProperty(required=False)
+    body = jsonobject.StringProperty(required=True, default='')
+    created_flag = jsonobject.BooleanProperty(required=False, default=False)
+    updated_flag = jsonobject.BooleanProperty(required=False, default=False)
 
 
 @App.jslcrud_identifierfields(schema=ObjectSchema)

@@ -10,6 +10,7 @@ import jsl
 import json
 from uuid import uuid4
 from datetime import datetime
+import jsonobject
 
 
 class App(BaseApp):
@@ -24,29 +25,29 @@ def validate_body(request, json):
         return "Body must not be 'invalid'"
 
 
-class PageSchema(jsl.Document):
+class PageSchema(jsonobject.JsonObject):
 
-    uuid = jsl.StringField(required=False, default='')
-    title = jsl.StringField(required=True, default='')
-    body = jsl.StringField(required=True, default='')
-    value = jsl.IntField(required=False)
-    footer = jsl.StringField(required=False, default='')
-    created = jsl.DateTimeField(required=False)
-    modified = jsl.DateTimeField(required=False)
-    state = jsl.StringField(required=False)
+    uuid = jsonobject.StringProperty(required=False)
+    title = jsonobject.StringProperty(required=True, default='')
+    body = jsonobject.StringProperty(required=True, default='')
+    value = jsonobject.IntegerProperty(required=False)
+    footer = jsonobject.StringProperty(required=False, default='')
+    created = jsonobject.DateTimeProperty(required=False)
+    modified = jsonobject.DateTimeProperty(required=False)
+    state = jsonobject.StringProperty(required=False)
 
 
-@App.jslcrud_formvalidators(schema=PageSchema)
+@App.formvalidators(schema=PageSchema)
 def page_formvalidators(schema):
     return [validate_body]
 
 
-@App.jslcrud_identifierfields(schema=PageSchema)
+@App.identifierfields(schema=PageSchema)
 def page_identifierfields(schema):
     return ['uuid']
 
 
-@App.jslcrud_default_identifier(schema=PageSchema)
+@App.default_identifier(schema=PageSchema)
 def page_default_identifier(schema, obj, request):
     return str(uuid4())
 
@@ -61,11 +62,11 @@ class PageModel(Model):
 
 class ObjectSchema(Schema):
 
-    id = jsl.IntField(required=False)
-    uuid = jsl.StringField(required=False)
-    body = jsl.StringField(required=True, default='')
-    created_flag = jsl.BooleanField(required=False, default=False)
-    updated_flag = jsl.BooleanField(required=False, default=False)
+    id = jsonobject.IntegerProperty(required=False)
+    uuid = jsonobject.StringProperty(required=False)
+    body = jsonobject.StringProperty(required=True, default='')
+    created_flag = jsonobject.BooleanProperty(required=False, default=False)
+    updated_flag = jsonobject.BooleanProperty(required=False, default=False)
 
 
 @App.jslcrud_identifierfields(schema=ObjectSchema)
@@ -117,12 +118,12 @@ def get_pagemodel_statemachine(context):
     return PageStateMachine(context)
 
 
-class NamedObjectSchema(jsl.Document):
+class NamedObjectSchema(jsonobject.JsonObject):
 
-    name = jsl.StringField(required=False)
-    body = jsl.StringField(required=True, default='')
-    created_flag = jsl.BooleanField(required=False, default=False)
-    updated_flag = jsl.BooleanField(required=False, default=False)
+    name = jsonobject.StringProperty(required=False)
+    body = jsonobject.StringProperty(required=True, default='')
+    created_flag = jsonobject.BooleanProperty(required=False, default=False)
+    updated_flag = jsonobject.BooleanProperty(required=False, default=False)
 
 
 @App.jslcrud_identifierfields(schema=NamedObjectSchema)
@@ -173,6 +174,8 @@ def run_jslcrud_test(app, skip_aggregate=False):
     assert r.json['data']['title'] == 'Hello'
 
     uuid = r.json['data']['uuid']
+    assert uuid
+
     r = c.get('/pages/%s' % uuid)
 
     assert r.json['data']['title'] == 'Hello'

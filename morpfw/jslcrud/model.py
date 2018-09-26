@@ -1,8 +1,8 @@
 from .app import App
-import jsl
 from jsonschema.validators import Draft4Validator
 from jsonschema import validate, ValidationError
 from .util import jsl_nullable
+from .util import jsonobject_to_jsl
 from .const import SEPARATOR
 from . import permission
 from . import signals
@@ -10,12 +10,11 @@ from .log import logger
 from rulez import validate_condition
 from morepath import reify
 from DateTime import DateTime
-import jsl
 from uuid import uuid4
 from transitions import Machine
 import copy
 from .errors import StateUpdateProhibitedError, AlreadyExistsError
-
+import jsonobject
 
 ALLOWED_SEARCH_OPERATORS = [
     'and', 'or', '==', 'in',
@@ -24,17 +23,17 @@ ALLOWED_SEARCH_OPERATORS = [
 ]
 
 
-@App.jslcrud_jsontransfrom(schema=jsl.Document)
+@App.jslcrud_jsontransfrom(schema=jsonobject.JsonObject)
 def default_jsontransform(request, context, data):
     return data
 
 
-class Schema(jsl.Document):
+class Schema(jsonobject.JsonObject):
 
-    uuid = jsl.StringField(required=False)
-    creator = jsl.StringField(required=False)
-    created = jsl.DateTimeField(required=False)
-    modified = jsl.DateTimeField(required=False)
+    uuid = jsonobject.StringProperty(required=False)
+    creator = jsonobject.StringProperty(required=False)
+    created = jsonobject.DateTimeProperty(required=False)
+    modified = jsonobject.DateTimeProperty(required=False)
 
 
 @App.jslcrud_identifierfields(schema=Schema)
@@ -139,7 +138,7 @@ class Collection(object):
 
     def json(self):
         return {
-            'schema': self.schema.get_schema(ordered=True),
+            'schema': jsonobject_to_jsl(self.schema).get_schema(ordered=True),
             'links': self.links()
         }
 
@@ -226,7 +225,8 @@ class Model(object):
 
         data = self._raw_json()
         data.update(newdata)
-        schema = jsl_nullable(self.schema).get_schema(ordered=True)
+        schema = jsonobject_to_jsl(
+            self.schema, nullable=True).get_schema(ordered=True)
         validate(data, schema)
         self.storage.update(self.identifier, data)
         self.request.app.jslcrud_publish(
@@ -240,12 +240,14 @@ class Model(object):
     def save(self):
         if self.data.changed:
             data = self._raw_json()
-            schema = jsl_nullable(self.schema).get_schema(ordered=True)
+            schema = jsonobject_to_jsl(
+                self.schema, nullable=True).get_schema(ordered=True)
             validate(data, schema)
             self.storage.update(self.identifier, data)
 
     def _raw_json(self):
-        schema = jsl_nullable(self.schema).get_schema(ordered=True)
+        schema = jsonobject_to_jsl(
+            self.schema, nullable=True).get_schema(ordered=True)
         jsondata = self.app.get_jslcrud_jsonprovider(self.data)
         jsondata = self.app.get_jslcrud_jsontransform(
             self.schema)(self.request, self, copy.deepcopy(jsondata))
