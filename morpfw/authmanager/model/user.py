@@ -6,46 +6,49 @@ import jsl
 from .. import exc
 import sqlalchemy as sa
 import sqlalchemy_jsonfield as sajson
-from .base import BaseSchema, NAME_PATTERN, EMAIL_PATTERN
+from .base import NAME_PATTERN, EMAIL_PATTERN
 from ...jslcrud import signals as crudsignal
 from ...jslcrud import errors as cruderrors
+from ...jslcrud.model import Schema
+from ...jslcrud.validator import regex_validator
 from .group import GroupCollection, GroupSchema
 from uuid import uuid4
 import re
+import jsonobject
 
 
-class RegistrationSchema(jsl.Document):
-    class Options(object):
-        title = 'credential'
-
-    username = jsl.StringField(required=True, pattern=NAME_PATTERN)
-    email = jsl.StringField(required=True, pattern=EMAIL_PATTERN)
-    password = jsl.StringField(required=True)
-    password_validate = jsl.StringField(required=True)
-
-
-class LoginSchema(jsl.Document):
-    class Options(object):
-        title = 'credential'
-
-    username = jsl.StringField(required=True)
-    password = jsl.StringField(required=True)
+class RegistrationSchema(jsonobject.JsonObject):
+    # pattern=NAME_PATTERN)
+    username = jsonobject.StringProperty(
+        required=True, validators=[regex_validator(NAME_PATTERN, 'name')])
+    # pattern=EMAIL_PATTERN
+    email = jsonobject.StringProperty(required=True, validators=[
+                                      regex_validator(EMAIL_PATTERN, 'email')])
+    password = jsonobject.StringProperty(required=True)
+    password_validate = jsonobject.StringProperty(required=True, default='')
 
 
-class UserSchema(BaseSchema):
-    class Options(object):
-        title = 'user'
-        additional_properties = True
-    username = jsl.StringField(required=True, pattern=NAME_PATTERN)
-    email = jsl.StringField(required=True, pattern=EMAIL_PATTERN)
-    password = jsl.StringField(required=False)
-    groups = jsl.ArrayField(items=jsl.StringField(
-        pattern=NAME_PATTERN), required=False)
-    attrs = jsl.DictField(required=False)
-    state = jsl.StringField(required=False)
-    created = jsl.StringField(required=False)
-    modified = jsl.StringField(required=False)
-    nonce = jsl.StringField(required=False)
+class LoginSchema(jsonobject.JsonObject):
+
+    username = jsonobject.StringProperty(required=True)
+    password = jsonobject.StringProperty(required=True)
+
+
+class UserSchema(Schema):
+
+    username = jsonobject.StringProperty(
+        required=True, validators=[regex_validator(NAME_PATTERN, 'name')])  # , pattern=NAME_PATTERN)
+    # , pattern=EMAIL_PATTERN)
+    email = jsonobject.StringProperty(required=True, validators=[
+                                      regex_validator(EMAIL_PATTERN, 'email')])
+    password = jsonobject.StringProperty(required=False)
+    groups = jsonobject.ListProperty(
+        str, required=False)  # pattern=NAME_PATTERN
+    attrs = jsonobject.DictProperty(required=False)
+    state = jsonobject.StringProperty(required=False)
+    created = jsonobject.StringProperty(required=False)
+    modified = jsonobject.StringProperty(required=False)
+    nonce = jsonobject.StringProperty(required=False)
 
 
 @App.jslcrud_identifierfields(schema=UserSchema)

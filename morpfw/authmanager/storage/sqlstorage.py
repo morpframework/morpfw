@@ -1,7 +1,6 @@
 from ..app import App
 from ..model.user import User, UserSchema, UserModel
 from ..model.group import Group, GroupSchema, GroupModel
-from ..model.base import BaseSchema
 from ..model.apikey import APIKeyModel, APIKeySchema, APIKey
 from ...jslcrud.storage.sqlstorage import SQLStorage
 from ...jslcrud import errors as cruderrors

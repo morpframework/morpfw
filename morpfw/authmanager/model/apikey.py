@@ -4,14 +4,15 @@ from ..app import App
 from ..dbmodel.apikey import APIKey
 from uuid import uuid4
 import rulez
+import jsonobject
 
 
 class APIKeySchema(Schema):
 
-    username = jsl.StringField()
-    label = jsl.StringField()
-    api_identity = jsl.StringField()
-    api_secret = jsl.StringField()
+    username = jsonobject.StringProperty()
+    label = jsonobject.StringProperty()
+    api_identity = jsonobject.StringProperty()
+    api_secret = jsonobject.StringProperty()
 
 
 class APIKeyModel(Model):

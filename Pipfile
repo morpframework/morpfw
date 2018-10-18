@@ -12,8 +12,10 @@ rulez = {git = "https://github.com/morpframework/rulez.git"}
 pylint = "*"
 "autopep8" = "*"
 pydocstyle = "*"
+morpfw = {editable = true, path = ".", extras = ["test"]}
 
 [packages]
+pydocstyle = "*"
 
 [requires]
 python_version = "3.6"

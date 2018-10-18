@@ -14,6 +14,7 @@ import traceback
 import os
 import sys
 import logging
+import jsonobject.exceptions
 logger = logging.getLogger('morp')
 
 
@@ -234,6 +235,21 @@ def validation_error(context, request):
     return {
         'status': 'error',
         'field_errors': field_errors,
+        'form_errors': form_errors
+    }
+
+
+@App.json(model=jsonobject.exceptions.BadValueError)
+def jsonobject_validation_error(context, request):
+    @request.after
+    def adjust_status(response):
+        response.status = 422
+
+    form_errors = [context.args[0]]
+
+    return {
+        'status': 'error',
+        'field_errors': [],
         'form_errors': form_errors
     }
 

@@ -11,14 +11,17 @@ from webob.exc import HTTPNotFound
 from more.jwtauth import (
     verify_refresh_request, InvalidTokenError, ExpiredSignatureError
 )
+from ...jslcrud.util import jsonobject_to_jsl
+from ...jslcrud.validator import validate_schema
 
 
 @App.json(model=UserCollection, name='register', request_method='POST',
-          permission=permission.Register)
-def register(context, request):
+          permission=permission.Register, load=validate_schema(schema=RegistrationSchema))
+def register(context, request, load):
     """Validate the username and password and create the user."""
     data = request.json
-    res = validate(data, RegistrationSchema.get_schema())
+    res = validate(data, jsonobject_to_jsl(
+        RegistrationSchema).get_schema())
     if res:
         @request.after
         def set_error(response):
@@ -36,7 +39,7 @@ def register(context, request):
         return {'status': 'error',
                 'message': 'Password confirmation does not match'}
 
-    if 'state' not in data.keys():
+    if 'state' not in data.keys() or not data['state']:
         data['state'] = getattr(
             request.app.settings.authmanager, 'default_userstate', 'active')
     obj = context.create(data)
@@ -46,7 +49,7 @@ def register(context, request):
 @App.json(model=UserCollection, name='login')
 def login(context, request):
     return {
-        'schema': LoginSchema.get_schema(),
+        'schema': jsonobject_to_jsl(LoginSchema).get_schema(),
         'links': [rellink(context, request, 'login', 'POST')]
     }
 

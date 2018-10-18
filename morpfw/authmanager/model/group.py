@@ -1,21 +1,20 @@
 from ..dbmodel import Group, Membership, RoleAssignment
-from .base import BaseSchema, NAME_PATTERN
-from ...jslcrud import Collection, Model
+from .base import NAME_PATTERN
+from ...jslcrud import Collection, Model, Schema
 from ..app import App
 import jsl
 from ...jslcrud import errors as cruderrors
 from .. import exc
+import jsonobject
 
 
-class GroupSchema(BaseSchema):
-    class Options(object):
-        title = 'group'
-        additional_properties = True
-    groupname = jsl.StringField(required=True, pattern=NAME_PATTERN)
-    members = jsl.ArrayField(items=jsl.StringField(), required=False)
-    attrs = jsl.DictField(required=False)
-    created = jsl.StringField(required=False)
-    modified = jsl.StringField(required=False)
+class GroupSchema(Schema):
+    groupname = jsonobject.StringProperty(
+        required=True)  # , pattern=NAME_PATTERN)
+    members = jsonobject.ListProperty(str, required=False)
+    attrs = jsonobject.DictProperty(required=False)
+    created = jsonobject.StringProperty(required=False)
+    modified = jsonobject.StringProperty(required=False)
 
 
 @App.jslcrud_identifierfields(schema=GroupSchema)
@@ -23,8 +22,8 @@ def group_identifierfields(schema):
     return ['groupname']
 
 
-class MemberSchema(BaseSchema):
-    users = jsl.ArrayField(items=jsl.StringField(), required=True)
+class MemberSchema(Schema):
+    users = jsonobject.ListProperty(str, required=True)
 
 
 class GroupCollection(Collection):

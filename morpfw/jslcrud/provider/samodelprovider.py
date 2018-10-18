@@ -121,7 +121,6 @@ def get_dict_provider(schema, obj, storage):
 
 @App.jslcrud_jsonprovider(obj=SQLAlchemyModelProvider)
 def get_jsonprovider(obj):
-    jsonobj = obj.schema()
     fields = obj.schema.properties().items()
     result = {}
     for n, f in fields:

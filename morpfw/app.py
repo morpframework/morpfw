@@ -150,7 +150,7 @@ class BaseApp(authmanager.App, cors.CORSApp):
                                               self.__class__.__name__)
 
 
-def create_admin(app, username, password, session=Session):
+def create_admin(app, username, password, email, session=Session):
     request = app.request_class(
         app=app, environ={'PATH_INFO': '/'})
 
@@ -159,6 +159,7 @@ def create_admin(app, username, password, session=Session):
         request, app.get_authmanager_storage(request, UserSchema))
     userobj = context.create({'username': username,
                               'password': password,
+                              'email': email,
                               'state': 'active'})
     gstorage = app.get_authmanager_storage(
         request, GroupSchema)

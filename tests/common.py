@@ -50,7 +50,8 @@ def get_client(app, config='settings.yml', **kwargs):
     appobj = create_app(app, settings, **kwargs)
     appobj.initdb()
     try:
-        create_admin(appobj, username='defaultuser', password='password')
+        create_admin(appobj, username='defaultuser',
+                     password='password', email='admin@localhost.localdomain')
     except UserExistsError:
         pass
     c = Client(appobj)

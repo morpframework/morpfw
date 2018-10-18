@@ -4,7 +4,6 @@ from ..model.user import User, UserModel, UserSchema
 from ..model.group import Group, GroupModel, GroupSchema
 from ..model.apikey import APIKey, APIKeyModel, APIKeySchema
 from .interfaces import IStorage
-from ..model.base import BaseSchema
 from ...jslcrud import errors as cruderrors
 from .. import exc
 import rulez
