@@ -6,7 +6,7 @@ import jsl
 from .. import exc
 import sqlalchemy as sa
 import sqlalchemy_jsonfield as sajson
-from ..model.base import NAME_PATTERN, EMAIL_PATTERN
+from ..model import NAME_PATTERN, EMAIL_PATTERN
 from morpfw.jslcrud import signals as crudsignal
 from morpfw.jslcrud import errors as cruderrors
 from morpfw.jslcrud.model import Schema
