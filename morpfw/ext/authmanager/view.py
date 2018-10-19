@@ -1,6 +1,6 @@
 
-from ..app import App
-from ..exc import AuthManagerError
+from .app import App
+from .exc import AuthManagerError
 
 
 @App.json(model=AuthManagerError)
