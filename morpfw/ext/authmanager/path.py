@@ -1,7 +1,7 @@
 from .app import App
 from .model.user import UserCollection, UserModel, UserSchema
 from .model.group import GroupModel, GroupCollection, GroupSchema
-from .model.apikey import APIKeyCollection, APIKeyModel, APIKeySchema
+from .apikey.model import APIKeyCollection, APIKeyModel, APIKeySchema
 
 
 def user_factory(app, request, identifier):

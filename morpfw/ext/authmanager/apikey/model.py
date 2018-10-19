@@ -1,7 +1,7 @@
 from morpfw.jslcrud import Schema, Collection, Model
 import jsl
 from ..app import App
-from ..dbmodel.apikey import APIKey
+from .storage import APIKey
 from uuid import uuid4
 import rulez
 import jsonobject

@@ -1,5 +1,5 @@
 from ..app import App
-from ..model.apikey import APIKeyModel, APIKeyCollection
+from .model import APIKeyModel, APIKeyCollection
 from ..path import user_factory, apikey_collection_factory, apikey_factory
 from morpfw.jslcrud import permission
 import uuid
