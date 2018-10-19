@@ -1,8 +1,8 @@
 from ..app import App
-from ..model.user import UserCollection, UserModel
+from .model import UserCollection, UserModel
 from ..path import user_collection_factory
-from ..model.user import UserSchema, LoginSchema
-from ..model.user import RegistrationSchema
+from .model import UserSchema, LoginSchema
+from .model import RegistrationSchema
 import morepath
 from ..validator import validate
 from ..utils import rellink

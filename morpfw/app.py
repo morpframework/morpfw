@@ -20,7 +20,7 @@ import time
 import re
 import sqlalchemy
 from .sql import Base
-from .ext.authmanager.model.user import UserCollection, UserSchema
+from .ext.authmanager.user.model import UserCollection, UserSchema
 from .ext.authmanager.group.model import GroupCollection, GroupSchema
 from .ext.authmanager.exc import UserExistsError
 import transaction

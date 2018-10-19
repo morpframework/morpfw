@@ -1,5 +1,5 @@
 from ..app import App
-from ..model.user import User, UserSchema, UserModel
+from ..user.model import User, UserSchema, UserModel
 from ..group.model import Group, GroupSchema, GroupModel
 from ..apikey.model import APIKeyModel, APIKeySchema, APIKey
 from morpfw.jslcrud.storage.sqlstorage import SQLStorage
