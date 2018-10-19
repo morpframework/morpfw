@@ -1,1 +1,1 @@
-from .jslcrud.storage.sqlstorage import Base, GUID
+from .crud.storage.sqlstorage import Base, GUID

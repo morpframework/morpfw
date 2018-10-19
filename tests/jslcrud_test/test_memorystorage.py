@@ -1,6 +1,6 @@
 import jsl
-from morpfw.jslcrud.storage.memorystorage import MemoryStorage
-import morpfw.jslcrud.signals as signals
+from morpfw.crud.storage.memorystorage import MemoryStorage
+import morpfw.crud.signals as signals
 from jslcrud_common import get_client, run_jslcrud_test, PageCollection, PageModel
 from jslcrud_common import ObjectCollection, ObjectModel
 from jslcrud_common import NamedObjectCollection, NamedObjectModel

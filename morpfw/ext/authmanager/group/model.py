@@ -1,9 +1,9 @@
 from .storage import Group, Membership, RoleAssignment
 from ..model import NAME_PATTERN
-from morpfw.jslcrud import Collection, Model, Schema
+from morpfw.crud import Collection, Model, Schema
 from ..app import App
 import jsl
-from morpfw.jslcrud import errors as cruderrors
+from morpfw.crud import errors as cruderrors
 from .. import exc
 import jsonobject
 
@@ -17,7 +17,7 @@ class GroupSchema(Schema):
     modified = jsonobject.StringProperty(required=False)
 
 
-@App.jslcrud_identifierfields(schema=GroupSchema)
+@App.identifierfields(schema=GroupSchema)
 def group_identifierfields(schema):
     return ['groupname']
 

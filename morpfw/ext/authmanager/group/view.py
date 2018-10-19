@@ -4,8 +4,8 @@ from .model import GroupSchema, MemberSchema
 from ..validator import validate
 from ..utils import rellink
 from ....util import get_user
-from morpfw.jslcrud import permission
-from morpfw.jslcrud.errors import UnprocessableError
+from morpfw.crud import permission
+from morpfw.crud.errors import UnprocessableError
 
 
 @App.json(model=GroupModel,

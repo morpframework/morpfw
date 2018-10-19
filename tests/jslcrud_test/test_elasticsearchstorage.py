@@ -1,6 +1,6 @@
 from jslcrud_common import App as BaseApp
-from morpfw.jslcrud.model import Collection, Model, Schema
-from morpfw.jslcrud.storage.elasticsearchstorage import ElasticSearchStorage
+from morpfw.crud.model import Collection, Model, Schema
+from morpfw.crud.storage.elasticsearchstorage import ElasticSearchStorage
 from jslcrud_common import get_client, run_jslcrud_test, PageCollection, PageModel
 from jslcrud_common import NamedObjectCollection, NamedObjectModel
 import pprint
@@ -10,7 +10,7 @@ from morepath.request import Request
 from more.basicauth import BasicAuthIdentityPolicy
 from sqlalchemy.orm import sessionmaker
 from zope.sqlalchemy import register as register_session
-import morpfw.jslcrud.signals as signals
+import morpfw.crud.signals as signals
 from elasticsearch import Elasticsearch
 import jsonobject
 

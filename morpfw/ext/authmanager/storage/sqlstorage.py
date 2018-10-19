@@ -2,8 +2,8 @@ from ..app import App
 from ..user.model import User, UserSchema, UserModel
 from ..group.model import Group, GroupSchema, GroupModel
 from ..apikey.model import APIKeyModel, APIKeySchema, APIKey
-from morpfw.jslcrud.storage.sqlstorage import SQLStorage
-from morpfw.jslcrud import errors as cruderrors
+from morpfw.crud.storage.sqlstorage import SQLStorage
+from morpfw.crud import errors as cruderrors
 from .. import dbmodel as db
 from .interfaces import IStorage
 import hashlib

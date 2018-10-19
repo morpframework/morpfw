@@ -2,7 +2,7 @@ from .ext.authmanager.app import App
 from .ext.authmanager import UserCollection
 from .ext.authmanager import GroupCollection
 from .ext.authmanager import permission as authperm
-from .jslcrud import permission as jslperm
+from .crud import permission as jslperm
 
 
 def _has_admin_role(app, identity, context, permission):

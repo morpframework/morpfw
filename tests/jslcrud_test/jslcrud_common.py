@@ -2,10 +2,10 @@ import os
 import morepath
 import yaml
 from webtest import TestApp as Client
-from morpfw.jslcrud.model import Collection, Model, Schema
-from morpfw.jslcrud.model import StateMachine
-from morpfw.jslcrud.app import App as BaseApp
-import morpfw.jslcrud.signals as signals
+from morpfw.crud.model import Collection, Model, Schema
+from morpfw.crud.model import StateMachine
+from morpfw.crud.app import App as BaseApp
+import morpfw.crud.signals as signals
 import jsl
 import json
 from uuid import uuid4

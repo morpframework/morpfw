@@ -11,8 +11,8 @@ from webob.exc import HTTPNotFound
 from more.jwtauth import (
     verify_refresh_request, InvalidTokenError, ExpiredSignatureError
 )
-from morpfw.jslcrud.util import jsonobject_to_jsl
-from morpfw.jslcrud.validator import validate_schema
+from morpfw.crud.util import jsonobject_to_jsl
+from morpfw.crud.validator import validate_schema
 
 
 @App.json(model=UserCollection, name='register', request_method='POST',

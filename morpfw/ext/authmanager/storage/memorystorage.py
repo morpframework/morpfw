@@ -1,10 +1,10 @@
 from ..app import App
-from morpfw.jslcrud.storage.memorystorage import MemoryStorage
+from morpfw.crud.storage.memorystorage import MemoryStorage
 from ..user.model import User, UserModel, UserSchema
 from ..group.model import Group, GroupModel, GroupSchema
 from ..apikey.model import APIKey, APIKeyModel, APIKeySchema
 from .interfaces import IStorage
-from morpfw.jslcrud import errors as cruderrors
+from morpfw.crud import errors as cruderrors
 from .. import exc
 import rulez
 

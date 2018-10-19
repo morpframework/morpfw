@@ -2,7 +2,7 @@ import morepath
 import dectate
 import reg
 from . import authmanager
-from .jslcrud.provider.base import Provider
+from .crud.provider.base import Provider
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.pool import NullPool, QueuePool
 from more.transaction import TransactionApp

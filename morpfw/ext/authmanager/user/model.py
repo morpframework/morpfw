@@ -1,5 +1,5 @@
-from morpfw.jslcrud import Collection, Model, StateMachine
-from morpfw.jslcrud import errors as cruderrors
+from morpfw.crud import Collection, Model, StateMachine
+from morpfw.crud import errors as cruderrors
 from .storage import User
 from ..app import App
 import jsl
@@ -7,10 +7,10 @@ from .. import exc
 import sqlalchemy as sa
 import sqlalchemy_jsonfield as sajson
 from ..model import NAME_PATTERN, EMAIL_PATTERN
-from morpfw.jslcrud import signals as crudsignal
-from morpfw.jslcrud import errors as cruderrors
-from morpfw.jslcrud.model import Schema
-from morpfw.jslcrud.validator import regex_validator
+from morpfw.crud import signals as crudsignal
+from morpfw.crud import errors as cruderrors
+from morpfw.crud.model import Schema
+from morpfw.crud.validator import regex_validator
 from ..group.model import GroupCollection, GroupSchema
 from uuid import uuid4
 import re
@@ -51,7 +51,7 @@ class UserSchema(Schema):
     nonce = jsonobject.StringProperty(required=False)
 
 
-@App.jslcrud_identifierfields(schema=UserSchema)
+@App.identifierfields(schema=UserSchema)
 def user_identifierfields(schema):
     return ['username']
 
@@ -119,7 +119,7 @@ class UserStateMachine(StateMachine):
         self._context.delete()
 
 
-@App.jslcrud_statemachine(model=UserModel)
+@App.statemachine(model=UserModel)
 def userstatemachine(context):
     return UserStateMachine(context)
 

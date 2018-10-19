@@ -1,4 +1,4 @@
-from morpfw.jslcrud.storage.sqlstorage import Base
+from morpfw.crud.storage.sqlstorage import Base
 import sqlalchemy as sa
 
 
