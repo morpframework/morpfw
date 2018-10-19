@@ -1,37 +1,10 @@
 from .app import App
-from .user.model import UserCollection, UserModel, UserSchema
+from .user.model import UserCollection, UserModel
+from .user.path import user_collection_factory, user_factory
 from .group.model import GroupModel, GroupCollection, GroupSchema
+from .group.path import group_model_factory, group_collection_factory
 from .apikey.model import APIKeyCollection, APIKeyModel, APIKeySchema
-
-
-def user_factory(app, request, identifier):
-    collection = user_collection_factory(app, request)
-    return collection.get(identifier)
-
-
-def user_collection_factory(app, request):
-    return UserCollection(request,
-                          app.get_authmanager_storage(request, UserSchema))
-
-
-def apikey_collection_factory(app, request):
-    return APIKeyCollection(request,
-                            app.get_authmanager_storage(request, APIKeySchema))
-
-
-def apikey_factory(app, request, identifier):
-    collection = apikey_collection_factory(app, request)
-    return collection.get(identifier)
-
-
-def group_model_factory(app, request, identifier):
-    storage = app.get_authmanager_storage(request, GroupSchema)
-    return storage.get(identifier)
-
-
-def group_collection_factory(app, request):
-    return GroupCollection(request,
-                           app.get_authmanager_storage(request, GroupSchema))
+from .apikey.path import apikey_factory, apikey_collection_factory
 
 
 def register_authmanager(app_class=App,
