@@ -1,6 +1,6 @@
 from .app import App
 from .model.user import UserCollection, UserModel, UserSchema
-from .model.group import GroupModel, GroupCollection, GroupSchema
+from .group.model import GroupModel, GroupCollection, GroupSchema
 from .apikey.model import APIKeyCollection, APIKeyModel, APIKeySchema
 
 

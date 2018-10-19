@@ -3,11 +3,9 @@ import os
 from test_authmanager import _test_authentication, get_client
 from more.jwtauth import JWTIdentityPolicy
 from morpfw.ext.authmanager.app import App
-
 from more.transaction import TransactionApp
 from morepath.reify import reify
 from morepath.request import Request
-
 from morpfw.ext.authmanager import Session
 
 

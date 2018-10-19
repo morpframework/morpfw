@@ -11,7 +11,7 @@ from morpfw.jslcrud import signals as crudsignal
 from morpfw.jslcrud import errors as cruderrors
 from morpfw.jslcrud.model import Schema
 from morpfw.jslcrud.validator import regex_validator
-from .group import GroupCollection, GroupSchema
+from ..group.model import GroupCollection, GroupSchema
 from uuid import uuid4
 import re
 import jsonobject

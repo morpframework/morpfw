@@ -1,6 +1,6 @@
 from ..app import App
-from ..model.group import GroupCollection, GroupModel
-from ..model.group import GroupSchema, MemberSchema
+from .model import GroupCollection, GroupModel
+from .model import GroupSchema, MemberSchema
 from ..validator import validate
 from ..utils import rellink
 from ....util import get_user

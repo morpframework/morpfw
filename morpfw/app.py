@@ -21,7 +21,7 @@ import re
 import sqlalchemy
 from .sql import Base
 from .ext.authmanager.model.user import UserCollection, UserSchema
-from .ext.authmanager.model.group import GroupCollection, GroupSchema
+from .ext.authmanager.group.model import GroupCollection, GroupSchema
 from .ext.authmanager.exc import UserExistsError
 import transaction
 import os

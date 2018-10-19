@@ -1,5 +1,5 @@
-from ..dbmodel import Group, Membership, RoleAssignment
-from .base import NAME_PATTERN
+from .storage import Group, Membership, RoleAssignment
+from ..model.base import NAME_PATTERN
 from morpfw.jslcrud import Collection, Model, Schema
 from ..app import App
 import jsl

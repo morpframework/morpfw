@@ -1,3 +1,3 @@
 
 from .user import User
-from .group import Group, Membership, RoleAssignment
+from ..group.storage import Membership, Group, RoleAssignment

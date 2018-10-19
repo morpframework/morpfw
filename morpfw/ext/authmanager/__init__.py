@@ -6,7 +6,7 @@ from morpfw.jslcrud.storage.sqlstorage import Base
 from sqlalchemy.orm import sessionmaker
 from zope.sqlalchemy import register as register_session
 from .model.user import UserModel, UserCollection
-from .model.group import GroupModel, GroupCollection
+from .group.model import GroupModel, GroupCollection
 
 Session = sessionmaker()
 

@@ -1,6 +1,6 @@
 from ..app import App
 from ..model.user import User, UserSchema, UserModel
-from ..model.group import Group, GroupSchema, GroupModel
+from ..group.model import Group, GroupSchema, GroupModel
 from ..apikey.model import APIKeyModel, APIKeySchema, APIKey
 from morpfw.jslcrud.storage.sqlstorage import SQLStorage
 from morpfw.jslcrud import errors as cruderrors
