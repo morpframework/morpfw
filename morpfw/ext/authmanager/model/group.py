@@ -1,9 +1,9 @@
 from ..dbmodel import Group, Membership, RoleAssignment
 from .base import NAME_PATTERN
-from ...jslcrud import Collection, Model, Schema
+from morpfw.jslcrud import Collection, Model, Schema
 from ..app import App
 import jsl
-from ...jslcrud import errors as cruderrors
+from morpfw.jslcrud import errors as cruderrors
 from .. import exc
 import jsonobject
 

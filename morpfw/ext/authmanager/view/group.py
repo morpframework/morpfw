@@ -3,9 +3,9 @@ from ..model.group import GroupCollection, GroupModel
 from ..model.group import GroupSchema, MemberSchema
 from ..validator import validate
 from ..utils import rellink
-from ...util import get_user
-from ...jslcrud import permission
-from ...jslcrud.errors import UnprocessableError
+from ....util import get_user
+from morpfw.jslcrud import permission
+from morpfw.jslcrud.errors import UnprocessableError
 
 
 @App.json(model=GroupModel,

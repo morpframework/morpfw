@@ -1,6 +1,6 @@
 import morepath
 from more.jwtauth import JWTIdentityPolicy
-from ..jslcrud import App as CRUDApp
+from morpfw.jslcrud import App as CRUDApp
 import reg
 import dectate
 from . import action

@@ -1,5 +1,5 @@
-from ...jslcrud import Collection, Model, StateMachine
-from ...jslcrud import errors as cruderrors
+from morpfw.jslcrud import Collection, Model, StateMachine
+from morpfw.jslcrud import errors as cruderrors
 from ..dbmodel.user import User
 from ..app import App
 import jsl
@@ -7,10 +7,10 @@ from .. import exc
 import sqlalchemy as sa
 import sqlalchemy_jsonfield as sajson
 from .base import NAME_PATTERN, EMAIL_PATTERN
-from ...jslcrud import signals as crudsignal
-from ...jslcrud import errors as cruderrors
-from ...jslcrud.model import Schema
-from ...jslcrud.validator import regex_validator
+from morpfw.jslcrud import signals as crudsignal
+from morpfw.jslcrud import errors as cruderrors
+from morpfw.jslcrud.model import Schema
+from morpfw.jslcrud.validator import regex_validator
 from .group import GroupCollection, GroupSchema
 from uuid import uuid4
 import re

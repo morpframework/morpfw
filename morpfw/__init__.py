@@ -5,7 +5,7 @@ from .jslcrud import Collection, Model, Adapter, Schema
 from .jslcrud import StateMachine
 from .jslcrud.storage.sqlstorage import SQLStorage
 from .jslcrud.storage.elasticsearchstorage import ElasticSearchStorage
-from . import authmanager
+from .ext import authmanager
 import jsl
 from .app import SQLApp
 from .main import create_app

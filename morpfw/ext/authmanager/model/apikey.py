@@ -1,4 +1,4 @@
-from ...jslcrud import Schema, Collection, Model
+from morpfw.jslcrud import Schema, Collection, Model
 import jsl
 from ..app import App
 from ..dbmodel.apikey import APIKey

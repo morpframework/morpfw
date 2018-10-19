@@ -2,7 +2,7 @@ from .app import App
 import morepath
 import os
 import sqlalchemy
-from ..jslcrud.storage.sqlstorage import Base
+from morpfw.jslcrud.storage.sqlstorage import Base
 from sqlalchemy.orm import sessionmaker
 from zope.sqlalchemy import register as register_session
 from .model.user import UserModel, UserCollection
