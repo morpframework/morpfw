@@ -25,21 +25,24 @@ class UserSQLStorage(SQLStorage):
         return super(UserSQLStorage, self).create(data)
 
     def get_by_email(self, email):
-        q = self.session.query(db.User).filter(db.User.email == email)
+        q = self.session.query(db.User).filter(
+            db.User.email == email, db.User.deleted.is_(None))
         u = q.first()
         if not u:
             return None
         return self.model(self.request, self, u)
 
     def change_password(self, username, new_password):
-        q = self.session.query(db.User).filter(db.User.username == username)
+        q = self.session.query(db.User).filter(
+            db.User.username == username, db.User.deleted.is_(None))
         u = q.first()
         if not u:
             raise ValueError("Unknown User %s" % username)
         u.password = hash(new_password)
 
     def get_user_groups(self, username):
-        q = self.session.query(db.User).filter(db.User.username == username)
+        q = self.session.query(db.User).filter(
+            db.User.username == username, db.User.deleted.is_(None))
         u = q.first()
         if not u:
             raise ValueError("Unknown user %s" % username)
@@ -54,7 +57,8 @@ class UserSQLStorage(SQLStorage):
 
     def validate(self, username, password):
 
-        q = self.session.query(db.User).filter(db.User.username == username)
+        q = self.session.query(db.User).filter(
+            db.User.username == username, db.User.deleted.is_(None))
         u = q.first()
         if not u:
             raise ValueError("Unknown User %s" % username)
@@ -74,7 +78,7 @@ class GroupSQLStorage(SQLStorage):
         q = (self.session.query(db.User)
              .join(db.Membership)
              .join(db.Group)
-             .filter(db.Group.groupname == groupname))
+             .filter(db.Group.groupname == groupname, db.User.deleted.is_(None)))
         members = []
         user_storage = UserSQLStorage(self.request)
         for m in q.all():
@@ -84,13 +88,13 @@ class GroupSQLStorage(SQLStorage):
     def add_group_members(self, groupname, usernames):
         # FIXME: not using sqlalchemy relations might impact performance
         g = self.session.query(db.Group).filter(
-            db.Group.groupname == groupname).first()
+            db.Group.groupname == groupname, db.Group.deleted.is_(None)).first()
         if not g:
             raise ValueError("Group Does Not Exist %s" % groupname)
         gid = g.uuid
         for username in usernames:
             u = self.session.query(db.User).filter(
-                db.User.username == username).first()
+                db.User.username == username, db.User.deleted.is_(None)).first()
             if not u:
                 raise ValueError("User Does Not Exist %s" % username)
             uid = u.uuid
@@ -105,13 +109,13 @@ class GroupSQLStorage(SQLStorage):
 
     def remove_group_members(self, groupname, usernames):
         g = self.session.query(db.Group).filter(
-            db.Group.groupname == groupname).first()
+            db.Group.groupname == groupname, db.Group.deleted.is_(None)).first()
         if not g:
             raise exc.GroupDoesNotExistsError(groupname)
         gid = g.uuid
         for username in usernames:
             u = self.session.query(db.User).filter(
-                db.User.username == username).first()
+                db.User.username == username, db.User.deleted.is_(None)).first()
             if not u:
                 raise exc.UserDoesNotExistsError(username)
             uid = u.uuid
@@ -123,12 +127,12 @@ class GroupSQLStorage(SQLStorage):
 
     def get_group_user_roles(self, groupname, username):
         g = self.session.query(db.Group).filter(
-            db.Group.groupname == groupname).first()
+            db.Group.groupname == groupname, db.Group.deleted.is_(None)).first()
         if not g:
             raise exc.GroupDoesNotExistsError(groupname)
         gid = g.uuid
         u = self.session.query(db.User).filter(
-            db.User.username == username).first()
+            db.User.username == username, db.User.deleted.is_(None)).first()
         if not u:
             raise exc.UserDoesNotExistsError(username)
         uid = u.uuid
@@ -141,12 +145,12 @@ class GroupSQLStorage(SQLStorage):
 
     def grant_group_user_role(self, groupname, username, rolename):
         g = self.session.query(db.Group).filter(
-            db.Group.groupname == groupname).first()
+            db.Group.groupname == groupname, db.Group.deleted.is_(None)).first()
         if not g:
             raise exc.GroupDoesNotExistsError(groupname)
         gid = g.uuid
         u = self.session.query(db.User).filter(
-            db.User.username == username).first()
+            db.User.username == username, db.User.deleted.is_(None)).first()
         if not u:
             raise exc.UserDoesNotExistsError(username)
         uid = u.uuid
@@ -167,12 +171,12 @@ class GroupSQLStorage(SQLStorage):
 
     def revoke_group_user_role(self, groupname, username, rolename):
         g = self.session.query(db.Group).filter(
-            db.Group.groupname == groupname).first()
+            db.Group.groupname == groupname, db.Group.deleted.is_(None)).first()
         if not g:
             raise exc.GroupDoesNotExistsError(groupname)
         gid = g.uuid
         u = self.session.query(db.User).filter(
-            db.User.username == username).first()
+            db.User.username == username, db.User.deleted.is_(None)).first()
         if not u:
             raise exc.UserDoesNotExistsError(username)
         uid = u.uuid
