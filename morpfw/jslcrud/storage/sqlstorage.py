@@ -172,6 +172,7 @@ class SQLStorage(BaseStorage):
                 identifier.split(
                     self.app.get_jslcrud_compositekey_separator())):
             qs.append(getattr(self.orm_model, f) == v)
+        qs.append(self.orm_model.deleted.is_(None))
         q = self.session.query(self.orm_model).filter(sa.and_(*qs))
 
         r = q.first()
