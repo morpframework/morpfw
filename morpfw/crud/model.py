@@ -14,6 +14,7 @@ from uuid import uuid4
 from transitions import Machine
 import copy
 from .errors import StateUpdateProhibitedError, AlreadyExistsError
+from .schema import Schema
 import jsonobject
 
 ALLOWED_SEARCH_OPERATORS = [
@@ -27,24 +28,6 @@ ALLOWED_SEARCH_OPERATORS = [
 def default_jsontransform(request, context, data):
     return data
 
-
-class Schema(jsonobject.JsonObject):
-
-    uuid = jsonobject.StringProperty(required=False)
-    creator = jsonobject.StringProperty(required=False)
-    created = jsonobject.DateTimeProperty(required=False)
-    modified = jsonobject.DateTimeProperty(required=False)
-
-
-@App.jslcrud_identifierfields(schema=Schema)
-def default_identifierfields(schema):
-    return ['uuid']
-
-
-@App.jslcrud_default_identifier(schema=Schema)
-def default_identifier(schema, obj, request):
-    if obj.get('uuid', None) is None:
-        return uuid4().hex
 
 
 def permits(request, obj, permission, app=None):

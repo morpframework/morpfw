@@ -229,6 +229,7 @@ class BaseMixin(object):
     created = sa.Column(sa.DateTime, default=datetime.utcnow)
     creator = sa.Column(sa.String(length=1024))
     modified = sa.Column(sa.DateTime, default=datetime.utcnow)
+    state = sa.Column(sa.String(length=1024))
     deleted = sa.Column(sa.DateTime)
 
 

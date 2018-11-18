@@ -66,8 +66,7 @@ def test_morp_framework(pgsql_db):
     c.authorization = ('JWT', r.headers.get('Authorization').split()[1])
 
     r = c.get('/')
-#    assert r.json['schema']['title'] == 'page'
-    assert len(r.json['schema']['properties']) == 6
+    assert len(r.json['schema']['properties']) == 8
 
     r = c.post_json(
         '/', {'title': 'Hello world', 'body': 'Lorem ipsum'})

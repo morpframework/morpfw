@@ -80,7 +80,7 @@ class Object(Base):
 
     __tablename__ = 'jslcrud_test_object'
 
-    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
+    objid = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     uuid = sa.Column(GUID)
     body = sa.Column(sa.String(length=1024), default='')
     created_flag = sa.Column(sa.Boolean, default=False)
@@ -110,8 +110,8 @@ class NamedObject(Base):
 
     name = sa.Column(sa.String(length=1024), primary_key=True)
     body = sa.Column(sa.String(length=1024), default='')
-    created = sa.Column(sa.Boolean, default=False)
-    updated = sa.Column(sa.Boolean, default=False)
+    created_flag = sa.Column(sa.Boolean, default=False)
+    updated_flag = sa.Column(sa.Boolean, default=False)
 
 
 class NamedObjectStorage(SQLStorage):
