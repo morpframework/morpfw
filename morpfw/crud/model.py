@@ -93,7 +93,7 @@ class Collection(object):
         return list(objs)
 
     def create(self, data):
-        identifier = self.app.get_jslcrud_default_identifier(
+        identifier = self.app.get_default_identifier(
             self.schema, data, self.request)
         if identifier and self.get(identifier):
             raise self.exist_exc(identifier)
@@ -171,7 +171,7 @@ class Model(object):
                 d = str(d)
             res.append(d)
         if None in res:
-            identifier = self.app.get_jslcrud_default_identifier(
+            identifier = self.app.get_default_identifier(
                 self.schema, self.data, self.request)
             if identifier is None:
                 return None

@@ -78,7 +78,7 @@ class DefaultIdentifierAction(dectate.Action):
         return str((app_class, self.schema))
 
     def perform(self, obj, app_class):
-        app_class.get_jslcrud_default_identifier.register(
+        app_class.get_default_identifier.register(
             reg.methodify(obj), schema=self.schema)
 
 

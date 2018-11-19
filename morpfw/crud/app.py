@@ -106,7 +106,7 @@ class App(JsonSchemaApp, signals.SignalApp):
     @reg.dispatch_method(
         reg.match_class('schema',
                         lambda self, schema, obj, request: schema))
-    def get_jslcrud_default_identifier(self, schema, obj, request):
+    def get_default_identifier(self, schema, obj, request):
         return None
 
     @reg.dispatch_method(reg.match_instance('model', lambda self, obj: obj))
