@@ -23,7 +23,7 @@ class PageSchema(Schema):
     body = jsonobject.StringProperty()
 
 
-@App.jslcrud_identifierfields(schema=PageSchema)
+@App.identifierfields(schema=PageSchema)
 def page_schema_identifier(schema):
     return ['uuid']
 

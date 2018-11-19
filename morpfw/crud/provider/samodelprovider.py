@@ -109,17 +109,17 @@ class SQLAlchemyModelProvider(Provider):
         return self.schema._fields.keys()
 
 
-@App.jslcrud_dataprovider(schema=jsonobject.JsonObject, obj=Base, storage=SQLStorage)
+@App.dataprovider(schema=jsonobject.JsonObject, obj=Base, storage=SQLStorage)
 def get_provider(schema, obj, storage):
     return SQLAlchemyModelProvider(schema, obj, storage)
 
 
-@App.jslcrud_dataprovider(schema=jsonobject.JsonObject, obj=dict, storage=SQLStorage)
+@App.dataprovider(schema=jsonobject.JsonObject, obj=dict, storage=SQLStorage)
 def get_dict_provider(schema, obj, storage):
     return DictProvider(schema, obj, storage)
 
 
-@App.jslcrud_jsonprovider(obj=SQLAlchemyModelProvider)
+@App.jsonprovider(obj=SQLAlchemyModelProvider)
 def get_jsonprovider(obj):
     fields = obj.schema.properties().items()
     result = {}

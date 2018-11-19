@@ -4,7 +4,7 @@ from ..storage.elasticsearchstorage import ElasticSearchStorage
 import jsonobject
 
 
-@App.jslcrud_dataprovider(schema=jsonobject.JsonObject, obj=dict,
-                          storage=ElasticSearchStorage)
+@App.dataprovider(schema=jsonobject.JsonObject, obj=dict,
+                  storage=ElasticSearchStorage)
 def get_dataprovider(schema, obj, storage):
     return DictProvider(schema, obj, storage)

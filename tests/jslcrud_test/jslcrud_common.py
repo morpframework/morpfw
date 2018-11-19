@@ -62,13 +62,12 @@ class ObjectModel(Model):
     schema = ObjectSchema
 
 
-
-@App.jslcrud_subscribe(signal=signals.OBJECT_CREATED, model=ObjectModel)
+@App.subscribe(signal=signals.OBJECT_CREATED, model=ObjectModel)
 def object_created(app, request, obj, signal):
     obj.data['created_flag'] = True
 
 
-@App.jslcrud_subscribe(signal=signals.OBJECT_UPDATED, model=ObjectModel)
+@App.subscribe(signal=signals.OBJECT_UPDATED, model=ObjectModel)
 def object_updated(app, request, obj, signal):
     obj.data['updated_flag'] = True
 
@@ -83,7 +82,7 @@ class PageStateMachine(StateMachine):
     ]
 
 
-@App.jslcrud_statemachine(model=PageModel)
+@App.statemachine(model=PageModel)
 def get_pagemodel_statemachine(context):
     return PageStateMachine(context)
 
@@ -96,18 +95,19 @@ class NamedObjectSchema(Schema):
     updated_flag = jsonobject.BooleanProperty(required=False, default=False)
 
 
-@App.jslcrud_identifierfields(schema=NamedObjectSchema)
+@App.identifierfields(schema=NamedObjectSchema)
 def namedobject_identifierfields(schema):
     return ['name']
 
 
-@App.jslcrud_default_identifier(schema=NamedObjectSchema)
+@App.default_identifier(schema=NamedObjectSchema)
 def namedobject_default_identifier(schema, obj, request):
     return obj['name']
 
 
 class NamedObjectCollection(Collection):
     schema = NamedObjectSchema
+
 
 @App.json(model=NamedObjectCollection, name='get_uuid')
 def get_object_by_uuid(context, request):

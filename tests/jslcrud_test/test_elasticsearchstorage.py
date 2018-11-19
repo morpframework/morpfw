@@ -70,12 +70,12 @@ class ObjectSchema(Schema):
     updated_flag = jsonobject.BooleanProperty(required=False, default=False)
 
 
-@App.jslcrud_identifierfields(schema=ObjectSchema)
+@App.identifierfields(schema=ObjectSchema)
 def object_identifierfields(schema):
     return ['id']
 
 
-@App.jslcrud_default_identifier(schema=ObjectSchema)
+@App.default_identifier(schema=ObjectSchema)
 def object_default_identifier(schema, obj, request):
     return None
 
@@ -88,12 +88,12 @@ class ObjectCollection(Collection):
     schema = ObjectSchema
 
 
-@App.jslcrud_subscribe(signal=signals.OBJECT_CREATED, model=ObjectModel)
+@App.subscribe(signal=signals.OBJECT_CREATED, model=ObjectModel)
 def object_created(app, request, obj, signal):
     obj.data['created_flag'] = True
 
 
-@App.jslcrud_subscribe(signal=signals.OBJECT_UPDATED, model=ObjectModel)
+@App.subscribe(signal=signals.OBJECT_UPDATED, model=ObjectModel)
 def object_updated(app, request, obj, signal):
     obj.data['updated_flag'] = True
 

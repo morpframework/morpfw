@@ -49,11 +49,11 @@ class DictProvider(Provider):
         return self.data.keys()
 
 
-@App.jslcrud_dataprovider(schema=jsonobject.JsonObject, obj=dict, storage=MemoryStorage)
+@App.dataprovider(schema=jsonobject.JsonObject, obj=dict, storage=MemoryStorage)
 def get_dataprovider(schema, obj, storage):
     return DictProvider(schema, obj, storage)
 
 
-@App.jslcrud_jsonprovider(obj=DictProvider)
+@App.jsonprovider(obj=DictProvider)
 def get_jsonprovider(obj):
     return obj.data

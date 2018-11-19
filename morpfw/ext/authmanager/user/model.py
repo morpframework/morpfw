@@ -96,12 +96,12 @@ class UserRulesAdapter(Adapter):
         return data
 
 
-@App.jslcrud_rulesadapter(model=UserModel)
+@App.rulesadapter(model=UserModel)
 def get_rulesadapter(obj):
     return UserRulesAdapter(obj)
 
 
-@App.jslcrud_subscribe(signal=crudsignal.OBJECT_CREATED, model=UserModel)
+@App.subscribe(signal=crudsignal.OBJECT_CREATED, model=UserModel)
 def add_user_to_default_group(app, request, obj, signal):
     request = obj.request
     storage = app.get_authmanager_storage(request, GroupSchema)

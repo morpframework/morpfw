@@ -359,6 +359,6 @@ class StateMachine(object):
         self._context.data['state'] = val
 
 
-@App.jslcrud_rulesadapter(model=Model)
+@App.rulesadapter(model=Model)
 def get_default_rulesadapter(obj):
     return Adapter(obj)

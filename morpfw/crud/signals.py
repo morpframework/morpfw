@@ -40,7 +40,7 @@ class Connect(dectate.Action):
 
 class SignalApp(dectate.App):
 
-    jslcrud_subscribe = dectate.directive(Connect)
+    subscribe = dectate.directive(Connect)
 
     @reg.dispatch_method(
         reg.match_instance('model',
