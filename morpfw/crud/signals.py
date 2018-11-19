@@ -4,9 +4,9 @@ import dectate
 from . import pubsub
 from uuid import uuid4
 
-OBJECT_CREATED = 'jslcrud_object_created'
-OBJECT_UPDATED = 'jslcrud_object_updated'
-OBJECT_TOBEDELETED = 'jslcrud_object_tobedeleted'
+OBJECT_CREATED = 'object_created'
+OBJECT_UPDATED = 'object_updated'
+OBJECT_TOBEDELETED = 'object_tobedeleted'
 
 
 def _get_identifier(obj):
@@ -50,5 +50,5 @@ class SignalApp(dectate.App):
     def _events(self, request, obj, signal):
         raise NotImplementedError
 
-    def jslcrud_publish(self, request, obj, signal):
+    def signal_publish(self, request, obj, signal):
         return self._events.publish(self, request, obj, signal)

@@ -1,2 +1,2 @@
 import logging
-logger = logging.getLogger('jslcrud')
+logger = logging.getLogger('morp.crud')

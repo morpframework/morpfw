@@ -119,7 +119,7 @@ class App(JsonSchemaApp, signals.SignalApp):
         raise NotImplementedError
 
     def get_compositekey_separator(self):
-        morp_settings = getattr(self.settings, 'jslcrud', {})
+        morp_settings = getattr(self.settings, 'crud', {})
         return morp_settings.get('compositekey_separator', '!!!')
 
     def join_identifier(self, *args):

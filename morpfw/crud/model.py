@@ -99,8 +99,8 @@ class Collection(object):
             raise self.exist_exc(identifier)
         obj = self._create(data)
         obj.set_initial_state()
-        self.request.app.jslcrud_publish(self.request,
-                                         obj, signals.OBJECT_CREATED)
+        self.request.app.signal_publish(self.request,
+                                        obj, signals.OBJECT_CREATED)
         return obj
 
     def _create(self, data):
@@ -208,11 +208,11 @@ class Model(object):
             self.schema, nullable=True).get_schema(ordered=True)
         validate(data, schema)
         self.storage.update(self.identifier, data)
-        self.request.app.jslcrud_publish(
+        self.request.app.signal_publish(
             self.request, self, signals.OBJECT_UPDATED)
 
     def delete(self):
-        self.request.app.jslcrud_publish(
+        self.request.app.signal_publish(
             self.request, self, signals.OBJECT_TOBEDELETED)
         self.storage.delete(self.identifier, model=self)
 
