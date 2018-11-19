@@ -28,14 +28,6 @@ class App(JsonSchemaApp, signals.SignalApp):
     jsonprovider = dectate.directive(actions.JSONProviderAction)
 
     @classmethod
-    def jslcrud_jsontransfrom(klass, *args, **kwargs):
-        warnings.warn(
-            "jslcrud_jsontransform is deprecated, use jsontransform", DeprecationWarning)
-        return klass.jsontransform(*args, **kwargs)
-
-    jsontransform = dectate.directive(actions.JSONTransformAction)
-
-    @classmethod
     def jslcrud_formvalidators(klass, *args, **kwargs):
         warnings.warn(
             "jslcrud_formvalidators is deprecated, use formvalidators", DeprecationWarning)
@@ -95,11 +87,6 @@ class App(JsonSchemaApp, signals.SignalApp):
     @reg.dispatch_method(reg.match_instance('obj'))
     def get_jsonprovider(self, obj):
         raise NotImplementedError('JSONProvider for %s' % obj.__class__)
-
-    @reg.dispatch_method(reg.match_class('schema',
-                                         lambda self, schema: schema))
-    def get_jslcrud_jsontransform(self, schema):
-        raise NotImplementedError('JSONTransform for %s' % schema)
 
     @reg.dispatch_method(reg.match_class('schema',
                                          lambda self, schema: schema))

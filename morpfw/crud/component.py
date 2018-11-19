@@ -37,21 +37,6 @@ class JSONProviderAction(dectate.Action):
             reg.methodify(obj), obj=self.obj)
 
 
-class JSONTransformAction(dectate.Action):
-
-    app_class_arg = True
-
-    def __init__(self, schema):
-        self.schema = schema
-
-    def identifier(self, app_class):
-        return str((app_class, self.schema))
-
-    def perform(self, obj, app_class):
-        app_class.get_jslcrud_jsontransform.register(
-            reg.methodify(lambda schema: obj), schema=self.schema)
-
-
 class IdentifierFieldsAction(dectate.Action):
 
     app_class_arg = True

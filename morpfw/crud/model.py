@@ -24,11 +24,6 @@ ALLOWED_SEARCH_OPERATORS = [
 ]
 
 
-@App.jslcrud_jsontransfrom(schema=jsonobject.JsonObject)
-def default_jsontransform(request, context, data):
-    return data
-
-
 def permits(request, obj, permission, app=None):
     if app is None:
         app = request.app
@@ -233,8 +228,6 @@ class Model(object):
         schema = jsonobject_to_jsl(
             self.schema, nullable=True).get_schema(ordered=True)
         jsondata = self.app.get_jsonprovider(self.data)
-        jsondata = self.app.get_jslcrud_jsontransform(
-            self.schema)(self.request, self, copy.deepcopy(jsondata))
         jsondata = self.rules_adapter().transform_json(copy.deepcopy(jsondata))
         try:
             validate(jsondata, schema)
@@ -299,31 +292,31 @@ class Model(object):
 
 class Adapter(object):
 
-    def __init__(self, model: Model):
-        self.model = model
-        self.request = model.request
-        self.app = model.app
+    def __init__(self, context: Model):
+        self.context = context
+        self.request = context.request
+        self.app = context.app
 
     @property
     def schema(self):
-        return self.model.schema
+        return self.context.schema
 
     @property
     def identifier(self):
-        return self.model.identifier
+        return self.context.identifier
 
     @property
     def data(self):
-        return self.model.data
+        return self.context.data
 
     def json(self):
-        return self.model.json()
+        return self.context.json()
 
     def update(self, *args, **kwargs):
-        return self.model.update(*args, **kwargs)
+        return self.context.update(*args, **kwargs)
 
     def delete(self):
-        return self.model.delete()
+        return self.context.delete()
 
     def transform_json(self, data):
         return data
@@ -332,7 +325,7 @@ class Adapter(object):
         return []
 
     def __repr__(self):
-        return "<Adapted %s:(%s)>" % (self.__class__.__name__, self.model)
+        return "<Adapted %s:(%s)>" % (self.__class__.__name__, self.context)
 
 
 class StateMachine(object):

@@ -9,7 +9,7 @@ import sqlalchemy_jsonfield as sajson
 from ..model import NAME_PATTERN, EMAIL_PATTERN
 from morpfw.crud import signals as crudsignal
 from morpfw.crud import errors as cruderrors
-from morpfw.crud.model import Schema
+from morpfw.crud.model import Schema, Adapter
 from morpfw.crud.validator import regex_validator
 from ..group.model import GroupCollection, GroupSchema
 from uuid import uuid4
@@ -85,14 +85,20 @@ def userstatemachine(context):
     return UserStateMachine(context)
 
 
-@App.jslcrud_jsontransfrom(schema=UserSchema)
-def jsontransform(request, context, data):
-    data = data.copy()
-    for f in ['password', 'password_validate']:
-        if f in data.keys():
-            del data[f]
-    data['groups'] = [g.identifier for g in context.groups()]
-    return data
+class UserRulesAdapter(Adapter):
+
+    def transform_json(self, data):
+        data = data.copy()
+        for f in ['password', 'password_validate']:
+            if f in data.keys():
+                del data[f]
+        data['groups'] = [g.identifier for g in self.context.groups()]
+        return data
+
+
+@App.jslcrud_rulesadapter(model=UserModel)
+def get_rulesadapter(obj):
+    return UserRulesAdapter(obj)
 
 
 @App.jslcrud_subscribe(signal=crudsignal.OBJECT_CREATED, model=UserModel)
