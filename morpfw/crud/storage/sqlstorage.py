@@ -27,8 +27,8 @@ class SQLStorage(BaseStorage):
 
     def create(self, data):
         o = self.orm_model()
-        dst = self.app.get_jslcrud_dataprovider(self.model.schema, o, self)
-        src = self.app.get_jslcrud_dataprovider(self.model.schema, data, self)
+        dst = self.app.get_dataprovider(self.model.schema, o, self)
+        src = self.app.get_dataprovider(self.model.schema, data, self)
         for k, v in src.items():
             dst[k] = v
         m = self.model(self.request, self, o)
@@ -178,7 +178,7 @@ class SQLStorage(BaseStorage):
         if not r:
             raise ValueError(identifier)
 
-        d = self.app.get_jslcrud_dataprovider(self.model.schema, r, self)
+        d = self.app.get_dataprovider(self.model.schema, r, self)
         for k, v in data.items():
             if d.get(k, None) != v:
                 d[k] = v

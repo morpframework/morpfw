@@ -88,7 +88,7 @@ class App(JsonSchemaApp, signals.SignalApp):
                         lambda self, schema, obj, storage: schema),
         reg.match_instance('obj'),
         reg.match_instance('storage'))
-    def get_jslcrud_dataprovider(self, schema, obj, storage):
+    def get_dataprovider(self, schema, obj, storage):
         raise NotImplementedError('Dataprovider for %s/%s' % (
             storage.__class__, obj.__class__))
 

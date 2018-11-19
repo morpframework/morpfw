@@ -62,8 +62,8 @@ class Collection(object):
         self.storage = storage
         self.data = None
         if data:
-            self.data = request.app.get_jslcrud_dataprovider(self.schema, data,
-                                                             self.storage)
+            self.data = request.app.get_dataprovider(self.schema, data,
+                                                     self.storage)
 
     def search(self, query=None, offset=0, limit=None, order_by=None,
                secure=False):
@@ -199,8 +199,8 @@ class Model(object):
         self.request = request
         self.storage = storage
         self.app = request.app
-        self.data = request.app.get_jslcrud_dataprovider(self.schema, data,
-                                                         self.storage)
+        self.data = request.app.get_dataprovider(self.schema, data,
+                                                 self.storage)
         self._cached_identifier = None
 
     def update(self, newdata):
