@@ -48,7 +48,7 @@ class IdentifierFieldsAction(dectate.Action):
         return str((app_class, self.schema))
 
     def perform(self, obj, app_class):
-        app_class.get_jslcrud_identifierfields.register(
+        app_class.get_identifierfields.register(
             reg.methodify(obj), schema=self.schema)
 
 

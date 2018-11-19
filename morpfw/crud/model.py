@@ -165,7 +165,7 @@ class Model(object):
         if self._cached_identifier:
             return self._cached_identifier
         res = []
-        for f in self.app.get_jslcrud_identifierfields(self.schema):
+        for f in self.app.get_identifierfields(self.schema):
             d = self.data.get(f)
             if d is not None:
                 d = str(d)

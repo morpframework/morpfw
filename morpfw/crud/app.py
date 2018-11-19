@@ -95,7 +95,7 @@ class App(JsonSchemaApp, signals.SignalApp):
 
     @reg.dispatch_method(reg.match_class('schema',
                                          lambda self, schema: schema))
-    def get_jslcrud_identifierfields(self, schema):
+    def get_identifierfields(self, schema):
         raise NotImplementedError('IdentifierFields for %s' % schema)
 
     @reg.dispatch_method(reg.match_class('schema',

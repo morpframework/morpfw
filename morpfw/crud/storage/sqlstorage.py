@@ -143,7 +143,7 @@ class SQLStorage(BaseStorage):
     def get(self, identifier):
         qs = []
         for f, v in zip(
-                self.app.get_jslcrud_identifierfields(self.model.schema),
+                self.app.get_identifierfields(self.model.schema),
                 identifier.split(self.app.get_jslcrud_compositekey_separator())):
             qs.append(getattr(self.orm_model, f) == v)
         q = self.session.query(self.orm_model).filter(
@@ -168,7 +168,7 @@ class SQLStorage(BaseStorage):
     def update(self, identifier, data):
         qs = []
         for f, v in zip(
-                self.app.get_jslcrud_identifierfields(self.model.schema),
+                self.app.get_identifierfields(self.model.schema),
                 identifier.split(
                     self.app.get_jslcrud_compositekey_separator())):
             qs.append(getattr(self.orm_model, f) == v)

@@ -15,7 +15,7 @@ class BaseStorage(object):
 
     def set_identifier(self, obj, identifier):
         for f, v in zip(
-                self.app.get_jslcrud_identifierfields(self.model.schema),
+                self.app.get_identifierfields(self.model.schema),
                 identifier.split(
                     self.app.get_jslcrud_compositekey_separator())):
             obj[f] = v

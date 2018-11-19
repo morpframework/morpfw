@@ -19,7 +19,7 @@ def identifierfields(schema):
 
 @App.default_identifier(schema=Schema)
 def default_identifier(schema, obj, request):
-    fields = request.app.get_jslcrud_identifierfields(schema)
+    fields = request.app.get_identifierfields(schema)
     res = []
     for f in fields:
         if f == 'uuid':
