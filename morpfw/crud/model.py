@@ -279,11 +279,11 @@ class Model(object):
         return []
 
     def rules_adapter(self):
-        return self.app._jslcrud_rulesadapter(self)
+        return self.app.get_rulesadapter(self)
 
     def state_machine(self):
-        if self.app._jslcrud_statemachine.by_args(self).all_matches:
-            return self.app._jslcrud_statemachine(self)
+        if self.app.get_statemachine.by_args(self).all_matches:
+            return self.app.get_statemachine(self)
         return None
 
     def set_initial_state(self):

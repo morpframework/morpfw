@@ -110,12 +110,12 @@ class App(JsonSchemaApp, signals.SignalApp):
         return None
 
     @reg.dispatch_method(reg.match_instance('model', lambda self, obj: obj))
-    def _jslcrud_rulesadapter(self, obj):
+    def get_rulesadapter(self, obj):
         raise NotImplementedError
 
     @reg.dispatch_method(reg.match_instance('model',
                                             lambda self, context: context))
-    def _jslcrud_statemachine(self, context):
+    def get_statemachine(self, context):
         raise NotImplementedError
 
     def get_jslcrud_compositekey_separator(self):

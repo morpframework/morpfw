@@ -108,7 +108,7 @@ class RulesAdapterAction(dectate.Action):
         return str((app_class, self.model))
 
     def perform(self, obj, app_class):
-        app_class._jslcrud_rulesadapter.register(
+        app_class.get_rulesadapter.register(
             reg.methodify(obj), model=self.model)
 
 
@@ -123,5 +123,5 @@ class StateMachineAction(dectate.Action):
         return str((app_class, self.model))
 
     def perform(self, obj, app_class):
-        app_class._jslcrud_statemachine.register(
+        app_class.get_statemachine.register(
             reg.methodify(obj), model=self.model)
