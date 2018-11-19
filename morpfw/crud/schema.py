@@ -13,7 +13,19 @@ class Schema(jsonobject.JsonObject):
     deleted = jsonobject.DateTimeProperty(required=False)
 
 
-@App.jslcrud_identifierfields(schema=Schema)
-def default_identifierfields(schema):
+@App.identifierfields(schema=Schema)
+def identifierfields(schema):
     return ['uuid']
+
+@App.default_identifier(schema=Schema)
+def default_identifier(schema, obj, request):
+    fields = request.app.get_jslcrud_identifierfields(schema)
+    res = []
+    for f in fields:
+        if f == 'uuid':
+            res.append(uuid4().hex)
+        else:
+            res.append(obj[f])
+    return res
+
 

@@ -190,6 +190,10 @@ def alreadyexists_error(context, request):
     def adjust_status(response):
         response.status = 422
 
+#   FIXME: should log this when a config for DEBUG_SECURITY is enabled
+#    logger.error(traceback.format_exc())
+#    print(traceback.format_exc())
+
     return {'status': 'error',
             'message': 'Object Already Exists : %s' % context.message}
 

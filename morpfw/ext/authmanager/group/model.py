@@ -7,16 +7,12 @@ from morpfw.crud import errors as cruderrors
 from .. import exc
 import jsonobject
 from .schema import GroupSchema, MemberSchema
+from ..exc import GroupExistsError
 
 
 class GroupCollection(Collection):
     schema = GroupSchema
-
-    def _create(self, data):
-        exists = self.storage.get(data['groupname'])
-        if exists:
-            raise exc.GroupExistsError(data['groupname'])
-        return super(GroupCollection, self)._create(data)
+    exist_exc = GroupExistsError
 
 
 class GroupModel(Model):

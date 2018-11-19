@@ -56,7 +56,8 @@ setup(name='morpfw',
           'jsonschema',
           'more.transaction',
           'zope.sqlalchemy',
-          'more.basicauth'
+          'more.basicauth',
+          'cryptography'
       ],
       extras_require={
           'test': [

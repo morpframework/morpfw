@@ -16,10 +16,12 @@ from uuid import uuid4
 import re
 import jsonobject
 from .schema import RegistrationSchema, UserSchema, LoginSchema
+from ..exc import UserExistsError
 
 
 class UserCollection(Collection):
     schema = UserSchema
+    exist_exc = UserExistsError
 
     def authenticate(self, username, password):
         if re.match(EMAIL_PATTERN, username):
@@ -35,9 +37,6 @@ class UserCollection(Collection):
 
     def _create(self, data):
         data['nonce'] = uuid4().hex
-        exists = self.storage.get(data['username'])
-        if exists:
-            raise exc.UserExistsError(data['username'])
         return super(UserCollection, self)._create(data)
 
 

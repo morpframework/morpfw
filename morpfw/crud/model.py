@@ -29,7 +29,6 @@ def default_jsontransform(request, context, data):
     return data
 
 
-
 def permits(request, obj, permission, app=None):
     if app is None:
         app = request.app
@@ -41,6 +40,8 @@ class Collection(object):
     create_view_enabled = True
     search_view_enabled = True
     aggregate_view_enabled = True
+
+    exist_exc = AlreadyExistsError
 
     @property
     def schema(self):
@@ -100,7 +101,7 @@ class Collection(object):
         identifier = self.app.get_jslcrud_default_identifier(
             self.schema, data, self.request)
         if identifier and self.get(identifier):
-            raise AlreadyExistsError(identifier)
+            raise self.exist_exc(identifier)
         obj = self._create(data)
         obj.set_initial_state()
         self.request.app.jslcrud_publish(self.request,

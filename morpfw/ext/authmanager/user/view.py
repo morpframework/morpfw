@@ -3,6 +3,7 @@ from .model import UserCollection, UserModel
 from ..path import user_collection_factory
 from .model import UserSchema, LoginSchema
 from .model import RegistrationSchema
+from ..exc import UserExistsError
 import morepath
 from ..validator import validate
 from ..utils import rellink
@@ -13,6 +14,7 @@ from more.jwtauth import (
 )
 from morpfw.crud.util import jsonobject_to_jsl
 from morpfw.crud.validator import validate_schema
+from morpfw.crud.errors import AlreadyExistsError
 
 
 @App.json(model=UserCollection, name='register', request_method='POST',
