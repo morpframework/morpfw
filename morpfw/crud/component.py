@@ -93,7 +93,7 @@ class FormValidatorAction(dectate.Action):
         return str((app_class, self.schema))
 
     def perform(self, obj, app_class):
-        app_class.get_jslcrud_formvalidators.register(
+        app_class.get_formvalidators.register(
             reg.methodify(obj), schema=self.schema)
 
 

@@ -37,7 +37,7 @@ def load(validator, schema, request):
         jso = schema
     jslschema = jsonobject_to_jsl(jso, nullable=True)
     schema = jslschema.get_schema(ordered=True)
-    form_validators = request.app.get_jslcrud_formvalidators(jso)
+    form_validators = request.app.get_formvalidators(jso)
     params = {}
 
     validator.check_schema(schema)

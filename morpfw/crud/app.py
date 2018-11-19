@@ -90,7 +90,7 @@ class App(JsonSchemaApp, signals.SignalApp):
 
     @reg.dispatch_method(reg.match_class('schema',
                                          lambda self, schema: schema))
-    def get_jslcrud_formvalidators(self, schema):
+    def get_formvalidators(self, schema):
         return []
 
     @reg.dispatch_method(reg.match_class('schema',
