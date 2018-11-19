@@ -33,7 +33,7 @@ class JSONProviderAction(dectate.Action):
         return str((app_class, self.obj))
 
     def perform(self, obj, app_class):
-        app_class.get_jslcrud_jsonprovider.register(
+        app_class.get_jsonprovider.register(
             reg.methodify(obj), obj=self.obj)
 
 

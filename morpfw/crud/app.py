@@ -93,7 +93,7 @@ class App(JsonSchemaApp, signals.SignalApp):
             storage.__class__, obj.__class__))
 
     @reg.dispatch_method(reg.match_instance('obj'))
-    def get_jslcrud_jsonprovider(self, obj):
+    def get_jsonprovider(self, obj):
         raise NotImplementedError('JSONProvider for %s' % obj.__class__)
 
     @reg.dispatch_method(reg.match_class('schema',

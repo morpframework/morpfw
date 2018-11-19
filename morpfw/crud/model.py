@@ -232,7 +232,7 @@ class Model(object):
     def _raw_json(self):
         schema = jsonobject_to_jsl(
             self.schema, nullable=True).get_schema(ordered=True)
-        jsondata = self.app.get_jslcrud_jsonprovider(self.data)
+        jsondata = self.app.get_jsonprovider(self.data)
         jsondata = self.app.get_jslcrud_jsontransform(
             self.schema)(self.request, self, copy.deepcopy(jsondata))
         jsondata = self.rules_adapter().transform_json(copy.deepcopy(jsondata))
