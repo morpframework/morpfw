@@ -109,7 +109,7 @@ class Collection(object):
 
     def get(self, identifier):
         if isinstance(identifier, list) or isinstance(identifier, tuple):
-            identifier = self.request.app.jslcrud_join_identifier(*identifier)
+            identifier = self.request.app.join_identifier(*identifier)
         return self.storage.get(identifier)
 
     def get_by_uuid(self, uuid):
@@ -176,7 +176,7 @@ class Model(object):
             if identifier is None:
                 return None
             if isinstance(identifier, list) or isinstance(identifier, tuple):
-                identifier = self.app.jslcrud_join_identifier(*identifier)
+                identifier = self.app.join_identifier(*identifier)
             self.storage.set_identifier(self.data, identifier)
             self._cached_identifier = identifier
             return identifier

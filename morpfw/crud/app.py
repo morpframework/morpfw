@@ -122,6 +122,6 @@ class App(JsonSchemaApp, signals.SignalApp):
         morp_settings = getattr(self.settings, 'jslcrud', {})
         return morp_settings.get('compositekey_separator', '!!!')
 
-    def jslcrud_join_identifier(self, *args):
+    def join_identifier(self, *args):
         separator = self.get_compositekey_separator()
         return separator.join(args)
