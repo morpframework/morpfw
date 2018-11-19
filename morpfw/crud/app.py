@@ -118,10 +118,10 @@ class App(JsonSchemaApp, signals.SignalApp):
     def get_statemachine(self, context):
         raise NotImplementedError
 
-    def get_jslcrud_compositekey_separator(self):
+    def get_compositekey_separator(self):
         morp_settings = getattr(self.settings, 'jslcrud', {})
         return morp_settings.get('compositekey_separator', '!!!')
 
     def jslcrud_join_identifier(self, *args):
-        separator = self.get_jslcrud_compositekey_separator()
+        separator = self.get_compositekey_separator()
         return separator.join(args)

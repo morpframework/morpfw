@@ -17,7 +17,7 @@ class BaseStorage(object):
         for f, v in zip(
                 self.app.get_identifierfields(self.model.schema),
                 identifier.split(
-                    self.app.get_jslcrud_compositekey_separator())):
+                    self.app.get_compositekey_separator())):
             obj[f] = v
 
     def set_schema_defaults(self, data):

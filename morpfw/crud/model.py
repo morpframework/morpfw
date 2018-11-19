@@ -180,7 +180,7 @@ class Model(object):
             self.storage.set_identifier(self.data, identifier)
             self._cached_identifier = identifier
             return identifier
-        separator = self.request.app.get_jslcrud_compositekey_separator()
+        separator = self.request.app.get_compositekey_separator()
         identifier = separator.join(res)
         self._cached_identifier = identifier
         return identifier
