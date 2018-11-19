@@ -64,7 +64,7 @@ class MemoryStorage(BaseStorage):
         return res
 
     def get_by_uuid(self, uuid):
-        uuid_field = self.app.get_jslcrud_uuidfield(self.model.schema)
+        uuid_field = self.app.get_uuidfield(self.model.schema)
         data_by_uuid = {}
         for u, v in DATA[self.typekey].items():
             if uuid_field not in v.data.keys():

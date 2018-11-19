@@ -187,7 +187,7 @@ class Model(object):
 
     @property
     def uuid(self):
-        uuid_field = self.app.get_jslcrud_uuidfield(self.schema)
+        uuid_field = self.app.get_uuidfield(self.schema)
         return self.data[uuid_field]
 
     def __init__(self, request, storage, data):

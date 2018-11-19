@@ -154,7 +154,7 @@ class SQLStorage(BaseStorage):
         return self.model(self.request, self, r)
 
     def get_by_uuid(self, uuid):
-        uuid_field = self.app.get_jslcrud_uuidfield(self.model.schema)
+        uuid_field = self.app.get_uuidfield(self.model.schema)
         if getattr(self.orm_model, uuid_field, None) is None:
             raise AttributeError('%s does not have %s field' %
                                  (self.orm_model, uuid_field))

@@ -100,7 +100,7 @@ class App(JsonSchemaApp, signals.SignalApp):
 
     @reg.dispatch_method(reg.match_class('schema',
                                          lambda self, schema: schema))
-    def get_jslcrud_uuidfield(self, schema):
+    def get_uuidfield(self, schema):
         return 'uuid'
 
     @reg.dispatch_method(

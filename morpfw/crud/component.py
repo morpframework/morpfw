@@ -63,7 +63,7 @@ class UUIDFieldAction(dectate.Action):
         return str((app_class, self.schema))
 
     def perform(self, obj, app_class):
-        app_class.get_jslcrud_uuidfield.register(
+        app_class.get_uuidfield.register(
             reg.methodify(obj), schema=self.schema)
 
 

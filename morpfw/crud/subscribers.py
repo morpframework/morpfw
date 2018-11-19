@@ -7,7 +7,7 @@ from uuid import uuid4
 
 @App.jslcrud_subscribe(signal=signals.OBJECT_CREATED, model=model.Model)
 def set_uuid(app, request, obj, signal):
-    uuid_field = app.get_jslcrud_uuidfield(obj.schema)
+    uuid_field = app.get_uuidfield(obj.schema)
     if getattr(obj.schema, uuid_field, None):
         if obj.data.get(uuid_field, None) is None:
             obj.data[uuid_field] = uuid4().hex
