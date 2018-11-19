@@ -67,6 +67,7 @@ setup(name='morpfw',
               'pytest-html',
               'pytest_postgresql',
               'pytest_rabbitmq',
+              'pytest-annotate',
               'pika',
               'elasticsearch>=5.0.0,<6.0.0'
           ]

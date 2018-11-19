@@ -26,7 +26,7 @@
         {
             "label": "Test Project",
             "type": "shell",
-            "command": "pipenv run pytest --html=report.html --self-contained-html -s tests",
+            "command": "pipenv run pytest  --annotate-output=annotations.json --html=report.html --self-contained-html -s tests",
             "group": "test",
             "options": {
                 "env": {
@@ -37,7 +37,7 @@
         {
             "label": "Test Current File",
             "type": "shell",
-            "command": "pipenv run pytest --html=report.html --self-contained-html -s ${relativeFile}",
+            "command": "pipenv run pytest -s ${relativeFile}",
             "group": "test",
             "options": {
                 "env": {
