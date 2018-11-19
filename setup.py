@@ -63,11 +63,11 @@ setup(name='morpfw',
           'test': [
               'nose',
               'webtest',
-              'pytest',
+              'pytest==3.10.1',
               'pytest-html',
               'pytest_postgresql',
               'pytest_rabbitmq',
-              'pytest-annotate',
+#              'pytest-annotate',
               'pika',
               'elasticsearch>=5.0.0,<6.0.0'
           ]
