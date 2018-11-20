@@ -1,8 +1,10 @@
 import morpfw
 from morpfw import sql as morpsql
+from morpfw.crud.model import Schema
 import sqlalchemy as sa
 import jsl
 from common import get_client
+import jsonobject
 
 
 class App(morpfw.SQLApp):
@@ -16,14 +18,12 @@ class Page(morpsql.Base):
     body = sa.Column(sa.Text)
 
 
-class PageSchema(jsl.Document):
-    class Options(object):
-        title = 'page'
-    title = jsl.StringField()
-    body = jsl.StringField()
+class PageSchema(Schema):
+    title = jsonobject.StringProperty()
+    body = jsonobject.StringProperty()
 
 
-@App.jslcrud_identifierfields(schema=PageSchema)
+@App.identifierfields(schema=PageSchema)
 def page_schema_identifier(schema):
     return ['uuid']
 
@@ -53,9 +53,6 @@ def get_page(request, identifier):
     return storage.get(identifier)
 
 
-App.authmanager_register(basepath='')
-
-
 def test_morp_framework(pgsql_db):
     c = get_client(App)
 
@@ -66,8 +63,7 @@ def test_morp_framework(pgsql_db):
     c.authorization = ('JWT', r.headers.get('Authorization').split()[1])
 
     r = c.get('/')
-    assert r.json['schema']['title'] == 'page'
-    assert len(r.json['schema']['properties']) == 2
+    assert len(r.json['schema']['properties']) == 8
 
     r = c.post_json(
         '/', {'title': 'Hello world', 'body': 'Lorem ipsum'})

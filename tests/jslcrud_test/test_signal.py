@@ -1,4 +1,4 @@
-from morpfw.jslcrud import pubsub
+from morpfw.crud import pubsub
 import reg
 
 

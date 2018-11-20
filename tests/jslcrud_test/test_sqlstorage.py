@@ -1,7 +1,7 @@
 import jsl
 from jslcrud_common import App as BaseApp
-from morpfw.jslcrud.model import Collection, Model
-from morpfw.jslcrud.storage.sqlstorage import SQLStorage, Base, GUID
+from morpfw.crud.model import Collection, Model
+from morpfw.crud.storage.sqlstorage import SQLStorage, Base, GUID
 from jslcrud_common import get_client, run_jslcrud_test, PageCollection, PageModel
 from jslcrud_common import ObjectCollection, ObjectModel
 from jslcrud_common import NamedObjectCollection, NamedObjectModel
@@ -12,7 +12,7 @@ from morepath.request import Request
 from more.basicauth import BasicAuthIdentityPolicy
 from sqlalchemy.orm import sessionmaker
 from zope.sqlalchemy import register as register_session
-import morpfw.jslcrud.signals as signals
+import morpfw.crud.signals as signals
 import sqlalchemy as sa
 
 
@@ -80,7 +80,7 @@ class Object(Base):
 
     __tablename__ = 'jslcrud_test_object'
 
-    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
+    objid = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     uuid = sa.Column(GUID)
     body = sa.Column(sa.String(length=1024), default='')
     created_flag = sa.Column(sa.Boolean, default=False)
@@ -110,8 +110,8 @@ class NamedObject(Base):
 
     name = sa.Column(sa.String(length=1024), primary_key=True)
     body = sa.Column(sa.String(length=1024), default='')
-    created = sa.Column(sa.Boolean, default=False)
-    updated = sa.Column(sa.Boolean, default=False)
+    created_flag = sa.Column(sa.Boolean, default=False)
+    updated_flag = sa.Column(sa.Boolean, default=False)
 
 
 class NamedObjectStorage(SQLStorage):

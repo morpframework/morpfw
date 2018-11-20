@@ -1,3 +1,6 @@
+[MASTER]
+disable=C0111,W0611,W0613,C0103,W0223
+
 [TYPECHECK]
 ignored-modules=jsonobject
 ignored-classes=

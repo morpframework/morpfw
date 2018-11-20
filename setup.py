@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import sys
 import os
 
-version = '0.1.0'
+version = '0.2.0'
 
 setup(name='morpfw',
       version=version,
@@ -56,16 +56,19 @@ setup(name='morpfw',
           'jsonschema',
           'more.transaction',
           'zope.sqlalchemy',
-          'more.basicauth'
+          'more.basicauth',
+          'cryptography'
       ],
       extras_require={
           'test': [
               'nose',
               'webtest',
-              'pytest',
+              'pytest==3.10.1',
               'pytest-html',
               'pytest_postgresql',
               'pytest_rabbitmq',
+              'pytest-annotate',
+              'pytest-cov',
               'pika',
               'elasticsearch>=5.0.0,<6.0.0'
           ]

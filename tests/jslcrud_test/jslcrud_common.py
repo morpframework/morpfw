@@ -2,14 +2,15 @@ import os
 import morepath
 import yaml
 from webtest import TestApp as Client
-from morpfw.jslcrud.model import Collection, Model, Schema
-from morpfw.jslcrud.model import StateMachine
-from morpfw.jslcrud.app import App as BaseApp
-import morpfw.jslcrud.signals as signals
+from morpfw.crud.model import Collection, Model, Schema
+from morpfw.crud.model import StateMachine
+from morpfw.crud.app import App as BaseApp
+import morpfw.crud.signals as signals
 import jsl
 import json
 from uuid import uuid4
 from datetime import datetime
+import jsonobject
 
 
 class App(BaseApp):
@@ -24,31 +25,18 @@ def validate_body(request, json):
         return "Body must not be 'invalid'"
 
 
-class PageSchema(jsl.Document):
+class PageSchema(Schema):
 
-    uuid = jsl.StringField(required=False, default='')
-    title = jsl.StringField(required=True, default='')
-    body = jsl.StringField(required=True, default='')
-    value = jsl.IntField(required=False)
-    footer = jsl.StringField(required=False, default='')
-    created = jsl.DateTimeField(required=False)
-    modified = jsl.DateTimeField(required=False)
-    state = jsl.StringField(required=False)
+    title = jsonobject.StringProperty(required=True, default='')
+    body = jsonobject.StringProperty(required=True, default='')
+    value = jsonobject.IntegerProperty(required=False)
+    footer = jsonobject.StringProperty(required=False, default='')
+    state = jsonobject.StringProperty(required=False)
 
 
-@App.jslcrud_formvalidators(schema=PageSchema)
+@App.formvalidators(schema=PageSchema)
 def page_formvalidators(schema):
     return [validate_body]
-
-
-@App.jslcrud_identifierfields(schema=PageSchema)
-def page_identifierfields(schema):
-    return ['uuid']
-
-
-@App.jslcrud_default_identifier(schema=PageSchema)
-def page_default_identifier(schema, obj, request):
-    return str(uuid4())
 
 
 class PageCollection(Collection):
@@ -61,21 +49,9 @@ class PageModel(Model):
 
 class ObjectSchema(Schema):
 
-    id = jsl.IntField(required=False)
-    uuid = jsl.StringField(required=False)
-    body = jsl.StringField(required=True, default='')
-    created_flag = jsl.BooleanField(required=False, default=False)
-    updated_flag = jsl.BooleanField(required=False, default=False)
-
-
-@App.jslcrud_identifierfields(schema=ObjectSchema)
-def object_identifierfields(schema):
-    return ['id']
-
-
-@App.jslcrud_default_identifier(schema=ObjectSchema)
-def object_default_identifier(schema, obj, request):
-    return None
+    body = jsonobject.StringProperty(required=True, default='')
+    created_flag = jsonobject.BooleanProperty(required=False, default=False)
+    updated_flag = jsonobject.BooleanProperty(required=False, default=False)
 
 
 class ObjectCollection(Collection):
@@ -86,18 +62,12 @@ class ObjectModel(Model):
     schema = ObjectSchema
 
 
-@App.json(model=ObjectCollection, name='get_uuid')
-def get_object_by_uuid(context, request):
-    uuid = request.GET.get('uuid')
-    return context.get_by_uuid(uuid).json()
-
-
-@App.jslcrud_subscribe(signal=signals.OBJECT_CREATED, model=ObjectModel)
+@App.subscribe(signal=signals.OBJECT_CREATED, model=ObjectModel)
 def object_created(app, request, obj, signal):
     obj.data['created_flag'] = True
 
 
-@App.jslcrud_subscribe(signal=signals.OBJECT_UPDATED, model=ObjectModel)
+@App.subscribe(signal=signals.OBJECT_UPDATED, model=ObjectModel)
 def object_updated(app, request, obj, signal):
     obj.data['updated_flag'] = True
 
@@ -112,31 +82,37 @@ class PageStateMachine(StateMachine):
     ]
 
 
-@App.jslcrud_statemachine(model=PageModel)
+@App.statemachine(model=PageModel)
 def get_pagemodel_statemachine(context):
     return PageStateMachine(context)
 
 
-class NamedObjectSchema(jsl.Document):
+class NamedObjectSchema(Schema):
 
-    name = jsl.StringField(required=False)
-    body = jsl.StringField(required=True, default='')
-    created_flag = jsl.BooleanField(required=False, default=False)
-    updated_flag = jsl.BooleanField(required=False, default=False)
+    name = jsonobject.StringProperty(required=False)
+    body = jsonobject.StringProperty(required=True, default='')
+    created_flag = jsonobject.BooleanProperty(required=False, default=False)
+    updated_flag = jsonobject.BooleanProperty(required=False, default=False)
 
 
-@App.jslcrud_identifierfields(schema=NamedObjectSchema)
+@App.identifierfields(schema=NamedObjectSchema)
 def namedobject_identifierfields(schema):
     return ['name']
 
 
-@App.jslcrud_default_identifier(schema=NamedObjectSchema)
+@App.default_identifier(schema=NamedObjectSchema)
 def namedobject_default_identifier(schema, obj, request):
     return obj['name']
 
 
 class NamedObjectCollection(Collection):
     schema = NamedObjectSchema
+
+
+@App.json(model=NamedObjectCollection, name='get_uuid')
+def get_object_by_uuid(context, request):
+    uuid = request.GET.get('uuid')
+    return context.get_by_uuid(uuid).json()
 
 
 class NamedObjectModel(Model):
@@ -173,6 +149,9 @@ def run_jslcrud_test(app, skip_aggregate=False):
     assert r.json['data']['title'] == 'Hello'
 
     uuid = r.json['data']['uuid']
+    assert uuid
+    assert len(uuid) == 32
+
     r = c.get('/pages/%s' % uuid)
 
     assert r.json['data']['title'] == 'Hello'
@@ -357,18 +336,9 @@ def run_jslcrud_test(app, skip_aggregate=False):
     r = c.post_json('/objects/', {'body': 'hello'})
 
     assert r.json['data']['body'] == 'hello'
-    assert r.json['data']['id']
     assert r.json['data']['created_flag'] is True
     assert r.json['data']['created']
     assert r.json['data']['creator'] == 'admin'
-    uuid = r.json['data']['uuid']
-    original_object = r.json['data']
-    assert len(uuid) == 32
-    r = c.get('/objects/+get_uuid?uuid=%s' % uuid)
-
-    object_by_uuid = r.json['data']
-
-    assert original_object == object_by_uuid
 
     # test creation of named object
     r = c.post_json('/named_objects/',
@@ -377,6 +347,11 @@ def run_jslcrud_test(app, skip_aggregate=False):
     r = c.get('/named_objects/obj1')
 
     assert r.json['data']['name'] == 'obj1'
+    uuid = r.json['data']['uuid']
+    original_object = r.json['data']
+    r = c.get('/named_objects/+get_uuid?uuid=%s' % uuid)
+    object_by_uuid = r.json['data']
+    assert original_object == object_by_uuid
 
     # duplicate should fail
     r = c.post_json('/named_objects/',

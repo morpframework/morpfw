@@ -1,7 +1,6 @@
-import jsl
 from jslcrud_common import App as BaseApp
-from morpfw.jslcrud.model import Collection, Model, Schema
-from morpfw.jslcrud.storage.elasticsearchstorage import ElasticSearchStorage
+from morpfw.crud.model import Collection, Model, Schema
+from morpfw.crud.storage.elasticsearchstorage import ElasticSearchStorage
 from jslcrud_common import get_client, run_jslcrud_test, PageCollection, PageModel
 from jslcrud_common import NamedObjectCollection, NamedObjectModel
 import pprint
@@ -11,8 +10,9 @@ from morepath.request import Request
 from more.basicauth import BasicAuthIdentityPolicy
 from sqlalchemy.orm import sessionmaker
 from zope.sqlalchemy import register as register_session
-import morpfw.jslcrud.signals as signals
+import morpfw.crud.signals as signals
 from elasticsearch import Elasticsearch
+import jsonobject
 
 Session = sessionmaker()
 register_session(Session)
@@ -63,19 +63,19 @@ def model_factory(request, identifier):
 
 class ObjectSchema(Schema):
 
-    id = jsl.StringField(required=False)
-    uuid = jsl.StringField(required=False)
-    body = jsl.StringField(required=True, default='')
-    created_flag = jsl.BooleanField(required=False, default=False)
-    updated_flag = jsl.BooleanField(required=False, default=False)
+    id = jsonobject.StringProperty(required=False)
+    uuid = jsonobject.StringProperty(required=False)
+    body = jsonobject.StringProperty(required=True, default='')
+    created_flag = jsonobject.BooleanProperty(required=False, default=False)
+    updated_flag = jsonobject.BooleanProperty(required=False, default=False)
 
 
-@App.jslcrud_identifierfields(schema=ObjectSchema)
+@App.identifierfields(schema=ObjectSchema)
 def object_identifierfields(schema):
     return ['id']
 
 
-@App.jslcrud_default_identifier(schema=ObjectSchema)
+@App.default_identifier(schema=ObjectSchema)
 def object_default_identifier(schema, obj, request):
     return None
 
@@ -88,12 +88,12 @@ class ObjectCollection(Collection):
     schema = ObjectSchema
 
 
-@App.jslcrud_subscribe(signal=signals.OBJECT_CREATED, model=ObjectModel)
+@App.subscribe(signal=signals.OBJECT_CREATED, model=ObjectModel)
 def object_created(app, request, obj, signal):
     obj.data['created_flag'] = True
 
 
-@App.jslcrud_subscribe(signal=signals.OBJECT_UPDATED, model=ObjectModel)
+@App.subscribe(signal=signals.OBJECT_UPDATED, model=ObjectModel)
 def object_updated(app, request, obj, signal):
     obj.data['updated_flag'] = True
 

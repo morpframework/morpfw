@@ -1,8 +1,8 @@
 import morepath
 import dectate
 import reg
-from . import authmanager
-from .jslcrud.provider.base import Provider
+from . import auth as authmanager
+from .crud.provider.base import Provider
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.pool import NullPool, QueuePool
 from more.transaction import TransactionApp
@@ -20,9 +20,9 @@ import time
 import re
 import sqlalchemy
 from .sql import Base
-from .authmanager.model.user import UserCollection, UserSchema
-from .authmanager.model.group import GroupCollection, GroupSchema
-from .authmanager.exc import UserExistsError
+from .auth.user.model import UserCollection, UserSchema
+from .auth.group.model import GroupCollection, GroupSchema
+from .auth.exc import UserExistsError
 import transaction
 import os
 from zope.sqlalchemy import register as register_session
@@ -30,30 +30,47 @@ import transaction
 from zope.sqlalchemy import ZopeTransactionExtension
 from .exc import ConfigurationError
 import warnings
+import sqlalchemy.orm
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+#from typing import Union
+from celery.local import Proxy
+from celery.result import AsyncResult
+from sqlalchemy.engine.base import Engine
+from billiard.einfo import ExceptionInfo
 
 
 Session = sessionmaker(extension=ZopeTransactionExtension())
 
 
-class SqlAlchemyTask(Task):
+class MorpTask(Task):
     abstract = True
 
-    def after_return(self, status, retval, task_id, args, kwargs, einfo):
+    def after_return(self,
+                     status: str,
+                     retval: Any,
+                     task_id: str,
+                     args: List,
+                     kwargs: Dict,
+                     einfo: Optional[ExceptionInfo],
+                     ):
         pass
 
 
 class Signal(object):
 
-    def __init__(self, app, signal, **kwargs):
+    def __init__(self, app: morepath.App, signal: str, **kwargs):
         self.app = app
         self.signal = signal
         self.signal_opts = kwargs
 
-    def subscribers(self):
+    def subscribers(self) -> List[Proxy]:
         self.app.config.celery_subscriber_registry.setdefault(self.signal, [])
         return self.app.config.celery_subscriber_registry[self.signal]
 
-    def send(self, request, **kwargs):
+    def send(self, request: morepath.Request, **kwargs) -> List[AsyncResult]:
         tasks = []
         envs = {}
         allcaps = re.compile(r'^[A-Z_]+$')
@@ -83,7 +100,7 @@ class DBSessionRequest(Request):
     _db_session = None
 
     @property
-    def db_session(self):
+    def db_session(self) -> sqlalchemy.orm.Session:
         if self._db_session is None:
             self._db_session = Session()
         return self._db_session
@@ -93,23 +110,23 @@ class BaseApp(authmanager.App, cors.CORSApp):
 
     celery = Celery()
     _celery_subscribe = dectate.directive(directive.CelerySubscriberAction)
-    _raw_settings = {}
+    _raw_settings: dict = {}
 
     @reg.dispatch_method(reg.match_key('name', lambda self, name: name))
     def get_celery_task(self, name):
         raise NotImplementedError
 
     @classmethod
-    def celery_subscribe(klass, signal, task_name=None):
+    def celery_subscribe(klass, signal, task_name: Optional[str] = None):
         warnings.warn(
             "celery_subscibe is deprecated, use async_subscribe",
             DeprecationWarning)
         return klass.async_subscribe(signal, task_name)
 
     @classmethod
-    def async_subscribe(klass, signal, task_name=None):
+    def async_subscribe(klass, signal: str, task_name: Optional[str] = None):
         def wrapper(wrapped):
-            task = shared_task(name=task_name,  base=SqlAlchemyTask)(wrapped)
+            task = shared_task(name=task_name,  base=MorpTask)(wrapped)
             klass._celery_subscribe(signal)(task)
             return task
         return wrapper
@@ -123,8 +140,8 @@ class BaseApp(authmanager.App, cors.CORSApp):
                           day_of_month, month_of_year)
 
     @classmethod
-    def cron(klass, name, minute='*', hour='*', day_of_week='*',
-             day_of_month='*', month_of_year='*'):
+    def cron(klass, name: str, minute: str = '*', hour: str = '*', day_of_week: str = '*',
+             day_of_month: str = '*', month_of_year: str = '*'):
         def wrapper(wrapped):
             task = shared_task()(wrapped)
             klass.celery.conf.beat_schedule[name] = {
@@ -142,7 +159,7 @@ class BaseApp(authmanager.App, cors.CORSApp):
                       DeprecationWarning)
         return self.signal(signal, **kwargs)
 
-    def signal(self, signal, **kwargs):
+    def signal(self, signal: str, **kwargs) -> Signal:
         return Signal(self, signal, **kwargs)
 
     def __repr__(self):
@@ -150,7 +167,7 @@ class BaseApp(authmanager.App, cors.CORSApp):
                                               self.__class__.__name__)
 
 
-def create_admin(app, username, password, session=Session):
+def create_admin(app: morepath.App, username: str, password: str, email: str, session=Session):
     request = app.request_class(
         app=app, environ={'PATH_INFO': '/'})
 
@@ -159,6 +176,7 @@ def create_admin(app, username, password, session=Session):
         request, app.get_authmanager_storage(request, UserSchema))
     userobj = context.create({'username': username,
                               'password': password,
+                              'email': email,
                               'state': 'active'})
     gstorage = app.get_authmanager_storage(
         request, GroupSchema)
@@ -179,7 +197,7 @@ class SQLApp(TransactionApp, BaseApp):
         super(SQLApp, self).__init__(*args, **kwargs)
         self._init_engine()
 
-    def _init_engine(self, session=Session):
+    def _init_engine(self, session=Session) -> Engine:
 
         settings = self._raw_settings
 
@@ -187,7 +205,6 @@ class SQLApp(TransactionApp, BaseApp):
             return self._engine
 
         register_session(session)
-
         # initialize SQLAlchemy
         if 'sqlalchemy' not in settings:
             raise ConfigurationError('SQLAlchemy settings not found')

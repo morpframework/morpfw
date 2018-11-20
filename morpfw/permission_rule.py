@@ -1,8 +1,8 @@
-from .authmanager.app import App
-from .authmanager import UserCollection
-from .authmanager import GroupCollection
-from .authmanager import permission as authperm
-from .jslcrud import permission as jslperm
+from .auth.app import App
+from .auth import UserCollection
+from .auth import GroupCollection
+from .auth import permission as authperm
+from .crud import permission as jslperm
 
 
 def _has_admin_role(app, identity, context, permission):

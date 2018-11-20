@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [dev-packages]
-pytest = "*"
+pytest = "==3.10.1"
 pytest-html = "*"
 rulez = {git = "https://github.com/morpframework/rulez.git"}
 "e1839a8" = {path = ".", extras = ["test"], editable = true}
@@ -12,8 +12,15 @@ rulez = {git = "https://github.com/morpframework/rulez.git"}
 pylint = "*"
 "autopep8" = "*"
 pydocstyle = "*"
+morpfw = {editable = true, path = ".", extras = ["test"]}
+mypy = "*"
 
 [packages]
+pydocstyle = "*"
+pytest = "==3.10.1"
+pip = "==18.1"
+pylint = "*"
+pytest-cov = "*"
 
 [requires]
 python_version = "3.6"
