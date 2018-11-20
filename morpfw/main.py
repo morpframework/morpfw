@@ -10,10 +10,15 @@ from .exc import ConfigurationError
 import transaction
 import sqlalchemy
 from celery import Celery
+import yaml
+import copy
+
+default_settings = yaml.load(
+    open(os.path.join(os.path.dirname(__file__), 'default_settings.yml')))
 
 
 def default_get_identity_policy(settings):
-    jwtauth_settings = getattr(settings, 'jwtauth', None)
+    jwtauth_settings = settings.jwtauth
     if jwtauth_settings:
         # Pass the settings dictionary to the identity policy.
         return JWTWithAPIKeyIdentityPolicy(**jwtauth_settings.__dict__.copy())
@@ -37,25 +42,41 @@ def create_app(app, settings, scan=True,
 def create_baseapp(app, settings, scan=True,
                    get_identity_policy=default_get_identity_policy,
                    verify_identity=default_verify_identity, **kwargs):
-    app.identity_policy()(get_identity_policy)
-    app.verify_identity()(verify_identity)
+
+    s = copy.deepcopy(default_settings)
+    for k in settings.keys():
+        if k in s.keys():
+            for j, v in settings[k].items():
+                s[k][j] = v
+        else:
+            s[k] = settings[k]
+
+    settings = s
+
     # initialize app
-
-#	morp_settings = settings.get('morp', {})
-#	for iapp_path in morp_settings.get('additional_apps', []):
-#		iapp_mod, iapp_clsname = iapp_path.strip().split(':')
-#		iapp_cls = getattr(__import__(iapp_mod), iapp_clsname)
-#		iapp_cls.init_settings(settings)
-
-    app.init_settings(settings)
-    app._raw_settings = settings
 
     if scan:
         morepath.autoscan()
-        app.commit()
 
-    if settings.get('morp', {}).get('use_celery', False):
-        celery_settings = settings['celery']
+    app_settings = settings['application']
+    for iapp_path in app_settings['mounted_apps']:
+        iapp_mod, iapp_clsname = iapp_path.strip().split(':')
+        iapp_cls = getattr(__import__(iapp_mod), iapp_clsname)
+        iapp_cls.identity_policy()(get_identity_policy)
+        iapp_cls.verify_identity()(verify_identity)
+        iapp_cls.init_settings(settings)
+        iapp_cls._raw_settings = settings
+        iapp_cls.commit()
+
+    app.identity_policy()(get_identity_policy)
+    app.verify_identity()(verify_identity)
+    app.init_settings(settings)
+    app._raw_settings = settings
+
+    app.commit()
+
+    if settings['worker']['enabled']:
+        celery_settings = settings['worker']['celery_settings']
         app.celery.conf.update(**celery_settings)
     application = app()
     return application

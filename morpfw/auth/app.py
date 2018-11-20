@@ -20,8 +20,8 @@ class App(CRUDApp):
         return u'AuthManager'
 
     def get_authmanager_storage(self, request: morepath.Request, schema: Type[morpfw.Schema]):
-        name = self.settings.authmanager.storage
-        storage_opts = getattr(self.settings.authmanager, 'storage_opts', {})
+        name = self.settings.application.authstorage
+        storage_opts = self.settings.application.authstorage_opts
         return self._get_authmanager_storage(name, schema)(request=request,
                                                            **storage_opts)
 

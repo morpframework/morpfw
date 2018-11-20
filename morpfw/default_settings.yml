@@ -1,0 +1,21 @@
+server:
+  listen_host: 127.0.0.1
+  listen_port: 5432
+
+application:
+  mounted_apps: []
+  authstorage: sqlstorage
+  authstorage_opts: {}
+  new_user_state: active
+  dburi: 'sqlite:///%(here)s/app.db'
+  compositekey_separator: '!!!!'
+
+worker:
+  enabled: false
+  celery_settings: {}
+
+jwtauth:
+  master_secret: secret
+  leeway: 10
+  allow_refresh: true
+

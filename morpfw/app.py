@@ -110,7 +110,6 @@ class BaseApp(authmanager.App, cors.CORSApp):
 
     celery = Celery()
     _celery_subscribe = dectate.directive(directive.CelerySubscriberAction)
-    _raw_settings: dict = {}
 
     @reg.dispatch_method(reg.match_key('name', lambda self, name: name))
     def get_celery_task(self, name):
@@ -191,32 +190,34 @@ class SQLApp(TransactionApp, BaseApp):
 
     request_class = DBSessionRequest
 
-    _engine = None
+    engine = None
+    _raw_settings: dict = {}
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, engine=None, *args, **kwargs):
         super(SQLApp, self).__init__(*args, **kwargs)
+        self.engine = engine
         self._init_engine()
 
     def _init_engine(self, session=Session) -> Engine:
 
         settings = self._raw_settings
 
-        if self._engine is not None:
-            return self._engine
+        if self.engine is not None:
+            return self.engine
 
         register_session(session)
         # initialize SQLAlchemy
-        if 'sqlalchemy' not in settings:
+        if not settings['application']['dburi']:
             raise ConfigurationError('SQLAlchemy settings not found')
-        if 'sqlalchemy' in settings:
-            cwd = os.environ.get('MORP_WORKDIR', os.getcwd())
-            os.chdir(cwd)
-            dburi = settings['sqlalchemy']['dburi'] % {'here': cwd}
-            engine = sqlalchemy.create_engine(dburi, poolclass=NullPool)
-            session.configure(bind=engine)
 
-        self._engine = engine
+        cwd = os.environ.get('MORP_WORKDIR', os.getcwd())
+        os.chdir(cwd)
+        dburi = settings['application']['dburi'] % {'here': cwd}
+        engine = sqlalchemy.create_engine(dburi, poolclass=NullPool)
+        session.configure(bind=engine)
+
+        self.engine = engine
         return engine
 
     def initdb(self, session=Session):
-        Base.metadata.create_all(self._engine)
+        Base.metadata.create_all(self.engine)

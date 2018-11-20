@@ -13,18 +13,6 @@ class App(BaseApp):
     pass
 
 
-@App.identity_policy()
-def get_identity_policy():
-    return BasicAuthIdentityPolicy()
-
-
-@App.verify_identity()
-def verify_identity(identity):
-    if identity.userid == 'admin' and identity.password == 'admin':
-        return True
-    return False
-
-
 class PageStorage(MemoryStorage):
     model = PageModel
 
@@ -76,4 +64,5 @@ def namedobject_model_factory(request, identifier):
 
 
 def test_memorystorage():
-    run_jslcrud_test(App, skip_aggregate=True)
+    client = get_client(App)
+    run_jslcrud_test(client, skip_aggregate=True)

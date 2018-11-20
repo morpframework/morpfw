@@ -30,18 +30,6 @@ class App(BaseApp, TransactionApp):
     request_class = ESClientRequest
 
 
-@App.identity_policy()
-def get_identity_policy():
-    return BasicAuthIdentityPolicy()
-
-
-@App.verify_identity()
-def verify_identity(identity):
-    if identity.userid == 'admin' and identity.password == 'admin':
-        return True
-    return False
-
-
 class PageStorage(ElasticSearchStorage):
     index_name = 'test-index'
     doc_type = 'page'
@@ -159,4 +147,5 @@ def test_elasticsearchstorage(es_client):
                                                 }
                                             }
                                         })
-    run_jslcrud_test(App)
+    client = get_client(App)
+    run_jslcrud_test(client)

@@ -42,8 +42,7 @@ def register(context, request, load):
                 'message': 'Password confirmation does not match'}
 
     if 'state' not in data.keys() or not data['state']:
-        data['state'] = getattr(
-            request.app.settings.authmanager, 'default_userstate', 'active')
+        data['state'] = request.app.settings.application.new_user_state
     obj = context.create(data)
     return {'status': 'success'}
 

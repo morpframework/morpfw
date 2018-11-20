@@ -135,7 +135,6 @@ def read(context, request):
     obj = context.json()
     if select:
         expr = jsonpath_parse(select)
-        results = []
         obj = [match.value for match in expr.find(obj['data'])]
     return obj
 

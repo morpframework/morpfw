@@ -9,39 +9,16 @@ import pprint
 from more.transaction import TransactionApp
 from morepath.reify import reify
 from morepath.request import Request
-from more.basicauth import BasicAuthIdentityPolicy
+
 from sqlalchemy.orm import sessionmaker
 from zope.sqlalchemy import register as register_session
 import morpfw.crud.signals as signals
 import sqlalchemy as sa
+from morpfw.app import SQLApp
 
 
-Session = sessionmaker()
-register_session(Session)
-
-
-class DBSessionRequest(Request):
-
-    @reify
-    def db_session(self):
-        return Session()
-
-
-class App(BaseApp, TransactionApp):
-
-    request_class = DBSessionRequest
-
-
-@App.identity_policy()
-def get_identity_policy():
-    return BasicAuthIdentityPolicy()
-
-
-@App.verify_identity()
-def verify_identity(identity):
-    if identity.userid == 'admin' and identity.password == 'admin':
-        return True
-    return False
+class App(BaseApp, SQLApp):
+    pass
 
 
 class Page(Base):
@@ -49,14 +26,10 @@ class Page(Base):
     __tablename__ = 'jslcrud_test_page'
 
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
-    uuid = sa.Column(sa.String(length=1024), default='')
     title = sa.Column(sa.String(length=1024), default='')
     body = sa.Column(sa.Text(), default='')
     value = sa.Column(sa.Integer)
     footer = sa.Column(sa.String(length=1024), default='')
-    created = sa.Column(sa.DateTime)
-    modified = sa.Column(sa.DateTime)
-    state = sa.Column(sa.String)
 
 
 class PageStorage(SQLStorage):
@@ -132,8 +105,5 @@ def namedobject_model_factory(request, identifier):
 
 
 def test_sqlstorage(pgsql_db):
-    engine = sa.create_engine(
-        'postgresql://postgres@localhost:45678/morp_tests')
-    Session.configure(bind=engine)
-    Base.metadata.create_all(engine)
-    run_jslcrud_test(App)
+    c = get_client(App, config='settings-sqlalchemy.yml')
+    run_jslcrud_test(c)

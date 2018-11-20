@@ -9,26 +9,17 @@ from morpfw.app import create_admin
 from morpfw.auth.exc import UserExistsError
 
 DEFAULT_SETTINGS = {
-    'authmanager': {
-        'storage': 'memorystorage',
-        'default_user': 'defaultuser',
-        'default_password': 'password',
-    },
-    'jwtauth': {
-        'master_secret': 'secret',
-        'leeway': 10
-    },
-    'sqlalchemy': {
+    'application': {
         'dburi': 'postgresql://postgres@localhost:45678/morp_tests'
     },
-    'morp': {
-        'use_celery': True,
+    'worker': {
+        'enabled': True,
         'celery_name': 'morp_tasks',
-    },
-    'celery': {
-        'metastore': 'sqlstorage',
-        'broker_url': 'amqp://guest:guest@localhost:38567/',
-        'result_backend': 'rpc://'
+        'celery_settings':  {
+            'metastore': 'sqlstorage',
+            'broker_url': 'amqp://guest:guest@localhost:38567/',
+            'result_backend': 'rpc://'
+        }
     }
 }
 

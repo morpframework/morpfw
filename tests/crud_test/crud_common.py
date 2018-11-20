@@ -4,13 +4,15 @@ import yaml
 from webtest import TestApp as Client
 from morpfw.crud.model import Collection, Model, Schema
 from morpfw.crud.model import StateMachine
-from morpfw.crud.app import App as BaseApp
+from morpfw.app import BaseApp
 import morpfw.crud.signals as signals
 import jsl
 import json
 from uuid import uuid4
 from datetime import datetime
 import jsonobject
+from morpfw.main import create_app
+from more.basicauth import BasicAuthIdentityPolicy
 
 
 class App(BaseApp):
@@ -119,6 +121,16 @@ class NamedObjectModel(Model):
     schema = NamedObjectSchema
 
 
+def get_identity_policy():
+    return BasicAuthIdentityPolicy()
+
+
+def verify_identity(identity):
+    if identity.userid == 'admin' and identity.password == 'admin':
+        return True
+    return False
+
+
 def get_client(app, config='settings.yml'):
     if isinstance(config, str):
         with open(os.path.join(os.path.dirname(__file__), config)) as f:
@@ -126,15 +138,13 @@ def get_client(app, config='settings.yml'):
     else:
         settings = config
 
-    morepath.autoscan()
-    app.init_settings(settings)
-    morepath.commit(app)
-    c = Client(app())
+    appobj = create_app(app, settings, get_identity_policy=get_identity_policy,
+                        verify_identity=verify_identity)
+    c = Client(appobj)
     return c
 
 
-def run_jslcrud_test(app, skip_aggregate=False):
-    c = get_client(app)
+def run_jslcrud_test(c, skip_aggregate=False):
 
     c.authorization = ('Basic', ('admin', 'admin'))
 
