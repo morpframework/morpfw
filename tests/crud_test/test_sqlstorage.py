@@ -1,10 +1,10 @@
 import jsl
-from jslcrud_common import App as BaseApp
+from crud_common import App as BaseApp
 from morpfw.crud.model import Collection, Model
 from morpfw.crud.storage.sqlstorage import SQLStorage, Base, GUID
-from jslcrud_common import get_client, run_jslcrud_test, PageCollection, PageModel
-from jslcrud_common import ObjectCollection, ObjectModel
-from jslcrud_common import NamedObjectCollection, NamedObjectModel
+from crud_common import get_client, run_jslcrud_test, PageCollection, PageModel
+from crud_common import ObjectCollection, ObjectModel
+from crud_common import NamedObjectCollection, NamedObjectModel
 import pprint
 from more.transaction import TransactionApp
 from morepath.reify import reify

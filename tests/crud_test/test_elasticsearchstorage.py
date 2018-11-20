@@ -1,8 +1,8 @@
-from jslcrud_common import App as BaseApp
+from crud_common import App as BaseApp
 from morpfw.crud.model import Collection, Model, Schema
 from morpfw.crud.storage.elasticsearchstorage import ElasticSearchStorage
-from jslcrud_common import get_client, run_jslcrud_test, PageCollection, PageModel
-from jslcrud_common import NamedObjectCollection, NamedObjectModel
+from crud_common import get_client, run_jslcrud_test, PageCollection, PageModel
+from crud_common import NamedObjectCollection, NamedObjectModel
 import pprint
 from more.transaction import TransactionApp
 from morepath.reify import reify
