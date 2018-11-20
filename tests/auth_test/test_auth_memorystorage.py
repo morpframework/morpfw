@@ -1,4 +1,4 @@
-from test_authmanager import _test_authentication, get_client
+from test_auth import _test_authentication, get_client
 from more.jwtauth import JWTIdentityPolicy
 from morpfw.app import BaseApp
 

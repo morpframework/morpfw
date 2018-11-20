@@ -1,10 +1,10 @@
 import jsl
 from morpfw.crud.storage.memorystorage import MemoryStorage
 import morpfw.crud.signals as signals
-from jslcrud_common import get_client, run_jslcrud_test, PageCollection, PageModel
-from jslcrud_common import ObjectCollection, ObjectModel
-from jslcrud_common import NamedObjectCollection, NamedObjectModel
-from jslcrud_common import App as BaseApp
+from crud_common import get_client, run_jslcrud_test, PageCollection, PageModel
+from crud_common import ObjectCollection, ObjectModel
+from crud_common import NamedObjectCollection, NamedObjectModel
+from crud_common import App as BaseApp
 from more.transaction import TransactionApp
 from more.basicauth import BasicAuthIdentityPolicy
 
