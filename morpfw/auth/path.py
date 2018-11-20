@@ -4,7 +4,7 @@ from .user.path import user_collection_factory, user_factory
 from .group.model import GroupModel, GroupCollection, GroupSchema
 from .group.path import group_model_factory, group_collection_factory
 from .apikey.model import APIKeyCollection, APIKeyModel, APIKeySchema
-from .apikey.path import apikey_factory, apikey_collection_factory
+from .apikey.path import get_apikey, get_apikey_collection
 
 
 def register_authmanager(app_class=App,
@@ -28,14 +28,14 @@ def register_authmanager(app_class=App,
     @app_class.path(model=APIKeyModel,
                     path='%s/%s/{uuid}' % (
                         basepath, apikeypath))
-    def _apikey_factory(app, request, uuid):
-        return apikey_factory(request, uuid)
+    def _get_apikey(app, request, uuid):
+        return get_apikey(request, uuid)
 
     @app_class.path(model=APIKeyCollection,
                     path='%s/%s/' % (
                         basepath, apikeypath))
-    def _apikey_collection_factory(app, request):
-        return apikey_collection_factory(request)
+    def _get_apikey_collection(app, request):
+        return get_apikey_collection(request)
 
     @app_class.path(model=GroupModel,
                     path='%s/%s/{identifier}' % (basepath, grouppath))

@@ -1,6 +1,6 @@
 from ..app import App
 from .model import APIKeyModel, APIKeyCollection
-from ..path import user_factory, apikey_collection_factory, apikey_factory
+from ..path import user_factory, get_apikey_collection, get_apikey
 from morpfw.crud import permission
 import uuid
 import rulez
