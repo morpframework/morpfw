@@ -6,8 +6,10 @@ import dectate
 from . import action
 from morepath.reify import reify
 import json
+from typing import List, Optional, Type
+import morpfw
 
-_REGISTERED_APPS = []
+_REGISTERED_APPS: List[morepath.App] = []
 
 
 class App(CRUDApp):
@@ -17,7 +19,7 @@ class App(CRUDApp):
     def __repr__(self):
         return u'AuthManager'
 
-    def get_authmanager_storage(self, request, schema):
+    def get_authmanager_storage(self, request: morepath.Request, schema: Type[morpfw.Schema]):
         name = self.settings.authmanager.storage
         storage_opts = getattr(self.settings.authmanager, 'storage_opts', {})
         return self._get_authmanager_storage(name, schema)(request=request,
@@ -27,24 +29,24 @@ class App(CRUDApp):
                                        lambda self, name, schema: name),
                          reg.match_class('schema',
                                          lambda self, name, schema: schema))
-    def _get_authmanager_storage(self, name, schema):
+    def _get_authmanager_storage(self, name: str, schema: Type[morpfw.Schema]):
         raise NotImplementedError
 
-    def authmanager_has_role(self, request, rolename,
-                             username=None,  groupname='__default__'):
+    def authmanager_has_role(self, request: morepath.Request, rolename: str,
+                             username: Optional[str] = None, groupname: str = '__default__'):
         if username is None:
             username = request.identity.userid
         from .group.model import GroupSchema
         storage = self.get_authmanager_storage(request, GroupSchema)
         return rolename in storage.get_group_user_roles(groupname, username)
 
-    def authmanager_permits(self, request, context, permission):
+    def authmanager_permits(self, request: morepath.Request, context: morpfw.Model, permission: str):
         identity = request.identity
         return request.app._permits(identity, context, permission)
 
     @classmethod
-    def authmanager_register(klass, basepath='api/v1',
-                             userpath='user', grouppath='group'):
+    def authmanager_register(klass, basepath: str = 'api/v1',
+                             userpath: str = 'user', grouppath: str = 'group'):
 
         if klass in _REGISTERED_APPS:
             return

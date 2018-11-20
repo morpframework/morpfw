@@ -1,5 +1,5 @@
 import jsonobject
-from morpfw.crud import Schema
+from morpfw import Schema
 from ..app import App
 
 
