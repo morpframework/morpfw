@@ -1,11 +1,6 @@
 from .auth.group.model import GroupSchema, GroupCollection
-from .auth.path import group_collection_factory as get_group_collection
+from .auth.path import get_group_collection, get_group
 from .auth.path import user_collection_factory as get_user_collection
-
-
-def get_group(request, groupname):
-    collection = get_group_collection(request)
-    return collection.get(groupname)
 
 
 def create_group(request, groupname):

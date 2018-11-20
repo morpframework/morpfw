@@ -2,7 +2,7 @@ from .app import App
 from .user.model import UserCollection, UserModel
 from .user.path import user_collection_factory, user_factory
 from .group.model import GroupModel, GroupCollection, GroupSchema
-from .group.path import group_model_factory, group_collection_factory
+from .group.path import get_group, get_group_collection
 from .apikey.model import APIKeyCollection, APIKeyModel, APIKeySchema
 from .apikey.path import get_apikey, get_apikey_collection
 
@@ -39,10 +39,10 @@ def register_authmanager(app_class=App,
 
     @app_class.path(model=GroupModel,
                     path='%s/%s/{identifier}' % (basepath, grouppath))
-    def _group_model_factory(app, request, identifier):
-        return group_model_factory(request, identifier)
+    def _get_group(app, request, identifier):
+        return get_group(request, identifier)
 
     @app_class.path(model=GroupCollection,
                     path='%s/%s' % (basepath, grouppath))
-    def _group_collection_factory(app, request):
-        return group_collection_factory(request)
+    def _get_group_collection(app, request):
+        return get_group_collection(request)
