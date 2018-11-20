@@ -1,7 +1,7 @@
 import morepath
 import dectate
 import reg
-from . import authmanager
+from . import auth as authmanager
 from .crud.provider.base import Provider
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.pool import NullPool, QueuePool
@@ -20,9 +20,9 @@ import time
 import re
 import sqlalchemy
 from .sql import Base
-from .authmanager.user.model import UserCollection, UserSchema
-from .authmanager.group.model import GroupCollection, GroupSchema
-from .authmanager.exc import UserExistsError
+from .auth.user.model import UserCollection, UserSchema
+from .auth.group.model import GroupCollection, GroupSchema
+from .auth.exc import UserExistsError
 import transaction
 import os
 from zope.sqlalchemy import register as register_session

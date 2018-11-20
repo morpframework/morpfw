@@ -28,3 +28,4 @@ lastline.yml
 config-prod.json
 rulez/
 .vscode/settings.json
+.mypy_cache/
