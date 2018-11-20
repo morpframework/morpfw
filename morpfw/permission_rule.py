@@ -1,7 +1,7 @@
-from .ext.authmanager.app import App
-from .ext.authmanager import UserCollection
-from .ext.authmanager import GroupCollection
-from .ext.authmanager import permission as authperm
+from .authmanager.app import App
+from .authmanager import UserCollection
+from .authmanager import GroupCollection
+from .authmanager import permission as authperm
 from .crud import permission as jslperm
 
 

@@ -20,9 +20,9 @@ import time
 import re
 import sqlalchemy
 from .sql import Base
-from .ext.authmanager.user.model import UserCollection, UserSchema
-from .ext.authmanager.group.model import GroupCollection, GroupSchema
-from .ext.authmanager.exc import UserExistsError
+from .authmanager.user.model import UserCollection, UserSchema
+from .authmanager.group.model import GroupCollection, GroupSchema
+from .authmanager.exc import UserExistsError
 import transaction
 import os
 from zope.sqlalchemy import register as register_session

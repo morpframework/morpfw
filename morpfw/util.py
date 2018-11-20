@@ -1,6 +1,6 @@
-from .ext.authmanager.group.model import GroupSchema, GroupCollection
-from .ext.authmanager.path import group_collection_factory as get_group_collection
-from .ext.authmanager.path import user_collection_factory as get_user_collection
+from .authmanager.group.model import GroupSchema, GroupCollection
+from .authmanager.path import group_collection_factory as get_group_collection
+from .authmanager.path import user_collection_factory as get_user_collection
 
 
 def get_group(request, groupname):
