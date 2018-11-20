@@ -2,7 +2,7 @@ import nose
 import morepath
 from webtest import TestApp as Client
 from morpfw.auth.app import App
-from morpfw.auth import create_app
+from morpfw.main import create_app
 from morpfw.auth.authpolicy import JWTWithAPIKeyIdentityPolicy
 from morpfw.auth.user.model import UserCollection, UserSchema, GroupSchema
 from more.jwtauth import JWTIdentityPolicy
@@ -276,14 +276,13 @@ def _test_authentication(c):
 
     assert r.status_code == 405
 
-
     r = c.patch_json('/user/user1/',
-                    {'password': 'newpass'}, expect_errors=True)
+                     {'password': 'newpass'}, expect_errors=True)
 
     assert r.status_code == 422
 
     r = c.patch_json('/user/user1/',
-                    {'username': 'newusername'}, expect_errors=True)
+                     {'username': 'newusername'}, expect_errors=True)
 
     assert r.status_code == 422
 

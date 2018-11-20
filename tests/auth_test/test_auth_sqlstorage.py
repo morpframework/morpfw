@@ -6,7 +6,6 @@ from morpfw.auth.app import App
 from more.transaction import TransactionApp
 from morepath.reify import reify
 from morepath.request import Request
-from morpfw.auth import Session
 from morpfw.app import SQLApp
 
 

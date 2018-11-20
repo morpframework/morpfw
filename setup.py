@@ -20,6 +20,7 @@ setup(name='morpfw',
       zip_safe=False,
       install_requires=[
           # -*- Extra requirements: -*-
+          'argh',
           'rulez',
           'more.cors',
           'celery',
@@ -73,5 +74,10 @@ setup(name='morpfw',
               'elasticsearch>=5.0.0,<6.0.0'
           ]
       },
-      entry_points={'morepath': ['scan=morpfw']}
+      entry_points={
+              'morepath': ['scan=morpfw'],
+              'console_scripts': [
+                'morpfw=morpfw.cli:run'
+            ]
+        }
       )
