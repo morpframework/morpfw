@@ -1,6 +1,6 @@
 from ..app import App
 from .model import UserCollection, UserModel
-from ..path import user_collection_factory
+from ..path import get_user_collection
 from .model import UserSchema, LoginSchema
 from .model import RegistrationSchema
 from ..exc import UserExistsError

@@ -1,6 +1,6 @@
 from .app import App
 from .user.model import UserCollection, UserModel
-from .user.path import user_collection_factory, user_factory
+from .user.path import get_user_collection, get_user
 from .group.model import GroupModel, GroupCollection, GroupSchema
 from .group.path import get_group, get_group_collection
 from .apikey.model import APIKeyCollection, APIKeyModel, APIKeySchema
@@ -17,13 +17,13 @@ def register_authmanager(app_class=App,
                     variables=lambda obj: {
                         'username': obj.data['username']
                     })
-    def _user_factory(app, request, username):
-        return user_factory(request, username)
+    def _get_user(app, request, username):
+        return get_user(request, username)
 
     @app_class.path(model=UserCollection,
                     path='%s/%s' % (basepath, userpath))
-    def _user_collection_factory(app, request):
-        return user_collection_factory(request)
+    def _get_user_collection(app, request):
+        return get_user_collection(request)
 
     @app_class.path(model=APIKeyModel,
                     path='%s/%s/{uuid}' % (

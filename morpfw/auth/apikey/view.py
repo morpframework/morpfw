@@ -1,6 +1,6 @@
 from ..app import App
 from .model import APIKeyModel, APIKeyCollection
-from ..path import user_factory, get_apikey_collection, get_apikey
+from ..path import get_user, get_apikey_collection, get_apikey
 from morpfw.crud import permission
 import uuid
 import rulez
@@ -10,7 +10,7 @@ import morepath
 @App.json(model=APIKeyCollection, request_method='POST',
           permission=permission.Create)
 def generate_apikey(context, request):
-    user = user_factory(request, request.identity.userid)
+    user = get_user(request, request.identity.userid)
     data = {}
     data['username'] = request.identity.userid
     if not user.validate(request.json['password']):
