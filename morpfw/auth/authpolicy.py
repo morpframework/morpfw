@@ -11,7 +11,7 @@ class JWTWithAPIKeyIdentityPolicy(JWTIdentityPolicy):
         api_key = request.headers.get('X-API-KEY', None)
         if api_key:
             api_identity, api_secret = api_key.split('.')
-            apikeys = apikey_collection_factory(request.app, request)
+            apikeys = apikey_collection_factory(request)
             keys = apikeys.search(
                 rulez.field['api_identity'] == api_identity, secure=False)
             if keys and keys[0].data['api_secret'] == api_secret:

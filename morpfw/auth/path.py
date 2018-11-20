@@ -29,13 +29,13 @@ def register_authmanager(app_class=App,
                     path='%s/%s/{uuid}' % (
                         basepath, apikeypath))
     def _apikey_factory(app, request, uuid):
-        return apikey_factory(app, request, uuid)
+        return apikey_factory(request, uuid)
 
     @app_class.path(model=APIKeyCollection,
                     path='%s/%s/' % (
                         basepath, apikeypath))
     def _apikey_collection_factory(app, request):
-        return apikey_collection_factory(app, request)
+        return apikey_collection_factory(request)
 
     @app_class.path(model=GroupModel,
                     path='%s/%s/{identifier}' % (basepath, grouppath))
