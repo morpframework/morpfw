@@ -7,21 +7,11 @@ from more.transaction import TransactionApp
 from morepath.reify import reify
 from morepath.request import Request
 from morpfw.auth import Session
+from morpfw.app import SQLApp
 
 
-class DBSessionRequest(Request):
-
-    @reify
-    def db_session(self):
-        return Session()
-
-
-class SQLStorageApp(TransactionApp, App):
-
-    request_class = DBSessionRequest
-
-
-SQLStorageApp.authmanager_register()
+class SQLStorageApp(SQLApp):
+    pass
 
 
 def test_authentication_sqlstorage(pgsql_db):

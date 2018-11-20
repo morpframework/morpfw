@@ -53,9 +53,6 @@ def get_page(request, identifier):
     return storage.get(identifier)
 
 
-App.authmanager_register(basepath='')
-
-
 def test_morp_framework(pgsql_db):
     c = get_client(App)
 

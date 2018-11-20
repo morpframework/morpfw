@@ -205,7 +205,6 @@ class SQLApp(TransactionApp, BaseApp):
             return self._engine
 
         register_session(session)
-
         # initialize SQLAlchemy
         if 'sqlalchemy' not in settings:
             raise ConfigurationError('SQLAlchemy settings not found')

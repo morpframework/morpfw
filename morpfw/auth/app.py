@@ -43,18 +43,3 @@ class App(CRUDApp):
     def authmanager_permits(self, request: morepath.Request, context: morpfw.Model, permission: str):
         identity = request.identity
         return request.app._permits(identity, context, permission)
-
-    @classmethod
-    def authmanager_register(klass, basepath: str = 'api/v1',
-                             userpath: str = 'user', grouppath: str = 'group'):
-
-        if klass in _REGISTERED_APPS:
-            return
-
-        from .path import register_authmanager
-        register_authmanager(app_class=klass,
-                             basepath=basepath,
-                             userpath=userpath,
-                             grouppath=grouppath)
-
-        _REGISTERED_APPS.append(klass)

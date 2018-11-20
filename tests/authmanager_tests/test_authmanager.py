@@ -56,7 +56,7 @@ def get_client(app, config='settings.yml', **kwargs):
 
 def login(c, username, password='password'):
 
-    r = c.post_json('/api/v1/user/+login', {
+    r = c.post_json('/user/+login', {
         'username': username,
         'password': password
     })
@@ -75,7 +75,7 @@ def logout(c):
 
 
 def _test_authentication(c):
-    r = c.get('/api/v1/user/+login')
+    r = c.get('/user/+login')
 
     # test schema access
 
@@ -97,7 +97,7 @@ def _test_authentication(c):
     logout(c)
 
     # test wrong login
-    r = c.post_json('/api/v1/user/+login', {
+    r = c.post_json('/user/+login', {
         'username': 'invaliduser',
         'password': 'invalidpassword'
     }, expect_errors=True)
@@ -110,7 +110,7 @@ def _test_authentication(c):
         }
     }
 
-    r = c.post_json('/api/v1/user/+login', {
+    r = c.post_json('/user/+login', {
         'username': 'admin',
         'password': 'invalidpassword'
     }, expect_errors=True)
@@ -130,7 +130,7 @@ def _test_authentication(c):
     # test refreshing token
     time.sleep(2)
 
-    r = c.get('/api/v1/user/+refresh_token')
+    r = c.get('/user/+refresh_token')
 
     n = r.headers.get('Authorization').split()
 
@@ -138,7 +138,7 @@ def _test_authentication(c):
 
     c.authorization = ('JWT', n[1])
 
-    r = c.get('/api/v1/user/admin')
+    r = c.get('/user/admin')
 
     assert r.json['data']['username'] == 'admin'
     assert r.json['data']['groups'] == ['__default__']
@@ -146,11 +146,11 @@ def _test_authentication(c):
 
     # query for nonexistent user
 
-    r = c.get('/api/v1/user/unknownuser', expect_errors=True)
+    r = c.get('/user/unknownuser', expect_errors=True)
 
     assert r.status_code == 404
 
-    r = c.get('/api/v1/user/')
+    r = c.get('/user/')
 
 #    assert r.json['schema']['title'] == 'user'
 
@@ -159,7 +159,7 @@ def _test_authentication(c):
     # register new user, you shouldnt be allowed to if not logged in
     # as admin
 
-    r = c.post_json('/api/v1/user/+register',
+    r = c.post_json('/user/+register',
                     {'username': 'user1',
                      'password': 'password',
                      'password_validate': 'password'}, expect_errors=True)
@@ -170,7 +170,7 @@ def _test_authentication(c):
 
     login(c, 'admin')
 
-    r = c.post_json('/api/v1/user/+register',
+    r = c.post_json('/user/+register',
                     {'username': 'user1',
                      'email': 'user1@localhost.com',
                      'password': 'password',
@@ -178,7 +178,7 @@ def _test_authentication(c):
 
     assert r.json == {'status': 'success'}
 
-    r = c.post_json('/api/v1/user/+register',
+    r = c.post_json('/user/+register',
                     {'username': 'user2',
                      'email': 'user2@localhost.com',
                      'password': 'password',
@@ -187,7 +187,7 @@ def _test_authentication(c):
     assert r.json == {'status': 'success'}
 
     # fail if password is not string
-    r = c.post_json('/api/v1/user/+register',
+    r = c.post_json('/user/+register',
                     {'username': 'user3',
                      'email': 'user3@localhost.com',
                      'password': {'hello': 'world'}},
@@ -197,7 +197,7 @@ def _test_authentication(c):
 
     # fail if duplicate user
 
-    r = c.post_json('/api/v1/user/+register',
+    r = c.post_json('/user/+register',
                     {'username': 'user1',
                      'email': 'user1@localhost.com',
                      'password': 'password',
@@ -210,7 +210,7 @@ def _test_authentication(c):
 
     # fail if invalid email
 
-    r = c.post_json('/api/v1/user/+register',
+    r = c.post_json('/user/+register',
                     {'username': 'user4',
                      'email': 'user4',
                      'password': 'password',
@@ -219,7 +219,7 @@ def _test_authentication(c):
 
     assert r.status_code == 422
 
-    r = c.post_json('/api/v1/user/+register',
+    r = c.post_json('/user/+register',
                     {'username': 'user4',
                      'email': 'user4@localhost',
                      'password': 'password',
@@ -228,7 +228,7 @@ def _test_authentication(c):
 
     assert r.status_code == 422
 
-    r = c.get('/api/v1/user/user1')
+    r = c.get('/user/user1')
 
     assert r.json['data']['username'] == 'user1'
     assert r.json['data']['groups'] == ['__default__']
@@ -243,15 +243,15 @@ def _test_authentication(c):
 
     login(c, 'admin')
     r = c.post_json(
-        '/api/v1/user/user1/+statemachine', {'transition': 'deactivate'})
+        '/user/user1/+statemachine', {'transition': 'deactivate'})
 
-    r = c.get('/api/v1/user/user1')
+    r = c.get('/user/user1')
 
     assert r.json['data']['username'] == 'user1'
     assert r.json['data']['groups'] == ['__default__']
     assert r.json['data']['state'] == 'inactive'
 
-    r = c.post_json('/api/v1/user/+login', {
+    r = c.post_json('/user/+login', {
         'username': 'user1',
         'password': 'password'
     }, expect_errors=True)
@@ -259,9 +259,9 @@ def _test_authentication(c):
     assert r.status_code == 401
 
     r = c.post_json(
-        '/api/v1/user/user1/+statemachine', {'transition': 'activate'})
+        '/user/user1/+statemachine', {'transition': 'activate'})
 
-    r = c.get('/api/v1/user/user1')
+    r = c.get('/user/user1')
 
     assert r.json['data']['username'] == 'user1'
     assert r.json['data']['groups'] == ['__default__']
@@ -271,12 +271,12 @@ def _test_authentication(c):
 
     # reject setting password through the update API
 
-    r = c.post_json('/api/v1/user/user1/',
+    r = c.post_json('/user/user1/',
                     {'password': 'newpass'}, expect_errors=True)
 
     assert r.status_code == 422
 
-    r = c.post_json('/api/v1/user/user1/',
+    r = c.post_json('/user/user1/',
                     {'username': 'newusername'}, expect_errors=True)
 
     assert r.status_code == 422
@@ -284,7 +284,7 @@ def _test_authentication(c):
     login(c, 'admin')
 
     # admin should be allowed to set password without requiring current password
-    r = c.post_json('/api/v1/user/user1/+change_password', {
+    r = c.post_json('/user/user1/+change_password', {
         'new_password': 'newpass',
         'new_password_validate': 'newpass'
     })
@@ -294,7 +294,7 @@ def _test_authentication(c):
     login(c, 'user1', 'newpass')
 
     # user require current password
-    r = c.post_json('/api/v1/user/user1/+change_password', {
+    r = c.post_json('/user/user1/+change_password', {
         'new_password': 'password',
         'new_password_validate': 'password'
     }, expect_errors=True)
@@ -302,7 +302,7 @@ def _test_authentication(c):
     assert r.status_code == 422
 
     # user require current password
-    r = c.post_json('/api/v1/user/user1/+change_password', {
+    r = c.post_json('/user/user1/+change_password', {
         'password': 'newpass',
         'new_password': 'password',
         'new_password_validate': 'password'
@@ -313,7 +313,7 @@ def _test_authentication(c):
     login(c, 'admin')
 
     # api keys
-    r = c.post_json('/api/v1/apikey/',
+    r = c.post_json('/apikey/',
                     {'label': 'samplekey', 'password': 'password'})
 
     key_identity = r.json['data']['api_identity']
@@ -323,7 +323,7 @@ def _test_authentication(c):
     assert len(key_secret) == 32
     assert r.json['data']['username'] == 'admin'
 
-    r = c.get('/api/v1/apikey/%s' % key_uuid)
+    r = c.get('/apikey/%s' % key_uuid)
 
     assert key_identity == r.json['data']['api_identity']
     assert key_secret == r.json['data']['api_secret']
@@ -333,7 +333,7 @@ def _test_authentication(c):
 
     login(c, 'user1')
 
-    r = c.get('/api/v1/apikey/+search')
+    r = c.get('/apikey/+search')
 
     assert len(r.json['results']) == 0
 
@@ -341,13 +341,13 @@ def _test_authentication(c):
 
     # lets try deactivating user1 using API key
     r = c.post_json(
-        '/api/v1/user/user1/+statemachine', {'transition': 'deactivate'},
+        '/user/user1/+statemachine', {'transition': 'deactivate'},
         expect_errors=True)
 
     assert r.status_code == 403
 
     r = c.post_json(
-        '/api/v1/user/user1/+statemachine',
+        '/user/user1/+statemachine',
         {'transition': 'deactivate'}, headers=[
             ('X-API-KEY', '.'.join([key_identity, key_secret]))
         ])
@@ -356,7 +356,7 @@ def _test_authentication(c):
 
     # activate back
     r = c.post_json(
-        '/api/v1/user/user1/+statemachine',
+        '/user/user1/+statemachine',
         {'transition': 'activate'}, headers=[
             ('X-API-KEY', '.'.join([key_identity, key_secret]))
         ])
@@ -365,41 +365,41 @@ def _test_authentication(c):
 
     login(c, 'admin')
 
-    r = c.get('/api/v1/group/')
+    r = c.get('/group/')
 
 #    assert r.json['schema']['title'] == 'group'
 
-    r = c.post_json('/api/v1/group/', {'groupname': 'group1'})
+    r = c.post_json('/group/', {'groupname': 'group1'})
 
     assert r.json['data']['groupname'] == 'group1'
 
-    r = c.post_json('/api/v1/group/', {'groupname': 'group1'},
+    r = c.post_json('/group/', {'groupname': 'group1'},
                     expect_errors=True)
 
     assert r.json['status'] == 'error'
     assert r.json['type'] == 'GroupExistsError'
 
-    r = c.get('/api/v1/group/group1')
+    r = c.get('/group/group1')
 
     assert r.json['data']['groupname'] == 'group1'
 
-    r = c.post_json('/api/v1/group/group1/+grant',
+    r = c.post_json('/group/group1/+grant',
                     {'mapping': {'user1': ['member']}})
 
     assert r.json == {'status': 'success'}
 
-    r = c.post_json('/api/v1/group/group1/+grant',
+    r = c.post_json('/group/group1/+grant',
                     {'mapping': {'dummyuser': ['member']}},
                     expect_errors=True)
 
     assert r.status_code == 422
 
-    r = c.get('/api/v1/user/user1')
+    r = c.get('/user/user1')
 
     assert list(sorted(r.json['data']['groups'])) == [
         '__default__', 'group1']
 
-    r = c.get('/api/v1/group/group1/+members')
+    r = c.get('/group/group1/+members')
 
     assert r.json == {
         'users': [
@@ -407,60 +407,60 @@ def _test_authentication(c):
              'links': [{
                  'rel': 'self',
                  'type': 'GET',
-                 'href': 'http://localhost/api/v1/user/user1'}],
+                 'href': 'http://localhost/user/user1'}],
              'roles': ['member']}]
     }
 
-    r = c.post_json('/api/v1/group/group1/+grant', {'mapping': {
+    r = c.post_json('/group/group1/+grant', {'mapping': {
         'user1': ['manager']
     }})
 
     assert r.json == {'status': 'success'}
 
-    r = c.get('/api/v1/group/group1/+members')
+    r = c.get('/group/group1/+members')
 
     assert r.json['users'][0]['roles'] == ['member', 'manager']
 
-    r = c.post_json('/api/v1/group/group1/+grant', {'mapping': {
+    r = c.post_json('/group/group1/+grant', {'mapping': {
         'user1': ['editor']
     }})
 
     assert r.json == {'status': 'success'}
 
-    r = c.get('/api/v1/group/group1/+members')
+    r = c.get('/group/group1/+members')
 
     assert sorted(r.json['users'][0]['roles']
                   ) == sorted(['member', 'editor', 'manager'])
 
-    r = c.get('/api/v1/user/user1/+roles')
+    r = c.get('/user/user1/+roles')
 
     assert sorted(r.json['group1']) == sorted(['member', 'editor', 'manager'])
 
-    r = c.post_json('/api/v1/group/group1/+revoke',
+    r = c.post_json('/group/group1/+revoke',
                     {'mapping': {
                         'user1': ['manager']
                     }})
 
     assert r.json == {'status': 'success'}
 
-    r = c.get('/api/v1/group/group1/+members')
+    r = c.get('/group/group1/+members')
 
     assert r.json['users'][0]['roles'] == ['member', 'editor']
 
-    r = c.post_json('/api/v1/group/group1/+revoke', {
+    r = c.post_json('/group/group1/+revoke', {
         'mapping': {'user1': ['editor', 'member']}
     })
 
     assert r.json == {'status': 'success'}
 
-    r = c.get('/api/v1/group/group1/+members')
+    r = c.get('/group/group1/+members')
 
     assert len(r.json['users']) == 0
 
-    r = c.delete('/api/v1/user/user1')
+    r = c.delete('/user/user1')
 
     assert r.json == {'status': 'success'}
 
-    r = c.get('/api/v1/user/user1', expect_errors=True)
+    r = c.get('/user/user1', expect_errors=True)
 
     assert r.status_code == 404

@@ -31,6 +31,7 @@ def create_app(app, settings, sqlalchemy_session=Session,
 
     # initialize app
     app.init_settings(settings)
+    app._raw_settings = settings
     morepath.commit(app)
     morepath.autoscan()
     app.commit()
