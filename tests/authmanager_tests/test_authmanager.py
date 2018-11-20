@@ -274,9 +274,15 @@ def _test_authentication(c):
     r = c.post_json('/user/user1/',
                     {'password': 'newpass'}, expect_errors=True)
 
+    assert r.status_code == 405
+
+
+    r = c.patch_json('/user/user1/',
+                    {'password': 'newpass'}, expect_errors=True)
+
     assert r.status_code == 422
 
-    r = c.post_json('/user/user1/',
+    r = c.patch_json('/user/user1/',
                     {'username': 'newusername'}, expect_errors=True)
 
     assert r.status_code == 422

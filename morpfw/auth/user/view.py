@@ -144,7 +144,7 @@ def logout(context, request):
     }
 
 
-@App.json(model=UserModel, request_method='POST')
+@App.json(model=UserModel, request_method='PATCH')
 def update(context, request):
     error = None
     if 'password' in request.json.keys():
