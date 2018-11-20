@@ -18,12 +18,12 @@ def register_authmanager(app_class=App,
                         'username': obj.data['username']
                     })
     def _user_factory(app, request, username):
-        return user_factory(app, request, username)
+        return user_factory(request, username)
 
     @app_class.path(model=UserCollection,
                     path='%s/%s' % (basepath, userpath))
     def _user_collection_factory(app, request):
-        return user_collection_factory(app, request)
+        return user_collection_factory(request)
 
     @app_class.path(model=APIKeyModel,
                     path='%s/%s/{uuid}' % (
@@ -40,9 +40,9 @@ def register_authmanager(app_class=App,
     @app_class.path(model=GroupModel,
                     path='%s/%s/{identifier}' % (basepath, grouppath))
     def _group_model_factory(app, request, identifier):
-        return group_model_factory(app, request, identifier)
+        return group_model_factory(request, identifier)
 
     @app_class.path(model=GroupCollection,
                     path='%s/%s' % (basepath, grouppath))
     def _group_collection_factory(app, request):
-        return group_collection_factory(app, request)
+        return group_collection_factory(request)

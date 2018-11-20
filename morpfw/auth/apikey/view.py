@@ -10,7 +10,7 @@ import morepath
 @App.json(model=APIKeyCollection, request_method='POST',
           permission=permission.Create)
 def generate_apikey(context, request):
-    user = user_factory(request.app, request, request.identity.userid)
+    user = user_factory(request, request.identity.userid)
     data = {}
     data['username'] = request.identity.userid
     if not user.validate(request.json['password']):

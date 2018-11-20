@@ -1,3 +1,6 @@
+from ..crud.errors import AlreadyExistsError
+
+
 class AuthManagerError(Exception):
     pass
 
@@ -6,11 +9,11 @@ class InvalidPasswordError(AuthManagerError):
     pass
 
 
-class UserExistsError(AuthManagerError):
+class UserExistsError(AuthManagerError, AlreadyExistsError):
     pass
 
 
-class GroupExistsError(AuthManagerError):
+class GroupExistsError(AuthManagerError, AlreadyExistsError):
     pass
 
 

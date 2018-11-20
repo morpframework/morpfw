@@ -1,11 +1,11 @@
 from .model import UserCollection, UserModel, UserSchema
 
 
-def user_factory(app, request, identifier):
-    collection = user_collection_factory(app, request)
+def user_factory(request, identifier):
+    collection = user_collection_factory(request)
     return collection.get(identifier)
 
 
-def user_collection_factory(app, request):
+def user_collection_factory(request):
     return UserCollection(request,
-                          app.get_authmanager_storage(request, UserSchema))
+                          request.app.get_authmanager_storage(request, UserSchema))
