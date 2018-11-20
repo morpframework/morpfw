@@ -29,7 +29,7 @@ class App(CRUDApp):
                                        lambda self, name, schema: name),
                          reg.match_class('schema',
                                          lambda self, name, schema: schema))
-    def _get_authmanager_storage(self, name: str, schema: Type[morpfw.Schema]):
+    def _get_authmanager_storage(self, name, schema):
         raise NotImplementedError
 
     def authmanager_has_role(self, request: morepath.Request, rolename: str,
