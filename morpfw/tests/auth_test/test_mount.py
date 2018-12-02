@@ -4,7 +4,7 @@ from morpfw.app import BaseApp
 from morpfw.crud.model import Schema
 import sqlalchemy as sa
 import jsl
-from test_auth import get_client
+from .test_auth import get_client
 import jsonobject
 import morepath
 

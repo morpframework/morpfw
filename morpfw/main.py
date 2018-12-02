@@ -1,3 +1,4 @@
+import importlib
 import reg
 import morepath
 from .app import SQLApp, Session, BaseApp
@@ -61,7 +62,7 @@ def create_baseapp(app, settings, scan=True,
     app_settings = settings['application']
     for iapp_path in app_settings['mounted_apps']:
         iapp_mod, iapp_clsname = iapp_path.strip().split(':')
-        iapp_cls = getattr(__import__(iapp_mod), iapp_clsname)
+        iapp_cls = getattr(importlib.import_module(iapp_mod), iapp_clsname)
         iapp_cls.identity_policy()(get_identity_policy)
         iapp_cls.verify_identity()(verify_identity)
         iapp_cls.init_settings(settings)

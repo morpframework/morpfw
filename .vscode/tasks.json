@@ -26,7 +26,7 @@
         {
             "label": "Test Project",
             "type": "shell",
-            "command": "pipenv run pytest --cov-report html --cov=morpfw --annotate-output=annotations.json --html=report.html --self-contained-html -s tests",
+            "command": "pipenv run pytest --cov-report html --cov=morpfw --annotate-output=annotations.json --html=report.html --self-contained-html -s morpfw",
             "group": "test",
             "options": {
                 "env": {

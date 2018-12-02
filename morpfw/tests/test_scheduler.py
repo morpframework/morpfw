@@ -1,5 +1,5 @@
 # FIXME: this test should run properly as unit test
-from common import get_client
+from .common import get_client
 from morpfw.app import SQLApp
 import morpfw
 import pytest

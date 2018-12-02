@@ -3,7 +3,7 @@ from morpfw import sql as morpsql
 from morpfw.crud.model import Schema
 import sqlalchemy as sa
 import jsl
-from common import get_client
+from .common import get_client
 import jsonobject
 
 

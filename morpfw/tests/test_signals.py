@@ -1,4 +1,4 @@
-from common import get_client
+from .common import get_client
 from morpfw.app import SQLApp
 from more.basicauth import BasicAuthIdentityPolicy
 import time
