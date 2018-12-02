@@ -18,9 +18,10 @@ mypy = "*"
 [packages]
 pydocstyle = "*"
 pytest = "==3.10.1"
-pip = "==18.1"
+pip = "==18.0"
 pylint = "*"
 pytest-cov = "*"
+sphinx = "*"
 
 [requires]
 python_version = "3.6"
