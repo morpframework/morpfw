@@ -121,14 +121,17 @@ class NamedObjectModel(Model):
     schema = NamedObjectSchema
 
 
-def get_identity_policy():
-    return BasicAuthIdentityPolicy()
+class AuthnPolicy(object):
 
+    @classmethod
+    def get_identity_policy(cls, settings):
+        return BasicAuthIdentityPolicy()
 
-def verify_identity(identity):
-    if identity.userid == 'admin' and identity.password == 'admin':
-        return True
-    return False
+    @classmethod
+    def verify_identity(cls, app, identity):
+        if identity.userid == 'admin' and identity.password == 'admin':
+            return True
+        return False
 
 
 def get_client(app, config='settings.yml'):
@@ -138,8 +141,7 @@ def get_client(app, config='settings.yml'):
     else:
         settings = config
 
-    appobj = create_app(app, settings, get_identity_policy=get_identity_policy,
-                        verify_identity=verify_identity)
+    appobj = create_app(app, settings)
     c = Client(appobj)
     return c
 

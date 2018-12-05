@@ -1,0 +1,2 @@
+application:
+  authn_policy: morpfw.tests.crud_test.crud_common:AuthnPolicy

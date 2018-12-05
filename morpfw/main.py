@@ -5,7 +5,6 @@ from .app import SQLApp, Session, BaseApp
 from .sql import Base
 import os
 from zope.sqlalchemy import register as register_session
-from .auth.authpolicy import JWTWithAPIKeyIdentityPolicy
 from more.basicauth import BasicAuthIdentityPolicy
 from .exc import ConfigurationError
 import transaction
@@ -18,31 +17,13 @@ default_settings = yaml.load(
     open(os.path.join(os.path.dirname(__file__), 'default_settings.yml')))
 
 
-def default_get_identity_policy(settings):
-    jwtauth_settings = settings.jwtauth
-    if jwtauth_settings:
-        # Pass the settings dictionary to the identity policy.
-        return JWTWithAPIKeyIdentityPolicy(**jwtauth_settings.__dict__.copy())
-    raise Exception('JWTAuth configuration is not set')
-
-
-def default_verify_identity(app, identity):
-    # As we use a token based authentication
-    # we can trust the claimed identity.
-    return True
-
-
 @reg.dispatch(reg.match_class('app', lambda app, *args, **kwargs: app))
-def create_app(app, settings, scan=True,
-               get_identity_policy=default_get_identity_policy,
-               verify_identity=default_verify_identity, **kwargs):
+def create_app(app, settings, scan=True, **kwargs):
     raise NotImplementedError
 
 
 @create_app.register(app=BaseApp)
-def create_baseapp(app, settings, scan=True,
-                   get_identity_policy=default_get_identity_policy,
-                   verify_identity=default_verify_identity, **kwargs):
+def create_baseapp(app, settings, scan=True, **kwargs):
 
     s = copy.deepcopy(default_settings)
     for k in settings.keys():
@@ -60,6 +41,12 @@ def create_baseapp(app, settings, scan=True,
         morepath.autoscan()
 
     app_settings = settings['application']
+    authpol_mod, authpol_clsname = (
+        app_settings['authn_policy'].strip().split(':'))
+    authpolicy = getattr(importlib.import_module(authpol_mod), authpol_clsname)
+    get_identity_policy = authpolicy.get_identity_policy
+    verify_identity = authpolicy.verify_identity
+
     for iapp_path in app_settings['mounted_apps']:
         iapp_mod, iapp_clsname = iapp_path.strip().split(':')
         iapp_cls = getattr(importlib.import_module(iapp_mod), iapp_clsname)
@@ -84,13 +71,15 @@ def create_baseapp(app, settings, scan=True,
 
 
 @create_app.register(app=SQLApp)
-def create_sqlapp(app, settings, scan=True,
-                  get_identity_policy=default_get_identity_policy,
-                  verify_identity=default_verify_identity, **kwargs):
+def create_sqlapp(app, settings, scan=True, **kwargs):
 
     application = create_baseapp(app=app, settings=settings, scan=scan,
-                                 get_identity_policy=get_identity_policy,
-                                 verify_identity=verify_identity, **kwargs)
+                                 **kwargs)
 
     application.initdb()
     return application
+
+
+def run(app, settings):
+    application = create_app(app, settings)
+    morepath.run(application)

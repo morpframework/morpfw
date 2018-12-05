@@ -1,2 +1,3 @@
 application:
   authstorage: memorystorage
+  authn_policy: morpfw.auth.policy.jwtapikey:AuthnPolicy

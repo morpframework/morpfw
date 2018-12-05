@@ -10,6 +10,7 @@ from morpfw.auth.exc import UserExistsError
 
 DEFAULT_SETTINGS = {
     'application': {
+        'authn_policy': 'morpfw.auth.policy.jwtapikey:AuthnPolicy',
         'dburi': 'postgresql://postgres@localhost:45678/morp_tests'
     },
     'worker': {

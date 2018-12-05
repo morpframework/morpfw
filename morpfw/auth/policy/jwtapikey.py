@@ -1,8 +1,9 @@
 from more.jwtauth import JWTIdentityPolicy
 from more.basicauth import BasicAuthIdentityPolicy
 from morepath import Identity, NO_IDENTITY
-from .path import get_apikey_collection
 import rulez
+from ..path import get_apikey_collection
+from .base import AuthnPolicy as BaseAuthnPolicy
 
 
 class JWTWithAPIKeyIdentityPolicy(JWTIdentityPolicy):
@@ -18,3 +19,18 @@ class JWTWithAPIKeyIdentityPolicy(JWTIdentityPolicy):
                 username = keys[0].data['username']
                 return Identity(userid=username)
         return super(JWTWithAPIKeyIdentityPolicy, self).identify(request)
+
+
+class AuthnPolicy(BaseAuthnPolicy):
+
+    @classmethod
+    def get_identity_policy(cls, settings):
+        jwtauth_settings = settings.jwtauth
+        if jwtauth_settings:
+            # Pass the settings dictionary to the identity policy.
+            return JWTWithAPIKeyIdentityPolicy(**jwtauth_settings.__dict__.copy())
+        raise Exception('JWTAuth configuration is not set')
+
+    @classmethod
+    def verify_identity(cls, app, identity):
+        return True

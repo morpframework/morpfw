@@ -22,6 +22,7 @@ pip = "==18.0"
 pylint = "*"
 pytest-cov = "*"
 sphinx = "*"
+"zest.releaser" = "*"
 
 [requires]
 python_version = "3.6"

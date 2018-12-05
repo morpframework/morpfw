@@ -3,7 +3,6 @@ import morepath
 from webtest import TestApp as Client
 from morpfw.auth.app import App
 from morpfw.main import create_app
-from morpfw.auth.authpolicy import JWTWithAPIKeyIdentityPolicy
 from morpfw.auth.user.model import UserCollection, UserSchema, GroupSchema
 from more.jwtauth import JWTIdentityPolicy
 import json
@@ -22,16 +21,8 @@ def get_client(app, config='settings.yml', **kwargs):
     else:
         settings = config
 
-    def get_identity_policy():
-        return JWTWithAPIKeyIdentityPolicy(master_secret='secret', leeway=10,
-                                           allow_refresh=True)
-
-    def verify_identity(identity):
-        return True
-
     kwargs = {}
-    appobj = create_app(app, settings, get_identity_policy=get_identity_policy,
-                        verify_identity=verify_identity, **kwargs)
+    appobj = create_app(app, settings, **kwargs)
     request = appobj.request_class(
         app=appobj, environ={'PATH_INFO': '/'})
 
