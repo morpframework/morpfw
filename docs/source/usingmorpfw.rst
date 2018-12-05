@@ -42,3 +42,20 @@ Lets create a page
    >>> resp = requests.get('http://localhost:5000/pages/%s?user.id=foo' % objid)
    >>> resp.json()
 
+Lets update the body text
+
+   >>> resp = requests.patch(
+   ...   'http://localhost:5000/pages/%s?user.id=foo' % objid, json={
+   ...       'body': 'foo bar baz'
+   ... })
+   >>> resp = requests.get('http://localhost:5000/pages/%s?user.id=foo' % objid)
+   >>> resp.json()
+
+Lets do a search
+
+   >>> resp = requests.get('http://localhost:5000/pages/+search')
+   >>> resp.json()
+
+Lets delete the object
+
+   >>> requests.delete('http://localhost:5000/pages/%s?user.id=foo' % objid)
