@@ -172,12 +172,12 @@ def create_admin(app: morepath.App, username: str, password: str, email: str, se
 
     transaction.manager.begin()
     context = UserCollection(
-        request, app.get_authmanager_storage(request, UserSchema))
+        request, app.get_authn_storage(request, UserSchema))
     userobj = context.create({'username': username,
                               'password': password,
                               'email': email,
                               'state': 'active'})
-    gstorage = app.get_authmanager_storage(
+    gstorage = app.get_authn_storage(
         request, GroupSchema)
     group = gstorage.get('__default__')
     group.add_members([username])

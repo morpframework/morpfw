@@ -30,12 +30,12 @@ def get_client(app, config='settings.yml', **kwargs):
     password = 'password'
     transaction.manager.begin()
     context = UserCollection(
-        request, appobj.get_authmanager_storage(request, UserSchema))
+        request, appobj.get_authn_storage(request, UserSchema))
     userobj = context.create({'username': username,
                               'password': password,
                               'email': '%s@localhost.localdomain' % username,
                               'state': 'active'})
-    gstorage = appobj.get_authmanager_storage(
+    gstorage = appobj.get_authn_storage(
         request, GroupSchema)
     group = gstorage.get('__default__')
     group.add_members([username])

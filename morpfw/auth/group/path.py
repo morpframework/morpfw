@@ -3,13 +3,13 @@ from ..app import App
 
 
 def get_group(request, identifier):
-    storage = request.app.get_authmanager_storage(request, GroupSchema)
+    storage = request.app.get_authn_storage(request, GroupSchema)
     return storage.get(identifier)
 
 
 def get_group_collection(request):
     return GroupCollection(request,
-                           request.app.get_authmanager_storage(request, GroupSchema))
+                           request.app.get_authn_storage(request, GroupSchema))
 
 
 @App.path(model=GroupModel,

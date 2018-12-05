@@ -19,17 +19,17 @@ class App(CRUDApp):
     def __repr__(self):
         return u'AuthManager'
 
-    def get_authmanager_storage(self, request: morepath.Request, schema: Type[morpfw.Schema]):
-        name = self.settings.application.authstorage
-        storage_opts = self.settings.application.authstorage_opts
-        return self._get_authmanager_storage(name, schema)(request=request,
-                                                           **storage_opts)
+    def get_authn_storage(self, request: morepath.Request, schema: Type[morpfw.Schema]):
+        name = self.settings.application.authn_storage
+        storage_opts = self.settings.application.authn_storage_opts
+        return self._get_authn_storage(name, schema)(request=request,
+                                                     **storage_opts)
 
     @reg.dispatch_method(reg.match_key('name',
                                        lambda self, name, schema: name),
                          reg.match_class('schema',
                                          lambda self, name, schema: schema))
-    def _get_authmanager_storage(self, name, schema):
+    def _get_authn_storage(self, name, schema):
         raise NotImplementedError
 
     def authmanager_has_role(self, request: morepath.Request, rolename: str,
@@ -37,7 +37,7 @@ class App(CRUDApp):
         if username is None:
             username = request.identity.userid
         from .group.model import GroupSchema
-        storage = self.get_authmanager_storage(request, GroupSchema)
+        storage = self.get_authn_storage(request, GroupSchema)
         return rolename in storage.get_group_user_roles(groupname, username)
 
     def authmanager_permits(self, request: morepath.Request, context: morpfw.Model, permission: str):

@@ -104,7 +104,7 @@ def get_rulesadapter(obj):
 @App.subscribe(signal=crudsignal.OBJECT_CREATED, model=UserModel)
 def add_user_to_default_group(app, request, obj, signal):
     request = obj.request
-    storage = app.get_authmanager_storage(request, GroupSchema)
+    storage = app.get_authn_storage(request, GroupSchema)
     g = storage.get('__default__')
     if g is None:
         gcol = GroupCollection(request, storage)

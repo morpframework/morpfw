@@ -14,5 +14,5 @@ class StorageAction(dectate.Action):
         return str((self.name, self.schema))
 
     def perform(self, obj, app_class):
-        app_class._get_authmanager_storage.register(
+        app_class._get_authn_storage.register(
             reg.methodify(obj), name=self.name, schema=self.schema)

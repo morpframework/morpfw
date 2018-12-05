@@ -29,7 +29,7 @@ class UserMemoryStorage(MemoryStorage):
         user.data['password'] = new_password
 
     def get_user_groups(self, username):
-        storage = self.request.app.get_authmanager_storage(
+        storage = self.request.app.get_authn_storage(
             self.request, GroupSchema)
         return storage.get_user_groups(username)
 
@@ -54,7 +54,7 @@ class GroupMemoryStorage(MemoryStorage):
 
     def get_members(self, groupname):
         group = self.get(groupname)
-        userstorage = self.request.app.get_authmanager_storage(
+        userstorage = self.request.app.get_authn_storage(
             self.request, UserSchema)
         res = []
         group.data.setdefault('attrs', {})

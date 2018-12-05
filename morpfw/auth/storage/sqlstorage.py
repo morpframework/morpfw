@@ -45,7 +45,7 @@ class UserSQLStorage(SQLStorage):
         q = self.session.query(db.Membership).filter(
             db.Membership.user_id == u.uuid)
         membership = q.all()
-        groupstorage = self.request.app.get_authmanager_storage(
+        groupstorage = self.request.app.get_authn_storage(
             self.request, GroupSchema)
         res = [groupstorage.get_by_uuid(m.group_id)
                for m in membership]

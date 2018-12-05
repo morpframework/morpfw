@@ -9,7 +9,7 @@ def get_user(request, identifier):
 
 def get_user_collection(request):
     return UserCollection(request,
-                          request.app.get_authmanager_storage(request, UserSchema))
+                          request.app.get_authn_storage(request, UserSchema))
 
 
 @App.path(model=UserModel,

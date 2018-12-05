@@ -4,8 +4,8 @@ server:
 
 application:
   mounted_apps: []
-  authstorage: sqlstorage
-  authstorage_opts: {}
+  authn_storage: sqlstorage
+  authn_storage_opts: {}
   new_user_state: active
   dburi: 'sqlite:///%(here)s/app.db'
   compositekey_separator: '!!!!'
