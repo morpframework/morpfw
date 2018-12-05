@@ -22,8 +22,8 @@ framework which supports:
 
  * REST API framework
 
-   * `JSL <https://jsl.readthedocs.io/>`_ schema model definition 
-     (deprecated, to be ported to Avro/JSONObject)
+   * `JsonObject <https://pypi.org/project/jsonobject/>`_ schema model 
+     definition
    * CRUD endpoints
    * Search endpoint, powered by `rulez
      <https://github.com/morpframework/rulez>`_ query
@@ -40,6 +40,8 @@ framework which supports:
  * Authentication engine
 
    * JWT token with refresh support
+   * Hadoop style ``user.id`` GET parameter with trusted host check
+   * ``REMOTE_USER`` header with trusted host check
    * Pluggable authentication system
 
  * Authorization engine
@@ -58,7 +60,7 @@ framework which supports:
 
 .. note:: Morp at the moment is still highly experimental, there is no promise 
           of API stability as of yet. However, because the author is using it
-          a production project, there is some level of stability. 
+          in a production project, there is some level of stability. 
 
 Documentation
 ==============
