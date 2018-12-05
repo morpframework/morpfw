@@ -4,11 +4,13 @@ import os
 
 version = '0.2.0'
 
+long_description = open(
+    os.path.join(os.path.dirname(__file__), 'README.rst')).read()
+
 setup(name='morpfw',
       version=version,
       description="Web framework based on morepath",
-      long_description="""\
-""",
+      long_description=long_description,
       classifiers=[],  # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
       keywords='',
       author='Izhar Firdaus',
