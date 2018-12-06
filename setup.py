@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import sys
 import os
 
-version = '0.2.1a1.dev2'
+version = '0.2.1a1.dev3'
 
 long_description = open(
     os.path.join(os.path.dirname(__file__), 'README.rst')).read()
@@ -60,7 +60,8 @@ setup(name='morpfw',
           'more.transaction',
           'zope.sqlalchemy',
           'more.basicauth',
-          'cryptography'
+          'cryptography',
+          'elasticsearch>=5.0.0,<6.0.0'
       ],
       extras_require={
           'test': [
@@ -73,7 +74,6 @@ setup(name='morpfw',
               'pytest-annotate',
               'pytest-cov',
               'pika',
-              'elasticsearch>=5.0.0,<6.0.0'
           ]
       },
       entry_points={

@@ -1,4 +1,5 @@
 from argh import arg, dispatch_commands
+import importlib
 import os
 import sys
 from .main import create_app
@@ -26,7 +27,7 @@ def load(app_path, settings_file, host=None, port=None):
 
     sys.path.append(os.getcwd())
     mod, clsname = app_path.split(':')
-    app_cls = getattr(__import__(mod), clsname)
+    app_cls = getattr(importlib.import_module(mod), clsname)
 
     appobj = create_app(app_cls, settings)
 
