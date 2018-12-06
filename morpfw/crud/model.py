@@ -124,7 +124,7 @@ class Collection(object):
     def links(self):
         request = self.request
         links = [{'rel': 'create',
-                  'href': request.link(self, '+create'),
+                  'href': request.link(self),
                   'method': 'POST'},
                  {'rel': 'search',
                   'href': request.link(self, '+search')}]
