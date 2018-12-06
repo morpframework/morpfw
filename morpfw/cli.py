@@ -29,11 +29,8 @@ def load(app_path, settings_file, host=None, port=None):
     mod, clsname = app_path.split(':')
     app_cls = getattr(importlib.import_module(mod), clsname)
 
-    appobj = create_app(app_cls, settings)
-
     return {
         'app_cls': app_cls,
-        'app': appobj,
         'settings': settings,
         'host': host,
         'port': port
@@ -46,7 +43,7 @@ def load(app_path, settings_file, host=None, port=None):
 @arg('-p', '--port', default=5432, type=int, help='Port')
 def start(app=None, settings=None, host=None, port=None):
     param = load(app, settings, host, port)
-    morpfw.run(param['app'], host=param['host'],
+    morpfw.run(param['app_cls'], host=param['host'],
                port=param['port'], ignore_cli=True)
 
 
