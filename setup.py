@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import sys
 import os
 
-version = '0.2.1a1.dev1'
+version = '0.2.1a1.dev2'
 
 long_description = open(
     os.path.join(os.path.dirname(__file__), 'README.rst')).read()
@@ -23,7 +23,7 @@ setup(name='morpfw',
       install_requires=[
           # -*- Extra requirements: -*-
           'argh',
-          'rulez',
+          'rulez>=0.1.1,<0.2.0',
           'more.cors',
           'celery',
           'redis',
