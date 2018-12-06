@@ -80,6 +80,6 @@ def create_sqlapp(app, settings, scan=True, **kwargs):
     return application
 
 
-def run(app, settings):
+def run(app, settings, host='127.0.0.1', port=5000, ignore_cli=True):
     application = create_app(app, settings)
-    morepath.run(application)
+    morepath.run(application, host=host, port=port, ignore_cli=ignore_cli)
