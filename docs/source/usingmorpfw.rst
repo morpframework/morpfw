@@ -28,8 +28,10 @@ username from ``user.id`` GET parameter.
 
 .. code-block:: python
 
-   >>> resp = requests.get('http://localhost:5000/pages?user.id=foo'))
+   >>> import requests
+   >>> resp = requests.get('http://localhost:5000/pages?user.id=foo')
    >>> resp.json()
+   {...}
 
 Lets create a page
 
@@ -41,6 +43,7 @@ Lets create a page
    >>> objid = resp.json()['data']['uuid']
    >>> resp = requests.get('http://localhost:5000/pages/%s?user.id=foo' % objid)
    >>> resp.json()
+   {...}
 
 Lets update the body text
 
@@ -50,12 +53,16 @@ Lets update the body text
    ... })
    >>> resp = requests.get('http://localhost:5000/pages/%s?user.id=foo' % objid)
    >>> resp.json()
+   {...}
 
 Lets do a search
 
    >>> resp = requests.get('http://localhost:5000/pages/+search')
    >>> resp.json()
+   {...}
 
 Lets delete the object
 
-   >>> requests.delete('http://localhost:5000/pages/%s?user.id=foo' % objid)
+   >>> resp = requests.delete('http://localhost:5000/pages/%s?user.id=foo' % objid)
+   >>> resp.status_code
+   200
