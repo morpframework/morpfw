@@ -116,27 +116,12 @@ class BaseApp(authmanager.App, cors.CORSApp):
         raise NotImplementedError
 
     @classmethod
-    def celery_subscribe(klass, signal, task_name: Optional[str] = None):
-        warnings.warn(
-            "celery_subscibe is deprecated, use async_subscribe",
-            DeprecationWarning)
-        return klass.async_subscribe(signal, task_name)
-
-    @classmethod
     def async_subscribe(klass, signal: str, task_name: Optional[str] = None):
         def wrapper(wrapped):
             task = shared_task(name=task_name,  base=MorpTask)(wrapped)
             klass._celery_subscribe(signal)(task)
             return task
         return wrapper
-
-    @classmethod
-    def celery_cron(klass, name, minute='*', hour='*', day_of_week='*',
-                    day_of_month='*', month_of_year='*'):
-        warnings.warn("celery_cron is deprecated, use cron",
-                      DeprecationWarning)
-        return klass.cron(name, minute, hour, day_of_week,
-                          day_of_month, month_of_year)
 
     @classmethod
     def cron(klass, name: str, minute: str = '*', hour: str = '*', day_of_week: str = '*',
@@ -152,11 +137,6 @@ class BaseApp(authmanager.App, cors.CORSApp):
             }
             return task
         return wrapper
-
-    def celery_signal(self, signal, **kwargs):
-        warnings.warn("celery_signal is deprecated, use signal",
-                      DeprecationWarning)
-        return self.signal(signal, **kwargs)
 
     def signal(self, signal: str, **kwargs) -> Signal:
         return Signal(self, signal, **kwargs)
