@@ -1,3 +1,4 @@
+import morepath
 from more.jsonschema import JsonSchemaApp
 from . import signals as signals
 from sqlalchemy.orm import sessionmaker
@@ -6,6 +7,7 @@ import reg
 from more.signals import SignalApp
 from . import component as actions
 import warnings
+from .model import Model
 
 Session = sessionmaker()
 
@@ -125,3 +127,8 @@ class App(JsonSchemaApp, signals.SignalApp):
     def join_identifier(self, *args):
         separator = self.get_compositekey_separator()
         return separator.join(args)
+
+    def permits(self, request: morepath.Request,
+                context: Model, permission: str):
+        identity = request.identity
+        return self._permits(identity, context, permission)

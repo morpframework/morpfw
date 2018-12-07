@@ -39,7 +39,3 @@ class App(CRUDApp):
         from .group.model import GroupSchema
         storage = self.get_authn_storage(request, GroupSchema)
         return rolename in storage.get_group_user_roles(groupname, username)
-
-    def authmanager_permits(self, request: morepath.Request, context: morpfw.Model, permission: str):
-        identity = request.identity
-        return request.app._permits(identity, context, permission)

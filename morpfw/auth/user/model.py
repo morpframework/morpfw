@@ -9,7 +9,8 @@ import sqlalchemy_jsonfield as sajson
 from ..model import NAME_PATTERN, EMAIL_PATTERN
 from morpfw.crud import signals as crudsignal
 from morpfw.crud import errors as cruderrors
-from morpfw.crud.model import Schema, Adapter
+from morpfw.crud.schema import Schema
+from morpfw.crud.rulesadapter import Adapter
 from morpfw.crud.validator import regex_validator
 from ..group.model import GroupCollection, GroupSchema
 from uuid import uuid4

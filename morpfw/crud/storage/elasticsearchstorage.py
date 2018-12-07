@@ -4,6 +4,7 @@ import elasticsearch.exceptions as es_exc
 from ..app import App
 from pprint import pprint as print
 import copy
+from typing import Optional
 
 
 class AggGroup(object):
@@ -143,7 +144,7 @@ class Aggregate(object):
 
 class ElasticSearchStorage(BaseStorage):
 
-    refresh = False
+    refresh: Optional[str] = None
     auto_id = False
     use_transactions = False
 

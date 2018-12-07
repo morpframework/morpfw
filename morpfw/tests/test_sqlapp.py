@@ -1,6 +1,6 @@
 import morpfw
 from morpfw import sql as morpsql
-from morpfw.crud.model import Schema
+from morpfw.crud.schema import Schema
 import sqlalchemy as sa
 import jsl
 from .common import get_client

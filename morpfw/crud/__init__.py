@@ -6,7 +6,9 @@ import argparse
 import yaml
 import sqlalchemy
 import os
-from .model import Collection, Model, Adapter, Schema
+from .model import Collection, Model
+from .rulesadapter import Adapter
+from .schema import Schema
 from .model import StateMachine
 from .util import resolve_model
 from .app import App

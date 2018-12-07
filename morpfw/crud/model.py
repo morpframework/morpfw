@@ -1,4 +1,3 @@
-from .app import App
 from jsonschema.validators import Draft4Validator
 from jsonschema import validate, ValidationError
 from .util import jsl_nullable
@@ -14,20 +13,14 @@ from uuid import uuid4
 from transitions import Machine
 import copy
 from .errors import StateUpdateProhibitedError, AlreadyExistsError
-from .schema import Schema
 import jsonobject
+
 
 ALLOWED_SEARCH_OPERATORS = [
     'and', 'or', '==', 'in',
     '~', '!=', '>', '<', '>=',
     '<='
 ]
-
-
-def permits(request, obj, permission, app=None):
-    if app is None:
-        app = request.app
-    return app._permits(request.identity, obj, permission)
 
 
 class Collection(object):
@@ -82,7 +75,7 @@ class Collection(object):
             query, offset=offset, limit=limit, order_by=order_by)
 
         if secure:
-            objs = list([obj for obj in objs if permits(
+            objs = list([obj for obj in objs if self.request.app.permits(
                 self.request, obj, permission.View)])
         return list(objs)
 
@@ -290,44 +283,6 @@ class Model(object):
         self.state_machine()
 
 
-class Adapter(object):
-
-    def __init__(self, context: Model):
-        self.context = context
-        self.request = context.request
-        self.app = context.app
-
-    @property
-    def schema(self):
-        return self.context.schema
-
-    @property
-    def identifier(self):
-        return self.context.identifier
-
-    @property
-    def data(self):
-        return self.context.data
-
-    def json(self):
-        return self.context.json()
-
-    def update(self, *args, **kwargs):
-        return self.context.update(*args, **kwargs)
-
-    def delete(self):
-        return self.context.delete()
-
-    def transform_json(self, data):
-        return data
-
-    def links(self):
-        return []
-
-    def __repr__(self):
-        return "<Adapted %s:(%s)>" % (self.__class__.__name__, self.context)
-
-
 class StateMachine(object):
 
     @property
@@ -357,8 +312,3 @@ class StateMachine(object):
     @state.setter
     def state(self, val):
         self._context.data['state'] = val
-
-
-@App.rulesadapter(model=Model)
-def get_default_rulesadapter(obj):
-    return Adapter(obj)

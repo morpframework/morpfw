@@ -2,7 +2,8 @@ import os
 import morepath
 import yaml
 from webtest import TestApp as Client
-from morpfw.crud.model import Collection, Model, Schema
+from morpfw.crud.model import Collection, Model
+from morpfw.crud.schema import Schema
 from morpfw.crud.model import StateMachine
 from morpfw.app import BaseApp
 import morpfw.crud.signals as signals

@@ -1,7 +1,7 @@
 import morpfw
 from morpfw import sql as morpsql
 from morpfw.app import BaseApp
-from morpfw.crud.model import Schema
+from morpfw.crud.schema import Schema
 import sqlalchemy as sa
 import jsl
 from .test_auth import get_client

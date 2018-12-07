@@ -1,5 +1,6 @@
 from .crud_common import App as BaseApp
-from morpfw.crud.model import Collection, Model, Schema
+from morpfw.crud.model import Collection, Model
+from morpfw.crud.schema import Schema
 from morpfw.crud.storage.elasticsearchstorage import ElasticSearchStorage
 from .crud_common import get_client, run_jslcrud_test, PageCollection, PageModel
 from .crud_common import NamedObjectCollection, NamedObjectModel
