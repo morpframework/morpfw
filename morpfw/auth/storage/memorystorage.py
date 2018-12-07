@@ -8,7 +8,7 @@ from morpfw.crud import errors as cruderrors
 from .. import exc
 import rulez
 
-DB = {
+DB: dict = {
     'users': {},
     'groups': {},
     'rolemap': {}
@@ -29,7 +29,7 @@ class UserMemoryStorage(MemoryStorage):
         user.data['password'] = new_password
 
     def get_user_groups(self, username):
-        storage = self.request.app.get_authn_storage(
+        storage = self.request.app.root.get_authnz_provider().get_authn_storage(
             self.request, GroupSchema)
         return storage.get_user_groups(username)
 
@@ -54,7 +54,7 @@ class GroupMemoryStorage(MemoryStorage):
 
     def get_members(self, groupname):
         group = self.get(groupname)
-        userstorage = self.request.app.get_authn_storage(
+        userstorage = self.request.app.root.get_authnz_provider().get_authn_storage(
             self.request, UserSchema)
         res = []
         group.data.setdefault('attrs', {})
@@ -105,14 +105,14 @@ class GroupMemoryStorage(MemoryStorage):
             rolemap[groupname][username].remove(rolename)
 
 
-SINGLETON = {}
+SINGLETON: dict = {}
 
 
 def userstorage_factory(request, *args, **kwargs):
     return UserMemoryStorage(request)
 
 
-@App.authmanager_storage('memorystorage', UserSchema)
+@App.authn_storage('memorystorage', UserSchema)
 def get_userstorage_factory(name, schema):
     return userstorage_factory
 
@@ -121,7 +121,7 @@ def apikeystorage_factory(request, *args, **kwargs):
     return APIKeyMemoryStorage(request)
 
 
-@App.authmanager_storage('memorystorage', APIKeySchema)
+@App.authn_storage('memorystorage', APIKeySchema)
 def get_apikeystorage_factory(name, schema):
     return apikeystorage_factory
 
@@ -130,6 +130,6 @@ def groupstorage_factory(request, *args, **kwargs):
     return GroupMemoryStorage(request)
 
 
-@App.authmanager_storage('memorystorage', GroupSchema)
+@App.authn_storage('memorystorage', GroupSchema)
 def get_groupstorage_factory(name, schema):
     return groupstorage_factory

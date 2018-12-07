@@ -56,12 +56,6 @@ def get_page(request, identifier):
 def test_morp_framework(pgsql_db):
     c = get_client(App)
 
-    r = c.post_json(
-        '/user/+login', {'username': 'defaultuser',
-                         'password': 'password'})
-
-    c.authorization = ('JWT', r.headers.get('Authorization').split()[1])
-
     r = c.get('/')
     assert len(r.json['schema']['properties']) == 8
 

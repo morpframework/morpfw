@@ -10,7 +10,7 @@ from morpfw.auth.exc import UserExistsError
 
 DEFAULT_SETTINGS = {
     'application': {
-        'authn_policy': 'morpfw.auth.policy.jwtapikey:AuthnPolicy',
+        'authn_policy': 'morpfw.auth.policy.noauth:AuthnPolicy',
         'dburi': 'postgresql://postgres@localhost:45678/morp_tests'
     },
     'worker': {
@@ -41,10 +41,10 @@ def get_client(app, config='settings.yml', **kwargs):
     settings = get_settings(config)
     appobj = create_app(app, settings, **kwargs)
     appobj.initdb()
-    try:
-        create_admin(appobj, username='defaultuser',
-                     password='password', email='admin@localhost.localdomain')
-    except UserExistsError:
-        pass
+#	try:
+#		create_admin(appobj, username='defaultuser',
+#					 password='password', email='admin@localhost.localdomain')
+#	except UserExistsError:
+#		pass
     c = Client(appobj)
     return c

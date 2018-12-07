@@ -41,11 +41,19 @@ def create_baseapp(app, settings, scan=True, **kwargs):
         morepath.autoscan()
 
     app_settings = settings['application']
-    authpol_mod, authpol_clsname = (
+
+    authnpol_mod, authnpol_clsname = (
         app_settings['authn_policy'].strip().split(':'))
-    authpolicy = getattr(importlib.import_module(authpol_mod), authpol_clsname)
-    get_identity_policy = authpolicy.get_identity_policy
-    verify_identity = authpolicy.verify_identity
+    authnpolicy = getattr(importlib.import_module(
+        authnpol_mod), authnpol_clsname)
+
+    authnzprv_mod, authnzprv_factory = (
+        app_settings['authnz_provider'].strip().split(':'))
+    authnz_provider = getattr(importlib.import_module(
+        authnzprv_mod), authnzprv_factory)
+
+    get_identity_policy = authnpolicy.get_identity_policy
+    verify_identity = authnpolicy.verify_identity
 
     for iapp_path in app_settings['mounted_apps']:
         iapp_mod, iapp_clsname = iapp_path.strip().split(':')
@@ -58,6 +66,7 @@ def create_baseapp(app, settings, scan=True, **kwargs):
 
     app.identity_policy()(get_identity_policy)
     app.verify_identity()(verify_identity)
+    app.authnz_provider()(lambda: authnz_provider())
     app.init_settings(settings)
     app._raw_settings = settings
 

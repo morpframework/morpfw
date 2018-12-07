@@ -4,7 +4,7 @@ from ..app import App
 
 def get_apikey_collection(request):
     return APIKeyCollection(request,
-                            request.app.get_authn_storage(request, APIKeySchema))
+                            request.app.root.get_authnz_provider().get_authn_storage(request, APIKeySchema))
 
 
 def get_apikey(request, identifier):

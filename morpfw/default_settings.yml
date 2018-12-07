@@ -4,12 +4,13 @@ server:
 
 application:
   mounted_apps: []
+  authnz_provider: morpfw.auth.authz:NullPolicy
   authn_storage: sqlstorage
   authn_storage_opts: {}
   new_user_state: active
   dburi: 'sqlite:///%(here)s/app.db'
   compositekey_separator: '!!!!'
-  authn_policy: morpfw.auth.policy.useridparam:AuthnPolicy
+  authn_policy: morpfw.auth.policy.noauth:AuthnPolicy
 
 worker:
   enabled: false

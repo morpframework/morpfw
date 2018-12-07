@@ -6,7 +6,7 @@ from .crud import permission as jslperm
 
 
 def _has_admin_role(app, identity, context, permission):
-    return app.authmanager_has_role(context.request, 'administrator')
+    return app.has_role(context.request, 'administrator')
 
 
 App.permission_rule(model=UserCollection,

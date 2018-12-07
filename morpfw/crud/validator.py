@@ -27,7 +27,7 @@ def regex_validator(pattern, name):
 
 def load(validator, schema, request):
     newreq = request.app.request_class(
-        request.environ.copy(), request.app,
+        request.environ.copy(), request.app.root,
         path_info=urllib.parse.unquote(request.path))
     context = resolve_model(newreq)
     context.request = request

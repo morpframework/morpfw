@@ -2,6 +2,7 @@ import morpfw
 from morpfw import sql as morpsql
 from morpfw.app import BaseApp
 from morpfw.crud.schema import Schema
+from morpfw.auth.app import App as AuthApp
 import sqlalchemy as sa
 import jsl
 from .test_auth import get_client
@@ -13,7 +14,7 @@ class App(morpfw.SQLApp):
     pass
 
 
-class MountedApp(morpfw.SQLApp):
+class MountedApp(AuthApp, morpfw.SQLApp):
     pass
 
 
@@ -31,6 +32,6 @@ def test_morp_framework(pgsql_db):
 
     c.authorization = ('JWT', r.headers.get('Authorization').split()[1])
 
-    r = c.get('/user/+refresh_token')
+    r = c.get('/api/v1/user/+refresh_token')
 
     c.authorization = ('JWT', r.headers.get('Authorization').split()[1])

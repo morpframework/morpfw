@@ -1,6 +1,7 @@
 application:
+  authnz_provider: morpfw.tests.auth_test.test_mount:MountedApp
   authn_storage: sqlstorage
   authn_policy: morpfw.auth.policy.jwtapikey:AuthnPolicy
   dburi: 'postgresql://postgres@localhost:45678/morp_tests'
   mounted_apps:
-    - morpfw.tests.auth_test.test_mount:MountedApp
+  - morpfw.tests.auth_test.test_mount:MountedApp

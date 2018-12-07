@@ -3,6 +3,7 @@ import dectate
 import reg
 from . import auth as authmanager
 from .crud.provider.base import Provider
+from .crud.app import App as CRUDApp
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.pool import NullPool, QueuePool
 from more.transaction import TransactionApp
@@ -41,7 +42,7 @@ from celery.result import AsyncResult
 from sqlalchemy.engine.base import Engine
 from billiard.einfo import ExceptionInfo
 from .signal.app import SignalApp
-
+import reg
 
 Session = sessionmaker(extension=ZopeTransactionExtension())
 
@@ -57,7 +58,13 @@ class DBSessionRequest(Request):
         return self._db_session
 
 
-class BaseApp(authmanager.App, cors.CORSApp, SignalApp):
+class BaseApp(CRUDApp, cors.CORSApp, SignalApp):
+
+    authnz_provider = dectate.directive(directive.AuthnzProviderAction)
+
+    @reg.dispatch_method()
+    def get_authnz_provider(self):
+        raise NotImplementedError
 
     def __repr__(self):
         return 'Morp Application -> %s:%s' % (self.__class__.__module__,
@@ -65,18 +72,18 @@ class BaseApp(authmanager.App, cors.CORSApp, SignalApp):
 
 
 def create_admin(app: morepath.App, username: str, password: str, email: str, session=Session):
-    request = app.request_class(
-        app=app, environ={'PATH_INFO': '/'})
+    authapp = app.get_authnz_provider()
+    authapp.root = app
+    request = authapp.request_class(app=authapp, environ={'PATH_INFO': '/'})
 
     transaction.manager.begin()
-    context = UserCollection(
-        request, app.get_authn_storage(request, UserSchema))
+    get_authn_storage = authapp.get_authn_storage
+    context = UserCollection(request, get_authn_storage(request, UserSchema))
     userobj = context.create({'username': username,
                               'password': password,
                               'email': email,
                               'state': 'active'})
-    gstorage = app.get_authn_storage(
-        request, GroupSchema)
+    gstorage = get_authn_storage(request, GroupSchema)
     group = gstorage.get('__default__')
     group.add_members([username])
     group.grant_member_role(username, 'administrator')

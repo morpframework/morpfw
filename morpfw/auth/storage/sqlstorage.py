@@ -195,12 +195,12 @@ def apikeystorage_factory(request, *args, **kwargs):
     return APIKeySQLStorage(request)
 
 
-@App.authmanager_storage('sqlstorage', APIKeySchema)
+@App.authn_storage('sqlstorage', APIKeySchema)
 def get_apikeystorage_factory(name, schema):
     return apikeystorage_factory
 
 
-@App.authmanager_storage('sqlstorage', UserSchema)
+@App.authn_storage('sqlstorage', UserSchema)
 def get_userstorage_factory(name, schema):
     return userstorage_factory
 
@@ -209,6 +209,6 @@ def groupstorage_factory(request, *args, **kwargs):
     return GroupSQLStorage(request)
 
 
-@App.authmanager_storage('sqlstorage', GroupSchema)
+@App.authn_storage('sqlstorage', GroupSchema)
 def get_groupstorage_factory(name, schema):
     return groupstorage_factory
