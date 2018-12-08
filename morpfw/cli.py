@@ -43,7 +43,7 @@ def load(app_path, settings_file, host=None, port=None):
 @arg('-p', '--port', default=5432, type=int, help='Port')
 def start(app=None, settings=None, host=None, port=None):
     param = load(app, settings, host, port)
-    morpfw.run(param['app_cls'], host=param['host'],
+    morpfw.run(param['app_cls'], settings=param['settings'], host=param['host'],
                port=param['port'], ignore_cli=True)
 
 
