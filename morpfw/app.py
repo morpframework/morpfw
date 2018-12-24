@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.pool import NullPool, QueuePool
 from more.transaction import TransactionApp
 from morepath.reify import reify
-from morepath.request import Request
+from morepath.request import Request as BaseRequest
 import webob
 from more import cors
 from morepath.request import Response
@@ -47,6 +47,21 @@ import reg
 Session = sessionmaker(extension=ZopeTransactionExtension())
 
 
+class Request(BaseRequest):
+
+    def copy(self, *args, **kwargs):
+        """
+        Copy the request and environment object.
+
+        This only does a shallow copy, except of wsgi.input
+        """
+        self.make_body_seekable()
+        env = self.environ.copy()
+        new_req = self.__class__(env, *args, **kwargs)
+        new_req.copy_body()
+        return new_req
+
+
 class DBSessionRequest(Request):
 
     _db_session = None
@@ -61,6 +76,7 @@ class DBSessionRequest(Request):
 class BaseApp(CRUDApp, cors.CORSApp, SignalApp):
 
     authnz_provider = dectate.directive(directive.AuthnzProviderAction)
+    request_class = Request
 
     @reg.dispatch_method()
     def get_authnz_provider(self):
