@@ -64,7 +64,14 @@ def solo_worker(app=None, settings=None):
 def register_admin(app=None, settings=None, username=None, email=None):
     param = load(app, settings)
     password = getpass.getpass('Enter password for %s: ' % username)
-    app = create_app(param['app_cls'], settings)
+    app = create_app(param['app_cls'], param['settings'])
+    while not isinstance(app, morepath.App):
+        wrapped = getattr(app, 'app', None)
+        if wrapped:
+            app = wrapped
+        else:
+            raise ValueError(
+                'Unable to locate app object from middleware')
     create_admin(app=app, username=username,
                  password=password, email=email)
 
