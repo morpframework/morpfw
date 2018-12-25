@@ -83,6 +83,9 @@ def create_baseapp(app, settings, scan=True, **kwargs):
     app.init_settings(settings)
     app._raw_settings = settings
 
+    if settings['application']['development_mode']:
+        os.environ['MOREPATH_TEMPLATE_AUTO_RELOAD'] = "1"
+
     app.commit()
 
     if settings['worker']['enabled']:
