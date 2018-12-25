@@ -31,6 +31,7 @@ def model_factory(request, identifier):
 
 class ObjectStorage(MemoryStorage):
     incremental_id = True
+    incremental_column = 'objid'
     model = ObjectModel
 
 

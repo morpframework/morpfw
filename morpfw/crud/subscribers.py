@@ -16,7 +16,7 @@ def set_uuid(app, request, obj, signal):
 @App.subscribe(signal=signals.OBJECT_CREATED, model=model.Model)
 def set_created(app, request, obj, signal):
     if getattr(obj.schema, 'created', None):
-        now = datetime.utcnow().isoformat()
+        now = datetime.utcnow()
         obj.data['created'] = now
         obj.data['modified'] = now
 

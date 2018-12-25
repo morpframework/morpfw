@@ -9,6 +9,7 @@ DATA = {}
 class MemoryStorage(BaseStorage):
 
     incremental_id = False
+    incremental_column = 'id'
 
     @property
     def datastore(self):
@@ -26,7 +27,7 @@ class MemoryStorage(BaseStorage):
         data = data.copy()
         obj = self.model(self.request, self, data)
         if self.incremental_id:
-            obj.data['id'] = len(DATA[self.typekey]) + 1
+            obj.data[self.incremental_column] = len(DATA[self.typekey]) + 1
         identifier = obj.identifier
         DATA[self.typekey][identifier] = obj
         return obj

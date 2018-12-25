@@ -10,7 +10,9 @@ import uuid
 from ..types import datestr
 import pytz
 import copy
-_MARKER = []
+import datetime
+
+_MARKER: list = []
 
 
 def parse_date(datestr):
@@ -38,7 +40,7 @@ class SQLAlchemyModelProvider(Provider):
             except AttributeError:
                 raise KeyError(key)
             if data:
-                return datestr(data.isoformat())
+                return data
             return None
         if isinstance(self.columns[key].type, GUID):
             try:
@@ -65,7 +67,8 @@ class SQLAlchemyModelProvider(Provider):
         if key not in self.columns:
             return
         if value and isinstance(self.columns[key].type, sa.DateTime):
-            value = parse_date(value)
+            if not isinstance(value, datetime.datetime):
+                value = parse_date(value)
         elif value and isinstance(self.columns[key].type, GUID):
             value = uuid.UUID(value)
 
@@ -108,6 +111,29 @@ class SQLAlchemyModelProvider(Provider):
     def keys(self):
         return self.schema._fields.keys()
 
+    def as_dict(self):
+        fields = self.schema.properties().items()
+        result = {}
+        for n, f in fields:
+            v = getattr(self.data, n)
+            if v is None and not f.required:
+                continue
+            result[n] = v
+        return result
+
+    def as_json(self):
+        fields = self.schema.properties().items()
+        result = {}
+        for n, f in fields:
+            v = self.get(n)
+            if v is None and not f.required:
+                continue
+            if isinstance(v, datetime.datetime):
+                result[n] = datestr(v.isoformat())
+            else:
+                result[n] = v
+        return result
+
 
 @App.dataprovider(schema=jsonobject.JsonObject, obj=Base, storage=SQLStorage)
 def get_provider(schema, obj, storage):
@@ -121,11 +147,4 @@ def get_dict_provider(schema, obj, storage):
 
 @App.jsonprovider(obj=SQLAlchemyModelProvider)
 def get_jsonprovider(obj):
-    fields = obj.schema.properties().items()
-    result = {}
-    for n, f in fields:
-        v = obj.get(n)
-        if v is None and not f.required:
-            continue
-        result[n] = v
-    return result
+    return obj.as_json()

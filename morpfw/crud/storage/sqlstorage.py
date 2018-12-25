@@ -187,7 +187,7 @@ class SQLStorage(BaseStorage):
         return self.model(self.request, self, r)
 
     def delete(self, identifier, model):
-        model['deleted'] = datetime.utcnow().isoformat()
+        model['deleted'] = datetime.utcnow()
 
 
 class GUID(TypeDecorator):

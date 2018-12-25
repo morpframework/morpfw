@@ -2,9 +2,11 @@ from ..app import App
 from .base import Provider
 from ..types import datestr
 from ..storage.memorystorage import MemoryStorage
+from dateutil.parser import parse as parse_date
+import datetime
 import jsonobject
 
-_MARKER = []
+_MARKER: list = []
 
 
 class DictProvider(Provider):
@@ -17,10 +19,16 @@ class DictProvider(Provider):
 
     def __getitem__(self, key):
         if isinstance(self.schema.properties()[key], jsonobject.DateTimeProperty):
-            return datestr(self.data[key])
+            data = self.data[key]
+            if isinstance(data, str):
+                return parse_date(data)
+            return data
         return self.data[key]
 
     def __setitem__(self, key, value):
+        if isinstance(self.schema.properties()[key], jsonobject.DateTimeProperty):
+            if value and not isinstance(value, datetime.datetime):
+                value = parse_date(value)
         self.data[key] = value
         self.changed = True
 
@@ -48,6 +56,21 @@ class DictProvider(Provider):
     def keys(self):
         return self.data.keys()
 
+    def as_dict(self):
+        result = {}
+        for k, v in obj.data.items():
+            result[k] = v
+        return result
+
+    def as_json(self):
+        result = {}
+        for k, v in self.data.items():
+            if isinstance(v, datetime.datetime):
+                result[k] = datestr(v.isoformat())
+            else:
+                result[k] = v
+        return result
+
 
 @App.dataprovider(schema=jsonobject.JsonObject, obj=dict, storage=MemoryStorage)
 def get_dataprovider(schema, obj, storage):
@@ -56,4 +79,4 @@ def get_dataprovider(schema, obj, storage):
 
 @App.jsonprovider(obj=DictProvider)
 def get_jsonprovider(obj):
-    return obj.data
+    return obj.as_json()
