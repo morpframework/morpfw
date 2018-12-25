@@ -115,7 +115,7 @@ class SQLAlchemyModelProvider(Provider):
         fields = self.schema.properties().items()
         result = {}
         for n, f in fields:
-            v = getattr(self.data, n)
+            v = self.get(n)
             if v is None and not f.required:
                 continue
             result[n] = v

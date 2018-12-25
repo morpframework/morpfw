@@ -143,6 +143,9 @@ class Model(object):
     def __delitem__(self, key):
         del self.data[key]
 
+    def __dict__(self):
+        return self.data.as_dict()
+
     @property
     def statemachine_view_enabled(self):
         if self.state_machine():
