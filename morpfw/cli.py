@@ -63,8 +63,9 @@ def solo_worker(app=None, settings=None):
 @arg('-e', '--email', required=True, help='Email address')
 def register_admin(app=None, settings=None, username=None, email=None):
     param = load(app, settings)
-    password = getpass.getpass('Password for %s' % username)
-    create_admin(app=param['app'], username=username,
+    password = getpass.getpass('Enter password for %s: ' % username)
+    app = create_app(param['app_cls'], settings)
+    create_admin(app=app, username=username,
                  password=password, email=email)
 
 
