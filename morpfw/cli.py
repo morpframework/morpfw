@@ -3,9 +3,11 @@ import importlib
 import os
 import sys
 from .main import create_app
+from .app import create_admin
 import morepath
 import yaml
 import morpfw
+import getpass
 
 
 def load(app_path, settings_file, host=None, port=None):
@@ -49,11 +51,22 @@ def start(app=None, settings=None, host=None, port=None):
 
 @arg('-a', '--app', required=False, help='Path to App class')
 @arg('-s', '--settings', required=True, help='Path to settings.yml')
-def solo_worker(app=None, settings=None, host=None, port=None):
-    param = load(app, settings, host, port)
+def solo_worker(app=None, settings=None):
+    param = load(app, settings)
     worker = param['app_cls'].celery.Worker()
     worker.start()
 
 
+@arg('-a', '--app', required=False, help='Path to App class')
+@arg('-s', '--settings', required=True, help='Path to settings.yml')
+@arg('-u', '--username', required=True, help='Username')
+@arg('-e', '--email', required=True, help='Email address')
+def register_admin(app=None, settings=None, username=None, email=None):
+    param = load(app, settings)
+    password = getpass.getpass('Password for %s' % username)
+    create_admin(app=param['app'], username=username,
+                 password=password, email=email)
+
+
 def run():
-    dispatch_commands([start, solo_worker])
+    dispatch_commands([start, solo_worker, register_admin])
