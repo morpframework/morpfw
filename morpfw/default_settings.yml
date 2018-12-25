@@ -11,6 +11,7 @@ application:
   dburi: 'sqlite:///%(here)s/app.db'
   compositekey_separator: '!!!!'
   authn_policy: morpfw.auth.policy.noauth:AuthnPolicy
+  development_mode: true
 
 worker:
   enabled: false

@@ -3,5 +3,7 @@ application:
   authn_storage: memorystorage
   authn_policy: morpfw.auth.policy.jwtapikey:AuthnPolicy
   mounted_apps:
-  - morpfw.tests.auth_test.test_auth_memorystorage:MemoryStorageAuthApp
+  - app: morpfw.tests.auth_test.test_auth_memorystorage:MemoryStorageAuthApp
+    authn_policy: morpfw.auth.policy.jwtapikey:AuthnPolicy
+ 
 

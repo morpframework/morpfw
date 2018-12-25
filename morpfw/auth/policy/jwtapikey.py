@@ -1,5 +1,4 @@
 from more.jwtauth import JWTIdentityPolicy
-from more.basicauth import BasicAuthIdentityPolicy
 from morepath import Identity, NO_IDENTITY
 import rulez
 from ..path import get_apikey_collection

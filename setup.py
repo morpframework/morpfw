@@ -38,6 +38,7 @@ setup(name='morpfw',
           'jsonpath_ng',
           'python-dateutil',
           'more.jwtauth',
+          'more.itsdangerous',
           'sqlsoup',
           'celery',
           'gunicorn',
@@ -77,9 +78,9 @@ setup(name='morpfw',
           ]
       },
       entry_points={
-              'morepath': ['scan=morpfw'],
-              'console_scripts': [
-                'morpfw=morpfw.cli:run'
-            ]
-        }
+          'morepath': ['scan=morpfw'],
+          'console_scripts': [
+              'morpfw=morpfw.cli:run'
+          ]
+      }
       )
