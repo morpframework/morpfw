@@ -59,6 +59,7 @@ class Request(BaseRequest):
         env = self.environ.copy()
         new_req = self.__class__(env, *args, **kwargs)
         new_req.copy_body()
+        new_req.identity = self.identity
         return new_req
 
 

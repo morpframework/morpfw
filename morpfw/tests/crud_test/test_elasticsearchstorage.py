@@ -2,8 +2,11 @@ from .crud_common import App as BaseApp
 from morpfw.crud.model import Collection, Model
 from morpfw.crud.schema import Schema
 from morpfw.crud.storage.elasticsearchstorage import ElasticSearchStorage
+from morpfw.crud.blobstorage.fsblobstorage import FSBlobStorage
 from .crud_common import get_client, run_jslcrud_test, PageCollection, PageModel
 from .crud_common import NamedObjectCollection, NamedObjectModel
+from .crud_common import BlobObjectCollection, BlobObjectModel
+from .crud_common import FSBLOB_DIR
 import pprint
 from more.transaction import TransactionApp
 from morepath.reify import reify
@@ -129,6 +132,27 @@ def namedobject_collection_factory(request):
 @App.path(model=NamedObjectModel, path='named_objects/{identifier}')
 def namedobject_model_factory(request, identifier):
     storage = NamedObjectStorage(request)
+    return storage.get(identifier)
+
+
+class BlobObjectStorage(ElasticSearchStorage):
+    index_name = 'test-index'
+    doc_type = 'blobobject'
+    refresh = 'wait_for'
+    model = BlobObjectModel
+
+
+@App.path(model=BlobObjectCollection, path='blob_objects')
+def blobobject_collection_factory(request):
+    blobstorage = FSBlobStorage(FSBLOB_DIR)
+    storage = BlobObjectStorage(request, blobstorage=blobstorage)
+    return BlobObjectCollection(request, storage)
+
+
+@App.path(model=BlobObjectModel, path='blob_objects/{identifier}')
+def blobobject_model_factory(request, identifier):
+    blobstorage = FSBlobStorage(FSBLOB_DIR)
+    storage = BlobObjectStorage(request, blobstorage)
     return storage.get(identifier)
 
 

@@ -25,3 +25,7 @@ class AlreadyExistsError(Exception):
 
 class StateUpdateProhibitedError(Exception):
     pass
+
+
+class BlobStorageNotImplementedError(Exception):
+    pass

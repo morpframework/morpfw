@@ -19,9 +19,9 @@ class MemoryStorage(BaseStorage):
     def typekey(self):
         return ':'.join([self.__module__, self.__class__.__name__])
 
-    def __init__(self, request):
+    def __init__(self, request, blobstorage=None):
         DATA.setdefault(self.typekey, {})
-        super(MemoryStorage, self).__init__(request)
+        super(MemoryStorage, self).__init__(request, blobstorage)
 
     def create(self, data):
         data = data.copy()

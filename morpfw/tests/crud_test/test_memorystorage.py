@@ -1,10 +1,13 @@
 import jsl
 from morpfw.crud.storage.memorystorage import MemoryStorage
+from morpfw.crud.blobstorage.fsblobstorage import FSBlobStorage
 import morpfw.crud.signals as signals
 from .crud_common import get_client, run_jslcrud_test, PageCollection, PageModel
 from .crud_common import ObjectCollection, ObjectModel
 from .crud_common import NamedObjectCollection, NamedObjectModel
 from .crud_common import App as BaseApp
+from .crud_common import BlobObjectCollection, BlobObjectModel
+from .crud_common import FSBLOB_DIR
 from more.transaction import TransactionApp
 from more.basicauth import BasicAuthIdentityPolicy
 
@@ -62,6 +65,24 @@ def namedobject_model_factory(request, identifier):
     storage = NamedObjectStorage(request)
     o = storage.get(identifier)
     return o
+
+
+class BlobObjectStorage(MemoryStorage):
+    model = BlobObjectModel
+
+
+@App.path(model=BlobObjectCollection, path='blob_objects')
+def blobobject_collection_factory(request):
+    blobstorage = FSBlobStorage(FSBLOB_DIR)
+    storage = BlobObjectStorage(request, blobstorage=blobstorage)
+    return BlobObjectCollection(request, storage)
+
+
+@App.path(model=BlobObjectModel, path='blob_objects/{identifier}')
+def blobobject_model_factory(request, identifier):
+    blobstorage = FSBlobStorage(FSBLOB_DIR)
+    storage = BlobObjectStorage(request, blobstorage)
+    return storage.get(identifier)
 
 
 def test_memorystorage():

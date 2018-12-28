@@ -183,6 +183,34 @@ def delete(context, request):
     return {'status': 'success'}
 
 
+@App.view(model=Model, name='blobs', permission=permission.Edit)
+def get_blob(context, request):
+    field = request.GET.get('field', None)
+    if field is None or context.storage.blobstorage is None:
+        raise HTTPNotFound()
+
+    blob = context.get_blob(field)
+
+    return request.get_response(blob)
+
+
+@App.json(model=Model, name='blobs', request_method='POST', permission=permission.Edit)
+def put_blob(context, request):
+    field = request.GET.get('field', None)
+    if field is None or context.storage.blobstorage is None:
+        raise HTTPNotFound()
+
+    upload = request.POST.get('upload')
+
+    if upload is None:
+        raise UnprocessableError()
+
+    context.put_blob(field, filename=os.path.basename(
+        upload.filename), mimetype=upload.type,
+        fileobj=upload.file)
+    return context['blobs']
+
+
 @App.json(model=AlreadyExistsError)
 def alreadyexists_error(context, request):
     @request.after

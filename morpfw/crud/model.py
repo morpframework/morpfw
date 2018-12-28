@@ -12,7 +12,7 @@ from DateTime import DateTime
 from uuid import uuid4
 from transitions import Machine
 import copy
-from .errors import StateUpdateProhibitedError, AlreadyExistsError
+from .errors import StateUpdateProhibitedError, AlreadyExistsError, BlobStorageNotImplementedError
 import jsonobject
 
 
@@ -133,6 +133,9 @@ class Model(object):
     linkable = True
     update_view_enabled = True
     delete_view_enabled = True
+
+    blobstorage_field = 'blobs'
+    blob_fields = []
 
     def __setitem__(self, key, value):
         self.data[key] = value
@@ -285,6 +288,35 @@ class Model(object):
     def set_initial_state(self):
         self.state_machine()
 
+    def _blob_guard(self, field):
+        if self.blobstorage_field not in self.schema._properties_by_attr.keys():
+            raise BlobStorageNotImplementedError(
+                'Object does not implement blobs store')
+        if field not in self.blob_fields:
+            raise BlobStorageNotImplementedError(
+                'Field %s not allowed for blobstorage' % field)
+
+    def put_blob(self, field, fileobj, filename, mimetype=None, size=None, encoding=None):
+        self._blob_guard(field)
+        blob_data = self.data[self.blobstorage_field]
+        existing = blob_data.get(field, None)
+        blob = self.storage.put_blob(
+            fileobj, filename, mimetype, size, encoding)
+        blob_data[field] = blob.uuid
+        self.update({self.blobstorage_field: blob_data})
+        if existing:
+            self.delete_blob(existing)
+        return blob
+
+    def get_blob(self, field):
+        uuid = self.data[self.blobstorage_field][field]
+        blob = self.storage.get_blob(uuid)
+        return blob
+
+    def delete_blob(self, field):
+        uuid = self.data[self.blobstorage_field][field]
+        self.storage.delete_blob(uuid)
+
 
 class StateMachine(object):
 
@@ -315,3 +347,6 @@ class StateMachine(object):
     @state.setter
     def state(self, val):
         self._context.data['state'] = val
+
+    def get_triggers(self):
+        return [i for i in self._machine.get_triggers(self.state) if not i.startswith('to_')]

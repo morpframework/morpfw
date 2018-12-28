@@ -14,6 +14,10 @@ from datetime import datetime
 import jsonobject
 from morpfw.main import create_app
 from more.basicauth import BasicAuthIdentityPolicy
+import tempfile
+import shutil
+
+FSBLOB_DIR = tempfile.mkdtemp()
 
 
 class App(BaseApp):
@@ -121,6 +125,21 @@ def get_object_by_uuid(context, request):
 
 class NamedObjectModel(Model):
     schema = NamedObjectSchema
+
+
+class BlobObjectSchema(Schema):
+
+    blobs = jsonobject.DictProperty(required=False)
+
+
+class BlobObjectCollection(Collection):
+    schema = BlobObjectSchema
+
+
+class BlobObjectModel(Model):
+    schema = BlobObjectSchema
+
+    blob_fields = ['blobfile']
 
 
 class AuthnPolicy(object):
@@ -399,3 +418,57 @@ def run_jslcrud_test(c, skip_aggregate=False):
     r = c.patch_json('/named_objects/object%20obj2', {'body': 'hello1'})
 
     assert r.status_code == 200
+
+    # blob upload test
+
+    r = c.post_json('/blob_objects', {})
+
+    bloburl = r.json['links'][0]['href']
+
+    r = c.get(bloburl)
+
+    testimg = os.path.join(os.path.dirname(__file__), 'testimg.png')
+
+    r = c.post(bloburl + '/+blobs?field=blobfile',
+               upload_files=[('upload', testimg)])
+
+    assert r.status_code == 200
+
+    r = c.get(bloburl)
+
+    assert r.json['data']['blobs']['blobfile']
+
+    r = c.get(bloburl + '/+blobs?field=blobfile')
+
+    with open(testimg, 'rb') as ti:
+        assert r.body == ti.read()
+
+    assert r.headers.get('Content-Type') == 'image/png'
+
+    # unocide textfile upload test
+
+    r = c.post_json('/blob_objects', {})
+
+    bloburl = r.json['links'][0]['href']
+
+    r = c.get(bloburl)
+
+    testimg = os.path.join(os.path.dirname(__file__), 'testtxt.txt')
+
+    r = c.post(bloburl + '/+blobs?field=blobfile',
+               upload_files=[('upload', testimg)])
+
+    assert r.status_code == 200
+
+    r = c.get(bloburl)
+
+    assert r.json['data']['blobs']['blobfile']
+
+    r = c.get(bloburl + '/+blobs?field=blobfile')
+
+    with open(testimg, 'rb') as ti:
+        assert r.body == ti.read()
+
+    assert r.headers.get('Content-Type') == 'text/plain; charset=UTF-8'
+
+    shutil.rmtree(FSBLOB_DIR)

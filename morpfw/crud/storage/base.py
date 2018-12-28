@@ -1,17 +1,21 @@
 import copy
+from ..errors import BlobStorageNotImplementedError
 
 
 class BaseStorage(object):
 
     use_transactions = True
 
+    blobstorage = None
+
     @property
     def model(self):
         raise NotImplementedError
 
-    def __init__(self, request):
+    def __init__(self, request, blobstorage=None):
         self.request = request
         self.app = request.app
+        self.blobstorage = blobstorage
 
     def set_identifier(self, obj, identifier):
         for f, v in zip(
@@ -41,3 +45,22 @@ class BaseStorage(object):
 
     def delete(self, identifier, model):
         raise NotImplementedError
+
+    def _blob_guard(self):
+        if self.blobstorage is None:
+            raise BlobStorageNotImplementedError(
+                'Storage does not implement blobstorage')
+
+    def get_blob(self, uuid):
+        self._blob_guard()
+        return self.blobstorage.get(uuid)
+
+    def put_blob(self, fileobj, filename, mimetype=None, size=None, encoding=None):
+        self._blob_guard()
+        blob = self.blobstorage.put(
+            fileobj, filename, mimetype, size, encoding)
+        return blob
+
+    def delete_blob(self, uuid):
+        self._blob_guard()
+        self.blobstorage.delete(uuid)
