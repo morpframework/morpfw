@@ -34,7 +34,13 @@ class BaseStorage(object):
     def search(self, query=None, limit=None):
         raise NotImplementedError
 
+    def aggregate(self, query=None, group=None, order_by=None):
+        raise NotImplementedError
+
     def get(self, identifier):
+        raise NotImplementedError
+
+    def get_by_id(self, id):
         raise NotImplementedError
 
     def get_by_uuid(self, uuid):

@@ -43,11 +43,11 @@ class UserSQLStorage(SQLStorage):
         if not u:
             raise ValueError("Unknown user %s" % username)
         q = self.session.query(db.Membership).filter(
-            db.Membership.user_id == u.uuid)
+            db.Membership.user_id == u.id)
         membership = q.all()
         groupstorage = self.request.app.get_authn_storage(
             self.request, GroupSchema)
-        res = [groupstorage.get_by_uuid(m.group_id)
+        res = [groupstorage.get_by_id(m.group_id)
                for m in membership]
         return res
 
@@ -86,13 +86,13 @@ class GroupSQLStorage(SQLStorage):
             db.Group.groupname == groupname).first()
         if not g:
             raise ValueError("Group Does Not Exist %s" % groupname)
-        gid = g.uuid
+        gid = g.id
         for username in usernames:
             u = self.session.query(db.User).filter(
                 db.User.username == username).first()
             if not u:
                 raise ValueError("User Does Not Exist %s" % username)
-            uid = u.uuid
+            uid = u.id
             e = self.session.query(db.Membership).filter(
                 sa.and_(db.Membership.group_id == gid,
                         db.Membership.user_id == uid)).first()
@@ -107,13 +107,13 @@ class GroupSQLStorage(SQLStorage):
             db.Group.groupname == groupname).first()
         if not g:
             raise exc.GroupDoesNotExistsError(groupname)
-        gid = g.uuid
+        gid = g.id
         for username in usernames:
             u = self.session.query(db.User).filter(
                 db.User.username == username).first()
             if not u:
                 raise exc.UserDoesNotExistsError(username)
-            uid = u.uuid
+            uid = u.id
             members = self.session.query(db.Membership).filter(
                 sa.and_(db.Membership.group_id == gid,
                         db.Membership.user_id == uid)).all()
@@ -125,12 +125,12 @@ class GroupSQLStorage(SQLStorage):
             db.Group.groupname == groupname).first()
         if not g:
             raise exc.GroupDoesNotExistsError(groupname)
-        gid = g.uuid
+        gid = g.id
         u = self.session.query(db.User).filter(
             db.User.username == username).first()
         if not u:
             raise exc.UserDoesNotExistsError(username)
-        uid = u.uuid
+        uid = u.id
         roles = (self.session.query(db.RoleAssignment)
                  .join(db.Membership)
                  .filter(
@@ -143,24 +143,24 @@ class GroupSQLStorage(SQLStorage):
             db.Group.groupname == groupname).first()
         if not g:
             raise exc.GroupDoesNotExistsError(groupname)
-        gid = g.uuid
+        gid = g.id
         u = self.session.query(db.User).filter(
             db.User.username == username).first()
         if not u:
             raise exc.UserDoesNotExistsError(username)
-        uid = u.uuid
+        uid = u.id
         m = self.session.query(db.Membership).filter(
             sa.and_(db.Membership.group_id == gid,
                     db.Membership.user_id == uid)).first()
         if not m:
             raise exc.MembershipError(username, groupname)
         ra = self.session.query(db.RoleAssignment).filter(
-            db.RoleAssignment.membership_id == m.uuid,
+            db.RoleAssignment.membership_id == m.id,
             db.RoleAssignment.rolename == rolename).first()
         if ra:
             return
         r = db.RoleAssignment()
-        r.membership_id = m.uuid
+        r.membership_id = m.id
         r.rolename = rolename
         self.session.add(r)
 
@@ -169,19 +169,19 @@ class GroupSQLStorage(SQLStorage):
             db.Group.groupname == groupname).first()
         if not g:
             raise exc.GroupDoesNotExistsError(groupname)
-        gid = g.uuid
+        gid = g.id
         u = self.session.query(db.User).filter(
             db.User.username == username).first()
         if not u:
             raise exc.UserDoesNotExistsError(username)
-        uid = u.uuid
+        uid = u.id
         m = self.session.query(db.Membership).filter(
             sa.and_(db.Membership.group_id == gid,
                     db.Membership.user_id == uid)).first()
         if not m:
             raise exc.MembershipError(username, groupname)
         ra = self.session.query(db.RoleAssignment).filter(
-            db.RoleAssignment.membership_id == m.uuid,
+            db.RoleAssignment.membership_id == m.id,
             db.RoleAssignment.rolename == rolename).first()
         if ra:
             self.session.delete(ra)

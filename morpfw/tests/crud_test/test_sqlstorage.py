@@ -57,8 +57,6 @@ class Object(Base):
 
     __tablename__ = 'jslcrud_test_object'
 
-    objid = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
-    uuid = sa.Column(GUID)
     body = sa.Column(sa.String(length=1024), default='')
     created_flag = sa.Column(sa.Boolean, default=False)
     updated_flag = sa.Column(sa.Boolean, default=False)

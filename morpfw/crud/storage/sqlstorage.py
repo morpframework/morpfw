@@ -153,6 +153,13 @@ class SQLStorage(BaseStorage):
             return None
         return self.model(self.request, self, r)
 
+    def get_by_id(self, id):
+        q = self.session.query(self.orm_model).filter(self.orm_model.id == id)
+        r = q.first()
+        if not r:
+            return None
+        return self.model(self.request, self, r)
+
     def get_by_uuid(self, uuid):
         uuid_field = self.app.get_uuidfield(self.model.schema)
         if getattr(self.orm_model, uuid_field, None) is None:
@@ -226,7 +233,8 @@ class GUID(TypeDecorator):
 
 class BaseMixin(object):
 
-    uuid = sa.Column(GUID, primary_key=True, default=uuid.uuid4)
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
+    uuid = sa.Column(GUID, default=uuid.uuid4, index=True, unique=True)
     created = sa.Column(sa.DateTime, default=datetime.utcnow)
     creator = sa.Column(sa.String(length=1024))
     modified = sa.Column(sa.DateTime, default=datetime.utcnow)

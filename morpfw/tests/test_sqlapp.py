@@ -57,7 +57,7 @@ def test_morp_framework(pgsql_db):
     c = get_client(App)
 
     r = c.get('/')
-    assert len(r.json['schema']['properties']) == 8
+    assert len(r.json['schema']['properties']) == 9
 
     r = c.post_json(
         '/', {'title': 'Hello world', 'body': 'Lorem ipsum'})

@@ -56,7 +56,6 @@ class PageModel(Model):
 
 class ObjectSchema(Schema):
 
-    objid = jsonobject.IntegerProperty(required=False)
     body = jsonobject.StringProperty(required=True, default='')
     created_flag = jsonobject.BooleanProperty(required=False, default=False)
     updated_flag = jsonobject.BooleanProperty(required=False, default=False)

@@ -11,4 +11,3 @@ class User(Base):
     email = sa.Column(sa.String)
     password = sa.Column(sa.String(length=1024))
     attrs = sa.Column(sajson.JSONField)
-    state = sa.Column(sa.String(length=64))

@@ -2,10 +2,12 @@ import jsonobject
 from uuid import uuid4
 from .app import App
 
+
 class Schema(jsonobject.JsonObject):
 
-    uuid = jsonobject.StringProperty(required=False, 
-        default=lambda: uuid4().hex)
+    id = jsonobject.IntegerProperty(required=False)
+    uuid = jsonobject.StringProperty(required=False,
+                                     default=lambda: uuid4().hex)
     creator = jsonobject.StringProperty(required=False)
     created = jsonobject.DateTimeProperty(required=False)
     modified = jsonobject.DateTimeProperty(required=False)
@@ -17,6 +19,7 @@ class Schema(jsonobject.JsonObject):
 def identifierfields(schema):
     return ['uuid']
 
+
 @App.default_identifier(schema=Schema)
 def default_identifier(schema, obj, request):
     fields = request.app.get_identifierfields(schema)
@@ -27,5 +30,3 @@ def default_identifier(schema, obj, request):
         else:
             res.append(obj[f])
     return res
-
-
