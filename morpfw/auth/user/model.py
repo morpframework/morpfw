@@ -1,6 +1,5 @@
 from morpfw.crud import Collection, Model, StateMachine
 from morpfw.crud import errors as cruderrors
-from .storage import User
 from ..app import App
 import jsl
 from .. import exc

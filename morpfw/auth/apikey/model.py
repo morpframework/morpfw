@@ -2,7 +2,6 @@ from morpfw.crud import Schema, Collection, Model
 from .schema import APIKeySchema
 import jsl
 from ..app import App
-from .storage import APIKey
 from uuid import uuid4
 import rulez
 

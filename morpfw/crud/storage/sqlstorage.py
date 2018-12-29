@@ -15,7 +15,7 @@ import uuid
 
 class SQLStorage(BaseStorage):
 
-    _temp = {}
+    _temp: dict = {}
 
     @property
     def orm_model(self):

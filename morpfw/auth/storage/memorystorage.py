@@ -1,8 +1,8 @@
 from ..app import App
 from morpfw.crud.storage.memorystorage import MemoryStorage
-from ..user.model import User, UserModel, UserSchema
-from ..group.model import Group, GroupModel, GroupSchema
-from ..apikey.model import APIKey, APIKeyModel, APIKeySchema
+from ..user.model import UserModel, UserSchema
+from ..group.model import GroupModel, GroupSchema
+from ..apikey.model import APIKeyModel, APIKeySchema
 from .interfaces import IStorage
 from morpfw.crud import errors as cruderrors
 from .. import exc

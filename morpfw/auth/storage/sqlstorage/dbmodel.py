@@ -5,6 +5,26 @@ import sqlalchemy.orm as saorm
 import sqlalchemy_jsonfield as sajson
 
 
+class User(Base):
+
+    __tablename__ = 'authmanager_users'
+
+    username = sa.Column(sa.String(length=256))
+    email = sa.Column(sa.String)
+    password = sa.Column(sa.String(length=1024))
+    attrs = sa.Column(sajson.JSONField)
+
+
+class APIKey(Base):
+
+    __tablename__ = 'authmanager_apikey'
+
+    username = sa.Column(sa.String(256))
+    label = sa.Column(sa.String(length=256))
+    api_identity = sa.Column(sa.String(length=40))
+    api_secret = sa.Column(sa.String(length=40))
+
+
 class Group(Base):
 
     __tablename__ = 'authmanager_groups'

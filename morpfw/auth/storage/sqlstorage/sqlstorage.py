@@ -1,14 +1,14 @@
-from ..app import App
-from ..user.model import User, UserSchema, UserModel
-from ..group.model import Group, GroupSchema, GroupModel
-from ..apikey.model import APIKeyModel, APIKeySchema, APIKey
+from ...app import App
+from ...user.model import UserSchema, UserModel
+from ...group.model import GroupSchema, GroupModel
+from ...apikey.model import APIKeyModel, APIKeySchema
+from . import dbmodel as db
 from morpfw.crud.storage.sqlstorage import SQLStorage
 from morpfw.crud import errors as cruderrors
-from .. import dbmodel as db
-from .interfaces import IStorage
+from ..interfaces import IStorage
 import hashlib
 import sqlalchemy as sa
-from .. import exc
+from ... import exc
 
 
 def hash(data):
@@ -17,7 +17,7 @@ def hash(data):
 
 class UserSQLStorage(SQLStorage):
     model = UserModel
-    orm_model = User
+    orm_model = db.User
 
     def create(self, data):
         data['password'] = hash(data['password'])
@@ -62,12 +62,12 @@ class UserSQLStorage(SQLStorage):
 
 class APIKeySQLStorage(SQLStorage):
     model = APIKeyModel
-    orm_model = APIKey
+    orm_model = db.APIKey
 
 
 class GroupSQLStorage(SQLStorage):
     model = GroupModel
-    orm_model = Group
+    orm_model = db.Group
 
     def get_members(self, groupname):
         q = (self.session.query(db.User)
