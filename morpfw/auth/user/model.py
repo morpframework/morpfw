@@ -1,3 +1,4 @@
+import morepath
 from morpfw.crud import Collection, Model, StateMachine
 from morpfw.crud import errors as cruderrors
 from ..app import App
@@ -26,14 +27,17 @@ class UserCollection(Collection):
     def authenticate(self, username, password):
         if re.match(EMAIL_PATTERN, username):
             user = self.storage.get_by_email(username)
-            if user is None:
-                return False
-            return user.validate(password)
+        else:
+            user = self.storage.get(username)
 
-        user = self.storage.get(username)
         if user is None:
-            return False
-        return user.validate(password)
+            return None
+        if not user.validate(password):
+            return None
+        return user
+
+    def get_by_userid(self, userid):
+        return self.storage.get_by_userid(userid)
 
     def _create(self, data):
         data['nonce'] = uuid4().hex
@@ -44,26 +48,42 @@ class UserModel(Model):
 
     schema = UserSchema
 
+    @property
+    def userid(self):
+        return self.storage.get_userid(self)
+
+    @property
+    def identity(self):
+        return morepath.Identity(self.userid)
+
     def change_password(self, password, new_password):
         if not self.app.has_role(self.request, 'administrator'):
             if not self.validate(password, check_state=False):
-                raise exc.InvalidPasswordError(self.data['username'])
-        self.storage.change_password(self.data['username'], new_password)
+                raise exc.InvalidPasswordError(self.userid)
+        self.storage.change_password(self.identity.userid, new_password)
 
     def validate(self, password, check_state=True):
         if check_state and self.data['state'] != 'active':
             return False
-        return self.storage.validate(self.data['username'], password)
+        return self.storage.validate(self.userid, password)
 
     def groups(self):
-        return self.storage.get_user_groups(self.data['username'])
+        return self.storage.get_user_groups(self.userid)
 
     def group_roles(self):
         group_roles = {}
         for g in self.groups():
             group_roles[g.data['groupname']] = g.get_member_roles(
-                self.data['username'])
+                self.userid)
         return group_roles
+
+    def _links(self):
+        links = super()._links()
+        links.append({
+            'rel': 'userid',
+            'value': self.userid
+        })
+        return links
 
 
 class UserStateMachine(StateMachine):
@@ -109,4 +129,4 @@ def add_user_to_default_group(app, request, obj, signal):
     if g is None:
         gcol = GroupCollection(request, storage)
         g = gcol.create({'groupname': '__default__'})
-    g.add_members([obj.data['username']])
+    g.add_members([obj.userid])

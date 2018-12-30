@@ -17,8 +17,8 @@ class APIKeyCollection(Collection):
         if kwargs.get('secure', True):
             if query:
                 rulez.and_(
-                    rulez.field['username'] == self.request.identity.userid,
+                    rulez.field['userid'] == self.request.identity.userid,
                     query)
             else:
-                query = rulez.field['username'] == self.request.identity.userid
+                query = rulez.field['userid'] == self.request.identity.userid
         return super(APIKeyCollection, self).search(query, *args, **kwargs)

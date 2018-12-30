@@ -17,29 +17,35 @@ class GroupCollection(Collection):
 class GroupModel(Model):
     schema = GroupSchema
 
+    def get_user_by_userid(self, userid):
+        return self.storage.get_user_by_userid(userid)
+
+    def get_user_by_username(self, username):
+        return self.storage.get_user_by_username(username)
+
     def members(self):
         members = self.storage.get_members(self.identifier)
         active_members = [
             member for member in members if member.data.get('state') == 'active']
         return active_members
 
-    def add_members(self, usernames):
-        self.storage.add_group_members(self.identifier, usernames)
+    def add_members(self, userids):
+        self.storage.add_group_members(self.identifier, userids)
 
-    def remove_members(self, usernames):
-        self.storage.remove_group_members(self.identifier, usernames)
+    def remove_members(self, userids):
+        self.storage.remove_group_members(self.identifier, userids)
 
-    def get_member_roles(self, username):
-        return self.storage.get_group_user_roles(self.identifier, username)
+    def get_member_roles(self, userid):
+        return self.storage.get_group_user_roles(self.identifier, userid)
 
-    def grant_member_role(self, username, rolename):
-        if username not in [m.identifier for m in self.members()]:
-            self.add_members([username])
-        self.storage.grant_group_user_role(self.identifier, username, rolename)
+    def grant_member_role(self, userid, rolename):
+        if userid not in [m.userid for m in self.members()]:
+            self.add_members([userid])
+        self.storage.grant_group_user_role(self.identifier, userid, rolename)
 
-    def revoke_member_role(self, username, rolename):
+    def revoke_member_role(self, userid, rolename):
         self.storage.revoke_group_user_role(
-            self.identifier, username, rolename)
-        if (not self.get_member_roles(username) and
+            self.identifier, userid, rolename)
+        if (not self.get_member_roles(userid) and
                 self.identifier != '__default__'):
-            self.remove_members([username])
+            self.remove_members([userid])

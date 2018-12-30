@@ -299,6 +299,10 @@ def _test_authentication(c):
 
     login(c, 'admin')
 
+    r = c.get('/auth/user/admin')
+
+    admin_user = r.json
+
     # api keys
     r = c.post_json('/auth/apikey/',
                     {'label': 'samplekey', 'password': 'password'})
@@ -308,7 +312,7 @@ def _test_authentication(c):
     key_uuid = r.json['data']['uuid']
     assert len(key_identity) == 32
     assert len(key_secret) == 32
-    assert r.json['data']['username'] == 'admin'
+    assert r.json['data']['userid'] == admin_user['data']['uuid']
 
     r = c.get('/auth/apikey/%s' % key_uuid)
 
@@ -371,12 +375,20 @@ def _test_authentication(c):
     assert r.json['data']['groupname'] == 'group1'
 
     r = c.post_json('/auth/group/group1/+grant',
-                    {'mapping': {'user1': ['member']}})
+                    {'mapping': [{
+                        'user': {
+                            'username': 'user1'
+                        },
+                        'roles': ['member']}]})
 
     assert r.json == {'status': 'success'}
 
     r = c.post_json('/auth/group/group1/+grant',
-                    {'mapping': {'dummyuser': ['member']}},
+                    {'mapping': [{
+                        'user': {
+                            'username': 'dummyuser'
+                        }, 'roles': ['member']
+                    }]},
                     expect_errors=True)
 
     assert r.status_code == 422
@@ -388,19 +400,13 @@ def _test_authentication(c):
 
     r = c.get('/auth/group/group1/+members')
 
-    assert r.json == {
-        'users': [
-            {'username': 'user1',
-             'links': [{
-                 'rel': 'self',
-                 'type': 'GET',
-                 'href': 'http://localhost/auth/user/user1'}],
-             'roles': ['member']}]
-    }
+    assert r.json['users'][0]['username'] == 'user1'
+    assert r.json['users'][0]['roles'] == ['member']
 
-    r = c.post_json('/auth/group/group1/+grant', {'mapping': {
-        'user1': ['manager']
-    }})
+    r = c.post_json('/auth/group/group1/+grant', {'mapping': [{
+        'user': {'username': 'user1'},
+        'roles': ['manager']
+    }]})
 
     assert r.json == {'status': 'success'}
 
@@ -408,9 +414,10 @@ def _test_authentication(c):
 
     assert r.json['users'][0]['roles'] == ['member', 'manager']
 
-    r = c.post_json('/auth/group/group1/+grant', {'mapping': {
-        'user1': ['editor']
-    }})
+    r = c.post_json('/auth/group/group1/+grant', {'mapping': [{
+        'user': {'username': 'user1'},
+        'roles': ['editor']
+    }]})
 
     assert r.json == {'status': 'success'}
 
@@ -424,9 +431,12 @@ def _test_authentication(c):
     assert sorted(r.json['group1']) == sorted(['member', 'editor', 'manager'])
 
     r = c.post_json('/auth/group/group1/+revoke',
-                    {'mapping': {
-                        'user1': ['manager']
-                    }})
+                    {'mapping': [{
+                        'user': {
+                            'username': 'user1'
+                        },
+                        'roles': ['manager']
+                    }]})
 
     assert r.json == {'status': 'success'}
 
@@ -435,7 +445,9 @@ def _test_authentication(c):
     assert r.json['users'][0]['roles'] == ['member', 'editor']
 
     r = c.post_json('/auth/group/group1/+revoke', {
-        'mapping': {'user1': ['editor', 'member']}
+        'mapping': [{
+            'user': {'username': 'user1'},
+            'roles': ['editor', 'member']}]
     })
 
     assert r.json == {'status': 'success'}
@@ -451,3 +463,7 @@ def _test_authentication(c):
     r = c.get('/auth/user/user1', expect_errors=True)
 
     assert r.status_code == 404
+
+    logout(c)
+
+    r = c.delete('/auth/user/user1', expect_errors=True)

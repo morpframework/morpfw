@@ -18,23 +18,32 @@ DB: dict = {
 class UserMemoryStorage(MemoryStorage):
     model = UserModel
 
+    def get_userid(self, model):
+        return model.uuid
+
     def get_by_email(self, email):
         users = self.search(rulez.field['email'] == email)
         if not users:
             return None
         return users[0]
 
-    def change_password(self, username, new_password):
-        user = self.get(username)
+    def get_by_userid(self, userid):
+        users = self.search(rulez.field['uuid'] == userid)
+        if not users:
+            return None
+        return users[0]
+
+    def change_password(self, userid, new_password):
+        user = self.get_by_userid(userid)
         user.data['password'] = new_password
 
-    def get_user_groups(self, username):
+    def get_user_groups(self, userid):
         storage = self.request.app.root.get_authnz_provider().get_authn_storage(
             self.request, GroupSchema)
-        return storage.get_user_groups(username)
+        return storage.get_user_groups(userid)
 
-    def validate(self, username, password):
-        user = self.get(username)
+    def validate(self, userid, password):
+        user = self.get_by_userid(userid)
         return user.data['password'] == password
 
 
@@ -45,10 +54,18 @@ class APIKeyMemoryStorage(MemoryStorage):
 class GroupMemoryStorage(MemoryStorage):
     model = GroupModel
 
-    def get_user_groups(self, username):
+    def get_user_by_userid(self, userid, as_model=True):
+        user_storage = self.app.get_authn_storage(self.request, UserSchema)
+        return user_storage.get_by_userid(userid, as_model)
+
+    def get_user_by_username(self, username, as_model=True):
+        user_storage = self.app.get_authn_storage(self.request, UserSchema)
+        return user_storage.get(username)
+
+    def get_user_groups(self, userid):
         res = []
         for gid, group in self.datastore.items():
-            if username in group.data['attrs'].get('members'):
+            if userid in group.data['attrs'].get('members'):
                 res.append(group)
         return res
 
@@ -61,48 +78,48 @@ class GroupMemoryStorage(MemoryStorage):
         attrs = group.data['attrs']
         attrs.setdefault('members', [])
         for m in group.data['attrs'].get('members'):
-            res.append(userstorage.get(m))
+            res.append(userstorage.get_by_userid(m))
         return res
 
-    def add_group_members(self, groupname, usernames):
+    def add_group_members(self, groupname, userids):
         group = self.get(groupname)
         group.data.setdefault('attrs', {})
         attrs = group.data['attrs']
         attrs.setdefault('members', [])
-        for u in usernames:
+        for u in userids:
             if u not in attrs['members']:
                 attrs['members'].append(u)
         group.data['attrs'] = attrs
 
-    def remove_group_members(self, groupname, usernames):
+    def remove_group_members(self, groupname, userids):
         group = self.get(groupname)
         group.data.setdefault('attrs', {})
         attrs = group.data['attrs']
         attrs.setdefault('members', [])
-        for u in usernames:
+        for u in userids:
             if u in attrs['members']:
                 attrs['members'].remove(u)
         group.data['attrs'] = attrs
 
-    def get_group_user_roles(self, groupname, username):
+    def get_group_user_roles(self, groupname, userid):
         rolemap = DB['rolemap']
         rolemap.setdefault(groupname, {})
-        rolemap[groupname].setdefault(username, [])
-        return rolemap[groupname][username]
+        rolemap[groupname].setdefault(userid, [])
+        return rolemap[groupname][userid]
 
-    def grant_group_user_role(self, groupname, username, rolename):
+    def grant_group_user_role(self, groupname, userid, rolename):
         rolemap = DB['rolemap']
         rolemap.setdefault(groupname, {})
-        rolemap[groupname].setdefault(username, [])
-        if rolename not in rolemap[groupname][username]:
-            rolemap[groupname][username].append(rolename)
+        rolemap[groupname].setdefault(userid, [])
+        if rolename not in rolemap[groupname][userid]:
+            rolemap[groupname][userid].append(rolename)
 
-    def revoke_group_user_role(self, groupname, username, rolename):
+    def revoke_group_user_role(self, groupname, userid, rolename):
         rolemap = DB['rolemap']
         rolemap.setdefault(groupname, {})
-        rolemap[groupname].setdefault(username, [])
-        if rolename in rolemap[groupname][username]:
-            rolemap[groupname][username].remove(rolename)
+        rolemap[groupname].setdefault(userid, [])
+        if rolename in rolemap[groupname][userid]:
+            rolemap[groupname][userid].remove(rolename)
 
 
 SINGLETON: dict = {}

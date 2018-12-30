@@ -1,4 +1,5 @@
 from morpfw.crud.storage.sqlstorage import Base
+from morpfw.crud.storage.sqlstorage import GUID
 import sqlalchemy as sa
 from sqlalchemy.orm import relationship
 import sqlalchemy.orm as saorm
@@ -19,7 +20,7 @@ class APIKey(Base):
 
     __tablename__ = 'authmanager_apikey'
 
-    username = sa.Column(sa.String(256))
+    userid = sa.Column(GUID)
     label = sa.Column(sa.String(length=256))
     api_identity = sa.Column(sa.String(length=40))
     api_secret = sa.Column(sa.String(length=40))

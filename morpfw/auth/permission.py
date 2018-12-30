@@ -4,3 +4,11 @@ class All(object):
 
 class Register(All):
     pass
+
+
+class ChangePassword(All):
+    pass
+
+
+class DeleteUser(All):
+    pass

@@ -33,9 +33,6 @@ class UserSchema(Schema):
     groups = jsonobject.ListProperty(
         str, required=False)  # pattern=NAME_PATTERN
     attrs = jsonobject.DictProperty(required=False)
-    state = jsonobject.StringProperty(required=False)
-    created = jsonobject.StringProperty(required=False)
-    modified = jsonobject.StringProperty(required=False)
     nonce = jsonobject.StringProperty(required=False)
 
 

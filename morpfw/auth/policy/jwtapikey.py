@@ -15,8 +15,8 @@ class JWTWithAPIKeyIdentityPolicy(JWTIdentityPolicy):
             keys = apikeys.search(
                 rulez.field['api_identity'] == api_identity, secure=False)
             if keys and keys[0].data['api_secret'] == api_secret:
-                username = keys[0].data['username']
-                return Identity(userid=username)
+                userid = keys[0].data['userid']
+                return Identity(userid=userid)
         return super(JWTWithAPIKeyIdentityPolicy, self).identify(request)
 
 

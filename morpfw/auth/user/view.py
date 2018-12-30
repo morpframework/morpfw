@@ -67,7 +67,8 @@ def process_login(context, request):
     password = request.json['password']
 
     # Do the password validation.
-    if not context.authenticate(username, password):
+    user = context.authenticate(username, password)
+    if not user:
         @request.after
         def adjust_status(response):
             response.status = 401
@@ -84,7 +85,7 @@ def process_login(context, request):
         """Remember the identity of the user logged in."""
         # We pass the extra info to the identity object.
         response.headers.add('Access-Control-Expose-Headers', 'Authorization')
-        identity = morepath.Identity(username)
+        identity = user.identity
         request.app.remember_identity(response, request, identity)
 
     return {
@@ -99,7 +100,7 @@ def refresh_token(context, request):
         # In this case returns the userid.
         # If not raises exceptions based on InvalidTokenError.
         # If expired this is a ExpiredSignatureError.
-        username = verify_refresh_request(request)
+        userid = verify_refresh_request(request)
     except ExpiredSignatureError:
         @request.after
         def expired_nonce_or_token(response):
@@ -120,7 +121,7 @@ def refresh_token(context, request):
         @request.after
         def remember(response):
             # create the identity with the userid and updated user info
-            identity = morepath.Identity(username)
+            identity = context.get_by_userid(userid).identity
             # create the updated token and set it in the response header
             request.app.remember_identity(response, request, identity)
 
@@ -173,7 +174,9 @@ def roles(context, request):
     return context.group_roles()
 
 
-@App.json(model=UserModel, name='change_password', request_method='POST')
+@App.json(model=UserModel, name='change_password',
+          permission=permission.ChangePassword,
+          request_method='POST')
 def change_password(context, request):
     data = request.json
     error = None
@@ -198,7 +201,8 @@ def change_password(context, request):
     return {'status': 'success'}
 
 
-@App.json(model=UserModel, request_method='DELETE')
+@App.json(model=UserModel, permission=permission.DeleteUser,
+          request_method='DELETE')
 def delete(context, request):
     sm = context.state_machine()
     try:

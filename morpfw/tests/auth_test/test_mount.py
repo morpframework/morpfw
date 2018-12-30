@@ -34,7 +34,7 @@ def login(context, request):
     coll = get_user_collection(newreq)
     data = newreq.json
     return {
-        'authenticated': coll.authenticate(**data)
+        'authenticated': True if coll.authenticate(**data) else False
     }
 
 
