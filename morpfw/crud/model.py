@@ -14,6 +14,7 @@ from transitions import Machine
 import copy
 from .errors import StateUpdateProhibitedError, AlreadyExistsError, BlobStorageNotImplementedError
 import jsonobject
+from ..interfaces import IModel
 
 
 ALLOWED_SEARCH_OPERATORS = [
@@ -128,7 +129,7 @@ class Collection(object):
         return []
 
 
-class Model(object):
+class Model(IModel):
 
     linkable = True
     update_view_enabled = True
@@ -196,6 +197,7 @@ class Model(object):
         self.data = request.app.get_dataprovider(self.schema, data,
                                                  self.storage)
         self._cached_identifier = None
+        super().__init__(request, storage, data)
 
     def update(self, newdata):
         if 'state' in newdata:
@@ -281,6 +283,9 @@ class Model(object):
         return self.app.get_rulesadapter(self)
 
     def state_machine(self):
+        return self.statemachine()
+
+    def statemachine(self):
         if self.app.get_statemachine.by_args(self).all_matches:
             return self.app.get_statemachine(self)
         return None

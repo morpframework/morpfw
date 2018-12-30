@@ -1,127 +1,88 @@
 import abc
 
 
-class IStorage(abc.ABCMeta):
+class IUserStorage(abc.ABC):
 
     @abc.abstractmethod
-    def search_users(self, filters):
-        "return list of users"
+    def get_userid(self, model):
+        """return the userid that will be used for internal references"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def search_groups(self, filters):
-        "return list of groups"
+    def get_by_email(self, email):
+        """return UserModel from email address"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_user(self, username):
-        """
-        get specific user model
+    def get_by_userid(self, userid):
+        """return UserModel from userid"""
+        raise NotImplementedError
 
-        return User object
+    @abc.abstractmethod
+    def get_by_username(self, username):
+        """return UserModel from username"""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def change_password(self, userid, new_password):
+        """update user's password"""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get_user_groups(self, userid):
+        """get groups which the userid is a member of"""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def validate(self, userid, password):
+        """validate userid's password"""
+        raise NotImplementedError
+
+
+class IGroupStorage(abc.ABC):
+
+    @abc.abstractmethod
+    def get_user_by_userid(self, userid, as_model=True):
+        """
+        get user by its userid, and return
+        as UserModel if as_model is True
         """
         raise NotImplementedError
 
     @abc.abstractmethod
-    def create_user(self, username, password, attrs):
+    def get_user_by_username(self, username, as_model=True):
         """
-        create a user
-
-        return User object
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def validate(self, username, password):
-        """
-        validate user authentication
-
-        return boolean
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def create_group(self, groupname, attrs=None):
-        """
-        create a group
-
-        return Group object
-        raises ValueError if group already exists
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def get_group(self, groupname):
-        """
-        get group by name
-
-        return Group object
+        get user by its username, and return
+        as UserModel if as_model is True
         """
         raise NotImplementedError
 
     @abc.abstractmethod
     def get_members(self, groupname):
-        """
-        get list of members of group
-
-        return list of User objects        
-        """
+        """get list of members of specified group"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def add_group_members(self, groupname, usernames):
-        """
-        add list of usernames into group
-        ignore if already exists in group
-
-        return None
-        """
+    def add_group_members(self, groupname, userids):
+        """add userids into a group"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def remove_group_members(self, groupname, usernames):
-        """
-        remove list of usernames from group
-        ignore if doesnt exists in group
-
-        return None
-        """
+    def remove_group_members(self, groupname, userids):
+        """remove userids from group"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_group_user_roles(self, groupname, username):
-        """
-        get list of roles mapping in a group for user
-
-        return list of role string
-        """
+    def get_group_user_roles(self, groupname, userid):
+        """get roles of userid in group"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def grant_group_user_role(self, groupname, username, rolename):
-        """
-        grant role in group to username
-        ignore if role already granted
-
-        return None
-        """
+    def grant_group_user_role(self, groupname, userid, rolename):
+        """grant userid role in group"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def revoke_group_user_role(self, groupname, username, rolename):
-        """
-        revoke role in group from username
-        ignore if role doesn't exist
-
-        return None
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def get_user_groups(self, username):
-        """
-        search for group for specified user
-
-        return a list of Group objects
-        """
+    def revoke_group_user_role(self, groupname, userid, rolename):
+        """revoke userid role in group"""
         raise NotImplementedError

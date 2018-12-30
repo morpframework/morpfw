@@ -3,20 +3,20 @@ from webob.dec import wsgify
 from webob import exc
 from webob.response import Response
 from webob.static import FileIter
+from ...interfaces import IBlob, IBlobStorage
 import os
+
 BLOCK_SIZE = 1 << 16
 
 
-class Blob(object):
+class Blob(IBlob):
     def __init__(self, uuid, filename, mimetype=None, size=None, encoding=None):
         self.uuid = uuid
         self.size = size
         self.filename = filename
         self.mimetype = mimetype
         self.encoding = encoding
-
-    def open(self) -> typing.BinaryIO:
-        raise NotImplementedError
+        super().__init__(uuid, filename, mimetype, size, encoding)
 
     def get_size(self) -> int:
         return self.size
@@ -47,16 +47,5 @@ class Blob(object):
         ).conditional_response_app
 
 
-class BlobStorage(object):
-
-    def get(self, uuid: str) -> Blob:
-        raise NotImplementedError
-
-    def put(self, fileobj: typing.BinaryIO,
-            filename: str, mimetype: typing.Optional[str] = None,
-            size: typing.Optional[int] = None,
-            encoding: typing.Optional[str] = None) -> Blob:
-        raise NotImplementedError
-
-    def delete(self, uuid: str):
-        raise NotImplementedError
+class BlobStorage(IBlobStorage):
+    pass

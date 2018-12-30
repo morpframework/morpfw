@@ -3,7 +3,7 @@ from morpfw.crud.storage.memorystorage import MemoryStorage
 from ..user.model import UserModel, UserSchema
 from ..group.model import GroupModel, GroupSchema
 from ..apikey.model import APIKeyModel, APIKeySchema
-from .interfaces import IStorage
+from .interfaces import IUserStorage, IGroupStorage
 from morpfw.crud import errors as cruderrors
 from .. import exc
 import rulez
@@ -15,7 +15,7 @@ DB: dict = {
 }
 
 
-class UserMemoryStorage(MemoryStorage):
+class UserMemoryStorage(MemoryStorage, IUserStorage):
     model = UserModel
 
     def get_userid(self, model):
@@ -29,6 +29,12 @@ class UserMemoryStorage(MemoryStorage):
 
     def get_by_userid(self, userid):
         users = self.search(rulez.field['uuid'] == userid)
+        if not users:
+            return None
+        return users[0]
+
+    def get_by_username(self, username):
+        users = self.search(rulez.field['username'] == username)
         if not users:
             return None
         return users[0]
@@ -51,7 +57,7 @@ class APIKeyMemoryStorage(MemoryStorage):
     model = APIKeyModel
 
 
-class GroupMemoryStorage(MemoryStorage):
+class GroupMemoryStorage(MemoryStorage, IGroupStorage):
     model = GroupModel
 
     def get_user_by_userid(self, userid, as_model=True):

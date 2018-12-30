@@ -310,6 +310,11 @@ class ElasticSearchStorage(BaseStorage):
             return self.model(self.request, self, res[0].json()['data'])
         return None
 
+    def get_by_id(self, id):
+        res = self.client.get(index=self.index_name, doc_type=self.doc_type,
+                              id=id)
+        return self.model(self.request, self, res['_source'])
+
     def update(self, identifier, data):
         self.create_index()
         self.client.update(index=self.index_name, doc_type=self.doc_type,

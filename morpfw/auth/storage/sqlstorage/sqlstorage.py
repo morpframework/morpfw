@@ -5,7 +5,7 @@ from ...apikey.model import APIKeyModel, APIKeySchema
 from . import dbmodel as db
 from morpfw.crud.storage.sqlstorage import SQLStorage
 from morpfw.crud import errors as cruderrors
-from ..interfaces import IStorage
+from ..interfaces import IGroupStorage, IUserStorage
 import hashlib
 import sqlalchemy as sa
 from ... import exc
@@ -15,7 +15,7 @@ def hash(data):
     return hashlib.sha256(data.encode('utf-8')).hexdigest()
 
 
-class UserSQLStorage(SQLStorage):
+class UserSQLStorage(SQLStorage, IUserStorage):
     model = UserModel
     orm_model = db.User
 
@@ -31,6 +31,15 @@ class UserSQLStorage(SQLStorage):
         u = q.first()
         if not u:
             raise exc.UserDoesNotExistsError(userid)
+        if not as_model:
+            return u
+        return self.model(self.request, self, u)
+
+    def get_by_username(self, username, as_model=True):
+        q = self.session.query(db.User).filter(db.User.username == username)
+        u = q.first()
+        if not u:
+            raise exc.UserDoesNotExistsError(username)
         if not as_model:
             return u
         return self.model(self.request, self, u)
@@ -67,7 +76,7 @@ class APIKeySQLStorage(SQLStorage):
     orm_model = db.APIKey
 
 
-class GroupSQLStorage(SQLStorage):
+class GroupSQLStorage(SQLStorage, IGroupStorage):
     model = GroupModel
     orm_model = db.Group
 
@@ -77,7 +86,7 @@ class GroupSQLStorage(SQLStorage):
 
     def get_user_by_username(self, username, as_model=True):
         user_storage = self.app.get_authn_storage(self.request, UserSchema)
-        return user_storage.get(username)
+        return user_storage.get_by_username(username)
 
     def get_members(self, groupname):
         q = (self.session.query(db.User)

@@ -1,8 +1,9 @@
 import copy
 from ..errors import BlobStorageNotImplementedError
+from ...interfaces import IStorage
 
 
-class BaseStorage(object):
+class BaseStorage(IStorage):
 
     use_transactions = True
 
@@ -16,6 +17,7 @@ class BaseStorage(object):
         self.request = request
         self.app = request.app
         self.blobstorage = blobstorage
+        super().__init__(request, blobstorage)
 
     def set_identifier(self, obj, identifier):
         for f, v in zip(
@@ -28,29 +30,29 @@ class BaseStorage(object):
         obj = self.model.schema(data)
         return obj.to_json()
 
-    def create(self, data):
-        raise NotImplementedError
-
-    def search(self, query=None, limit=None):
-        raise NotImplementedError
-
-    def aggregate(self, query=None, group=None, order_by=None):
-        raise NotImplementedError
-
-    def get(self, identifier):
-        raise NotImplementedError
-
-    def get_by_id(self, id):
-        raise NotImplementedError
-
-    def get_by_uuid(self, uuid):
-        raise NotImplementedError
-
-    def update(self, identifier, data):
-        raise NotImplementedError
-
-    def delete(self, identifier, model):
-        raise NotImplementedError
+#	def create(self, data):
+#		raise NotImplementedError
+#
+#	def search(self, query=None, limit=None):
+#		raise NotImplementedError
+#
+#	def aggregate(self, query=None, group=None, order_by=None):
+#		raise NotImplementedError
+#
+#	def get(self, identifier):
+#		raise NotImplementedError
+#
+#	def get_by_id(self, id):
+#		raise NotImplementedError
+#
+#	def get_by_uuid(self, uuid):
+#		raise NotImplementedError
+#
+#	def update(self, identifier, data):
+#		raise NotImplementedError
+#
+#	def delete(self, identifier, model):
+#		raise NotImplementedError
 
     def _blob_guard(self):
         if self.blobstorage is None:

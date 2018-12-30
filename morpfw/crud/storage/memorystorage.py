@@ -64,6 +64,21 @@ class MemoryStorage(BaseStorage):
         res.request = self.request
         return res
 
+    def get_by_id(self, id):
+        id_field = self.incremental_column
+        data_by_id = {}
+        for u, v in DATA[self.typekey].items():
+            if id_field not in v.data.keys():
+                raise AttributeError(
+                    '%s does not have %s field' % (v, id_field))
+            data_by_id[v.data[id_field]] = v
+
+        if id not in data_by_id.keys():
+            return None
+        res = data_by_id[id]
+        res.request = self.request
+        return res
+
     def get_by_uuid(self, uuid):
         uuid_field = self.app.get_uuidfield(self.model.schema)
         data_by_uuid = {}
