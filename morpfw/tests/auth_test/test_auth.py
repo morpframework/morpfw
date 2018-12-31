@@ -123,7 +123,9 @@ def _test_authentication(c):
     r = c.get('/auth/user/admin')
 
     assert r.json['data']['username'] == 'admin'
-    assert r.json['data']['groups'] == ['__default__']
+    assert list(
+        [l['name'] for l in r.json['links'] if l['rel'] == 'group']
+    ) == ['__default__']
     assert r.json['data']['state'] == 'active'
 
     # query for nonexistent user
@@ -213,7 +215,10 @@ def _test_authentication(c):
     r = c.get('/auth/user/user1')
 
     assert r.json['data']['username'] == 'user1'
-    assert r.json['data']['groups'] == ['__default__']
+    assert list(
+        [l['name'] for l in r.json['links'] if l['rel'] == 'group']
+    ) == ['__default__']
+
     assert r.json['data']['state'] == 'active'
     assert 'password' not in r.json['data'].keys()
 
@@ -230,7 +235,9 @@ def _test_authentication(c):
     r = c.get('/auth/user/user1')
 
     assert r.json['data']['username'] == 'user1'
-    assert r.json['data']['groups'] == ['__default__']
+    assert list(
+        [l['name'] for l in r.json['links'] if l['rel'] == 'group']
+    ) == ['__default__']
     assert r.json['data']['state'] == 'inactive'
 
     r = c.post_json('/auth/user/+login', {
@@ -246,7 +253,10 @@ def _test_authentication(c):
     r = c.get('/auth/user/user1')
 
     assert r.json['data']['username'] == 'user1'
-    assert r.json['data']['groups'] == ['__default__']
+    assert list(
+        [l['name'] for l in r.json['links'] if l['rel'] == 'group']
+    ) == ['__default__']
+
     assert r.json['data']['state'] == 'active'
 
     login(c, 'user1')
@@ -395,8 +405,9 @@ def _test_authentication(c):
 
     r = c.get('/auth/user/user1')
 
-    assert list(sorted(r.json['data']['groups'])) == [
-        '__default__', 'group1']
+    assert list(sorted(
+        [l['name'] for l in r.json['links'] if l['rel'] == 'group']
+    )) == ['__default__', 'group1']
 
     r = c.get('/auth/group/group1/+members')
 

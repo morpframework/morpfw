@@ -1,9 +1,10 @@
 import jsonobject
 from uuid import uuid4
+from ..interfaces import ISchema
 from .app import App
 
 
-class Schema(jsonobject.JsonObject):
+class Schema(ISchema):
 
     id = jsonobject.IntegerProperty(required=False)
     uuid = jsonobject.StringProperty(required=False,

@@ -83,6 +83,12 @@ class UserModel(Model):
             'rel': 'userid',
             'value': self.userid
         })
+        for g in self.groups():
+            links.append({
+                'rel': 'group',
+                'name': g.identifier,
+                'href': self.request.link(g),
+            })
         return links
 
 
@@ -92,12 +98,7 @@ class UserStateMachine(StateMachine):
     transitions = [
         {'trigger': 'activate', 'source': 'inactive', 'dest': 'active'},
         {'trigger': 'deactivate', 'source': 'active', 'dest': 'inactive'},
-        {'trigger': 'delete', 'source': [
-            'active', 'inactive'], 'dest': 'deleted'}
     ]
-
-    def on_enter_deleted(self):
-        self._context.delete()
 
 
 @App.statemachine(model=UserModel)
@@ -112,7 +113,6 @@ class UserRulesAdapter(Adapter):
         for f in ['password', 'password_validate']:
             if f in data.keys():
                 del data[f]
-        data['groups'] = [g.identifier for g in self.context.groups()]
         return data
 
 

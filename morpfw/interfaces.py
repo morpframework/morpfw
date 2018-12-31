@@ -1,10 +1,11 @@
 import abc
 import morepath
 import webob
-from typing import Optional, Union, BinaryIO
+from typing import Optional, Union, BinaryIO, List, Sequence, Type
+import jsonobject
 
 
-class ISchema(abc.ABC):
+class ISchema(jsonobject.JsonObject):
     pass
 
 
@@ -49,8 +50,7 @@ class IBlobStorage(abc.ABC):
         raise NotImplementedError
 
 
-class IStorage(abc.ABC):
-
+class IStorageBase(abc.ABC):
     @abc.abstractmethod
     def __init__(self, request: morepath.Request,
                  blobstorage: Optional[IBlobStorage] = None):
@@ -62,16 +62,9 @@ class IStorage(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def aggregate(self, query: Optional[dict] = None,
-                  group: Optional[dict] = None,
-                  order_by: Union[None, list, tuple] = None) -> list:
-        """return aggregation result based on specified rulez query and group"""
-        raise NotImplementedError
-
-    @abc.abstractmethod
     def search(self, query: Optional[dict] = None, offset: Optional[int] = None,
                limit: Optional[int] = None,
-               order_by: Union[None, list, tuple] = None) -> list:
+               order_by: Union[None, list, tuple] = None) -> Sequence['IModel']:
         """return search result based on specified rulez query"""
         raise NotImplementedError
 
@@ -96,10 +89,19 @@ class IStorage(abc.ABC):
         raise NotImplementedError
 
 
+class IStorage(IStorageBase):
+    @abc.abstractmethod
+    def aggregate(self, query: Optional[dict] = None,
+                  group: Optional[dict] = None,
+                  order_by: Union[None, list, tuple] = None) -> list:
+        """return aggregation result based on specified rulez query and group"""
+        raise NotImplementedError
+
+
 class IModel(abc.ABC):
 
     linkable: bool
-    schema: ISchema
+    schema: Type[ISchema]
     update_view_enabled: bool
     delete_view_enabled: bool
     statemachine_view_enabled: bool
@@ -123,10 +125,6 @@ class IModel(abc.ABC):
 
     @abc.abstractmethod
     def __delitem__(self, key):
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def __dict__(self) -> dict:
         raise NotImplementedError
 
     @abc.abstractmethod

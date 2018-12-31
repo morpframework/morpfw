@@ -30,6 +30,7 @@ class UserSchema(Schema):
     email = jsonobject.StringProperty(required=True, validators=[
                                       regex_validator(EMAIL_PATTERN, 'email')])
     password = jsonobject.StringProperty(required=False)
+    plugin_source = jsonobject.StringProperty(required=False, default='local')
     groups = jsonobject.ListProperty(
         str, required=False)  # pattern=NAME_PATTERN
     attrs = jsonobject.DictProperty(required=False)

@@ -8,7 +8,3 @@ class Register(All):
 
 class ChangePassword(All):
     pass
-
-
-class DeleteUser(All):
-    pass

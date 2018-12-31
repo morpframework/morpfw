@@ -199,21 +199,3 @@ def change_password(context, request):
 
     context.change_password(current_password, data['new_password'])
     return {'status': 'success'}
-
-
-@App.json(model=UserModel, permission=permission.DeleteUser,
-          request_method='DELETE')
-def delete(context, request):
-    sm = context.state_machine()
-    try:
-        sm.delete()
-    except AttributeError:
-        @request.after
-        def adjust_status(response):
-            response.status = 404
-
-        return {
-            'status': 'error',
-            'message': 'User no longer exists'
-        }
-    return {'status': 'success'}

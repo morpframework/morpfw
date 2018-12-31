@@ -13,6 +13,7 @@ class User(Base):
     username = sa.Column(sa.String(length=256))
     email = sa.Column(sa.String)
     password = sa.Column(sa.String(length=1024))
+    plugin_source = sa.Column(sa.String(length=1024))
     attrs = sa.Column(sajson.JSONField)
 
 
