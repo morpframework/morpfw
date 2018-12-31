@@ -24,6 +24,8 @@ ALLOWED_SEARCH_OPERATORS = [
     '<='
 ]
 
+_marker = object()
+
 
 class Collection(object):
 
@@ -410,4 +412,16 @@ class XattrProvider(object):
         self.update(data)
 
     def update(self, newdata: dict):
+        raise NotImplementedError
+
+    def __setitem__(self, key, value):
+        raise NotImplementedError
+
+    def __getitem__(self, key):
+        raise NotImplementedError
+
+    def __delitem__(self, key):
+        raise NotImplementedError
+
+    def get(self, key, default=_marker):
         raise NotImplementedError

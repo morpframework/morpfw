@@ -60,7 +60,6 @@ class ObjectSchema(Schema):
     body = jsonobject.StringProperty(required=True, default='')
     created_flag = jsonobject.BooleanProperty(required=False, default=False)
     updated_flag = jsonobject.BooleanProperty(required=False, default=False)
-    attrs = jsonobject.DictProperty(required=False)
 
 
 @App.identifierfields(schema=ObjectSchema)

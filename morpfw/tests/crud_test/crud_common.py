@@ -5,6 +5,7 @@ from webtest import TestApp as Client
 from morpfw.crud.model import Collection, Model
 from morpfw.crud.schema import Schema
 from morpfw.crud.model import StateMachine, XattrProvider
+from morpfw.crud.xattrprovider import FieldXattrProvider
 from morpfw.app import BaseApp
 import morpfw.crud.signals as signals
 import jsl
@@ -85,17 +86,9 @@ class ObjectXattrSchema(jsonobject.JsonObject):
     message = jsonobject.StringProperty(required=False)
 
 
-class ObjectXattrProvider(XattrProvider):
+class ObjectXattrProvider(FieldXattrProvider):
 
     schema = ObjectXattrSchema
-
-    def as_json(self):
-        return self.context['attrs']
-
-    def update(self, newdata: dict):
-        data = self.context['attrs']
-        data.update(newdata)
-        self.context.update({'attrs': data})
 
 
 @App.xattrprovider(model=ObjectModel)
@@ -404,7 +397,7 @@ def run_jslcrud_test(c, skip_aggregate=False):
 
     r = c.get(obj_link)
 
-    assert r.json['data']['attrs'] == {}
+    assert r.json['data'].get('xattrs', None) is None
 
     r = c.get(obj_link + '/+xattr-schema')
 
@@ -417,7 +410,7 @@ def run_jslcrud_test(c, skip_aggregate=False):
     assert r.json == {'message': 'hello world'}
 
     r = c.get(obj_link)
-    assert r.json['data']['attrs'] == {'message': 'hello world'}
+    assert r.json['data']['xattrs'] == {'message': 'hello world'}
 
     # test creation of named object
     r = c.post_json('/named_objects/',

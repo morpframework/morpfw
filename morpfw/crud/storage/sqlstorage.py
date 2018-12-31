@@ -7,6 +7,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import func
 from datetime import datetime
 from decimal import Decimal
+import sqlalchemy_jsonfield as sajson
 from .base import BaseStorage
 from ..app import App
 import jsl
@@ -240,6 +241,8 @@ class BaseMixin(object):
     modified = sa.Column(sa.DateTime, default=datetime.utcnow)
     state = sa.Column(sa.String(length=1024))
     deleted = sa.Column(sa.DateTime)
+    blobs = sa.Column(sajson.JSONField)
+    xattrs = sa.Column(sajson.JSONField)
 
 
 Base = declarative_base(cls=BaseMixin)

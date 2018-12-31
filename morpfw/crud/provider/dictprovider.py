@@ -23,6 +23,9 @@ class DictProvider(Provider):
             if isinstance(data, str):
                 return parse_date(data)
             return data
+        if key not in self.data.keys():
+            default = self.schema.properties()[key].default
+            return default()
         return self.data[key]
 
     def __setitem__(self, key, value):
