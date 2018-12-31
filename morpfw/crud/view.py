@@ -146,7 +146,7 @@ def update(context, request, json):
     if not context.update_view_enabled:
         raise HTTPNotFound()
 
-    context.update(request.json)
+    context.update(request.json, secure=True)
     return {'status': 'success'}
 
 

@@ -13,6 +13,7 @@ from uuid import uuid4
 from transitions import Machine
 import copy
 from .errors import StateUpdateProhibitedError, AlreadyExistsError, BlobStorageNotImplementedError
+from .errors import UnprocessableError
 import jsonobject
 from ..interfaces import IModel
 
@@ -137,6 +138,11 @@ class Model(IModel):
 
     blobstorage_field = 'blobs'
     blob_fields = []
+    protected_fields = [
+        'id',  'blobs', 'state',  'xattrs',
+        'modified', 'created', 'uuid',
+        'creator', 'deleted'
+    ]
 
     def __setitem__(self, key, value):
         self.data[key] = value
@@ -205,9 +211,15 @@ class Model(IModel):
         self._cached_identifier = None
         super().__init__(request, storage, data)
 
-    def update(self, newdata):
-        if 'state' in newdata:
-            raise StateUpdateProhibitedError()
+    def update(self, newdata, secure=False):
+
+        if secure:
+            if 'state' in newdata:
+                raise StateUpdateProhibitedError()
+            for protected in self.protected_fields:
+                if protected in newdata.keys():
+                    raise UnprocessableError(
+                        "%s is not allowed to be updated in this context" % protected)
 
         data = self._raw_json()
         data.update(newdata)
