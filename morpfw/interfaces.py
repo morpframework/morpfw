@@ -62,6 +62,11 @@ class IStorageBase(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
+    def get(self, identifier) -> Optional['IModel']:
+        """return model from identifier"""
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def search(self, query: Optional[dict] = None, offset: Optional[int] = None,
                limit: Optional[int] = None,
                order_by: Union[None, list, tuple] = None) -> Sequence['IModel']:
@@ -69,12 +74,12 @@ class IStorageBase(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_by_id(self, id) -> 'IModel':
+    def get_by_id(self, id) -> Optional['IModel']:
         """return model from internal ID"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_by_uuid(self, uuid) -> 'IModel':
+    def get_by_uuid(self, uuid) -> Optional['IModel']:
         """return model from GUID"""
         raise NotImplementedError
 
