@@ -62,7 +62,8 @@ setup(name='morpfw',
           'zope.sqlalchemy',
           'more.basicauth',
           'cryptography',
-          'elasticsearch>=5.0.0,<6.0.0'
+          'elasticsearch>=5.0.0,<6.0.0',
+          'pamela'
       ],
       extras_require={
           'test': [
