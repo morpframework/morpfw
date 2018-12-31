@@ -144,8 +144,7 @@ class NamedObjectModel(Model):
 
 
 class BlobObjectSchema(Schema):
-
-    blobs = jsonobject.DictProperty(required=False)
+    pass
 
 
 class BlobObjectCollection(Collection):

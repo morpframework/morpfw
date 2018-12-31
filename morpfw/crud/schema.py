@@ -14,7 +14,7 @@ class Schema(ISchema):
     modified = jsonobject.DateTimeProperty(required=False)
     state = jsonobject.StringProperty(required=False)
     deleted = jsonobject.DateTimeProperty(required=False)
-    blobs = jsonobject.ListProperty(required=False, default=lambda: [],
+    blobs = jsonobject.DictProperty(required=False, default=lambda: {},
                                     exclude_if_none=True)
     xattrs = jsonobject.DictProperty(required=False, default=lambda: {},
                                      exclude_if_none=True)

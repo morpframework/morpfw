@@ -328,7 +328,7 @@ class Model(IModel):
 
     def put_blob(self, field, fileobj, filename, mimetype=None, size=None, encoding=None):
         self._blob_guard(field)
-        blob_data = self.data[self.blobstorage_field]
+        blob_data = self.data[self.blobstorage_field] or {}
         existing = blob_data.get(field, None)
         blob = self.storage.put_blob(
             fileobj, filename, mimetype, size, encoding)
