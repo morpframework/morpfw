@@ -106,7 +106,7 @@ class IModel(abc.ABC):
     delete_view_enabled: bool
     statemachine_view_enabled: bool
     blobstorage_field: str
-    blob_fields: list
+    blob_fields: List[str]
     identifier: str
     uuid: str
 

@@ -77,6 +77,8 @@ class App(JsonSchemaApp, signals.SignalApp):
 
     statemachine = dectate.directive(actions.StateMachineAction)
 
+    xattrprovider = dectate.directive(actions.XattrProviderAction)
+
     @reg.dispatch_method(
         reg.match_class('schema',
                         lambda self, schema, obj, storage: schema),
@@ -118,6 +120,11 @@ class App(JsonSchemaApp, signals.SignalApp):
     @reg.dispatch_method(reg.match_instance('model',
                                             lambda self, context: context))
     def get_statemachine(self, context):
+        raise NotImplementedError
+
+    @reg.dispatch_method(reg.match_instance('model',
+                                            lambda self, context: context))
+    def get_xattrprovider(self, context):
         raise NotImplementedError
 
     def get_compositekey_separator(self):

@@ -6,6 +6,7 @@ from morpfw.crud.blobstorage.fsblobstorage import FSBlobStorage
 from .crud_common import get_client, run_jslcrud_test, PageCollection, PageModel
 from .crud_common import NamedObjectCollection, NamedObjectModel
 from .crud_common import BlobObjectCollection, BlobObjectModel
+from .crud_common import ObjectXattrProvider, ObjectXattrSchema
 from .crud_common import FSBLOB_DIR
 import pprint
 from more.transaction import TransactionApp
@@ -56,10 +57,10 @@ def model_factory(request, identifier):
 class ObjectSchema(Schema):
 
     id = jsonobject.StringProperty(required=False)
-    uuid = jsonobject.StringProperty(required=False)
     body = jsonobject.StringProperty(required=True, default='')
     created_flag = jsonobject.BooleanProperty(required=False, default=False)
     updated_flag = jsonobject.BooleanProperty(required=False, default=False)
+    attrs = jsonobject.DictProperty(required=False)
 
 
 @App.identifierfields(schema=ObjectSchema)
@@ -74,6 +75,11 @@ def object_default_identifier(schema, obj, request):
 
 class ObjectModel(Model):
     schema = ObjectSchema
+
+
+@App.xattrprovider(model=ObjectModel)
+def get_xattr_provider(context):
+    return ObjectXattrProvider(context)
 
 
 class ObjectCollection(Collection):

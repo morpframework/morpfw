@@ -183,7 +183,7 @@ def delete(context, request):
     return {'status': 'success'}
 
 
-@App.view(model=Model, name='blobs', permission=permission.Edit)
+@App.view(model=Model, name='blobs', permission=permission.View)
 def get_blob(context, request):
     field = request.GET.get('field', None)
     if field is None or context.storage.blobstorage is None:
@@ -209,6 +209,35 @@ def put_blob(context, request):
         upload.filename), mimetype=upload.type,
         fileobj=upload.file)
     return context['blobs']
+
+
+@App.json(model=Model, name='xattr-schema', permission=permission.View)
+def get_xattr_schema(context, request):
+    if not context.xattr_view_enabled:
+        raise HTTPNotFound()
+
+    provider = context.xattrprovider()
+    return provider.jsonschema()
+
+
+@App.json(model=Model, name='xattr', permission=permission.View)
+def get_xattr(context, request):
+    if not context.xattr_view_enabled:
+        raise HTTPNotFound()
+
+    provider = context.xattrprovider()
+    return provider.as_json()
+
+
+@App.json(model=Model, name='xattr', permission=permission.View,
+          request_method='PATCH')
+def set_xattr(context, request):
+    if not context.xattr_view_enabled:
+        raise HTTPNotFound()
+
+    provider = context.xattrprovider()
+    provider.process_update(request.json)
+    return {'status': 'success'}
 
 
 @App.json(model=AlreadyExistsError)

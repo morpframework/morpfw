@@ -60,6 +60,7 @@ class Object(Base):
     body = sa.Column(sa.String(length=1024), default='')
     created_flag = sa.Column(sa.Boolean, default=False)
     updated_flag = sa.Column(sa.Boolean, default=False)
+    attrs = sa.Column(sajson.JSONField)
 
 
 class ObjectStorage(SQLStorage):

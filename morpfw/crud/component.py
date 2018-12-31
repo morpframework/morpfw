@@ -125,3 +125,18 @@ class StateMachineAction(dectate.Action):
     def perform(self, obj, app_class):
         app_class.get_statemachine.register(
             reg.methodify(obj), model=self.model)
+
+
+class XattrProviderAction(dectate.Action):
+
+    app_class_arg = True
+
+    def __init__(self, model):
+        self.model = model
+
+    def identifier(self, app_class):
+        return str((app_class, self.model))
+
+    def perform(self, obj, app_class):
+        app_class.get_xattrprovider.register(
+            reg.methodify(obj), model=self.model)

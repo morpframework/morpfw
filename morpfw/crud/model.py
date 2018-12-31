@@ -157,6 +157,12 @@ class Model(IModel):
         return False
 
     @property
+    def xattr_view_enabled(self):
+        if self.xattrprovider():
+            return True
+        return False
+
+    @property
     def schema(self):
         raise NotImplementedError
 
@@ -290,6 +296,11 @@ class Model(IModel):
             return self.app.get_statemachine(self)
         return None
 
+    def xattrprovider(self):
+        if self.app.get_xattrprovider.by_args(self).all_matches:
+            return self.app.get_xattrprovider(self)
+        return None
+
     def set_initial_state(self):
         self.state_machine()
 
@@ -355,3 +366,36 @@ class StateMachine(object):
 
     def get_triggers(self):
         return [i for i in self._machine.get_triggers(self.state) if not i.startswith('to_')]
+
+
+class XattrProvider(object):
+
+    @property
+    def schema(self):
+        raise NotImplementedError
+
+    def __init__(self, context):
+        self.context = context
+        self.request = context.request
+        self.app = context.request.app
+
+    def jsonschema(self):
+        schema = jsonobject_to_jsl(
+            self.schema, nullable=True).get_schema(ordered=True)
+        return {
+            'schema': schema
+        }
+
+    def as_json(self):
+        raise NotImplementedError
+
+    def process_update(self, newdata: dict):
+        data = self.as_json()
+        data.update(newdata)
+        schema = jsonobject_to_jsl(
+            self.schema, nullable=True).get_schema(ordered=True)
+        validate(data, schema)
+        self.update(data)
+
+    def update(self, newdata: dict):
+        raise NotImplementedError

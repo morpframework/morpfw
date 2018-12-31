@@ -4,7 +4,7 @@ import yaml
 from webtest import TestApp as Client
 from morpfw.crud.model import Collection, Model
 from morpfw.crud.schema import Schema
-from morpfw.crud.model import StateMachine
+from morpfw.crud.model import StateMachine, XattrProvider
 from morpfw.app import BaseApp
 import morpfw.crud.signals as signals
 import jsl
@@ -59,6 +59,7 @@ class ObjectSchema(Schema):
     body = jsonobject.StringProperty(required=True, default='')
     created_flag = jsonobject.BooleanProperty(required=False, default=False)
     updated_flag = jsonobject.BooleanProperty(required=False, default=False)
+    attrs = jsonobject.DictProperty(required=False)
 
 
 class ObjectCollection(Collection):
@@ -77,6 +78,29 @@ def object_created(app, request, obj, signal):
 @App.subscribe(signal=signals.OBJECT_UPDATED, model=ObjectModel)
 def object_updated(app, request, obj, signal):
     obj.data['updated_flag'] = True
+
+
+class ObjectXattrSchema(jsonobject.JsonObject):
+
+    message = jsonobject.StringProperty(required=False)
+
+
+class ObjectXattrProvider(XattrProvider):
+
+    schema = ObjectXattrSchema
+
+    def as_json(self):
+        return self.context['attrs']
+
+    def update(self, newdata: dict):
+        data = self.context['attrs']
+        data.update(newdata)
+        self.context.update({'attrs': data})
+
+
+@App.xattrprovider(model=ObjectModel)
+def get_objectmodel_xattrprovider(context):
+    return ObjectXattrProvider(context)
 
 
 class PageStateMachine(StateMachine):
@@ -371,6 +395,29 @@ def run_jslcrud_test(c, skip_aggregate=False):
     assert r.json['data']['created_flag'] is True
     assert r.json['data']['created']
     assert r.json['data']['creator'] == 'admin'
+
+    obj_link = r.json['links'][0]['href']
+    obj_xattr_link = obj_link + '/+xattr'
+    r = c.get(obj_xattr_link)
+
+    assert r.json == {}
+
+    r = c.get(obj_link)
+
+    assert r.json['data']['attrs'] == {}
+
+    r = c.get(obj_link + '/+xattr-schema')
+
+    assert r.json['schema']['$schema']
+
+    r = c.patch_json(obj_xattr_link, {'message': 'hello world'})
+
+    r = c.get(obj_xattr_link)
+
+    assert r.json == {'message': 'hello world'}
+
+    r = c.get(obj_link)
+    assert r.json['data']['attrs'] == {'message': 'hello world'}
 
     # test creation of named object
     r = c.post_json('/named_objects/',
