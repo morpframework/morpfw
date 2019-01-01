@@ -18,6 +18,7 @@ import re
 import jsonobject
 from .schema import RegistrationSchema, UserSchema, LoginSchema
 from ..exc import UserExistsError
+from ..utils import has_role
 
 
 class UserCollection(Collection):
@@ -57,7 +58,7 @@ class UserModel(Model):
         return morepath.Identity(self.userid)
 
     def change_password(self, password, new_password):
-        if not self.app.has_role(self.request, 'administrator'):
+        if not has_role(self.request, 'administrator'):
             if not self.validate(password, check_state=False):
                 raise exc.InvalidPasswordError(self.userid)
         self.storage.change_password(self.identity.userid, new_password)

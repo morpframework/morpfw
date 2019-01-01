@@ -6,7 +6,7 @@ from .model import RegistrationSchema
 from ..exc import UserExistsError
 import morepath
 from ..validator import validate
-from ..utils import rellink
+from ..utils import rellink, has_role
 from .. import permission
 from webob.exc import HTTPNotFound
 from more.jwtauth import (
@@ -181,7 +181,7 @@ def change_password(context, request):
     data = request.json
     error = None
     current_password = data.get('password', '')
-    if not request.app.has_role(request, 'administrator'):
+    if not has_role(request, 'administrator'):
         if not context.validate(current_password, check_state=False):
             error = 'Invalid password'
 

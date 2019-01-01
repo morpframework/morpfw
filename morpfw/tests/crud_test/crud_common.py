@@ -4,6 +4,7 @@ import yaml
 from webtest import TestApp as Client
 from morpfw.crud.model import Collection, Model
 from morpfw.crud.schema import Schema
+from morpfw.crud import permission as crudperm
 from morpfw.crud.model import StateMachine, XattrProvider
 from morpfw.crud.xattrprovider import FieldXattrProvider
 from morpfw.app import BaseApp
@@ -24,6 +25,16 @@ FSBLOB_DIR = tempfile.mkdtemp()
 
 class App(BaseApp):
     pass
+
+
+@App.permission_rule(model=Model, permission=crudperm.All)
+def allow_all_model_access(identity, context, permission):
+    return True
+
+
+@App.permission_rule(model=Collection, permission=crudperm.All)
+def allow_all_collection_access(identity, context, permission):
+    return True
 
 
 def validate_body(request, json):

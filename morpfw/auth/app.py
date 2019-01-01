@@ -25,18 +25,5 @@ class App(BaseApp):
     def _get_authn_storage(self, schema):
         raise NotImplementedError
 
-    def get_roles(self, request: morepath.Request, username: Optional[str] = None,
-                  groupname: str = '__default__'):
-        if username is None:
-            username = request.identity.userid
-        from .group.model import GroupSchema
-        storage = self.get_authn_storage(request, GroupSchema)
-        return storage.get_group_user_roles(groupname, username)
-
-    def has_role(self, request: morepath.Request, rolename: str,
-                 username: Optional[str] = None,
-                 groupname: str = '__default__'):
-        return rolename in self.get_roles(request, username, groupname)
-
     def __repr__(self):
         return u'AuthManager'

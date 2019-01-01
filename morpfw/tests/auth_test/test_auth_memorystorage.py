@@ -6,13 +6,14 @@ import os
 import yaml
 from morpfw.auth.policy.default import MemoryStorageAuthnPolicy
 from morpfw.auth.policy.default import MemoryStorageAuthApp as BaseAuthApp
+from morpfw.authz.default import DefaultAuthzPolicy
 
 
-class MemoryStorageAuthApp(BaseAuthApp):
+class MemoryStorageAuthApp(BaseAuthApp, DefaultAuthzPolicy):
     pass
 
 
-class MemoryStorageApp(BaseApp):
+class MemoryStorageApp(BaseApp, DefaultAuthzPolicy):
     pass
 
 

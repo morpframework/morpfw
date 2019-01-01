@@ -9,13 +9,14 @@ from morpfw.app import SQLApp
 from morpfw.auth.app import App
 from morpfw.auth.policy.default import SQLStorageAuthnPolicy
 from morpfw.auth.policy.default import SQLStorageAuthApp as BaseAuthApp
+from morpfw.authz.default import DefaultAuthzPolicy
 
 
-class SQLStorageAuthApp(BaseAuthApp):
+class SQLStorageAuthApp(BaseAuthApp, DefaultAuthzPolicy):
     pass
 
 
-class SQLStorageApp(SQLApp):
+class SQLStorageApp(SQLApp, DefaultAuthzPolicy):
     pass
 
 

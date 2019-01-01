@@ -1,6 +1,8 @@
 import morpfw
 from morpfw import sql as morpsql
 from morpfw.crud.schema import Schema
+from morpfw.crud import Collection, Model
+from morpfw.crud import permission as crudperm
 import sqlalchemy as sa
 import jsl
 from .common import get_client
@@ -9,6 +11,16 @@ import jsonobject
 
 class App(morpfw.SQLApp):
     pass
+
+
+@App.permission_rule(model=Model, permission=crudperm.All)
+def allow_all_model_access(identity, context, permission):
+    return True
+
+
+@App.permission_rule(model=Collection, permission=crudperm.All)
+def allow_all_collection_access(identity, context, permission):
+    return True
 
 
 class Page(morpsql.Base):
