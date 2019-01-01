@@ -4,9 +4,11 @@ from morpfw.app import BaseApp
 from morpfw.auth.app import App
 import os
 import yaml
+from morpfw.auth.policy.default import MemoryStorageAuthnPolicy
+from morpfw.auth.policy.default import MemoryStorageAuthApp as BaseAuthApp
 
 
-class MemoryStorageAuthApp(App, BaseApp):
+class MemoryStorageAuthApp(BaseAuthApp):
     pass
 
 
@@ -14,9 +16,13 @@ class MemoryStorageApp(BaseApp):
     pass
 
 
-@MemoryStorageApp.mount(app=MemoryStorageAuthApp, path='/auth')
+class AuthnPolicy(MemoryStorageAuthnPolicy):
+    app_cls = MemoryStorageAuthApp
+
+
+@MemoryStorageApp.mount(app=AuthnPolicy.app_cls, path='/auth')
 def mount_app(app):
-    return MemoryStorageAuthApp()
+    return AuthnPolicy.app_cls()
 
 
 def test_authentication_memorystorage():

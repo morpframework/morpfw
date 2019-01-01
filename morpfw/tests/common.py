@@ -5,7 +5,7 @@ from webtest import TestApp as Client
 from more.jwtauth import JWTIdentityPolicy
 from more.basicauth import BasicAuthIdentityPolicy
 from morpfw.main import create_app
-from morpfw.app import create_admin
+from morpfw.main import create_admin
 from morpfw.auth.exc import UserExistsError
 
 DEFAULT_SETTINGS = {

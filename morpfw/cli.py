@@ -3,7 +3,7 @@ import importlib
 import os
 import sys
 from .main import create_app
-from .app import create_admin
+from .main import create_admin
 import morepath
 import yaml
 import morpfw

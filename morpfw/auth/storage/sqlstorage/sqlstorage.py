@@ -189,30 +189,3 @@ class GroupSQLStorage(SQLStorage, IGroupStorage):
             db.RoleAssignment.rolename == rolename).first()
         if ra:
             self.session.delete(ra)
-
-
-def userstorage_factory(request, *args, **kwargs):
-    return UserSQLStorage(request)
-
-
-def apikeystorage_factory(request, *args, **kwargs):
-    return APIKeySQLStorage(request)
-
-
-@App.authn_storage('sqlstorage', APIKeySchema)
-def get_apikeystorage_factory(name, schema):
-    return apikeystorage_factory
-
-
-@App.authn_storage('sqlstorage', UserSchema)
-def get_userstorage_factory(name, schema):
-    return userstorage_factory
-
-
-def groupstorage_factory(request, *args, **kwargs):
-    return GroupSQLStorage(request)
-
-
-@App.authn_storage('sqlstorage', GroupSchema)
-def get_groupstorage_factory(name, schema):
-    return groupstorage_factory

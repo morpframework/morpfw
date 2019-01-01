@@ -7,9 +7,11 @@ from morepath.reify import reify
 from morepath.request import Request
 from morpfw.app import SQLApp
 from morpfw.auth.app import App
+from morpfw.auth.policy.default import SQLStorageAuthnPolicy
+from morpfw.auth.policy.default import SQLStorageAuthApp as BaseAuthApp
 
 
-class SQLStorageAuthApp(App, SQLApp):
+class SQLStorageAuthApp(BaseAuthApp):
     pass
 
 
@@ -17,9 +19,13 @@ class SQLStorageApp(SQLApp):
     pass
 
 
-@SQLStorageApp.mount(app=SQLStorageAuthApp, path='/auth')
+class AuthnPolicy(SQLStorageAuthnPolicy):
+    app_cls = SQLStorageAuthApp
+
+
+@SQLStorageApp.mount(app=AuthnPolicy.app_cls, path='/auth')
 def mount_app(app):
-    return SQLStorageAuthApp()
+    return AuthnPolicy.app_cls()
 
 
 def test_authentication_sqlstorage(pgsql_db):

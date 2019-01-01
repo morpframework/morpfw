@@ -8,8 +8,8 @@ def get_user(request, identifier):
 
 
 def get_user_collection(request):
-    return UserCollection(request,
-                          request.app.get_authn_storage(request, UserSchema))
+    authprovider = request.app.get_authnz_provider()
+    return UserCollection(request, authprovider.get_authn_storage(request, UserSchema))
 
 
 @App.path(model=UserModel,

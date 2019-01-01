@@ -3,7 +3,7 @@ import morepath
 from webtest import TestApp as Client
 from morpfw.auth.app import App
 from morpfw.main import create_app
-from morpfw.app import create_admin
+from morpfw.main import create_admin
 from morpfw.auth.user.model import UserCollection, UserSchema, GroupSchema
 from more.jwtauth import JWTIdentityPolicy
 import json

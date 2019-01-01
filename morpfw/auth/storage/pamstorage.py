@@ -1,9 +1,13 @@
 # FIXME: this plugin is not testable
 
 import pamela
-from .sqlstorage.sqlstorage import UserSQLStorage
+from .sqlstorage.sqlstorage import UserSQLStorage, APIKeySQLStorage, GroupSQLStorage
+from ..user.model import UserModel, UserSchema
+from ..group.model import GroupModel, GroupSchema
+from ..apikey.model import APIKeyModel, APIKeySchema
 from ...crud.errors import UnprocessableError
 import socket
+from ..app import App
 
 
 class UserPAMSQLStorage(UserSQLStorage):

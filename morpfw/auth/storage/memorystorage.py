@@ -129,30 +129,3 @@ class GroupMemoryStorage(MemoryStorage, IGroupStorage):
 
 
 SINGLETON: dict = {}
-
-
-def userstorage_factory(request, *args, **kwargs):
-    return UserMemoryStorage(request)
-
-
-@App.authn_storage('memorystorage', UserSchema)
-def get_userstorage_factory(name, schema):
-    return userstorage_factory
-
-
-def apikeystorage_factory(request, *args, **kwargs):
-    return APIKeyMemoryStorage(request)
-
-
-@App.authn_storage('memorystorage', APIKeySchema)
-def get_apikeystorage_factory(name, schema):
-    return apikeystorage_factory
-
-
-def groupstorage_factory(request, *args, **kwargs):
-    return GroupMemoryStorage(request)
-
-
-@App.authn_storage('memorystorage', GroupSchema)
-def get_groupstorage_factory(name, schema):
-    return groupstorage_factory

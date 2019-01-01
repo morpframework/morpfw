@@ -1,6 +1,5 @@
 from morepath import Identity, NO_IDENTITY
 from .base import AuthnPolicy as BaseAuthnPolicy
-from ipaddress import IPv4Address, IPv4Network
 
 
 class NoAuthIdentityPolicy(object):
@@ -17,10 +16,8 @@ class NoAuthIdentityPolicy(object):
 
 class AuthnPolicy(BaseAuthnPolicy):
 
-    @classmethod
-    def get_identity_policy(cls, settings):
+    def get_identity_policy(self, settings):
         return NoAuthIdentityPolicy()
 
-    @classmethod
-    def verify_identity(cls, app, identity):
+    def verify_identity(self, app, identity):
         return True

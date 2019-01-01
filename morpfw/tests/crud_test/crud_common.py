@@ -7,6 +7,7 @@ from morpfw.crud.schema import Schema
 from morpfw.crud.model import StateMachine, XattrProvider
 from morpfw.crud.xattrprovider import FieldXattrProvider
 from morpfw.app import BaseApp
+from morpfw.auth.policy.base import AuthnPolicy as BaseAuthnPolicy
 import morpfw.crud.signals as signals
 import jsl
 import json
@@ -157,14 +158,12 @@ class BlobObjectModel(Model):
     blob_fields = ['blobfile']
 
 
-class AuthnPolicy(object):
+class AuthnPolicy(BaseAuthnPolicy):
 
-    @classmethod
-    def get_identity_policy(cls, settings):
+    def get_identity_policy(self, settings):
         return BasicAuthIdentityPolicy()
 
-    @classmethod
-    def verify_identity(cls, app, identity):
+    def verify_identity(self, app, identity):
         if identity.userid == 'admin' and identity.password == 'admin':
             return True
         return False
