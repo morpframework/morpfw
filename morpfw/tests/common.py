@@ -6,11 +6,11 @@ from more.jwtauth import JWTIdentityPolicy
 from more.basicauth import BasicAuthIdentityPolicy
 from morpfw.main import create_app
 from morpfw.main import create_admin
-from morpfw.authn.exc import UserExistsError
+from morpfw.authn.pas.exc import UserExistsError
 
 DEFAULT_SETTINGS = {
     'application': {
-        'authn_policy': 'morpfw.authn.policy.noauth:AuthnPolicy',
+        'authn_policy': 'morpfw.authn.noauth:AuthnPolicy',
         'dburi': 'postgresql://postgres@localhost:45678/morp_tests'
     },
     'worker': {

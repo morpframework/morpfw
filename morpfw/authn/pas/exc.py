@@ -1,4 +1,4 @@
-from ..crud.errors import AlreadyExistsError
+from ...crud.errors import AlreadyExistsError
 
 
 class AuthManagerError(Exception):

@@ -8,7 +8,7 @@ from morepath.reify import reify
 import json
 from typing import List, Optional, Type
 import morpfw
-from ..app import BaseApp
+from ...app import BaseApp
 
 _REGISTERED_APPS: List[morepath.App] = []
 

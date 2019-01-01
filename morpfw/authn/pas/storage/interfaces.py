@@ -1,5 +1,5 @@
 import abc
-from ...interfaces import IModel, IStorageBase
+from ....interfaces import IModel, IStorageBase
 from typing import Optional, Union, List, Sequence
 
 

@@ -1,6 +1,6 @@
-from .authn.group.model import GroupSchema, GroupCollection
-from .authn.path import get_group_collection, get_group
-from .authn.path import get_user_collection as get_user_collection
+from .authn.pas.group.model import GroupSchema, GroupCollection
+from .authn.pas.path import get_group_collection, get_group
+from .authn.pas.path import get_user_collection as get_user_collection
 
 
 def create_group(request, groupname):

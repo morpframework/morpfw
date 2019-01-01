@@ -7,7 +7,7 @@ application:
   new_user_state: active
   dburi: 'sqlite:///%(here)s/app.db'
   compositekey_separator: '!!!!'
-  authn_policy: morpfw.authn.policy.noauth:AuthnPolicy
+  authn_policy: morpfw.authn.noauth:AuthnPolicy
   authn_policy_settings: {}
   development_mode: true
 

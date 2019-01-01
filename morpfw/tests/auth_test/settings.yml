@@ -1,4 +1,0 @@
-application:
-  authn_provider: morpfw.authn.app:App
-  authn_storage: memorystorage
-  authn_policy: morpfw.authn.policy.jwtapikey:AuthnPolicy

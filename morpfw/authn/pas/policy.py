@@ -1,15 +1,15 @@
 from more.jwtauth import JWTIdentityPolicy
 from morepath import Identity, NO_IDENTITY
 import rulez
-from ..path import get_apikey_collection
-from .base import AuthnPolicy as BaseAuthnPolicy
+from .path import get_apikey_collection
+from ..base import AuthnPolicy as BaseAuthnPolicy
 from ...app import SQLApp
-from ..app import App as BaseAuthApp
-from ..user.model import UserSchema
-from ..group.model import GroupSchema
-from ..apikey.model import APIKeySchema
-from ..storage.sqlstorage.sqlstorage import GroupSQLStorage, UserSQLStorage, APIKeySQLStorage
-from ..storage.memorystorage import GroupMemoryStorage, UserMemoryStorage, APIKeyMemoryStorage
+from .app import App as BaseAuthApp
+from .user.model import UserSchema
+from .group.model import GroupSchema
+from .apikey.model import APIKeySchema
+from .storage.sqlstorage.sqlstorage import GroupSQLStorage, UserSQLStorage, APIKeySQLStorage
+from .storage.memorystorage import GroupMemoryStorage, UserMemoryStorage, APIKeyMemoryStorage
 
 
 class JWTWithAPIKeyIdentityPolicy(JWTIdentityPolicy):

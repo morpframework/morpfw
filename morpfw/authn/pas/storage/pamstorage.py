@@ -5,7 +5,7 @@ from .sqlstorage.sqlstorage import UserSQLStorage, APIKeySQLStorage, GroupSQLSto
 from ..user.model import UserModel, UserSchema
 from ..group.model import GroupModel, GroupSchema
 from ..apikey.model import APIKeyModel, APIKeySchema
-from ...crud.errors import UnprocessableError
+from ....crud.errors import UnprocessableError
 import socket
 from ..app import App
 
