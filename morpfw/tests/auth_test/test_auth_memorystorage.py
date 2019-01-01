@@ -1,11 +1,11 @@
 from .test_auth import _test_authentication, get_client
 from more.jwtauth import JWTIdentityPolicy
 from morpfw.app import BaseApp
-from morpfw.auth.app import App
+from morpfw.authn.app import App
 import os
 import yaml
-from morpfw.auth.policy.default import MemoryStorageAuthnPolicy
-from morpfw.auth.policy.default import MemoryStorageAuthApp as BaseAuthApp
+from morpfw.authn.policy.default import MemoryStorageAuthnPolicy
+from morpfw.authn.policy.default import MemoryStorageAuthApp as BaseAuthApp
 from morpfw.authz.default import DefaultAuthzPolicy
 
 

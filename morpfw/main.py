@@ -2,8 +2,8 @@ import importlib
 import reg
 import morepath
 from .app import SQLApp, Session, BaseApp
-from .auth.user.model import UserCollection, UserSchema
-from .auth.group.model import GroupSchema
+from .authn.user.model import UserCollection, UserSchema
+from .authn.group.model import GroupSchema
 from .sql import Base
 import os
 from zope.sqlalchemy import register as register_session

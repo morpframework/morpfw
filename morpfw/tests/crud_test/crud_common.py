@@ -8,7 +8,7 @@ from morpfw.crud import permission as crudperm
 from morpfw.crud.model import StateMachine, XattrProvider
 from morpfw.crud.xattrprovider import FieldXattrProvider
 from morpfw.app import BaseApp
-from morpfw.auth.policy.base import AuthnPolicy as BaseAuthnPolicy
+from morpfw.authn.policy.base import AuthnPolicy as BaseAuthnPolicy
 import morpfw.crud.signals as signals
 import jsl
 import json

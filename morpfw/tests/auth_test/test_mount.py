@@ -2,8 +2,8 @@ import morpfw
 from morpfw import sql as morpsql
 from morpfw.app import BaseApp
 from morpfw.crud.schema import Schema
-from morpfw.auth.app import App as AuthApp
-from morpfw.auth.user.path import get_user_collection
+from morpfw.authn.app import App as AuthApp
+from morpfw.authn.user.path import get_user_collection
 import sqlalchemy as sa
 import jsl
 from .test_auth import get_client

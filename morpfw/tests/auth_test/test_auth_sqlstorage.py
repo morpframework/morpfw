@@ -6,9 +6,9 @@ from more.transaction import TransactionApp
 from morepath.reify import reify
 from morepath.request import Request
 from morpfw.app import SQLApp
-from morpfw.auth.app import App
-from morpfw.auth.policy.default import SQLStorageAuthnPolicy
-from morpfw.auth.policy.default import SQLStorageAuthApp as BaseAuthApp
+from morpfw.authn.app import App
+from morpfw.authn.policy.default import SQLStorageAuthnPolicy
+from morpfw.authn.policy.default import SQLStorageAuthApp as BaseAuthApp
 from morpfw.authz.default import DefaultAuthzPolicy
 
 
