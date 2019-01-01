@@ -3,8 +3,8 @@ from ..app import App
 
 
 def get_apikey_collection(request):
-    authnz_provider = request.app.get_authnz_provider()
-    storage = authnz_provider.get_authn_storage(request, APIKeySchema)
+    authn_provider = request.app.get_authn_provider()
+    storage = authn_provider.get_authn_storage(request, APIKeySchema)
     return APIKeyCollection(request, storage)
 
 

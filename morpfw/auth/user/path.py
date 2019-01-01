@@ -8,7 +8,7 @@ def get_user(request, identifier):
 
 
 def get_user_collection(request):
-    authprovider = request.app.get_authnz_provider()
+    authprovider = request.app.get_authn_provider()
     return UserCollection(request, authprovider.get_authn_storage(request, UserSchema))
 
 

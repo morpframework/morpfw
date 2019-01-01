@@ -72,11 +72,11 @@ class DBSessionRequest(Request):
 
 class BaseApp(CRUDApp, cors.CORSApp, SignalApp):
 
-    authnz_provider = dectate.directive(directive.AuthnzProviderAction)
+    authn_provider = dectate.directive(directive.AuthnProviderAction)
     request_class = Request
 
     @reg.dispatch_method()
-    def get_authnz_provider(self):
+    def get_authn_provider(self):
         raise NotImplementedError
 
     def __repr__(self):
