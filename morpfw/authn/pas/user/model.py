@@ -41,7 +41,6 @@ class UserCollection(Collection):
         return self.storage.get_by_userid(userid)
 
     def _create(self, data):
-        data['nonce'] = uuid4().hex
         return super(UserCollection, self)._create(data)
 
 

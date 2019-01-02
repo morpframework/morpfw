@@ -71,7 +71,7 @@ class GroupMemoryStorage(MemoryStorage, IGroupStorage):
     def get_user_groups(self, userid):
         res = []
         for gid, group in self.datastore.items():
-            if userid in group.data['attrs'].get('members'):
+            if userid in group.data['xattrs'].get('members'):
                 res.append(group)
         return res
 
@@ -80,32 +80,32 @@ class GroupMemoryStorage(MemoryStorage, IGroupStorage):
         userstorage = self.request.app.root.get_authn_provider().get_authn_storage(
             self.request, UserSchema)
         res = []
-        group.data.setdefault('attrs', {})
-        attrs = group.data['attrs']
+        group.data.setdefault('xattrs', {})
+        attrs = group.data['xattrs']
         attrs.setdefault('members', [])
-        for m in group.data['attrs'].get('members'):
+        for m in group.data['xattrs'].get('members'):
             res.append(userstorage.get_by_userid(m))
         return res
 
     def add_group_members(self, groupname, userids):
         group = self.get(groupname)
-        group.data.setdefault('attrs', {})
-        attrs = group.data['attrs']
+        group.data.setdefault('xattrs', {})
+        attrs = group.data['xattrs']
         attrs.setdefault('members', [])
         for u in userids:
             if u not in attrs['members']:
                 attrs['members'].append(u)
-        group.data['attrs'] = attrs
+        group.data['xattrs'] = attrs
 
     def remove_group_members(self, groupname, userids):
         group = self.get(groupname)
-        group.data.setdefault('attrs', {})
-        attrs = group.data['attrs']
+        group.data.setdefault('xattrs', {})
+        attrs = group.data['xattrs']
         attrs.setdefault('members', [])
         for u in userids:
             if u in attrs['members']:
                 attrs['members'].remove(u)
-        group.data['attrs'] = attrs
+        group.data['xattrs'] = attrs
 
     def get_group_user_roles(self, groupname, userid):
         rolemap = DB['rolemap']

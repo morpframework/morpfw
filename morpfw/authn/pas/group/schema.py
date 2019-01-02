@@ -6,10 +6,6 @@ from ..app import App
 class GroupSchema(Schema):
     groupname = jsonobject.StringProperty(
         required=True)  # , pattern=NAME_PATTERN)
-    members = jsonobject.ListProperty(str, required=False)
-    attrs = jsonobject.DictProperty(required=False)
-    created = jsonobject.StringProperty(required=False)
-    modified = jsonobject.StringProperty(required=False)
 
 
 @App.identifierfields(schema=GroupSchema)

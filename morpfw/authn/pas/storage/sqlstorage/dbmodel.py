@@ -13,8 +13,7 @@ class User(Base):
     username = sa.Column(sa.String(length=256))
     email = sa.Column(sa.String)
     password = sa.Column(sa.String(length=1024))
-    plugin_source = sa.Column(sa.String(length=1024))
-    attrs = sa.Column(sajson.JSONField)
+    source = sa.Column(sa.String(length=1024))
 
 
 class APIKey(Base):
@@ -32,7 +31,6 @@ class Group(Base):
     __tablename__ = 'authmanager_groups'
 
     groupname = sa.Column(sa.String(length=256))
-    attrs = sa.Column(sajson.JSONField)
     memberships = relationship('Membership', cascade='all')
 
 
@@ -44,7 +42,6 @@ class Membership(Base):
         'authmanager_groups.id'))
     user_id = sa.Column(sa.ForeignKey(
         'authmanager_users.id'))
-    created = sa.Column(sa.DateTime)
     sa.UniqueConstraint('group_id', 'user_id')
 
     roles_assignment = relationship('RoleAssignment', cascade='all')
@@ -56,5 +53,4 @@ class RoleAssignment(Base):
 
     membership_id = sa.Column(sa.ForeignKey('authmanager_membership.id'))
     rolename = sa.Column(sa.String)
-    created = sa.Column(sa.DateTime)
     sa.UniqueConstraint('membership_id', 'role_id')

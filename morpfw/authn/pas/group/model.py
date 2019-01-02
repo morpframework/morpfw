@@ -49,3 +49,12 @@ class GroupModel(Model):
         if (not self.get_member_roles(userid) and
                 self.identifier != '__default__'):
             self.remove_members([userid])
+
+    def _links(self):
+        links = []
+        for m in self.members():
+            links.append({
+                'rel': 'member',
+                'href': self.request.link(m)
+            })
+        return links
