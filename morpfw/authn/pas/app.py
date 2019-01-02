@@ -13,6 +13,4 @@ _REGISTERED_APPS: List[morepath.App] = []
 
 
 class App(BaseApp):
-
-    def __repr__(self):
-        return u'AuthManager'
+    pass
