@@ -42,9 +42,11 @@ class FSBlobStorage(BlobStorage):
     def put(self, fileobj: typing.BinaryIO,
             filename: str, mimetype: typing.Optional[str] = None,
             size: typing.Optional[int] = None,
-            encoding: typing.Optional[str] = None) -> Blob:
+            encoding: typing.Optional[str] = None,
+            uuid: typing.Optional[str] = None) -> FSBlob:
 
-        uuid = uuid4().hex
+        if uuid is None:
+            uuid = uuid4().hex
 
         obj_path = os.path.join(self._uuid_path(uuid), uuid)
         meta_path = self._meta_path(obj_path)

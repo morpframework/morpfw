@@ -38,7 +38,8 @@ class IBlobStorage(abc.ABC):
             filename: str,
             mimetype: Optional[str] = None,
             size: Optional[int] = None,
-            encoding: Optional[str] = None) -> IBlob:
+            encoding: Optional[str] = None,
+            uuid: Optional[str] = None) -> IBlob:
         raise NotImplementedError
 
     @abc.abstractmethod
