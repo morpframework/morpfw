@@ -48,6 +48,8 @@ class UserModel(Model):
 
     schema = UserSchema
 
+    blob_fields = ['profile-photo']
+
     @property
     def userid(self):
         return self.storage.get_userid(self)
