@@ -120,7 +120,8 @@ def create_sqlapp(app, settings, scan=True, **kwargs):
 
 
 def create_admin(app: morepath.App, username: str, password: str, email: str, session=Session):
-    authapp = app.get_authn_provider()
+    appreq = app.request_class(app=app, environ={'PATH_INFO': '/'})
+    authapp = app.get_authn_provider(appreq)
     authapp.root = app
     request = authapp.request_class(app=authapp, environ={'PATH_INFO': '/'})
 

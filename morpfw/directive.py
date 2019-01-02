@@ -12,4 +12,4 @@ class AuthnProviderAction(dectate.Action):
         return str((app_class, uuid4().hex))
 
     def perform(self, obj, app_class):
-        app_class.get_authn_provider.register(reg.methodify(obj))
+        app_class._get_authn_provider.register(reg.methodify(obj))

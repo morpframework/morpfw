@@ -8,7 +8,7 @@ def get_group(request, identifier):
 
 
 def get_group_collection(request):
-    authnzprovider = request.app.get_authn_provider()
+    authnzprovider = request.app.get_authn_provider(request)
     storage = authnzprovider.get_authn_storage(request, GroupSchema)
     return GroupCollection(request, storage)
 

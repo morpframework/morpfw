@@ -58,6 +58,10 @@ class Request(BaseRequest):
         new_req.identity = self.identity
         return new_req
 
+    def get_authn_request(self):
+        app = self.app.get_authn_provider(self)
+        return self.copy(app=app)
+
 
 class DBSessionRequest(Request):
 
@@ -75,8 +79,14 @@ class BaseApp(CRUDApp, cors.CORSApp, SignalApp):
     authn_provider = dectate.directive(directive.AuthnProviderAction)
     request_class = Request
 
+    def get_authn_provider(self, request):
+        authn_app = self._get_authn_provider()
+        authn_app.root = request.app.root
+        authn_app.parent = request.app
+        return authn_app
+
     @reg.dispatch_method()
-    def get_authn_provider(self):
+    def _get_authn_provider(self):
         raise NotImplementedError
 
     def __repr__(self):

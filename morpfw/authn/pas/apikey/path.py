@@ -3,7 +3,7 @@ from ..app import App
 
 
 def get_apikey_collection(request):
-    authn_provider = request.app.get_authn_provider()
+    authn_provider = request.app.get_authn_provider(request)
     storage = authn_provider.get_authn_storage(request, APIKeySchema)
     return APIKeyCollection(request, storage)
 
