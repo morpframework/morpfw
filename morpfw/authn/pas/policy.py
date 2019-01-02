@@ -5,9 +5,9 @@ from .path import get_apikey_collection
 from ..base import AuthnPolicy as BaseAuthnPolicy
 from ...app import SQLApp
 from .app import App as BaseAuthApp
-from .user.model import UserSchema
-from .group.model import GroupSchema
-from .apikey.model import APIKeySchema
+from .user.model import UserSchema, UserModel
+from .group.model import GroupSchema, GroupModel
+from .apikey.model import APIKeySchema, APIKeyModel
 from .storage.sqlstorage.sqlstorage import GroupSQLStorage, UserSQLStorage, APIKeySQLStorage
 from .storage.memorystorage import GroupMemoryStorage, UserMemoryStorage, APIKeyMemoryStorage
 
@@ -44,19 +44,19 @@ class SQLStorageAuthApp(BaseAuthApp, SQLApp):
     pass
 
 
-@SQLStorageAuthApp.authn_storage(schema=UserSchema)
-def get_user_sqlstorage_factory(schema):
-    return UserSQLStorage
+@SQLStorageAuthApp.storage(model=UserModel)
+def get_user_sqlstorage(model, request, blobstorage):
+    return UserSQLStorage(request, blobstorage=blobstorage)
 
 
-@SQLStorageAuthApp.authn_storage(schema=GroupSchema)
-def get_group_sqlstorage_factory(schema):
-    return GroupSQLStorage
+@SQLStorageAuthApp.storage(model=GroupModel)
+def get_group_sqlstorage(model, request, blobstorage):
+    return GroupSQLStorage(request, blobstorage=blobstorage)
 
 
-@SQLStorageAuthApp.authn_storage(schema=APIKeySchema)
-def get_apikey_sqlstorage_factory(schema):
-    return APIKeySQLStorage
+@SQLStorageAuthApp.storage(model=APIKeyModel)
+def get_apikey_sqlstorage(model, request, blobstorage):
+    return APIKeySQLStorage(request, blobstorage=blobstorage)
 
 
 class SQLStorageAuthnPolicy(DefaultAuthnPolicy):
@@ -68,19 +68,19 @@ class MemoryStorageAuthApp(BaseAuthApp):
     pass
 
 
-@MemoryStorageAuthApp.authn_storage(schema=UserSchema)
-def get_user_memorystorage_factory(schema):
-    return UserMemoryStorage
+@MemoryStorageAuthApp.storage(model=UserModel)
+def get_user_memorystorage(model, request, blobstorage):
+    return UserMemoryStorage(request, blobstorage=blobstorage)
 
 
-@MemoryStorageAuthApp.authn_storage(schema=GroupSchema)
-def get_group_memorystorage_factory(schema):
-    return GroupMemoryStorage
+@MemoryStorageAuthApp.storage(model=GroupModel)
+def get_group_memorystorage(model, request, blobstorage):
+    return GroupMemoryStorage(request, blobstorage=blobstorage)
 
 
-@MemoryStorageAuthApp.authn_storage(schema=APIKeySchema)
-def get_apikey_memorystorage_factory(schema):
-    return APIKeyMemoryStorage
+@MemoryStorageAuthApp.storage(model=APIKeyModel)
+def get_apikey_memorystorage(model, request, blobstorage):
+    return APIKeyMemoryStorage(request, blobstorage=blobstorage)
 
 
 class MemoryStorageAuthnPolicy(DefaultAuthnPolicy):

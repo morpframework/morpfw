@@ -2,8 +2,8 @@ import importlib
 import reg
 import morepath
 from .app import SQLApp, Session, BaseApp
-from .authn.pas.user.model import UserCollection, UserSchema
-from .authn.pas.group.model import GroupSchema
+from .authn.pas.user.model import UserCollection, UserSchema, UserModel
+from .authn.pas.group.model import GroupSchema, GroupModel
 from .sql import Base
 import os
 from zope.sqlalchemy import register as register_session
@@ -122,17 +122,16 @@ def create_sqlapp(app, settings, scan=True, **kwargs):
 def create_admin(app: morepath.App, username: str, password: str, email: str, session=Session):
     appreq = app.request_class(app=app, environ={'PATH_INFO': '/'})
     authapp = app.get_authn_provider(appreq)
-    authapp.root = app
     request = authapp.request_class(app=authapp, environ={'PATH_INFO': '/'})
 
     transaction.manager.begin()
-    get_authn_storage = authapp.get_authn_storage
-    usercol = UserCollection(request, get_authn_storage(request, UserSchema))
+    get_authn_storage = authapp.get_storage
+    usercol = UserCollection(request, get_authn_storage(UserModel, request))
     userobj = usercol.create({'username': username,
                               'password': password,
                               'email': email,
                               'state': 'active'})
-    gstorage = get_authn_storage(request, GroupSchema)
+    gstorage = get_authn_storage(GroupModel, request)
     group = gstorage.get('__default__')
     group.add_members([userobj.userid])
     group.grant_member_role(userobj.userid, 'administrator')

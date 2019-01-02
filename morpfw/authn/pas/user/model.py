@@ -12,7 +12,7 @@ from morpfw.crud import errors as cruderrors
 from morpfw.crud.schema import Schema
 from morpfw.crud.rulesadapter import Adapter
 from morpfw.crud.validator import regex_validator
-from ..group.model import GroupCollection, GroupSchema
+from ..group.model import GroupCollection, GroupSchema, GroupModel
 from uuid import uuid4
 import re
 import jsonobject
@@ -126,7 +126,7 @@ def get_rulesadapter(obj):
 @App.subscribe(signal=crudsignal.OBJECT_CREATED, model=UserModel)
 def add_user_to_default_group(app, request, obj, signal):
     request = obj.request
-    storage = app.get_authn_storage(request, GroupSchema)
+    storage = app.get_storage(GroupModel, request)
     g = storage.get('__default__')
     if g is None:
         gcol = GroupCollection(request, storage)

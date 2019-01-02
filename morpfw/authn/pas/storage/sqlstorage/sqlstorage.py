@@ -60,8 +60,8 @@ class UserSQLStorage(SQLStorage, IUserStorage):
         q = self.session.query(db.Membership).filter(
             db.Membership.user_id == u.id)
         membership = q.all()
-        groupstorage = self.request.app.get_authn_storage(
-            self.request, GroupSchema)
+        groupstorage = self.request.app.get_storage(GroupModel,
+                                                    self.request)
         res = [groupstorage.get_by_id(m.group_id)
                for m in membership]
         return res
@@ -81,11 +81,11 @@ class GroupSQLStorage(SQLStorage, IGroupStorage):
     orm_model = db.Group
 
     def get_user_by_userid(self, userid, as_model=True):
-        user_storage = self.app.get_authn_storage(self.request, UserSchema)
+        user_storage = self.app.get_storage(UserModel, self.request)
         return user_storage.get_by_userid(userid, as_model)
 
     def get_user_by_username(self, username, as_model=True):
-        user_storage = self.app.get_authn_storage(self.request, UserSchema)
+        user_storage = self.app.get_storage(UserModel, self.request)
         return user_storage.get_by_username(username)
 
     def get_members(self, groupname):
@@ -94,7 +94,7 @@ class GroupSQLStorage(SQLStorage, IGroupStorage):
              .join(db.Group)
              .filter(db.Group.groupname == groupname))
         members = []
-        user_storage = self.app.get_authn_storage(self.request, UserSchema)
+        user_storage = self.app.get_storage(UserModel, self.request)
         for m in q.all():
             members.append(user_storage.model(self.request, user_storage, m))
         return members

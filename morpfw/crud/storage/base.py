@@ -1,4 +1,5 @@
 import copy
+from ..blobstorage.base import NullBlobStorage
 from ..errors import BlobStorageNotImplementedError
 from ...interfaces import IStorage
 
@@ -55,7 +56,7 @@ class BaseStorage(IStorage):
 #		raise NotImplementedError
 
     def _blob_guard(self):
-        if self.blobstorage is None:
+        if self.blobstorage is None or isinstance(self.blobstorage, NullBlobStorage):
             raise BlobStorageNotImplementedError(
                 'Storage does not implement blobstorage')
 

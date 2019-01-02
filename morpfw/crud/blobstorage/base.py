@@ -49,3 +49,19 @@ class Blob(IBlob):
 
 class BlobStorage(IBlobStorage):
     pass
+
+
+class NullBlobStorage(BlobStorage):
+
+    def put(self, fileobj: typing.BinaryIO,
+            filename: str, mimetype: typing.Optional[str] = None,
+            size: typing.Optional[int] = None,
+            encoding: typing.Optional[str] = None,
+            uuid: typing.Optional[str] = None) -> Blob:
+        raise NotImplementedError
+
+    def get(self, uuid: str) -> typing.Optional[Blob]:
+        raise NotImplementedError
+
+    def delete(self, uuid: str):
+        raise NotImplementedError

@@ -1,6 +1,39 @@
 import dectate
 import reg
+import morepath
+from .blobstorage.base import BlobStorage
 from . import signals
+
+
+class StorageAction(dectate.Action):
+
+    app_class_arg = True
+
+    def __init__(self, model):
+        self.model = model
+
+    def identifier(self, app_class):
+        return str((self.model))
+
+    def perform(self, obj, app_class):
+        app_class._get_storage.register(
+            reg.methodify(obj), model=self.model,
+            request=morepath.Request, blobstorage=BlobStorage)
+
+
+class BlobStorageAction(dectate.Action):
+
+    app_class_arg = True
+
+    def __init__(self, model):
+        self.model = model
+
+    def identifier(self, app_class):
+        return str((self.model))
+
+    def perform(self, obj, app_class):
+        app_class._get_blobstorage.register(
+            reg.methodify(obj), model=self.model, request=morepath.Request)
 
 
 class DataProviderAction(dectate.Action):

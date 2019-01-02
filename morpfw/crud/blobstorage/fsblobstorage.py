@@ -7,6 +7,7 @@ from uuid import uuid4
 from .base import BlobStorage, Blob
 import typing
 import json
+import morepath
 
 # 1MB
 WRITE_BUFF_SIZE = 1073741824
@@ -28,8 +29,9 @@ class FSBlob(Blob):
 
 class FSBlobStorage(BlobStorage):
 
-    def __init__(self, path: str):
+    def __init__(self, request: morepath.Request, path: str):
         self.path = path
+        self.request = request
 
     def _uuid_path(self, uuid):
         first = uuid[:2]

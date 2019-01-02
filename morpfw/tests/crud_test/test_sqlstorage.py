@@ -119,17 +119,25 @@ class BlobObjectStorage(SQLStorage):
     orm_model = BlobObject
 
 
+@App.storage(model=BlobObjectModel)
+def get_blobobject_storage(model, request, blobstorage):
+    return BlobObjectStorage(request, blobstorage=blobstorage)
+
+
+@App.blobstorage(model=BlobObjectModel)
+def get_blobobject_blobstorage(model, request):
+    return FSBlobStorage(request, FSBLOB_DIR)
+
+
 @App.path(model=BlobObjectCollection, path='blob_objects')
 def blobobject_collection_factory(request):
-    blobstorage = FSBlobStorage(FSBLOB_DIR)
-    storage = BlobObjectStorage(request, blobstorage=blobstorage)
+    storage = request.app.get_storage(BlobObjectModel, request)
     return BlobObjectCollection(request, storage)
 
 
 @App.path(model=BlobObjectModel, path='blob_objects/{identifier}')
 def blobobject_model_factory(request, identifier):
-    blobstorage = FSBlobStorage(FSBLOB_DIR)
-    storage = BlobObjectStorage(request, blobstorage)
+    storage = request.app.get_storage(BlobObjectModel, request)
     return storage.get(identifier)
 
 

@@ -8,6 +8,7 @@ from more.signals import SignalApp
 from . import component as actions
 import warnings
 from .model import Model
+from .blobstorage.base import NullBlobStorage
 
 Session = sessionmaker()
 
@@ -78,6 +79,27 @@ class App(JsonSchemaApp, signals.SignalApp):
     statemachine = dectate.directive(actions.StateMachineAction)
 
     xattrprovider = dectate.directive(actions.XattrProviderAction)
+
+    storage = dectate.directive(actions.StorageAction)
+
+    blobstorage = dectate.directive(actions.BlobStorageAction)
+
+    def get_storage(self, model, request):
+        blobstorage = self.get_blobstorage(model, request)
+        return self._get_storage(model, request, blobstorage)
+
+    def get_blobstorage(self, model, request):
+        return self._get_blobstorage(model, request)
+
+    @reg.dispatch_method(reg.match_class('model'),
+                         reg.match_instance('request'),
+                         reg.match_instance('blobstorage'))
+    def _get_storage(self, model, request, blobstorage):
+        raise NotImplementedError
+
+    @reg.dispatch_method(reg.match_class('model'), reg.match_instance('request'))
+    def _get_blobstorage(self, model, request):
+        return NullBlobStorage()
 
     @reg.dispatch_method(
         reg.match_class('schema',
