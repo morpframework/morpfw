@@ -345,6 +345,8 @@ class Model(IModel):
         return blob
 
     def get_blob(self, field):
+        if not self.data[self.blobstorage_field]:
+            return None
         uuid = self.data[self.blobstorage_field][field]
         blob = self.storage.get_blob(uuid)
         return blob
