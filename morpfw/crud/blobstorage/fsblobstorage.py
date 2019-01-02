@@ -70,9 +70,12 @@ class FSBlobStorage(BlobStorage):
         meta['path'] = obj_path
         return FSBlob(**meta)
 
-    def get(self, uuid: str) -> Blob:
+    def get(self, uuid: str) -> typing.Optional[Blob]:
         obj_path = os.path.join(self._uuid_path(uuid), uuid)
         meta_path = self._meta_path(obj_path)
+
+        if not os.path.exists(meta_path):
+            return None
 
         meta: dict = {}
         with open(meta_path) as mo:

@@ -42,7 +42,7 @@ class IBlobStorage(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get(self, uuid: str) -> IBlob:
+    def get(self, uuid: str) -> Optional[IBlob]:
         raise NotImplementedError
 
     @abc.abstractmethod
