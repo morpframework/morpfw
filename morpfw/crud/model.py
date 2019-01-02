@@ -268,6 +268,12 @@ class Model(IModel):
             }
         return self._json()
 
+    def as_json(self):
+        return self.data.as_json()
+
+    def as_dict(self):
+        return self.data.as_dict()
+
     def links(self):
         links = []
         links.append({
@@ -401,6 +407,9 @@ class XattrProvider(object):
         }
 
     def as_json(self):
+        raise NotImplementedError
+
+    def as_dict(self):
         raise NotImplementedError
 
     def process_update(self, newdata: dict):

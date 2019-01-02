@@ -27,6 +27,9 @@ class FieldXattrProvider(XattrProvider):
         return self.context[self.field].get(key, default)
 
     def as_json(self):
+        return self.context.as_json().get(self.field, {})
+
+    def as_dict(self):
         return self.context[self.field] or {}
 
     def update(self, newdata: dict):
