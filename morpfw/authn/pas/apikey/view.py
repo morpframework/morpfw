@@ -14,7 +14,6 @@ def generate_apikey(context, request):
     usercol = get_user_collection(request)
     user = usercol.get_by_userid(request.identity.userid)
     data = {}
-    data['userid'] = request.identity.userid
     if not user.validate(request.json['password']):
         @request.after
         def adjust_response(response):
@@ -22,8 +21,6 @@ def generate_apikey(context, request):
 
         return {'status': 'error', 'message': 'Invalid password'}
 
-    data['api_identity'] = uuid.uuid4().hex
-    data['api_secret'] = uuid.uuid4().hex
     data['label'] = request.json['label']
     obj = context.create(data)
     return obj.json()
