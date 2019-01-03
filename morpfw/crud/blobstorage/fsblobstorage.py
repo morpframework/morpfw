@@ -54,6 +54,7 @@ class FSBlobStorage(BlobStorage):
         meta_path = self._meta_path(obj_path)
         Path(self._uuid_path(uuid)).mkdir(parents=True, exist_ok=True)
 
+        fileobj.seek(0)
         with open(obj_path, 'wb') as o:
             while True:
                 data = fileobj.read(WRITE_BUFF_SIZE)
