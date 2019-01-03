@@ -93,5 +93,8 @@ class FSBlobStorage(BlobStorage):
         obj_path = os.path.join(self._uuid_path(uuid), uuid)
         meta_path = self._meta_path(obj_path)
 
-        os.unlink(obj_path)
-        os.unlink(meta_path)
+        if os.path.exists(obj_path):
+            os.unlink(obj_path)
+
+        if os.path.exists(meta_path):
+            os.unlink(meta_path)

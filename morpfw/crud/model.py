@@ -341,7 +341,7 @@ class Model(IModel):
         blob_data[field] = blob.uuid
         self.update({self.blobstorage_field: blob_data})
         if existing:
-            self.delete_blob(existing)
+            self.storage.delete_blob(existing)
         return blob
 
     def get_blob(self, field):
