@@ -12,6 +12,8 @@ BLOCK_SIZE = 1 << 16
 class Blob(IBlob):
     def __init__(self, uuid, filename, mimetype=None, size=None, encoding=None):
         self.uuid = uuid
+        if size and size < 0:
+            size = None
         self.size = size
         self.filename = filename
         self.mimetype = mimetype
@@ -27,6 +29,7 @@ class Blob(IBlob):
             return exc.HTTPMethodNotAllowed("You cannot %s a file" %
                                             req.method)
 
+        disposition = req.GET.get('disposition', 'attachment')
         try:
             file = self.open()
         except (IOError, OSError) as e:
@@ -42,7 +45,9 @@ class Blob(IBlob):
             app_iter=app_iter,
             content_length=self.get_size(),
             content_type=self.mimetype,
-            content_encoding=self.encoding
+            content_encoding=self.encoding,
+            content_disposition='%s; filename="%s"' % (
+                disposition, self.filename),
             # @@ etag
         ).conditional_response_app
 
