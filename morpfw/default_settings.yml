@@ -2,6 +2,9 @@ server:
   listen_host: 127.0.0.1
   listen_port: 5432
 
+morpfw:
+  scan: []
+
 application:
   mounted_apps: []
   new_user_state: active

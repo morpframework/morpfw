@@ -41,6 +41,9 @@ def create_baseapp(app, settings, scan=True, **kwargs):
 
     if scan:
         morepath.autoscan()
+        for scanmodpath in (settings['morpfw']['scan'] or []):
+            scanmod = importlib.import_module(scanmodpath)
+            morepath.scan(package=scanmod)
 
     app_settings = settings['application']
 

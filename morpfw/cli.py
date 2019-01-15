@@ -23,9 +23,9 @@ def load(app_path, settings_file, host=None, port=None):
 
     if 'server' in settings:
         if not host:
-            host = settings['server'].get('listen_host', host)
+            host = settings['server'].get('listen_host', '127.0.0.1')
         if not port:
-            port = settings['server'].get('listen_port', port)
+            port = settings['server'].get('listen_port', 5432)
 
     sys.path.append(os.getcwd())
     mod, clsname = app_path.split(':')
@@ -41,8 +41,8 @@ def load(app_path, settings_file, host=None, port=None):
 
 @arg('-a', '--app', required=False, default=None, help='Path to App class')
 @arg('-s', '--settings', required=True, help='Path to settings.yml')
-@arg('-h', '--host', default='127.0.0.1', help='Host')
-@arg('-p', '--port', default=5432, type=int, help='Port')
+@arg('-h', '--host', default=None, help='Host')
+@arg('-p', '--port', default=None, type=int, help='Port')
 def start(app=None, settings=None, host=None, port=None):
     param = load(app, settings, host, port)
     morpfw.run(param['app_cls'], settings=param['settings'], host=param['host'],
