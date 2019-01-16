@@ -4,7 +4,6 @@ from ..app import App
 import jsl
 from morpfw.crud import errors as cruderrors
 from .. import exc
-import jsonobject
 from .schema import GroupSchema, MemberSchema
 from ..exc import GroupExistsError
 

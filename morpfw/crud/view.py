@@ -15,7 +15,6 @@ import traceback
 import os
 import sys
 import logging
-import jsonobject.exceptions
 logger = logging.getLogger('morp')
 
 

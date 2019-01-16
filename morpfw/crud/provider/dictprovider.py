@@ -6,7 +6,6 @@ from ...interfaces import ISchema
 from dateutil.parser import parse as parse_date
 from ..util import dataclass_check_type, dataclass_get_type
 import datetime
-import jsonobject
 from dataclasses import _MISSING_TYPE
 
 _MARKER: list = []

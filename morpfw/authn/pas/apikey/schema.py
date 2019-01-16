@@ -1,4 +1,3 @@
-import jsonobject
 from morpfw.crud import Schema
 from dataclasses import dataclass, field
 import typing

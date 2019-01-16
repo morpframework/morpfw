@@ -6,7 +6,6 @@ from morpfw.crud import permission as crudperm
 import sqlalchemy as sa
 import jsl
 from .common import get_client
-import jsonobject
 from pprint import pprint
 from dataclasses import dataclass
 import typing

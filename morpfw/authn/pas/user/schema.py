@@ -1,4 +1,3 @@
-import jsonobject
 from morpfw.crud import Schema
 from morpfw.crud.validator import regex_validator
 from ..model import NAME_PATTERN, EMAIL_PATTERN

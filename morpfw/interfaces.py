@@ -2,7 +2,6 @@ import abc
 import morepath
 import webob
 from typing import Optional, Union, BinaryIO, List, Sequence, Type
-import jsonobject
 from dataclasses_json import DataClassJsonMixin
 
 

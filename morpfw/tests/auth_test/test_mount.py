@@ -7,7 +7,6 @@ from morpfw.authn.pas.user.path import get_user_collection
 import sqlalchemy as sa
 import jsl
 from .test_auth import get_client
-import jsonobject
 import morepath
 
 

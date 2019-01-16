@@ -1,7 +1,6 @@
 from .dictprovider import DictProvider
 from ..app import App
 from ..storage.elasticsearchstorage import ElasticSearchStorage
-import jsonobject
 from ...interfaces import ISchema
 
 

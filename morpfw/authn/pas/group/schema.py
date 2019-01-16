@@ -1,4 +1,3 @@
-import jsonobject
 from morpfw import Schema
 from ..app import App
 from dataclasses import dataclass, field

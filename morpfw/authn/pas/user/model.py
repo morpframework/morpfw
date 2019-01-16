@@ -15,7 +15,6 @@ from morpfw.crud.validator import regex_validator
 from ..group.model import GroupCollection, GroupSchema, GroupModel
 from uuid import uuid4
 import re
-import jsonobject
 from .schema import RegistrationSchema, UserSchema, LoginSchema
 from ..exc import UserExistsError
 from ..utils import has_role

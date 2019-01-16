@@ -1,4 +1,3 @@
-import jsonobject
 from uuid import uuid4
 from ..interfaces import ISchema
 from .app import App
