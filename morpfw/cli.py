@@ -8,6 +8,8 @@ import morepath
 import yaml
 import morpfw
 import getpass
+import socket
+from datetime import datetime
 
 
 def load(app_path, settings_file, host=None, port=None):
@@ -53,8 +55,23 @@ def start(app=None, settings=None, host=None, port=None):
 @arg('-s', '--settings', required=True, help='Path to settings.yml')
 def solo_worker(app=None, settings=None):
     param = load(app, settings)
-    worker = param['app_cls'].celery.Worker()
+    hostname = socket.gethostname()
+    ws = param['settings']['worker']['celery_worker_settings']
+    now = datetime.utcnow().strftime(r'%Y%m%d%H%M')
+    worker = param['app_cls'].celery.Worker(
+        hostname='worker%s.%s' % (now, hostname), **ws)
     worker.start()
+
+
+@arg('-a', '--app', required=False, help='Path to App class')
+@arg('-s', '--settings', required=True, help='Path to settings.yml')
+def scheduler(app=None, settings=None):
+    param = load(app, settings)
+    hostname = socket.gethostname()
+    ss = param['settings']['worker']['celery_scheduler_settings']
+    sched = param['app_cls'].celery.Beat(
+        hostname='scheduler.%s' % hostname, **ss)
+    sched.start()
 
 
 @arg('-a', '--app', required=False, help='Path to App class')
@@ -77,4 +94,4 @@ def register_admin(app=None, settings=None, username=None, email=None):
 
 
 def run():
-    dispatch_commands([start, solo_worker, register_admin])
+    dispatch_commands([start, solo_worker, register_admin, scheduler])
