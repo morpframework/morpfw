@@ -1,12 +1,11 @@
 from functools import partial
-from .errors import ValidationError, FormValidationError
+from .errors import ValidationError, FormValidationError, FieldValidationError
 from jsonschema import Draft4Validator
-from .util import jsl_to_jsonobject, jsonobject_to_jsl
+from .util import jsl_to_jsonobject, dataclass_to_jsl, dataclass_get_type
 import reg
 from morepath.publish import resolve_model
 import urllib
 import re
-import jsonobject.exceptions
 
 
 @reg.dispatch(reg.match_instance('model'), reg.match_instance('request'))
@@ -19,7 +18,7 @@ def regex_validator(pattern, name):
 
     def _regex_validator(value):
         if not p.match(value):
-            raise jsonobject.exceptions.BadValueError(
+            raise FieldValidationError(
                 '%s does not match %s pattern' % (value, name))
 
     return _regex_validator
@@ -32,12 +31,12 @@ def load(validator, schema, request):
     context = resolve_model(newreq)
     context.request = request
     if schema is None:
-        jso = context.schema
+        dc = context.schema
     else:
-        jso = schema
-    jslschema = jsonobject_to_jsl(jso, nullable=True)
+        dc = schema
+    jslschema = dataclass_to_jsl(dc, nullable=True)
     schema = jslschema.get_schema(ordered=True)
-    form_validators = request.app.get_formvalidators(jso)
+    form_validators = request.app.get_formvalidators(dc)
     params = {}
 
     validator.check_schema(schema)
@@ -58,6 +57,11 @@ def load(validator, schema, request):
     if params:
         raise ValidationError(**params)
 
+    # field errors
+    for k, f in dc.__dataclass_fields__.items():
+        t = dataclass_get_type(f)
+        for validate in t['metadata']['validators']:
+            validate(data[k])
     return request.json
 
 

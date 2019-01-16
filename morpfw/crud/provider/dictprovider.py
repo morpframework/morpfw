@@ -2,9 +2,12 @@ from ..app import App
 from .base import Provider
 from ..types import datestr
 from ..storage.memorystorage import MemoryStorage
+from ...interfaces import ISchema
 from dateutil.parser import parse as parse_date
+from ..util import dataclass_check_type, dataclass_get_type
 import datetime
 import jsonobject
+from dataclasses import _MISSING_TYPE
 
 _MARKER: list = []
 
@@ -18,18 +21,28 @@ class DictProvider(Provider):
         self.changed = False
 
     def __getitem__(self, key):
-        if isinstance(self.schema.properties()[key], jsonobject.DateTimeProperty):
+        t = dataclass_check_type(
+            self.schema.__dataclass_fields__[key], datetime.datetime)
+        if t:
             data = self.data[key]
             if isinstance(data, str):
                 return parse_date(data)
             return data
         if key not in self.data.keys():
-            default = self.schema.properties()[key].default
-            return default()
+            field = self.schema.__dataclass_fields__[key]
+            if field.default is not _MISSING_TYPE:
+                return field.default
+            if field.default_factory is not _MISSING_TYPE:
+                return field.default_factory()
+            return None
         return self.data[key]
 
     def __setitem__(self, key, value):
-        if isinstance(self.schema.properties()[key], jsonobject.DateTimeProperty):
+        field = self.schema.__dataclass_fields__[key]
+        t = dataclass_get_type(field)
+        for v in t['metadata']['validators']:
+            v(value)
+        if t['type'] == datetime.datetime:
             if value and not isinstance(value, datetime.datetime):
                 value = parse_date(value)
         self.data[key] = value
@@ -40,6 +53,10 @@ class DictProvider(Provider):
         self.changed = True
 
     def setdefault(self, key, value):
+        field = self.schema.__dataclass_fields__[key]
+        t = dataclass_get_type(field)
+        for v in t['metadata']['validators']:
+            v(value)
         r = self.data.setdefault(key, value)
         self.changed = True
         return r
@@ -50,6 +67,10 @@ class DictProvider(Provider):
         return self.data.get(key, default)
 
     def set(self, key, value):
+        field = self.schema.__dataclass_fields__[key]
+        t = dataclass_get_type(field)
+        for v in t['metadata']['validators']:
+            v(value)
         self.data[key] = value
         self.changed = True
 
@@ -68,6 +89,11 @@ class DictProvider(Provider):
     def as_json(self):
         result = {}
         for k, v in self.data.items():
+            field = self.schema.__dataclass_fields__[k]
+            exclude_if_empty = field.metadata.get(
+                'morpfw', {}).get('exclude_if_empty', False)
+            if exclude_if_empty and not v:
+                continue
             if isinstance(v, datetime.datetime):
                 result[k] = datestr(v.isoformat())
             else:
@@ -75,7 +101,7 @@ class DictProvider(Provider):
         return result
 
 
-@App.dataprovider(schema=jsonobject.JsonObject, obj=dict, storage=MemoryStorage)
+@App.dataprovider(schema=ISchema, obj=dict, storage=MemoryStorage)
 def get_dataprovider(schema, obj, storage):
     return DictProvider(schema, obj, storage)
 

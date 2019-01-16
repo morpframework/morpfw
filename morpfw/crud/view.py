@@ -3,6 +3,7 @@ from .model import Model, Collection
 from .validator import validate_schema, get_data
 from .errors import ValidationError, StateUpdateProhibitedError
 from .errors import AlreadyExistsError, UnprocessableError
+from .errors import FieldValidationError
 from . import permission
 import json
 from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
@@ -299,8 +300,8 @@ def validation_error(context, request):
     }
 
 
-@App.json(model=jsonobject.exceptions.BadValueError)
-def jsonobject_validation_error(context, request):
+@App.json(model=FieldValidationError)
+def field_validation_error(context, request):
     @request.after
     def adjust_status(response):
         response.status = 422

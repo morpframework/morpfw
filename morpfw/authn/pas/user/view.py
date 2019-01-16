@@ -12,7 +12,7 @@ from webob.exc import HTTPNotFound
 from more.jwtauth import (
     verify_refresh_request, InvalidTokenError, ExpiredSignatureError
 )
-from morpfw.crud.util import jsonobject_to_jsl
+from morpfw.crud.util import dataclass_to_jsl
 from morpfw.crud.validator import validate_schema
 from morpfw.crud.errors import AlreadyExistsError
 
@@ -22,7 +22,7 @@ from morpfw.crud.errors import AlreadyExistsError
 def register(context, request, load):
     """Validate the username and password and create the user."""
     data = request.json
-    res = validate(data, jsonobject_to_jsl(
+    res = validate(data, dataclass_to_jsl(
         RegistrationSchema).get_schema())
     if res:
         @request.after
@@ -43,6 +43,7 @@ def register(context, request, load):
 
     if 'state' not in data.keys() or not data['state']:
         data['state'] = request.app.settings.application.new_user_state
+    del data['password_validate']
     obj = context.create(data)
     return {'status': 'success'}
 
@@ -50,7 +51,7 @@ def register(context, request, load):
 @App.json(model=UserCollection, name='login')
 def login(context, request):
     return {
-        'schema': jsonobject_to_jsl(LoginSchema).get_schema(),
+        'schema': dataclass_to_jsl(LoginSchema).get_schema(),
         'links': [rellink(context, request, 'login', 'POST')]
     }
 

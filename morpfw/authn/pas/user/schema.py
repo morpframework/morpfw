@@ -3,34 +3,61 @@ from morpfw.crud import Schema
 from morpfw.crud.validator import regex_validator
 from ..model import NAME_PATTERN, EMAIL_PATTERN
 from ..app import App
+from dataclasses import dataclass, field
+import typing
 
 
-class RegistrationSchema(jsonobject.JsonObject):
+@dataclass
+class RegistrationSchema(object):
     # pattern=NAME_PATTERN)
-    username = jsonobject.StringProperty(
-        required=True, validators=[regex_validator(NAME_PATTERN, 'name')])
-    # pattern=EMAIL_PATTERN
-    email = jsonobject.StringProperty(required=True, validators=[
-                                      regex_validator(EMAIL_PATTERN, 'email')])
-    password = jsonobject.StringProperty(required=True)
-    password_validate = jsonobject.StringProperty(required=True, default='')
+    username: typing.Optional[str] = field(default=None, metadata={
+        'morpfw': {
+            'required': True,
+            'validators': [regex_validator(NAME_PATTERN, 'name')]
+        }
+    })
+
+    email: typing.Optional[str] = field(default=None, metadata={
+        'morpfw': {
+            'required': True,
+            'validators': [regex_validator(EMAIL_PATTERN, 'email')]
+        }
+    })
+
+    password: typing.Optional[str] = field(default=None, metadata={
+        'morpfw': {'required': True}})
+    password_validate: typing.Optional[str] = field(default=None, metadata={
+        'morpfw': {'required': True}})
 
 
-class LoginSchema(jsonobject.JsonObject):
+@dataclass
+class LoginSchema(object):
+    username: typing.Optional[str] = field(default=None, metadata={
+        'morpfw': {'required': True}})
 
-    username = jsonobject.StringProperty(required=True)
-    password = jsonobject.StringProperty(required=True)
+    password: typing.Optional[str] = field(default=None, metadata={
+        'morpfw': {'required': True}})
 
 
+@dataclass
 class UserSchema(Schema):
 
-    username = jsonobject.StringProperty(
-        required=True, validators=[regex_validator(NAME_PATTERN, 'name')])  # , pattern=NAME_PATTERN)
-    # , pattern=EMAIL_PATTERN)
-    email = jsonobject.StringProperty(required=True, validators=[
-                                      regex_validator(EMAIL_PATTERN, 'email')])
-    password = jsonobject.StringProperty(required=False)
-    source = jsonobject.StringProperty(required=False, default='local')
+    username: typing.Optional[str] = field(default=None, metadata={
+        'morpfw': {
+            'required': True,
+            'validators': [regex_validator(NAME_PATTERN, 'name')]
+        }
+    })
+
+    email: typing.Optional[str] = field(default=None, metadata={
+        'morpfw': {
+            'required': True,
+            'validators': [regex_validator(EMAIL_PATTERN, 'email')]
+        }
+    })
+
+    password: typing.Optional[str] = field(default=None)
+    source: typing.Optional[str] = field(default='local')
 
 
 @App.identifierfields(schema=UserSchema)

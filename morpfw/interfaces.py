@@ -3,9 +3,10 @@ import morepath
 import webob
 from typing import Optional, Union, BinaryIO, List, Sequence, Type
 import jsonobject
+from dataclasses_json import DataClassJsonMixin
 
 
-class ISchema(jsonobject.JsonObject):
+class ISchema(object):
     pass
 
 

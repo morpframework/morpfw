@@ -28,8 +28,8 @@ class BaseStorage(IStorage):
             obj[f] = v
 
     def set_schema_defaults(self, data):
-        obj = self.model.schema(data)
-        return obj.to_json()
+        obj = self.model.schema(**data)
+        return obj.__dict__
 
 #	def create(self, data):
 #		raise NotImplementedError

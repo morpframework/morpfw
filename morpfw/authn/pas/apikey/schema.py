@@ -1,10 +1,13 @@
 import jsonobject
 from morpfw.crud import Schema
+from dataclasses import dataclass, field
+import typing
 
 
+@dataclass
 class APIKeySchema(Schema):
 
-    userid = jsonobject.StringProperty()
-    label = jsonobject.StringProperty()
-    api_identity = jsonobject.StringProperty()
-    api_secret = jsonobject.StringProperty()
+    userid: typing.Optional[str] = None
+    label: typing.Optional[str] = None
+    api_identity: typing.Optional[str] = None
+    api_secret: typing.Optional[str] = None

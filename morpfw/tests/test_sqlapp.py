@@ -7,6 +7,9 @@ import sqlalchemy as sa
 import jsl
 from .common import get_client
 import jsonobject
+from pprint import pprint
+from dataclasses import dataclass
+import typing
 
 
 class App(morpfw.SQLApp):
@@ -30,9 +33,10 @@ class Page(morpsql.Base):
     body = sa.Column(sa.Text)
 
 
+@dataclass
 class PageSchema(Schema):
-    title = jsonobject.StringProperty()
-    body = jsonobject.StringProperty()
+    title: typing.Optional[str] = None
+    body: typing.Optional[str] = None
 
 
 @App.identifierfields(schema=PageSchema)

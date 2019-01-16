@@ -17,6 +17,11 @@ class FormValidationError(Exception):
         self.message = message
 
 
+class FieldValidationError(Exception):
+    def __init__(self, message):
+        self.message = message
+
+
 class AlreadyExistsError(Exception):
 
     def __init__(self, message):

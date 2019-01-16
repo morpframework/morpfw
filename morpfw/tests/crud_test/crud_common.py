@@ -9,16 +9,18 @@ from morpfw.crud.model import StateMachine, XattrProvider
 from morpfw.crud.xattrprovider import FieldXattrProvider
 from morpfw.app import BaseApp
 from morpfw.authn.base import AuthnPolicy as BaseAuthnPolicy
+from morpfw.interfaces import ISchema
 import morpfw.crud.signals as signals
 import jsl
 import json
 from uuid import uuid4
 from datetime import datetime
-import jsonobject
 from morpfw.main import create_app
 from more.basicauth import BasicAuthIdentityPolicy
 import tempfile
 import shutil
+from dataclasses import dataclass, field
+import typing
 
 FSBLOB_DIR = tempfile.mkdtemp()
 
@@ -45,13 +47,13 @@ def validate_body(request, json):
         return "Body must not be 'invalid'"
 
 
+@dataclass
 class PageSchema(Schema):
 
-    title = jsonobject.StringProperty(required=True, default='')
-    body = jsonobject.StringProperty(required=True, default='')
-    value = jsonobject.IntegerProperty(required=False)
-    footer = jsonobject.StringProperty(required=False, default='')
-    state = jsonobject.StringProperty(required=False)
+    title: str = ''
+    body: str = ''
+    value: typing.Optional[int] = None
+    footer: typing.Optional[str] = ''
 
 
 @App.formvalidators(schema=PageSchema)
@@ -67,12 +69,13 @@ class PageModel(Model):
     schema = PageSchema
 
 
+@dataclass
 class ObjectSchema(Schema):
 
-    body = jsonobject.StringProperty(required=True, default='')
-    created_flag = jsonobject.BooleanProperty(required=False, default=False)
-    updated_flag = jsonobject.BooleanProperty(required=False, default=False)
-    attrs = jsonobject.DictProperty(required=False)
+    body: str = ''
+    created_flag: typing.Optional[bool] = False
+    updated_flag: typing.Optional[bool] = False
+    attrs: typing.Optional[dict] = field(default_factory=dict)
 
 
 class ObjectCollection(Collection):
@@ -93,9 +96,10 @@ def object_updated(app, request, obj, signal):
     obj.data['updated_flag'] = True
 
 
-class ObjectXattrSchema(jsonobject.JsonObject):
+@dataclass
+class ObjectXattrSchema(ISchema):
 
-    message = jsonobject.StringProperty(required=False)
+    message: typing.Optional[str] = None
 
 
 class ObjectXattrProvider(FieldXattrProvider):
@@ -123,12 +127,13 @@ def get_pagemodel_statemachine(context):
     return PageStateMachine(context)
 
 
+@dataclass
 class NamedObjectSchema(Schema):
 
-    name = jsonobject.StringProperty(required=False)
-    body = jsonobject.StringProperty(required=True, default='')
-    created_flag = jsonobject.BooleanProperty(required=False, default=False)
-    updated_flag = jsonobject.BooleanProperty(required=False, default=False)
+    name: typing.Optional[str] = None
+    body: typing.Optional[str] = ''
+    created_flag: typing.Optional[bool] = False
+    updated_flag: typing.Optional[bool] = False
 
 
 @App.identifierfields(schema=NamedObjectSchema)

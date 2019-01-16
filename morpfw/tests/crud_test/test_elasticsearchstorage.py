@@ -8,6 +8,7 @@ from .crud_common import NamedObjectCollection, NamedObjectModel
 from .crud_common import BlobObjectCollection, BlobObjectModel
 from .crud_common import ObjectXattrProvider, ObjectXattrSchema
 from .crud_common import FSBLOB_DIR
+from .crud_common import ObjectSchema as BaseObjectSchema
 import pprint
 from more.transaction import TransactionApp
 from morepath.reify import reify
@@ -17,7 +18,8 @@ from sqlalchemy.orm import sessionmaker
 from zope.sqlalchemy import register as register_session
 import morpfw.crud.signals as signals
 from elasticsearch import Elasticsearch
-import jsonobject
+from dataclasses import dataclass, field
+import typing
 
 Session = sessionmaker()
 register_session(Session)
@@ -54,12 +56,10 @@ def model_factory(request, identifier):
     return storage.get(identifier)
 
 
-class ObjectSchema(Schema):
+@dataclass
+class ObjectSchema(BaseObjectSchema):
 
-    id = jsonobject.StringProperty(required=False)
-    body = jsonobject.StringProperty(required=True, default='')
-    created_flag = jsonobject.BooleanProperty(required=False, default=False)
-    updated_flag = jsonobject.BooleanProperty(required=False, default=False)
+    id: typing.Optional[str] = None
 
 
 @App.identifierfields(schema=ObjectSchema)

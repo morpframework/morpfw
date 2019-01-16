@@ -1,4 +1,3 @@
-import jsonobject
 from ..storage.sqlstorage import Base, GUID, SQLStorage
 from .dictprovider import DictProvider
 from ..app import App
@@ -11,6 +10,9 @@ from ..types import datestr
 import pytz
 import copy
 import datetime
+from ...interfaces import ISchema
+from ..util import dataclass_get_type
+from dataclasses import _MISSING_TYPE
 
 _MARKER: list = []
 
@@ -84,12 +86,15 @@ class SQLAlchemyModelProvider(Provider):
 
     def get(self, key, default=_MARKER):
         if default is _MARKER:
-            attr = getattr(self.schema, key, None)
+            attr = self.schema.__dataclass_fields__.get(key, None)
             if attr:
-                if isinstance(attr, jsonobject.ListProperty):
-                    default = []
+                #t = dataclass_get_type(attr)
+                if attr.default is not _MISSING_TYPE:
+                    default = attr.default
+                elif attr.default_factory is not _MISSING_TYPE:
+                    default = attr.default_factory()
                 else:
-                    default = getattr(self.schema, key).default()
+                    default = None
 
         if default is not _MARKER:
             try:
@@ -103,30 +108,32 @@ class SQLAlchemyModelProvider(Provider):
 
     def items(self):
         res = []
-        fields = self.schema._fields.keys()
+        fields = self.schema.__dataclass_fields__.keys()
         for f in fields:
             res.append((f, self.data[f]))
         return res
 
     def keys(self):
-        return self.schema._fields.keys()
+        return self.schema.__dataclass_fields__.keys()
 
     def as_dict(self):
-        fields = self.schema.properties().items()
+        fields = self.schema.__dataclass_fields__.items()
         result = {}
         for n, f in fields:
             v = self.get(n)
-            if v is None and not f.required:
+            t = dataclass_get_type(f)
+            if not v and t['metadata']['exclude_if_empty']:
                 continue
             result[n] = v
         return result
 
     def as_json(self):
-        fields = self.schema.properties().items()
+        fields = self.schema.__dataclass_fields__.items()
         result = {}
         for n, f in fields:
+            t = dataclass_get_type(f)
             v = self.get(n)
-            if v is None and not f.required:
+            if not v and t['metadata']['exclude_if_empty']:
                 continue
             if isinstance(v, datetime.datetime):
                 result[n] = datestr(v.isoformat())
@@ -135,12 +142,12 @@ class SQLAlchemyModelProvider(Provider):
         return result
 
 
-@App.dataprovider(schema=jsonobject.JsonObject, obj=Base, storage=SQLStorage)
+@App.dataprovider(schema=ISchema, obj=Base, storage=SQLStorage)
 def get_provider(schema, obj, storage):
     return SQLAlchemyModelProvider(schema, obj, storage)
 
 
-@App.dataprovider(schema=jsonobject.JsonObject, obj=dict, storage=SQLStorage)
+@App.dataprovider(schema=ISchema, obj=dict, storage=SQLStorage)
 def get_dict_provider(schema, obj, storage):
     return DictProvider(schema, obj, storage)
 

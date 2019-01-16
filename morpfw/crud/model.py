@@ -1,7 +1,7 @@
 from jsonschema.validators import Draft4Validator
 from jsonschema import validate, ValidationError
 from .util import jsl_nullable
-from .util import jsonobject_to_jsl
+from .util import dataclass_to_jsl
 from .const import SEPARATOR
 from . import permission
 from . import signals
@@ -14,8 +14,8 @@ from transitions import Machine
 import copy
 from .errors import StateUpdateProhibitedError, AlreadyExistsError, BlobStorageNotImplementedError
 from .errors import UnprocessableError
-import jsonobject
 from ..interfaces import IModel
+import json
 
 
 ALLOWED_SEARCH_OPERATORS = [
@@ -114,7 +114,7 @@ class Collection(object):
 
     def json(self):
         return {
-            'schema': jsonobject_to_jsl(self.schema).get_schema(ordered=True),
+            'schema': dataclass_to_jsl(self.schema).get_schema(ordered=True),
             'links': self.links()
         }
 
@@ -225,7 +225,7 @@ class Model(IModel):
 
         data = self._raw_json()
         data.update(newdata)
-        schema = jsonobject_to_jsl(
+        schema = dataclass_to_jsl(
             self.schema, nullable=True).get_schema(ordered=True)
         validate(data, schema)
         self.storage.update(self.identifier, data)
@@ -240,13 +240,13 @@ class Model(IModel):
     def save(self):
         if self.data.changed:
             data = self._raw_json()
-            schema = jsonobject_to_jsl(
+            schema = dataclass_to_jsl(
                 self.schema, nullable=True).get_schema(ordered=True)
             validate(data, schema)
             self.storage.update(self.identifier, data)
 
     def _raw_json(self):
-        schema = jsonobject_to_jsl(
+        schema = dataclass_to_jsl(
             self.schema, nullable=True).get_schema(ordered=True)
         jsondata = self.app.get_jsonprovider(self.data)
         jsondata = self.rules_adapter().transform_json(copy.deepcopy(jsondata))
@@ -325,7 +325,7 @@ class Model(IModel):
         self.state_machine()
 
     def _blob_guard(self, field):
-        if self.blobstorage_field not in self.schema._properties_by_attr.keys():
+        if self.blobstorage_field not in self.schema.__dataclass_fields__.keys():
             raise BlobStorageNotImplementedError(
                 'Object does not implement blobs store')
         if field not in self.blob_fields:
@@ -402,7 +402,7 @@ class XattrProvider(object):
         self.app = context.request.app
 
     def jsonschema(self):
-        schema = jsonobject_to_jsl(
+        schema = dataclass_to_jsl(
             self.schema, nullable=True).get_schema(ordered=True)
         return {
             'schema': schema
@@ -417,7 +417,7 @@ class XattrProvider(object):
     def process_update(self, newdata: dict):
         data = self.as_json()
         data.update(newdata)
-        schema = jsonobject_to_jsl(
+        schema = dataclass_to_jsl(
             self.schema, nullable=True).get_schema(ordered=True)
         validate(data, schema)
         self.update(data)

@@ -1,7 +1,11 @@
 from morepath.publish import resolve_model as _resolve_model
+from ..interfaces import ISchema
 import jsl
 import jsonobject
+import dataclasses
 from copy import copy
+import typing
+from datetime import datetime, date
 
 
 def resolve_model(request):
@@ -61,10 +65,163 @@ def jsonobject_property_to_jsl_field(
     raise KeyError(prop)
 
 
+_marker = object()
+
+
+def dataclass_get_type(field):
+    metadata = {
+        'required': _marker,
+        'exclude_if_empty': False,
+        'validators': []
+    }
+    metadata.update(field.metadata.get('morpfw', {}))
+
+    origin = getattr(field.type, '__origin__', None)
+    required = True
+    if origin == typing.Union:
+        if len(field.type.__args__) == 2:
+            if field.type.__args__[1] == type(None):
+                required = False
+            typ = field.type.__args__[0]
+    else:
+        typ = field.type
+
+    if metadata['required'] is _marker:
+        metadata['required'] = required
+
+    required = metadata['required']
+
+    origin = getattr(typ, '__origin__', None)
+
+    if origin == list:
+        if getattr(typ, '__args__', None):
+            return {
+                'name': field.name,
+                'type': list,
+                'schema': field.type.__args__[0],
+                'required': required,
+                'metadata': metadata
+            }
+        else:
+            return {
+                'name': field.name,
+                'type': list,
+                'required': required,
+                'metadata': metadata
+            }
+
+    return {
+        'type': typ,
+        'required': required,
+        'metadata': metadata
+    }
+
+
+def dataclass_check_type(field, basetype):
+
+    t = dataclass_get_type(field)
+
+    if t['type'] == basetype:
+        return t
+
+    # wtf bool is a subclass of integer?
+    if t['type'] == bool and basetype == int:
+        return None
+
+    if issubclass(t['type'], basetype):
+        return t
+
+    return None
+
+
+def dataclass_field_to_jsl_field(
+        prop: dataclasses.Field, nullable=False) -> jsl.BaseField:
+    t = dataclass_check_type(prop, date)
+    if t:
+        return jsl.DateTimeField(name=prop.name, required=t['required'])
+    t = dataclass_check_type(prop, datetime)
+    if t:
+        return jsl.DateTimeField(name=prop.name, required=t['required'])
+    t = dataclass_check_type(prop, str)
+    if t:
+        return jsl.StringField(name=prop.name, required=t['required'])
+    t = dataclass_check_type(prop, int)
+    if t:
+        return jsl.IntField(name=prop.name, required=t['required'])
+    t = dataclass_check_type(prop, float)
+    if t:
+        return jsl.NumberField(name=prop.name, required=t['required'])
+    t = dataclass_check_type(prop, bool)
+    if t:
+        return jsl.BooleanField(name=prop.name, required=t['required'])
+    t = dataclass_check_type(prop, dict)
+    if t:
+        return jsl.DictField(name=prop.name, required=t['required'])
+    t = dataclass_check_type(prop, ISchema)
+    if t:
+        subtype = jsonobject_to_jsl(
+            t['schema'], nullable=nullable)
+        return jsl.DocumentField(name=prop.name,
+                                 document_cls=subtype,
+                                 required=t['required'])
+
+    t = dataclass_check_type(prop, list)
+    if t:
+        return jsl.ArrayField(name=prop.name, required=t['required'])
+
+    t = dataclass_check_type(prop, typing.List)
+    if t:
+        if 'schema' not in t.keys():
+            return jsl.ArrayField(name=prop.name, required=t['required'])
+
+        if issubclass(t['schema'], ISchema):
+            subtype = jsl.DocumentField(
+                document_cls=jsonobject_to_jsl(
+                    t['schema'], nullable=nullable))
+        elif t['schema'] == str:
+            subtype = jsl.StringField(name=prop.name)
+        elif t['schema'] == int:
+            subtype = jsl.IntField(name=prop.name)
+        elif t['schema'] == float:
+            subtype = jsl.NumberField(name=prop.name)
+        elif t['schema'] == dict:
+            subtype = jsl.DictField(name=prop.name)
+        else:
+            raise KeyError(t['schema'])
+        return jsl.ArrayField(items=subtype, required=t['required'])
+
+    raise KeyError(prop)
+
+
 def _set_nullable(prop):
     if not prop.required:
         return jsl.OneOfField([prop, jsl.NullField(name=prop.name)])
     return prop
+
+
+def dataclass_to_jsl(schema, nullable=False):
+    attrs = {}
+
+    class Options(object):
+        additional_properties = True
+
+    for attr, prop in schema.__dataclass_fields__.items():
+        prop = dataclass_field_to_jsl_field(prop, nullable=False)
+        if nullable:
+            attrs[attr] = _set_nullable(prop)
+        else:
+            if not prop.required:
+                attrs[attr] = prop
+            else:
+                if isinstance(prop, jsl.StringField):
+                    if not prop.pattern:
+                        prop.pattern = '.+'
+                attrs[attr] = prop
+
+    attrs['Options'] = Options
+    Schema = type("Schema", (jsl.Document, ), attrs)
+
+    return Schema
 
 
 def jsonobject_to_jsl(schema, nullable=False):
