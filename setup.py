@@ -64,8 +64,6 @@ setup(name='morpfw',
           'cryptography',
           'elasticsearch>=5.0.0,<6.0.0',
           'pamela',
-          'dataclasses_json',
-          'marshmallow>=3.0.0rc3'
       ],
       extras_require={
           'test': [

@@ -2,7 +2,6 @@ import abc
 import morepath
 import webob
 from typing import Optional, Union, BinaryIO, List, Sequence, Type
-from dataclasses_json import DataClassJsonMixin
 
 
 class ISchema(object):
