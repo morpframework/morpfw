@@ -1,47 +1,47 @@
 import morpfw
 from morpfw.authz.pas import DefaultAuthzPolicy
-import jsonobject
 import sqlalchemy as sa
 from morpfw.crud import permission as crudperm
+import typing
 
 
 class App(DefaultAuthzPolicy, morpfw.SQLApp):
-   pass
+    pass
 
 
 class PageSchema(morpfw.Schema):
-   body = jsonobject.StringProperty(required=False)
+    body: typing.Optional[str] = None
 
 
 class PageCollection(morpfw.Collection):
-   schema = PageSchema
+    schema = PageSchema
 
 
 class PageModel(morpfw.Model):
-   schema = PageSchema
+    schema = PageSchema
 
 
 class Page(morpfw.SQLBase):
-   __tablename__ = 'test_page'
+    __tablename__ = 'test_page'
 
-   body = sa.Column(sa.String(length=1024))
+    body = sa.Column(sa.String(length=1024))
 
 
 class PageStorage(morpfw.SQLStorage):
-   model = PageModel
-   orm_model = Page
+    model = PageModel
+    orm_model = Page
 
 
 @App.path(model=PageCollection, path='pages')
 def get_collection(request):
-   storage = PageStorage(request)
-   return PageCollection(request, storage)
+    storage = PageStorage(request)
+    return PageCollection(request, storage)
 
 
 @App.path(model=PageModel, path='pages/{identifier}')
 def get_model(request, identifier):
-   collection = get_collection(request)
-   return collection.get(identifier)
+    collection = get_collection(request)
+    return collection.get(identifier)
 
 
 @App.permission_rule(model=PageModel, permission=crudperm.All)
@@ -57,6 +57,6 @@ def allow_collection(identity, context, permission):
 if __name__ == '__main__':
     morpfw.run(App, {
         'application': {
-           'authn_policy': 'morpfw.authn.useridparam:AuthnPolicy'
+            'authn_policy': 'morpfw.authn.useridparam:AuthnPolicy'
         }
     })

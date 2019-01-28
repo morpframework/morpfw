@@ -14,7 +14,7 @@ from transitions import Machine
 import copy
 from .errors import StateUpdateProhibitedError, AlreadyExistsError, BlobStorageNotImplementedError
 from .errors import UnprocessableError
-from ..interfaces import IModel
+from ..interfaces import IModel, ICollection
 import json
 
 
@@ -27,7 +27,7 @@ ALLOWED_SEARCH_OPERATORS = [
 _marker = object()
 
 
-class Collection(object):
+class Collection(ICollection):
 
     create_view_enabled = True
     search_view_enabled = True

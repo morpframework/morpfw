@@ -179,3 +179,40 @@ class IModel(abc.ABC):
     @abc.abstractmethod
     def delete_blob(self, field: str):
         raise NotImplementedError
+
+
+class ICollection(abc.ABC):
+
+    @abc.abstractmethod
+    def search(self, query: Optional[dict] = None,
+               offset: int = 0,
+               limit: Optional[int] = None,
+               order_by: Optional[tuple] = None,
+               secure: bool = False) -> List[IModel]:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def aggregate(self, query: Optional[dict] = None,
+                  group: Optional[dict] = None,
+                  order_by: Optional[tuple] = None) -> List[IModel]:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def create(self, data: dict) -> IModel:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get(self, identifier) -> IModel:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get_by_uuid(self, uuid: str) -> IModel:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def json(self) -> dict:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def links(self) -> list:
+        raise NotImplementedError

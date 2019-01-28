@@ -3,9 +3,9 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-=========================================
-Welcome to MorpFramework's documentation!
-=========================================
+==================================================
+MorpFW: Highly pluggable Python framework
+==================================================
 
 Introduction
 ===============
@@ -20,43 +20,41 @@ first class citizen of the framework.
 Morp, built on top of Morepath, provides a highly extensible
 framework which supports:
 
- * REST API framework
+* REST API framework
 
-   * `JsonObject <https://pypi.org/project/jsonobject/>`_ schema model 
-     definition
-   * CRUD endpoints
-   * Search endpoint, powered by `rulez
-     <https://github.com/morpframework/rulez>`_ query
-   * Aggregation endpoint
-   * State machine / transition engine powered by `pytransitions
-     <https://github.com/pytransitions/transitions>`_
-   * Soft delete 
+  * DataClass schema model definition
+  * CRUD endpoints
+  * Search endpoint, powered by `rulez
+    <https://github.com/morpframework/rulez>`_ query
+  * Aggregation endpoint
+  * State machine / transition engine powered by `pytransitions
+    <https://github.com/pytransitions/transitions>`_
+  * Soft delete
 
- * Modular storage engine
+* Modular storage engine
 
-   * `SQLAlchemy <http://www.sqlalchemy.org/>`_ (primary)
-   * `Elasticsearch <https://www.elastic.co/>`_
+  * `SQLAlchemy <http://www.sqlalchemy.org/>`_ (primary)
+  * `Elasticsearch <https://www.elastic.co/>`_
 
- * Authentication engine
+* Authentication engine
 
-   * JWT token with refresh support
-   * Hadoop style ``user.id`` GET parameter with trusted host check
-   * ``REMOTE_USER`` header with trusted host check
-   * Pluggable authentication system
+  * Pluggable authentication system with JWT token and X-API-KEY header support
+  * Hadoop style ``user.id`` GET parameter with trusted host check
+  * ``REMOTE_USER`` header with trusted host check
 
- * Authorization engine
+* Authorization engine
 
-   * Group & role management
+  * Group & role management
 
- * Distributed processing & task scheduling
+* Distributed processing & task scheduling
 
-   * Powered by `celery <http://www.celeryproject.org/>`_
-   * Future plan to support `Streamparse <http://www.celeryproject.org/>`_
+  * Powered by `celery <http://www.celeryproject.org/>`_
+  * Future plan to support `Streamparse <http://www.celeryproject.org/>`_
 
- * Plugin based architecture
+* Plugin based architecture
 
-   * Powered by `morepath <https://morepath.readthedocs.io>`_, `dectate
-     <https://dectate.readthedocs.io>`_ and `reg <https://reg.readthedocs.io>`_
+  * Powered by `morepath <https://morepath.readthedocs.io>`_, `dectate
+    <https://dectate.readthedocs.io>`_ and `reg <https://reg.readthedocs.io>`_
 
 .. note:: Morp at the moment is still highly experimental, there is no promise 
           of API stability as of yet. However, because the author is using it
