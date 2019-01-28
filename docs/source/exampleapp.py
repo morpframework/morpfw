@@ -1,12 +1,8 @@
 import morpfw
-from morpfw.authz.pas import DefaultAuthzPolicy
 import sqlalchemy as sa
 from morpfw.crud import permission as crudperm
 import typing
-
-
-class App(DefaultAuthzPolicy, morpfw.SQLApp):
-    pass
+from .app import App
 
 
 class PageSchema(morpfw.Schema):
@@ -52,11 +48,3 @@ def allow_model(identity, context, permission):
 @App.permission_rule(model=PageCollection, permission=crudperm.All)
 def allow_collection(identity, context, permission):
     return True
-
-
-if __name__ == '__main__':
-    morpfw.run(App, {
-        'application': {
-            'authn_policy': 'morpfw.authn.useridparam:AuthnPolicy'
-        }
-    })

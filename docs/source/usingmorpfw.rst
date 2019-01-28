@@ -2,22 +2,45 @@
 Using Morp
 ===========
 
+Bootstrapping a new project
+============================
 
-Quick Start
-=============
+The recommended way to install morpfw is to use 
+`pipenv <http://pipenv.rtfd.org>`_, or you can also use pip or virtualenv.
 
-Installing Morp::
+If you don't have pipenv installed yet, do:
 
-   pipenv install morpfw>=0.2.1a1 --pre
+.. code-block:: bash
 
-Creating a simple CRUD application
+   sudo pip install pipenv>=2018.11.26
+
+Lets create a new project. You can initialize new project using 
+``cookiecutter-morpfw``:
+
+.. code-block:: bash
+
+   sudo pip install cookiecutter
+   cookiecutter https://github.com/morpframework/cookiecutter-morpfw
+
+
+And start your project using:
+
+.. code-block:: bash
+
+   cd $PROJECTNAME/ # replace with your project directory name
+   pipenv install .
+   pipenv run morpfw start -s settings.yml
+
+
+Creating a simple CRUD model
+===================================
 
 .. literalinclude:: exampleapp.py
    :language: python
 
-save as ``myapp.py``, and you can run it using::
+save as ``pages.py``, and lets start the application::
 
-   python myapp.py
+   pipenv run morpfw start -s settings.yml
 
 
 Accessing API
