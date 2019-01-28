@@ -8,7 +8,7 @@ Quick Start
 
 Installing Morp::
 
-   pipenv install morpfw
+   pipenv install morpfw>=0.2.1a1 --pre
 
 Creating a simple CRUD application
 
@@ -18,6 +18,7 @@ Creating a simple CRUD application
 save as ``myapp.py``, and you can run it using::
 
    python myapp.py
+
 
 Accessing API
 ==============
