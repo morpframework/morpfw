@@ -1,7 +1,6 @@
 from ..storage.sqlstorage import Base, GUID, SQLStorage
 from .dictprovider import DictProvider
 from ..app import App
-from .base import Provider
 import sqlalchemy as sa
 import sqlalchemy_jsonfield as sajson
 from dateutil.parser import parse as _parse_date
@@ -10,7 +9,7 @@ from ..types import datestr
 import pytz
 import copy
 import datetime
-from ...interfaces import ISchema
+from ...interfaces import ISchema, IDataProvider
 from ..util import dataclass_get_type
 from dataclasses import _MISSING_TYPE
 
@@ -25,7 +24,7 @@ def parse_date(datestr):
     return d.replace(tzinfo=None)
 
 
-class SQLAlchemyModelProvider(Provider):
+class SQLAlchemyModelProvider(IDataProvider):
 
     def __init__(self, schema, data, storage):
         self.schema = schema

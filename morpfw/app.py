@@ -1,7 +1,6 @@
 import morepath
 import dectate
 import reg
-from .crud.provider.base import Provider
 from .crud.app import App as CRUDApp
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.pool import NullPool, QueuePool

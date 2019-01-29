@@ -18,6 +18,7 @@ Schema
 Content type schema in MorpFW is defined through new python 3.7 `dataclass
 library <https://docs.python.org/3/library/dataclasses.html>`_.
 
+
 Schema in MorpFW is used for:
 
 * data validation of JSON data on create/update REST API
@@ -53,6 +54,8 @@ provides the necessary API for model manipulation such as update, delete, save
 and other model manipulation capabilities of MorpFW.
 
 .. autoclass:: morpfw.interfaces.IModel
+   :members:
+   :member-order: groupwise
 
 Collection
 ===========
@@ -62,7 +65,8 @@ type of Model and and provide collection level Model object management API
 such as create, search and aggregate.
 
 .. autoclass:: morpfw.interfaces.ICollection
-
+   :members:
+   :member-order: groupwise
 
 Storage
 ========
@@ -72,6 +76,9 @@ interface to storage backends, allowing custom storage backends to be
 implemented.
 
 .. autoclass:: morpfw.interfaces.IStorage
+   :members:
+   :member-order: groupwise
+   :inherited-members:
 
 
 BlobStorage
@@ -81,3 +88,5 @@ Storage provider may have a BLOB storage backend implemented which will handle
 the management of BLOBs
 
 .. autoclass:: morpfw.interfaces.IBlobStorage
+   :members:
+

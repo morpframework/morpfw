@@ -1,2 +1,0 @@
-class Provider(object):
-    pass

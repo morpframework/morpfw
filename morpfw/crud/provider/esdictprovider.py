@@ -1,7 +1,7 @@
 from .dictprovider import DictProvider
 from ..app import App
 from ..storage.elasticsearchstorage import ElasticSearchStorage
-from ...interfaces import ISchema
+from ...interfaces import ISchema, IDataProvider
 
 
 @App.dataprovider(schema=ISchema, obj=dict,

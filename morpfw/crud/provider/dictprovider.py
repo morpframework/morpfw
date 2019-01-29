@@ -1,8 +1,7 @@
 from ..app import App
-from .base import Provider
 from ..types import datestr
 from ..storage.memorystorage import MemoryStorage
-from ...interfaces import ISchema
+from ...interfaces import ISchema, IDataProvider
 from dateutil.parser import parse as parse_date
 from ..util import dataclass_check_type, dataclass_get_type
 import datetime
@@ -11,7 +10,7 @@ from dataclasses import _MISSING_TYPE
 _MARKER: list = []
 
 
-class DictProvider(Provider):
+class DictProvider(IDataProvider):
 
     def __init__(self, schema, data, storage):
         self.schema = schema
