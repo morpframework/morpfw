@@ -12,8 +12,8 @@ Lets take for example the following resource type definition:
    :language: python
 
 
-Collection REST API
-====================
+Collection
+===========
 
 .. http:get:: /pages
    
@@ -98,8 +98,8 @@ Collection REST API
       :language: http
 
 
-Model REST API
-===============
+Model
+=======
 
 .. http:get:: /page/{uuid}
 

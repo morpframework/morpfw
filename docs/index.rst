@@ -60,13 +60,6 @@ framework which supports:
           of API stability as of yet. However, because the author is using it
           in a production project, there is some level of stability. 
 
-Getting Help
-=============
-
-Our community is still in infancy, and we hangout mostly on Telegram. Come
-join us at `MorpFW Telegram Channel <https://t.me/morpfw>`_ if you have any
-questions.
-
 
 Documentation
 ==============
@@ -81,5 +74,6 @@ Documentation
    authn
    authz
    pas
+   pas-restapi
    worker
    community
