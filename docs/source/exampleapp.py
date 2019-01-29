@@ -7,6 +7,7 @@ from .app import App
 
 class PageSchema(morpfw.Schema):
     body: typing.Optional[str] = None
+    value: int = 0
 
 
 class PageCollection(morpfw.Collection):
@@ -21,6 +22,7 @@ class Page(morpfw.SQLBase):
     __tablename__ = 'test_page'
 
     body = sa.Column(sa.String(length=1024))
+    value = sa.Column(sa.Integer)
 
 
 class PageStorage(morpfw.SQLStorage):

@@ -1,0 +1,21 @@
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+[
+    {
+        "year": 2019,
+        "month": 1,
+        "day": 1,
+        "sum": 45,
+        "count": 11,
+        "avg": 4.5
+    },
+    {
+        "year": 2019,
+        "month": 1,
+        "day": 2,
+        "sum": 60,
+        "count": 14,
+        "avg": 4.6
+    }
+]

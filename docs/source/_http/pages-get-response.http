@@ -1,0 +1,59 @@
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+    "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {
+            "id": {
+                "type": "integer"
+            },
+            "uuid": {
+                "type": "string"
+            },
+            "creator": {
+                "type": "string"
+            },
+            "created": {
+                "type": "string",
+                "format": "date-time"
+            },
+            "modified": {
+                "type": "string",
+                "format": "date-time"
+            },
+            "state": {
+                "type": "string"
+            },
+            "deleted": {
+                "type": "string",
+                "format": "date-time"
+            },
+            "blobs": {
+                "type": "object"
+            },
+            "xattrs": {
+                "type": "object"
+            },
+            "body": {
+                "type": "string"
+            },
+            "value": {
+                "type": "integer"
+            }
+        },
+        "additionalProperties": true
+    },
+    "links": [
+        {
+            "rel": "create",
+            "href": "http://localhost:5432/pages",
+            "method": "POST"
+        },
+        {
+            "rel": "search",
+            "href": "http://localhost:5432/pages/+search"
+        }
+    ]
+}

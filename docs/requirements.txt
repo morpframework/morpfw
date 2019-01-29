@@ -1,2 +1,3 @@
 morpfw>=0.2.1a2
 dataclasses>=0.6
+sphinxcontrib-httpdomain
