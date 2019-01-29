@@ -361,6 +361,8 @@ def run_jslcrud_test(c, skip_aggregate=False):
     r = c.post_json('/pages/%s/+statemachine' %
                     uuid, {'transition': 'approve'})
 
+    r = c.get('/pages/%s' % uuid)
+
     assert r.json['data']['state'] == 'approved'
 
     # it cant be approved twice
