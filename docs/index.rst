@@ -78,4 +78,5 @@ Documentation
    resourcetype
    views
    authn
+   worker
    community
