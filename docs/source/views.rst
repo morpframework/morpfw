@@ -8,8 +8,8 @@ Morp inherits its view implementation from `morepath views
 Every ``morpfw.Model`` and ``morpfw.Collection`` are models which are published
 on the defined path, and you can attach views to it.
 
-Resource API
-=============
+Resource REST API
+==================
 
 For each published resource type, several endpoints are automatically made
 available by the framework to use. This is done through Morepath view inheritance
@@ -53,6 +53,11 @@ Collection REST API
    The aggregate API allows you to query for aggregate
    of fields from your resource dataset.
 
+   :query group: grouping structure
+   :query q: ``rulez`` based filter query
+   :query order_by: string in ``field:order`` format where ``order`` is
+                    ``asc`` or ``asc`` and ``field`` is the field name.
+
    .. note:: This API is a bit ugly as it passes JSON object
              through GET parameter. We want to use a cleaner
              alternative, but have yet to get around it yet.
@@ -74,11 +79,22 @@ Collection REST API
    The search API allows you to do advanced querying on your resources
    using Rulez query structure.
 
+   :query select: jsonpath field selector
+   :query q: ``rulez`` based filter query
+   :query order_by: string in ``field:order`` format where ``order`` is
+                    ``asc`` or ``asc`` and ``field`` is the field name.
+   :query offset: result offset
+   :query limit: result limit
+
    .. note:: This API is a bit ugly as it passes JSON object
              through GET parameter. We want to use a cleaner
              alternative, but have yet to get around it yet.
 
              Perhaps proper GraphQL implementation later
+
+   .. warning:: ``select`` query parameter would alter the response
+                data structure from ``{"data":{},"links":[]}`` to 
+                ``["val1","val2","val3" ... ]``
 
    **Example request**:
 
@@ -89,3 +105,48 @@ Collection REST API
 
    .. literalinclude:: _http/pages-search-get-response.http
       :language: http
+
+
+Model REST API
+---------------
+
+.. http:get:: /page/{uuid}
+
+   Display resource data
+
+   **Example response**:
+
+   .. literalinclude:: _http/page-get-response.http
+      :language: http
+
+
+.. http:patch:: /page/{uuid}
+
+   Update resource data
+
+   **Example request**:
+
+   .. literalinclude:: _http/page-patch.http
+      :language: http
+
+   **Example response**:
+
+   .. literalinclude:: _http/page-patch-response.http
+      :language: http
+
+
+.. http:delete:: /page/{uuid}
+
+   Delete resource
+
+   **Example request**:
+
+   .. literalinclude:: _http/page-delete.http
+      :language: http
+
+   **Example response**:
+
+   .. literalinclude:: _http/page-delete-response.http
+      :language: http
+
+
