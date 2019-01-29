@@ -76,6 +76,7 @@ Documentation
 
    usingmorpfw
    resourcetype
+   restapi
    views
    authn
    worker
