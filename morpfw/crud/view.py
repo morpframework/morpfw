@@ -208,7 +208,7 @@ def put_blob(context, request):
     context.put_blob(field, filename=os.path.basename(
         upload.filename), mimetype=upload.type,
         fileobj=upload.file)
-    return context['blobs']
+    return {"status": "success"}
 
 
 @App.json(model=Model, name='xattr-schema', permission=permission.View)

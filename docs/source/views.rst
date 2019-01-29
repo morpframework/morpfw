@@ -150,3 +150,50 @@ Model REST API
       :language: http
 
 
+.. http:post:: /page/{uuid}/+blobs?field={blobfieldname}
+
+   Upload blob using HTTP file upload
+
+   **Example request**:
+
+   .. literalinclude:: _http/page-blobs-post.py
+      :language: python
+
+   **Example response**:
+
+   .. literalinclude:: _http/page-blobs-post-response.http
+      :language: http
+
+
+.. http:get:: /page/{uuid}/+blobs?field={blobfieldname}
+
+   Download blob
+
+.. http:get:: /page/{uuid}/+xattr-schema
+
+   Get JSON schema for validating extended attributes
+
+.. http:get:: /page/{uuid}/+xattr
+
+   Return extended attributes
+
+   **Example response**:
+
+   .. literalinclude:: _http/page-xattr-get-response.http
+      :language: http
+
+.. http:patch:: /page/{uuid}/+xattr
+
+   Update extended attributes
+
+   **Example request**:
+
+   .. literalinclude:: _http/page-xattr-patch.http
+      :language: http
+
+   **Example response**:
+
+   .. literalinclude:: _http/page-xattr-patch-response.http
+      :language: http
+
+

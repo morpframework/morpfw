@@ -17,6 +17,10 @@ class PageCollection(morpfw.Collection):
 class PageModel(morpfw.Model):
     schema = PageSchema
 
+    blob_fields = [
+        'attachment'
+    ]
+
 
 class Page(morpfw.SQLBase):
     __tablename__ = 'test_page'
