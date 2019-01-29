@@ -35,9 +35,7 @@ def create_app(app, settings, sqlalchemy_session=Session,
     register_session(sqlalchemy_session)
     # initialize SQLAlchemy
     if 'sqlalchemy' in settings:
-        cwd = os.getcwd()
-        engine = sqlalchemy.create_engine(
-            settings['sqlalchemy']['dburi'] % {'here': cwd})
+        engine = sqlalchemy.create_engine(settings['sqlalchemy']['dburi'])
         sqlalchemy_session.configure(bind=engine)
 
     # initialize app

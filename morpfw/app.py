@@ -119,7 +119,7 @@ class SQLApp(TransactionApp, BaseApp):
 
         cwd = os.environ.get('MORP_WORKDIR', os.getcwd())
         os.chdir(cwd)
-        dburi = settings['application']['dburi'] % {'here': cwd}
+        dburi = settings['application']['dburi']
         engine = sqlalchemy.create_engine(dburi, poolclass=NullPool)
         session.configure(bind=engine)
 

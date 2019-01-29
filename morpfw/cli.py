@@ -13,7 +13,9 @@ from datetime import datetime
 
 
 def load(app_path, settings_file, host=None, port=None):
-    settings = yaml.load(open(settings_file))
+    raw_file = open(settings_file).read()
+    raw_file = raw_file.replace(r'%(here)s', os.getcwd())
+    settings = yaml.load(raw_file)
 
     if not app_path:
         if 'application' not in settings:
@@ -81,6 +83,10 @@ def scheduler(app=None, settings=None):
 def register_admin(app=None, settings=None, username=None, email=None):
     param = load(app, settings)
     password = getpass.getpass('Enter password for %s: ' % username)
+    confirm_password = getpass.getpass('Confirm password for %s: ' % username)
+    if password != confirm_password:
+        print("Passwords does not match!!")
+        sys.exit(1)
     app = create_app(param['app_cls'], param['settings'])
     while not isinstance(app, morepath.App):
         wrapped = getattr(app, 'app', None)
