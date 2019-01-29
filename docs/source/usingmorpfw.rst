@@ -28,7 +28,7 @@ And start your project using:
 .. code-block:: bash
 
    cd $PROJECTNAME/ # replace with your project directory name
-   pipenv install .
+   pipenv install -e .
    pipenv run morpfw start -s settings.yml
 
 
