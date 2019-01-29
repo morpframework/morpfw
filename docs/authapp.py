@@ -1,18 +1,17 @@
-import morpfw
+from morpfw.authn.pas.policy import SQLStorageAuthApp
+from morpfw.authn.pas.policy import SQLStorageAuthnPolicy
+from morpfw.authz.pas import DefaultAuthzPolicy
+from .app import App
 
 
-class App(morpfw.SQLApp):
+class AuthApp(SQLStorageAuthApp, DefaultAuthzPolicy):
     pass
 
 
-class MountedApp(morpfw.SQLApp):
-    pass
+class AuthnPolicy(SQLStorageAuthnPolicy):
+    app_cls = AuthApp
 
 
-@App.mount(app=MountedApp, path='/api/v1')
-def mount_app(app):
-    return MountedApp()
-
-
-if __name__ == '__main__':
-    morpfw.run(App, {})
+@App.mount(app=AuthnPolicy.app_cls, path='/auth')
+def mount_authapp(app):
+    return AuthnPolicy.app_cls()
