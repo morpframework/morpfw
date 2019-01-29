@@ -67,6 +67,6 @@ Documentation
    :maxdepth: 2
 
    usingmorpfw
-   contenttype
+   resourcetype
    views
    authn

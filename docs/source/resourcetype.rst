@@ -1,21 +1,21 @@
 ===============
-Content Type
+Type System
 ===============
 
-MorpFW CRUD & object management revolves around the idea of content type. A
-content type represents a data model and its respective fields. Content type
+MorpFW CRUD & object management revolves around the idea of resource type. A
+resource type represents a data model and its respective fields. Resource type
 definition consist of a Schema, a Collection and a Model class. Collection is
 very similar to the concept of database table, and model is very similar to a
 row. Model have a Schema which defines the columns available in the Model.
 
 When designing your application, it helps to think and model your application
-around the concept of content type model and collections because views are
+around the concept of resource type model and collections because views are
 attached to them.
 
 Schema
 =======
 
-Content type schema in MorpFW is defined through new python 3.7 `dataclass
+Resource type schema in MorpFW is defined through new python 3.7 `dataclass
 library <https://docs.python.org/3/library/dataclasses.html>`_.
 
 
@@ -23,7 +23,7 @@ Schema in MorpFW is used for:
 
 * data validation of JSON data on create/update REST API
 * data validation on dictionary that is used to create a new instance of
-  content type.
+  resource.
 * generating JSON schema for publishing in REST API
 
 When defining a schema, it is good that you inherit from ``morpfw.Schema``
