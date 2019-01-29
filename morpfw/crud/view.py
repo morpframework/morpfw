@@ -170,7 +170,7 @@ def statemachine(context, request):
         }
     attr()
     context.save()
-    return context.json()
+    return {"status": "success"}
 
 
 @App.json(model=Model, request_method='DELETE',

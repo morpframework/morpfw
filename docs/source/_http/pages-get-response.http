@@ -48,12 +48,12 @@ Content-Type: application/json
     "links": [
         {
             "rel": "create",
-            "href": "http://localhost:5432/pages",
+            "href": "http://localhost:5000/pages",
             "method": "POST"
         },
         {
             "rel": "search",
-            "href": "http://localhost:5432/pages/+search"
+            "href": "http://localhost:5000/pages/+search"
         }
     ]
 }

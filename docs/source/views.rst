@@ -197,3 +197,16 @@ Model REST API
       :language: http
 
 
+.. http:post: /pages/{uuid}/+statemachine
+
+   Apply transition
+
+   **Example request**:
+
+   .. literalinclude:: _http/page-statemachine-post.http
+      :language: http
+
+   **Example response**:
+
+   .. literalinclude:: _http/page-statemachine-post-response.http
+      :language: http

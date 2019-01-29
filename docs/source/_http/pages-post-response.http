@@ -16,16 +16,16 @@ Content-Type: application/json
     "links": [
         {
             "rel": "self",
-            "href": "http://localhost:5432/pages/ea31ebb4eb814572b2cbfc2d30fac7f2"
+            "href": "http://localhost:5000/pages/ea31ebb4eb814572b2cbfc2d30fac7f2"
         },
         {
             "rel": "update",
-            "href": "http://localhost:5432/pages/ea31ebb4eb814572b2cbfc2d30fac7f2",
+            "href": "http://localhost:5000/pages/ea31ebb4eb814572b2cbfc2d30fac7f2",
             "method": "PATCH"
         },
         {
             "rel": "delete",
-            "href": "http://localhost:5432/pages/ea31ebb4eb814572b2cbfc2d30fac7f2",
+            "href": "http://localhost:5000/pages/ea31ebb4eb814572b2cbfc2d30fac7f2",
             "method": "DELETE"
         }
     ]

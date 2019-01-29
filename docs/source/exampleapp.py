@@ -54,3 +54,18 @@ def allow_model(identity, context, permission):
 @App.permission_rule(model=PageCollection, permission=crudperm.All)
 def allow_collection(identity, context, permission):
     return True
+
+
+class PageStateMachine(morpfw.StateMachine):
+
+    states = ['new', 'pending', 'approved']
+    transitions = [
+        {'trigger': 'approve', 'source': [
+            'new', 'pending'], 'dest': 'approved'},
+        {'trigger': 'submit', 'source': 'new', 'dest': 'pending'}
+    ]
+
+
+@App.statemachine(model=PageModel)
+def get_pagemodel_statemachine(context):
+    return PageStateMachine(context)
