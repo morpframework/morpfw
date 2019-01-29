@@ -78,3 +78,4 @@ Documentation
    resourcetype
    views
    authn
+   community
