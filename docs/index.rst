@@ -79,5 +79,7 @@ Documentation
    restapi
    views
    authn
+   authz
+   pas
    worker
    community

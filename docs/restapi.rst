@@ -1,10 +1,10 @@
-==================
-Resource REST API
-==================
+=====================
+Type System REST API
+=====================
 
 For each published resource type, several endpoints are automatically made
-available by the framework to use. This is done through Morepath view inheritance
-on model/collection objects.
+available by the framework to use. This is done through Morepath view 
+inheritance on model/collection objects.
 
 Lets take for example the following resource type definition:
 
