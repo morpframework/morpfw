@@ -197,7 +197,7 @@ Model REST API
       :language: http
 
 
-.. http:post: /pages/{uuid}/+statemachine
+.. http:post:: /pages/{uuid}/+statemachine
 
    Apply transition
 
