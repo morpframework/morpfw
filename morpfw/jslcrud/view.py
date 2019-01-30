@@ -88,6 +88,8 @@ def search(context, request):
         params['select'] = select
     if limit:
         params['limit'] = limit
+    if order_by:
+        params['order_by'] = request.GET.get('order_by', '')
     params['offset'] = offset + (limit or 0)
     qs = urlencode(params)
     res = {'results': results, 'q': query}
