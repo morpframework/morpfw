@@ -90,6 +90,8 @@ def search(context, request):
     if limit:
         params['limit'] = limit
     params['offset'] = offset + (limit or 0)
+    if request.get('order_by', None):
+        params['order_by'] = request.get('order_by', '')
     qs = urlencode(params)
     res = {'results': results, 'q': query}
     if has_next:
