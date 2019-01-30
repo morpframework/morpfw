@@ -2,6 +2,9 @@ import os
 import morepath
 import yaml
 import json
+import socket
+import time
+from multiprocessing import Process
 from webtest import TestApp as Client
 from more.jwtauth import JWTIdentityPolicy
 from more.basicauth import BasicAuthIdentityPolicy
@@ -19,8 +22,8 @@ DEFAULT_SETTINGS = {
         'celery_name': 'morp_tasks',
         'celery_settings':  {
             'metastore': 'sqlstorage',
-            'broker_url': 'amqp://guest:guest@localhost:38567/',
-            'result_backend': 'rpc://'
+            'broker_url': 'amqp://guest:guest@localhost:34567/',
+            'result_backend': 'db+postgresql://postgres@localhost:45678/morp_tests'
         }
     }
 }
@@ -43,10 +46,31 @@ def get_client(app, config='settings.yml', **kwargs):
     appobj = create_app(app, settings, **kwargs)
     appobj.initdb()
     os.environ['MORP_SETTINGS'] = json.dumps(settings)
-#	try:
-#		create_admin(appobj, username='defaultuser',
-#					 password='password', email='admin@localhost.localdomain')
-#	except UserExistsError:
-#		pass
     c = Client(appobj)
     return c
+
+
+def start_scheduler(app):
+    settings = app._raw_settings
+    hostname = socket.gethostname()
+    ss = settings['worker']['celery_settings']
+    sched = app.celery.Beat(
+        hostname='testscheduler.%s' % hostname, **ss)
+    proc = Process(target=sched.run)
+    proc.daemon = True
+    proc.start()
+    time.sleep(2)
+    return proc
+
+
+def start_worker(app):
+    settings = app._raw_settings
+    hostname = socket.gethostname()
+    ss = settings['worker']['celery_settings']
+    worker = app.celery.Worker(
+        hostname='testworker.%s' % hostname, **ss)
+    proc = Process(target=worker.start)
+    proc.daemon = True
+    proc.start()
+    time.sleep(2)
+    return proc

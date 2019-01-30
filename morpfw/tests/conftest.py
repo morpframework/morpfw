@@ -10,6 +10,7 @@ import shutil
 import mirakuru
 from elasticsearch import Elasticsearch
 from pytest_postgresql import factories
+import time
 
 pgsql_proc = factories.postgresql_proc(
     executable='/usr/bin/pg_ctl', host='localhost', port=45678,

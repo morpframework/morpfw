@@ -34,7 +34,7 @@ class MorpTask(Task):
         pass
 
 
-class Signal(object):
+class AsyncDispatcher(object):
 
     def __init__(self, app: morepath.App, signal: str, **kwargs):
         self.app = app
@@ -45,7 +45,7 @@ class Signal(object):
         self.app.config.celery_subscriber_registry.setdefault(self.signal, [])
         return self.app.config.celery_subscriber_registry[self.signal]
 
-    def send(self, request: morepath.Request, **kwargs) -> List[AsyncResult]:
+    def dispatch(self, request: morepath.Request, **kwargs) -> List[AsyncResult]:
         tasks = []
         envs = {}
         allcaps = re.compile(r'^[A-Z_]+$')
@@ -63,7 +63,6 @@ class Signal(object):
 
         subs = self.subscribers()
         for s in subs:
-            wrapped = s.__wrapped__
             task = s.apply_async(kwargs=dict(request=req_json, **kwargs),
                                  **self.signal_opts)
             tasks.append(task)
@@ -124,6 +123,9 @@ class SignalApp(morepath.App):
     celery = Celery()
     _celery_subscribe = dectate.directive(directive.CelerySubscriberAction)
 
+    def async_dispatcher(self, signal: str, **kwargs) -> AsyncDispatcher:
+        return AsyncDispatcher(self, signal, **kwargs)
+
     @classmethod
     def async_subscribe(klass, signal: str, task_name: Optional[str] = None):
         def wrapper(wrapped):
@@ -166,6 +168,3 @@ class SignalApp(morepath.App):
             }
             return task
         return wrapper
-
-    def signal(self, signal: str, **kwargs) -> Signal:
-        return Signal(self, signal, **kwargs)

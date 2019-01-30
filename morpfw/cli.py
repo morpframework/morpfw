@@ -86,7 +86,7 @@ def scheduler(app=None, settings=None):
     ss = param['settings']['worker']['celery_scheduler_settings']
     sched = param['app_cls'].celery.Beat(
         hostname='scheduler.%s' % hostname, **ss)
-    sched.start()
+    sched.run()
 
 
 @arg('-a', '--app', required=False, help='Path to App class')

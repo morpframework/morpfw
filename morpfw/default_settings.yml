@@ -17,8 +17,6 @@ application:
 worker:
   enabled: false
   celery_settings: {}
-  celery_worker_settings: {}
-  celery_scheduler_settings: {}
 
 security:
   allowed_nets:
