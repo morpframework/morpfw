@@ -7,12 +7,12 @@ name = "pypi"
 pytest = "==3.10.1"
 pytest-html = "*"
 rulez = {git = "https://github.com/morpframework/rulez.git"}
-"e1839a8" = {path = ".", extras = ["test"], editable = true}
+e1839a8 = {path = ".",extras = ["test"],editable = true}
 "pep8" = "*"
 pylint = "*"
 "autopep8" = "*"
 pydocstyle = "*"
-morpfw = {editable = true, path = ".", extras = ["test"]}
+morpfw = {path = ".",extras = ["test"],editable = true}
 mypy = "*"
 
 [packages]
@@ -24,6 +24,10 @@ pytest-cov = "*"
 sphinx = "*"
 "zest.releaser" = "*"
 "doc8" = "*"
+rulez = "==0.1.1"
 
 [requires]
 python_version = "3.7"
+
+[pipenv]
+allow_prereleases = true

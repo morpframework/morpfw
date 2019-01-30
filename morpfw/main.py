@@ -15,8 +15,10 @@ from celery import Celery
 import yaml
 import copy
 
-default_settings = yaml.load(
-    open(os.path.join(os.path.dirname(__file__), 'default_settings.yml')))
+default_settings = open(os.path.join(
+    os.path.dirname(__file__), 'default_settings.yml')).read()
+default_settings = default_settings.replace(r'%(here)s', os.getcwd())
+default_settings = yaml.load(default_settings)
 
 
 @reg.dispatch(reg.match_class('app', lambda app, *args, **kwargs: app))

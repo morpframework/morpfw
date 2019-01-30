@@ -6,7 +6,7 @@
         {
             "label": "Build Project",
             "type": "shell",
-            "command": "pipenv install --dev -e .[test]",
+            "command": "pipenv install --pre --dev -e .[test]",
             "group": "build",
             "problemMatcher": []
         },

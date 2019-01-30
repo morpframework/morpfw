@@ -1,6 +1,7 @@
 import os
 import morepath
 import yaml
+import json
 from webtest import TestApp as Client
 from more.jwtauth import JWTIdentityPolicy
 from more.basicauth import BasicAuthIdentityPolicy
@@ -41,6 +42,7 @@ def get_client(app, config='settings.yml', **kwargs):
     settings = get_settings(config)
     appobj = create_app(app, settings, **kwargs)
     appobj.initdb()
+    os.environ['MORP_SETTINGS'] = json.dumps(settings)
 #	try:
 #		create_admin(appobj, username='defaultuser',
 #					 password='password', email='admin@localhost.localdomain')

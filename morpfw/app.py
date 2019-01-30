@@ -40,6 +40,7 @@ from .signal.app import SignalApp
 import reg
 
 Session = sessionmaker(extension=ZopeTransactionExtension())
+register_session(Session)
 
 
 class Request(BaseRequest):
@@ -112,7 +113,6 @@ class SQLApp(TransactionApp, BaseApp):
         if self.engine is not None:
             return self.engine
 
-        register_session(session)
         # initialize SQLAlchemy
         if not settings['application']['dburi']:
             raise ConfigurationError('SQLAlchemy settings not found')

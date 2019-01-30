@@ -2,6 +2,7 @@ from argh import arg, dispatch_commands
 import importlib
 import os
 import sys
+import copy
 from .main import create_app
 from .main import create_admin
 import morepath
@@ -9,13 +10,25 @@ import yaml
 import morpfw
 import getpass
 import socket
+import json
 from datetime import datetime
+from .main import default_settings
 
 
 def load(app_path, settings_file, host=None, port=None):
     raw_file = open(settings_file).read()
     raw_file = raw_file.replace(r'%(here)s', os.getcwd())
     settings = yaml.load(raw_file)
+
+    s = copy.deepcopy(default_settings)
+    for k in settings.keys():
+        if k in s.keys():
+            for j, v in settings[k].items():
+                s[k][j] = v
+        else:
+            s[k] = settings[k]
+
+    settings = s
 
     if not app_path:
         if 'application' not in settings:
@@ -34,7 +47,7 @@ def load(app_path, settings_file, host=None, port=None):
     sys.path.append(os.getcwd())
     mod, clsname = app_path.split(':')
     app_cls = getattr(importlib.import_module(mod), clsname)
-
+    os.environ['MORP_SETTINGS'] = json.dumps(settings)
     return {
         'app_cls': app_cls,
         'settings': settings,
