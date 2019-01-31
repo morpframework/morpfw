@@ -4,9 +4,6 @@ server:
   listen_port: 5000
   server_url: http://localhost:5000
 
-morpfw:
-  scan: []
-
 # core application configuration
 application:
   
@@ -52,3 +49,8 @@ security:
     leeway: 10
     allow_refresh: true
 
+# list of extra python modules to scan
+morpfw:
+  scan: 
+    - module1
+    - module2.myapp
