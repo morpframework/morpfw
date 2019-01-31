@@ -1,0 +1,29 @@
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+    "data": {
+        "id": 1,
+        "uuid": "3aed93a0844e482ca0997d20ab0a1b2a",
+        "creator": "285969eefd7547d38fb3a5d06996f93e",
+        "created": "2019-01-29T08:37:48.653715",
+        "modified": "2019-01-29T08:37:48.653715",
+        "state": null,
+        "deleted": null,
+        "userid": "demouser",
+        "label": "apikey label",
+        "apikey_identity": "cfaa53c9f583434b9a56ed7a8889f32e",
+        "apikey_secret": "df2e6b0f112843bdaa8c695f7ac6603b",
+    },
+    "links": [
+        {
+            "rel":"self",
+            "href": "http://localhost:5000/auth/apikey/3aed93a0844e482ca0997d20ab0a1b2a"
+        },
+        {
+            "rel": "delete",
+            "href": "http://localhost:5000/auth/apikey/3aed93a0844e482ca0997d20ab0a1b2a",
+            "method": "DELETE"
+        }
+    ]
+}

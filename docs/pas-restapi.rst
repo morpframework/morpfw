@@ -112,3 +112,24 @@ Group Management
       :language: http
 
 .. note:: individual group resource management api is the same as model rest api.
+
+
+API Key Management
+====================
+
+.. http:post:: /auth/apikey/
+
+   Create API key for current logged in user
+
+   **Example request**:
+
+   .. literalinclude:: _http/auth-apikey-post.http
+      :language: http
+
+   **Example response**:
+
+   .. literalinclude:: _http/auth-apikey-post-response.http
+      :language: http
+
+.. note:: individual API key resource management api is the same as model
+          rest api.
