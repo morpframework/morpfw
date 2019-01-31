@@ -26,8 +26,7 @@ triggered using ``async_dispatcher``.
 
 .. warning:: Because request object is passed to the worker, avoid using this
              in pages with uploads as it involves transfering the upload to the
-             worker. We will be excluding uploads from being pushed to worker
-             in the future.
+             worker.
 
 Following is a simple example implementation
 

@@ -8,7 +8,7 @@ Bootstrapping a new project
 MorpFW requires Python 3.7 or newer to run. Python 3.6 is also supported but
 you will need to install ``dataclasses`` backport into your environment.
 
-The recommended way to install morpfw is to use 
+The recommended way to install morpfw is to use
 `pipenv <http://pipenv.rtfd.org>`_, or you can also use pip or virtualenv.
 
 If you don't have pipenv installed yet, do:
@@ -17,7 +17,7 @@ If you don't have pipenv installed yet, do:
 
    sudo pip install pipenv>=2018.11.26
 
-Lets create a new project. You can initialize new project using 
+Lets create a new project. You can initialize new project using
 ``cookiecutter-morpfw``:
 
 .. code-block:: bash
