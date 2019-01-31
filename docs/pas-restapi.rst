@@ -67,7 +67,6 @@ User Management
    .. literalinclude:: _http/auth-changepassword-post-response.http
       :language: http
 
-   .. todo:: examples
 
 .. note:: individual user resource management api is the same as model rest api.
 
@@ -80,12 +79,12 @@ Group Management
 
    **Example request**:
 
-   .. literalinclude:: auth-grant-post.http
+   .. literalinclude:: _http/auth-grant-post.http
       :language: http
 
    **Example response**:
 
-   .. literalinclude:: auth-grant-post-response.http
+   .. literalinclude:: _http/auth-grant-post-response.http
       :language: http
 
 .. http:post:: /auth/group/{groupname}/+revoke
@@ -94,12 +93,12 @@ Group Management
 
    **Example request**:
 
-   .. literalinclude:: auth-revoke-post.http
+   .. literalinclude:: _http/auth-revoke-post.http
       :language: http
 
    **Example response**:
 
-   .. literalinclude:: auth-revoke-post-response.http
+   .. literalinclude:: _http/auth-revoke-post-response.http
       :language: http
 
 
@@ -109,7 +108,7 @@ Group Management
 
    **Example response**:
 
-   .. literalinclude:: auth-members-get-response.http
+   .. literalinclude:: _http/auth-members-get-response.http
       :language: http
 
 .. note:: individual group resource management api is the same as model rest api.
