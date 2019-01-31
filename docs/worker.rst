@@ -14,7 +14,7 @@ similar behavior to web development when working with asynchronous tasks.
 In scheduled task, a minimal request object is created and passed to the
 scheduled task function.
 
-Creating An Async Task
+Creating Async Task
 =======================
 
 Asynchronous task is implemented as signals which you can implement a
@@ -30,7 +30,7 @@ Following is a simple example implementation
    :language: python
 
 
-Creating A Scheduled Job
+Creating Scheduled Job
 =========================
 
 Scheduled job can be implemented with a similar API style. MorpFW exposes
