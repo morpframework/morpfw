@@ -3,6 +3,7 @@ from ..model.user import UserCollection, UserModel
 from ..path import user_collection_factory
 from ..model.user import UserSchema, LoginSchema
 from ..model.user import RegistrationSchema
+from ...jslcrud import permission as crudperm
 import morepath
 from ..validator import validate
 from ..utils import rellink
@@ -139,7 +140,7 @@ def logout(context, request):
     }
 
 
-@App.json(model=UserModel, request_method='POST')
+@App.json(model=UserModel, request_method='PATCH', permission=crudperm.Edit)
 def update(context, request):
     error = None
     if 'password' in request.json.keys():
@@ -164,12 +165,13 @@ def update(context, request):
     return {'status': 'success'}
 
 
-@App.json(model=UserModel, name='roles')
+@App.json(model=UserModel, name='roles', permission=crudperm.View)
 def roles(context, request):
     return context.group_roles()
 
 
-@App.json(model=UserModel, name='change_password', request_method='POST')
+@App.json(model=UserModel, name='change_password', request_method='POST',
+          permission=crudperm.Edit)
 def change_password(context, request):
     data = request.json
     error = None
@@ -194,7 +196,7 @@ def change_password(context, request):
     return {'status': 'success'}
 
 
-@App.json(model=UserModel, request_method='DELETE')
+@App.json(model=UserModel, request_method='DELETE', permission=crudperm.Delete)
 def delete(context, request):
     sm = context.state_machine()
     try:
