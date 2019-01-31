@@ -65,7 +65,7 @@ def get_page(request, identifier):
     return storage.get(identifier)
 
 
-@App.periodic(name='test-tick', second=1)
+@App.periodic(name='test-tick', seconds=1)
 def tick(request):
     collection = get_pagecollection(request)
     collection.create({"title": "Hello", "body": "World"})

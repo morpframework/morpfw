@@ -157,14 +157,14 @@ class SignalApp(morepath.App):
         return wrapper
 
     @classmethod
-    def periodic(klass, name: str, second: int = 1):
+    def periodic(klass, name: str, seconds: int = 1):
         def wrapper(wrapped):
             func = periodic_transaction_handler(klass, wrapped)
             task_name = '.'.join([wrapped.__module__, wrapped.__name__])
             task = shared_task(name=task_name, base=MorpTask)(func)
             klass.celery.conf.beat_schedule[name] = {
                 'task': task_name,
-                'schedule': second
+                'schedule': seconds
             }
             return task
         return wrapper
