@@ -6,6 +6,7 @@ import typing
 
 @dataclass
 class GroupSchema(Schema):
+    parent: typing.Optional[str] = None
     groupname: typing.Optional[str] = field(default=None, metadata={
         'morpfw': {'required': True}})
 

@@ -6,6 +6,7 @@ from morpfw.crud import errors as cruderrors
 from .. import exc
 from .schema import GroupSchema, MemberSchema
 from ..exc import GroupExistsError
+import rulez
 
 
 class GroupCollection(Collection):
@@ -27,6 +28,11 @@ class GroupModel(Model):
         active_members = [
             member for member in members if member.data.get('state') == 'active']
         return active_members
+
+    def children(self):
+        col = GroupCollection(self.request, self.storage)
+        children = col.search(rulez.field['parent'] == self.identifier)
+        return children
 
     def add_members(self, userids):
         self.storage.add_group_members(self.identifier, userids)

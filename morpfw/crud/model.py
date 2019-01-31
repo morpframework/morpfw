@@ -54,6 +54,7 @@ class Collection(ICollection):
         self.storage = storage
         self.data = None
         if data:
+            # FIXME: what is this for again? o_O
             self.data = request.app.get_dataprovider(self.schema, data,
                                                      self.storage)
 
@@ -61,8 +62,9 @@ class Collection(ICollection):
                secure=False):
         objs = self._search(query, offset, limit, order_by, secure)
         if secure and limit:
-            nextpage = {'query': query, 'offset': offset +
-                        limit, 'limit': limit, 'order_by': order_by}
+            nextpage = {'query': query,
+                        'offset': offset + limit,
+                        'limit': limit, 'order_by': order_by}
             while len(objs) < limit:
                 nextobjs = self._search(secure=True, **nextpage)
                 if len(nextobjs) == 0:
@@ -138,10 +140,10 @@ class Model(IModel):
     update_view_enabled = True
     delete_view_enabled = True
 
-    blobstorage_field = 'blobs'
-    blob_fields = []
-    protected_fields = [
-        'id',  'blobs', 'state',  'xattrs',
+    blobstorage_field: str = 'blobs'
+    blob_fields: list = []
+    protected_fields: list = [
+        'id', 'blobs', 'state', 'xattrs',
         'modified', 'created', 'uuid',
         'creator', 'deleted'
     ]

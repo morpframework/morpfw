@@ -23,6 +23,7 @@ from ..utils import has_role
 class UserCollection(Collection):
     schema = UserSchema
     exist_exc = UserExistsError
+    create_view_enabled = False
 
     def authenticate(self, username, password):
         if re.match(EMAIL_PATTERN, username):
@@ -48,6 +49,7 @@ class UserModel(Model):
     schema = UserSchema
 
     blob_fields = ['profile-photo']
+    protected_fields = Model.protected_fields + ['username', 'password']
 
     @property
     def userid(self):

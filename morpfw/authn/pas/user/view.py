@@ -145,31 +145,6 @@ def logout(context, request):
     }
 
 
-@App.json(model=UserModel, request_method='PATCH', permission=crudperm.Edit)
-def update(context, request):
-    error = None
-    if 'password' in request.json.keys():
-        error = {
-            'status': 'error',
-            'message': 'Changing password is not allowed through this method'
-        }
-    elif 'username' in request.json.keys():
-        error = {
-            'status': 'error',
-            'message': 'Changing username is not allowed'
-        }
-
-    if error:
-        @request.after
-        def adjust_status(response):
-            response.status = 422
-
-        return error
-
-    context.update(request.json)
-    return {'status': 'success'}
-
-
 @App.json(model=UserModel, name='roles', permission=crudperm.View)
 def roles(context, request):
     return context.group_roles()

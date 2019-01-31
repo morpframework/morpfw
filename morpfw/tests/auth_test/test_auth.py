@@ -263,10 +263,10 @@ def _test_authentication(c):
 
     # reject setting password through the update API
 
-    r = c.post_json('/auth/user/user1/',
-                    {'password': 'newpass'}, expect_errors=True)
+    r = c.patch_json('/auth/user/user1/',
+                     {'password': 'newpass'}, expect_errors=True)
 
-    assert r.status_code == 405
+    assert r.status_code == 422
 
     r = c.patch_json('/auth/user/user1/',
                      {'password': 'newpass'}, expect_errors=True)

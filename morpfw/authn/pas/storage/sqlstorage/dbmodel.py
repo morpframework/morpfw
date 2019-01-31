@@ -30,6 +30,7 @@ class Group(Base):
 
     __tablename__ = 'authmanager_groups'
 
+    parent = sa.Column(sa.String(length=256))
     groupname = sa.Column(sa.String(length=256))
     memberships = relationship('Membership', cascade='all')
 
