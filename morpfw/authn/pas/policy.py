@@ -27,6 +27,12 @@ class JWTWithAPIKeyIdentityPolicy(JWTIdentityPolicy):
         return super(JWTWithAPIKeyIdentityPolicy, self).identify(request)
 
 
+def verify_refresh_request(request):
+    jwtauth_settings = request.app.settings.security.jwt.copy()
+    identity_policy = JWTWithAPIKeyIdentityPolicy(**jwtauth_settings)
+    return identity_policy.verify_refresh(request)
+
+
 class DefaultAuthnPolicy(BaseAuthnPolicy):
 
     def get_identity_policy(self, settings):

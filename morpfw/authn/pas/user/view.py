@@ -9,10 +9,9 @@ from ..validator import validate
 from ..utils import rellink, has_role
 from .. import permission
 from ....crud import permission as crudperm
+from ..policy import verify_refresh_request
 from webob.exc import HTTPNotFound
-from more.jwtauth import (
-    verify_refresh_request, InvalidTokenError, ExpiredSignatureError
-)
+from more.jwtauth import InvalidTokenError, ExpiredSignatureError
 from morpfw.crud.util import dataclass_to_jsl
 from morpfw.crud.validator import validate_schema
 from morpfw.crud.errors import AlreadyExistsError
