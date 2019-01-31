@@ -43,8 +43,8 @@ Following is a simple example implementation
    :language: python
 
 
-Starting Celery Work & Celery Beat Scheduler
-=============================================
+Starting Celery Worker & Celery Beat Scheduler
+==============================================
 
 Worker and beat scheduler can be easily started up using:
 
