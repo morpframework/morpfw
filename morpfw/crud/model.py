@@ -122,11 +122,17 @@ class Collection(ICollection):
 
     def links(self):
         request = self.request
-        links = [{'rel': 'create',
-                  'href': request.link(self),
-                  'method': 'POST'},
-                 {'rel': 'search',
-                  'href': request.link(self, '+search')}]
+        links = []
+        if self.create_view_enabled:
+            links.append({'rel': 'create',
+                          'href': request.link(self),
+                          'method': 'POST'})
+        if self.search_view_enabled:
+            links.append({'rel': 'search',
+                          'href': request.link(self, '+search')})
+        if self.aggregate_view_enabled:
+            links.append({'rel': 'aggregate',
+                          'href': request.link(self, '+aggregate')})
         links += self._links()
         return links
 
