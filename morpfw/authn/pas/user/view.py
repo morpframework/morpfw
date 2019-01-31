@@ -8,6 +8,7 @@ import morepath
 from ..validator import validate
 from ..utils import rellink, has_role
 from .. import permission
+from ....crud import permission as crudperm
 from webob.exc import HTTPNotFound
 from more.jwtauth import (
     verify_refresh_request, InvalidTokenError, ExpiredSignatureError
@@ -145,7 +146,7 @@ def logout(context, request):
     }
 
 
-@App.json(model=UserModel, request_method='PATCH')
+@App.json(model=UserModel, request_method='PATCH', permission=crudperm.Edit)
 def update(context, request):
     error = None
     if 'password' in request.json.keys():
@@ -170,7 +171,7 @@ def update(context, request):
     return {'status': 'success'}
 
 
-@App.json(model=UserModel, name='roles')
+@App.json(model=UserModel, name='roles', permission=crudperm.View)
 def roles(context, request):
     return context.group_roles()
 
