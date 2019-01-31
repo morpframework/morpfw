@@ -1,12 +1,13 @@
 server:
   listen_host: 127.0.0.1
-  listen_port: 5432
+  listen_port: 5000
+  server_url: http://localhost:5000
 
 morpfw:
   scan: []
 
 application:
-  mounted_apps: {}
+  mounted_apps: []
   new_user_state: active
   dburi: 'sqlite:///%(here)s/app.db'
   compositekey_separator: '!!!!'
@@ -15,15 +16,12 @@ application:
   development_mode: true
 
 worker:
-  enabled: false
   celery_settings: {}
 
 security:
   allowed_nets:
     - 127.0.0.1/32
-
-jwtauth:
-  master_secret: secret
-  leeway: 10
-  allow_refresh: true
-
+  jwt:
+    master_secret: secret
+    leeway: 10
+    allow_refresh: true

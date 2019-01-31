@@ -68,6 +68,7 @@ Documentation
    :maxdepth: 2
 
    usingmorpfw
+   settings
    resourcetype
    restapi
    views

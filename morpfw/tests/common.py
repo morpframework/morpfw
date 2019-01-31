@@ -18,10 +18,7 @@ DEFAULT_SETTINGS = {
         'dburi': 'postgresql://postgres@localhost:45678/morp_tests'
     },
     'worker': {
-        'enabled': True,
-        'celery_name': 'morp_tasks',
         'celery_settings':  {
-            'metastore': 'sqlstorage',
             'broker_url': 'amqp://guest:guest@localhost:34567/',
             'result_backend': 'db+postgresql://postgres@localhost:45678/morp_tests'
         }

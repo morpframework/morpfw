@@ -30,10 +30,10 @@ class JWTWithAPIKeyIdentityPolicy(JWTIdentityPolicy):
 class DefaultAuthnPolicy(BaseAuthnPolicy):
 
     def get_identity_policy(self, settings):
-        jwtauth_settings = settings.jwtauth
+        jwtauth_settings = settings.security.jwt
         if jwtauth_settings:
             # Pass the settings dictionary to the identity policy.
-            return JWTWithAPIKeyIdentityPolicy(**jwtauth_settings.__dict__.copy())
+            return JWTWithAPIKeyIdentityPolicy(**jwtauth_settings)
         raise Exception('JWTAuth configuration is not set')
 
     def verify_identity(self, app, identity):

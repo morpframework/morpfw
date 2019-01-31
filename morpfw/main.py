@@ -107,9 +107,8 @@ def create_baseapp(app, settings, scan=True, **kwargs):
 
     app.commit()
 
-    if settings['worker']['enabled']:
-        celery_settings = settings['worker']['celery_settings']
-        app.celery.conf.update(**celery_settings)
+    celery_settings = settings['worker']['celery_settings']
+    app.celery.conf.update(**celery_settings)
     application = app()
     return application
 

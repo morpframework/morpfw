@@ -1,0 +1,54 @@
+# listening port
+server:
+  listen_host: 127.0.0.1
+  listen_port: 5000
+  server_url: http://localhost:5000
+
+morpfw:
+  scan: []
+
+# core application configuration
+application:
+  
+  # path to App class
+  app: myproject.app:App 
+
+  # SQLAlchemy database URI
+  dburi: 'sqlite:///%(here)s/app.db'
+
+  # Authentication policy
+  authn_policy: morpfw.authn.noauth:AuthnPolicy
+  authn_policy_settings: {}
+
+  # set development node
+  development_mode: true
+
+  # list of mounted apps
+  mounted_apps: 
+    - name: appname
+      app: someotherproject.app:App
+      authn_policy: policy.of.this.app:AuthnPolicy
+    - name: app2name
+      app: anotherproject.app:App
+      authn_policy: policy.of.this.app:AuthnPolicy
+    
+  # default state of new users
+  new_user_state: active
+
+# celery configuration
+worker:
+  # celery settings variables
+  celery_settings: {}
+
+# security locking
+security:
+  # only allow this network to access the service
+  allowed_nets:
+    - 127.0.0.1/32
+
+  # more.jwtauth configuration
+  jwt:
+    master_secret: secret
+    leeway: 10
+    allow_refresh: true
+
