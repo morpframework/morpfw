@@ -8,6 +8,7 @@ import rulez
 
 class APIKeyModel(Model):
     schema = APIKeySchema
+    update_view_enabled = False
 
 
 class APIKeyCollection(Collection):
