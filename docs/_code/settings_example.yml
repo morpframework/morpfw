@@ -35,7 +35,10 @@ application:
 # celery configuration
 worker:
   # celery settings variables
-  celery_settings: {}
+  celery_settings:
+    broker_url: 'amqp://guest:guest@localhost:5672/'
+    result_backend: 'db+postgresql://postgres@localhost:5432/morp_tests'
+
 
 # security locking
 security:

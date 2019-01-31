@@ -1,0 +1,17 @@
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+    "users": [
+        {
+            "username": "demouser",
+            "userid": "demouser",
+            "roles": ["member"],
+            "links": [
+                {"rel": "self",
+                 "type": "GET",
+                 "href": "http://localhost:5000/auth/user/demouser"}
+            ]
+        }
+    ]
+}

@@ -18,8 +18,8 @@ Available authentication modules are:
   from ``REMOTE_USER`` environment variable. Validates remote address
   against ``security.allowed_nets`` to only trust provded hosts
 
-To change to a different authentication module, update ``application.authn_policy``
-in ``settings.yml``. Eg:
+To change to a different authentication module, update
+``application.authn_policy`` in ``settings.yml``. Eg:
 
 .. code-block:: yaml
 

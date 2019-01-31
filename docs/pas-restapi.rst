@@ -35,7 +35,7 @@ Authentication
       :language: http
 
 
-User Management 
+User Management
 ================
 
 
@@ -43,15 +43,33 @@ User Management
 
    Register user
 
-   .. todo:: examples
+   **Example request**:
+
+   .. literalinclude:: _http/auth-register-post.http
+      :language: http
+
+   **Example response**:
+
+   .. literalinclude:: _http/auth-register-post-response.http
+      :language: http
 
 .. http:post:: /auth/user/{username}/+change_password
 
    Change password
 
+   **Example request**:
+
+   .. literalinclude:: _http/auth-changepassword-post.http
+      :language: http
+
+   **Example response**:
+
+   .. literalinclude:: _http/auth-changepassword-post-response.http
+      :language: http
+
    .. todo:: examples
 
-.. note:: Individual user object management API is the same as Model REST API.
+.. note:: individual user resource management api is the same as model rest api.
 
 Group Management
 =================
@@ -60,16 +78,38 @@ Group Management
 
    Grant role
 
-   .. todo:: examples
+   **Example request**:
+
+   .. literalinclude:: auth-grant-post.http
+      :language: http
+
+   **Example response**:
+
+   .. literalinclude:: auth-grant-post-response.http
+      :language: http
 
 .. http:post:: /auth/group/{groupname}/+revoke
 
    Revoke role
 
-   .. todo:: examples
+   **Example request**:
+
+   .. literalinclude:: auth-revoke-post.http
+      :language: http
+
+   **Example response**:
+
+   .. literalinclude:: auth-revoke-post-response.http
+      :language: http
+
 
 .. http:get:: /auth/group/{groupname}/+members
 
    List members and their roles
 
-   .. todo:: examples
+   **Example response**:
+
+   .. literalinclude:: auth-members-get-response.http
+      :language: http
+
+.. note:: individual group resource management api is the same as model rest api.
