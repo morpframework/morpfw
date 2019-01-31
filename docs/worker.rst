@@ -24,6 +24,11 @@ To create an async task subscribing to a signal, you can use the
 ``async_subscribe`` decorator on your ``App`` object. . The task can then be
 triggered using ``async_dispatcher``.
 
+.. warning:: Because request object is passed to the worker, avoid using this
+             in pages with uploads as it involves transfering the upload to the
+             worker. We will be excluding uploads from being pushed to worker
+             in the future.
+
 Following is a simple example implementation
 
 .. literalinclude:: _code/async_subscribe.py

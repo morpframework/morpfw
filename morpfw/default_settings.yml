@@ -6,7 +6,7 @@ morpfw:
   scan: []
 
 application:
-  mounted_apps: []
+  mounted_apps: {}
   new_user_state: active
   dburi: 'sqlite:///%(here)s/app.db'
   compositekey_separator: '!!!!'
