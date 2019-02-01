@@ -7,7 +7,7 @@ MYSIGNAL = 'my_signal'
 
 @App.view(model=PageModel, name='dispatch')
 def dispatch(request, context):
-    request.app.signal_publish(request, context, MYSIGNAL)
+    request.app.dispatcher(MYSIGNAL).dispatch(request, context)
 
 
 @App.subscribe(model=PageModel, signal=MYSIGNAL)
