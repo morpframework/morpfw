@@ -73,6 +73,7 @@ Documentation
    settings
    resourcetype
    restapi
+   event
    views
    authn
    authz

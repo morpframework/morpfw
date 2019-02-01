@@ -115,8 +115,8 @@ class Collection(ICollection):
             raise self.exist_exc(identifier)
         obj = self._create(data)
         obj.set_initial_state()
-        self.request.app.signal_publish(self.request,
-                                        obj, signals.OBJECT_CREATED)
+        dispatch = self.request.app.dispatcher(signals.OBJECT_CREATED)
+        dispatch.dispatch(self.request, obj)
         return obj
 
     def _create(self, data):
@@ -254,12 +254,13 @@ class Model(IModel):
             self.schema, nullable=True).get_schema(ordered=True)
         validate(data, schema)
         self.storage.update(self.identifier, data)
-        self.request.app.signal_publish(
-            self.request, self, signals.OBJECT_UPDATED)
+        dispatch = self.request.app.dispatcher(signals.OBJECT_UPDATED)
+        dispatch.dispatch(self.request, self)
 
     def delete(self):
-        self.request.app.signal_publish(
-            self.request, self, signals.OBJECT_TOBEDELETED)
+        dispatch = self.request.app.dispatcher(
+            signals.OBJECT_TOBEDELETED)
+        dispatch.dispatch(self.request, self)
         self.storage.delete(self.identifier, model=self)
 
     def save(self):

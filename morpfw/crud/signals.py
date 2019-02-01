@@ -38,6 +38,16 @@ class Connect(dectate.Action):
             model=self.model, signal=self.signal)
 
 
+class Dispatcher(object):
+
+    def __init__(self, app, signal):
+        self.app = app
+        self.signal = signal
+
+    def dispatch(self, request, context):
+        self.app._events.publish(self.app, request, context, self.signal)
+
+
 class SignalApp(dectate.App):
 
     subscribe = dectate.directive(Connect)
@@ -50,5 +60,5 @@ class SignalApp(dectate.App):
     def _events(self, request, obj, signal):
         raise NotImplementedError
 
-    def signal_publish(self, request, obj, signal):
-        return self._events.publish(self, request, obj, signal)
+    def dispatcher(self, signal):
+        return Dispatcher(self, signal)
