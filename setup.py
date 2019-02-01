@@ -23,7 +23,7 @@ setup(name='morpfw',
       install_requires=[
           # -*- Extra requirements: -*-
           'argh',
-          'rulez>=0.1.1,<0.2.0',
+          'rulez>=0.1.2,<0.2.0',
           'more.cors',
           'celery',
           'redis',

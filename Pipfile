@@ -24,7 +24,7 @@ pytest-cov = "*"
 sphinx = "*"
 "zest.releaser" = "*"
 "doc8" = "*"
-rulez = "==0.1.1"
+rulez = "==0.1.2"
 
 [requires]
 python_version = "3.7"

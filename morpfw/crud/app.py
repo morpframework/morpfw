@@ -14,74 +14,19 @@ Session = sessionmaker()
 
 
 class App(JsonSchemaApp, signals.SignalApp):
-    @classmethod
-    def jslcrud_dataprovider(klass, *args, **kwargs):
-        warnings.warn(
-            "jslcrud_dataprovider is deprecated, use dataprovider", DeprecationWarning)
-        return klass.dataprovider(*args, **kwargs)
 
     dataprovider = dectate.directive(actions.DataProviderAction)
-
-    @classmethod
-    def jslcrud_jsonprovider(klass, *args, **kwargs):
-        warnings.warn(
-            "jslcrud_jsonprovider is deprecated, use jsonprovider", DeprecationWarning)
-        return klass.jsonprovider(*args, **kwargs)
-
     jsonprovider = dectate.directive(actions.JSONProviderAction)
-
-    @classmethod
-    def jslcrud_formvalidators(klass, *args, **kwargs):
-        warnings.warn(
-            "jslcrud_formvalidators is deprecated, use formvalidators", DeprecationWarning)
-        return klass.formvalidators(*args, **kwargs)
-
     formvalidators = dectate.directive(actions.FormValidatorAction)
-
-    @classmethod
-    def jslcrud_identifierfields(klass, *args, **kwargs):
-        warnings.warn(
-            "jslcrud_identifierfields is deprecated, use identifierfields", DeprecationWarning)
-        return klass.identifierfields(*args, **kwargs)
-
     identifierfields = dectate.directive(actions.IdentifierFieldsAction)
-
-    @classmethod
-    def jslcrud_default_identifier(klass, *args, **kwargs):
-        warnings.warn(
-            "jslcrud_default_identifier is deprecated, use default_identifier", DeprecationWarning)
-        return klass.default_identifier(*args, **kwargs)
-
     default_identifier = dectate.directive(actions.DefaultIdentifierAction)
-
-    @classmethod
-    def jslcrud_rulesadapter(klass, *args, **kwargs):
-        warnings.warn(
-            "jslcrud_rulesadapter is deprecated, use rulesadapter", DeprecationWarning)
-        return klass.rulesadapter(*args, **kwargs)
-
     rulesadapter = dectate.directive(actions.RulesAdapterAction)
-
-    @classmethod
-    def jslcrud_uuidfield(klass, *args, **kwargs):
-        warnings.warn(
-            "jslcrud_uuidfield is deprecated, use uuidfield", DeprecationWarning)
-        return klass.uuidfield(*args, **kwargs)
-
     uuidfield = dectate.directive(actions.UUIDFieldAction)
-
-    @classmethod
-    def jslcrud_statemachine(klass, *args, **kwargs):
-        warnings.warn(
-            "jslcrud_statemachine is deprecated, use statemachine", DeprecationWarning)
-        return klass.statemachine(*args, **kwargs)
-
     statemachine = dectate.directive(actions.StateMachineAction)
-
+    searchprovider = dectate.directive(actions.SearchProviderAction)
+    aggregateprovider = dectate.directive(actions.AggregateProviderAction)
     xattrprovider = dectate.directive(actions.XattrProviderAction)
-
     storage = dectate.directive(actions.StorageAction)
-
     blobstorage = dectate.directive(actions.BlobStorageAction)
 
     def get_storage(self, model, request):
@@ -142,6 +87,16 @@ class App(JsonSchemaApp, signals.SignalApp):
     @reg.dispatch_method(reg.match_instance('model',
                                             lambda self, context: context))
     def get_statemachine(self, context):
+        raise NotImplementedError
+
+    @reg.dispatch_method(reg.match_instance('model',
+                                            lambda self, context: context))
+    def get_searchprovider(self, context):
+        raise NotImplementedError
+
+    @reg.dispatch_method(reg.match_instance('model',
+                                            lambda self, context: context))
+    def get_aggregateprovider(self, context):
         raise NotImplementedError
 
     @reg.dispatch_method(reg.match_instance('model',

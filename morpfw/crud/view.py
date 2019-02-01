@@ -33,12 +33,20 @@ def aggregate(context, request):
     if not context.aggregate_view_enabled:
         raise HTTPNotFound()
 
-    query = json.loads(request.GET.get('q', '{}'))
-    if not query:
-        query = None
+    qs = request.GET.get('q', '').strip()
+
+    query = None
+    if qs:
+        searchprovider = context.searchprovider()
+        query = searchprovider.parse_query(qs)
 
     order_by = request.GET.get('order_by', None)
-    group = json.loads(request.GET.get('group', '{}'))
+    gs = request.GET.get('group', '').strip()
+    group = None
+    if gs:
+        aggregateprovider = context.aggregateprovider()
+        group = aggregateprovider.parse_group(gs)
+
     if order_by:
         order_by = order_by.split(':')
         if len(order_by) == 1:
@@ -51,9 +59,14 @@ def aggregate(context, request):
 def search(context, request):
     if not context.search_view_enabled:
         raise HTTPNotFound()
-    query = json.loads(request.GET.get('q', '{}'))
-    if not query:
-        query = None
+
+    qs = request.GET.get('q', '').strip()
+
+    query = None
+    if qs:
+        searchprovider = context.searchprovider()
+        query = searchprovider.parse_query(qs)
+
     limit = int(request.GET.get('limit', 0)) or None
     offset = int(request.GET.get('offset', 0))
     order_by = request.GET.get('order_by', None)

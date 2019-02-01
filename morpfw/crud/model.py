@@ -1,3 +1,4 @@
+import morepath
 from jsonschema.validators import Draft4Validator
 from jsonschema import validate, ValidationError
 from .util import jsl_nullable
@@ -6,7 +7,7 @@ from .const import SEPARATOR
 from . import permission
 from . import signals
 from .log import logger
-from rulez import validate_condition
+from rulez import validate_condition, parse_dsl, OperatorNotAllowedError
 from morepath import reify
 from DateTime import DateTime
 from uuid import uuid4
@@ -16,6 +17,7 @@ from .errors import StateUpdateProhibitedError, AlreadyExistsError, BlobStorageN
 from .errors import UnprocessableError
 from ..interfaces import IModel, ICollection
 import json
+import re
 
 
 ALLOWED_SEARCH_OPERATORS = [
@@ -31,6 +33,7 @@ class Collection(ICollection):
 
     create_view_enabled = True
     search_view_enabled = True
+    search_allow_queryobject = True
     aggregate_view_enabled = True
 
     exist_exc = AlreadyExistsError
@@ -77,7 +80,10 @@ class Collection(ICollection):
                 secure=False):
         if query:
             validate_condition(query, ALLOWED_SEARCH_OPERATORS)
-        objs = self.storage.search(
+
+        prov = self.searchprovider()
+
+        objs = prov.search(
             query, offset=offset, limit=limit, order_by=order_by)
 
         if secure:
@@ -88,8 +94,19 @@ class Collection(ICollection):
     def aggregate(self, query=None, group=None, order_by=None):
         if query:
             validate_condition(query, ALLOWED_SEARCH_OPERATORS)
-        objs = self.storage.aggregate(query, group=group, order_by=order_by)
+        prov = self.aggregateprovider()
+        objs = prov.aggregate(query, group=group, order_by=order_by)
         return list(objs)
+
+    def searchprovider(self):
+        if self.app.get_searchprovider.by_args(self).all_matches:
+            return self.app.get_searchprovider(self)
+        return None
+
+    def aggregateprovider(self):
+        if self.app.get_aggregateprovider.by_args(self).all_matches:
+            return self.app.get_aggregateprovider(self)
+        return None
 
     def create(self, data):
         identifier = self.app.get_default_identifier(

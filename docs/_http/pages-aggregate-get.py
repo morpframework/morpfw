@@ -1,29 +1,10 @@
+from urllib.parse import urlencode
 import json
 import requests
 
-requests.get('/pages/+aggregate', data={'group': json.dumps({
-    'count': {
-        'function': 'count',
-        'field': 'uuid'
-    },
-    'year': {
-        'function': 'year',
-        'field': 'created'
-    },
-    'month': {
-        'function': 'month',
-        'field': 'created'
-    },
-    'day': {
-        'function': 'day',
-        'field': 'created'
-    },
-    'sum': {
-        'function': 'sum',
-        'field': 'value'
-    },
-    'avg': {
-        'function': 'avg',
-        'field': 'value'
-    }
-})})
+
+qs = urlencode({
+    'group': ("count:count(uuid), year:year(created), month:month(created),"
+              "day:day(created), sum:sum(value), avg:avg(value)")
+})
+requests.get('/pages/+aggregate?%s' % qs)

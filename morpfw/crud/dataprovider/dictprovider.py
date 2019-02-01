@@ -80,7 +80,7 @@ class DictProvider(IDataProvider):
 
     def as_dict(self):
         result = {}
-        for k, v in obj.data.items():
+        for k, v in self.data.items():
             result[k] = v
         return result
 

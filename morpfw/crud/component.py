@@ -160,6 +160,36 @@ class StateMachineAction(dectate.Action):
             reg.methodify(obj), model=self.model)
 
 
+class SearchProviderAction(dectate.Action):
+
+    app_class_arg = True
+
+    def __init__(self, model):
+        self.model = model
+
+    def identifier(self, app_class):
+        return str((app_class, self.model))
+
+    def perform(self, obj, app_class):
+        app_class.get_searchprovider.register(
+            reg.methodify(obj), model=self.model)
+
+
+class AggregateProviderAction(dectate.Action):
+
+    app_class_arg = True
+
+    def __init__(self, model):
+        self.model = model
+
+    def identifier(self, app_class):
+        return str((app_class, self.model))
+
+    def perform(self, obj, app_class):
+        app_class.get_aggregateprovider.register(
+            reg.methodify(obj), model=self.model)
+
+
 class XattrProviderAction(dectate.Action):
 
     app_class_arg = True

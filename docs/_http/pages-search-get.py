@@ -1,9 +1,8 @@
+from urllib.parse import urlencode
 import json
 import requests
 
-
-requests.get('http://localhost:5000/pages/+search', {
-    'q': json.dumps({'operator': 'in',
-                     'value': ['Hello'],
-                     'field': 'body'})
+qs = urlencode({
+    'q': 'body in ["Hello"]'
 })
+requests.get('http://localhost:5000/pages/+search?%s' % qs)

@@ -227,32 +227,9 @@ def run_jslcrud_test(c, skip_aggregate=False):
             '/pages/', {'title': 'page%s' % i, 'body': 'page%sbody' % i, 'value': i})
 
     if not skip_aggregate:
-        r = c.get('/pages/+aggregate', {'group': json.dumps({
-            'count': {
-                'function': 'count',
-                'field': 'uuid'
-            },
-            'year': {
-                'function': 'year',
-                'field': 'created'
-            },
-            'month': {
-                'function': 'month',
-                'field': 'created'
-            },
-            'day': {
-                'function': 'day',
-                'field': 'created'
-            },
-            'sum': {
-                'function': 'sum',
-                'field': 'value'
-            },
-            'avg': {
-                'function': 'avg',
-                'field': 'value'
-            }
-        })})
+        r = c.get('/pages/+aggregate', {'group': (
+            "count:count(uuid), year:year(created), month:month(created),"
+            "day:day(created), sum:sum(value), avg:avg(value)")})
 
         now = datetime.utcnow()
         assert r.json[0]['year'] == now.year
@@ -263,9 +240,7 @@ def run_jslcrud_test(c, skip_aggregate=False):
         assert r.json[0]['avg'] == 4.5
 
     r = c.get('/pages/+search',
-              {'q': json.dumps({'operator': 'in',
-                                'value': ['Hello', 'something'],
-                                'field': 'title'})})
+              {'q': 'title in ("Hello","something")'})
 
     assert r.json['results'][0]['data']['title'] == 'Hello'
 
@@ -275,18 +250,14 @@ def run_jslcrud_test(c, skip_aggregate=False):
 
     r = c.get('/pages/+search', {
         'select': '$.title',
-        'q': json.dumps({'operator': 'in',
-                         'value': ['Hello'],
-                         'field': 'title'})
+        'q': 'title in ["Hello"]'
     })
 
     assert r.json['results'] == [['Hello']]
 
     r = c.get('/pages/+search', {
         'select': '$.[title, body]',
-        'q': json.dumps({'operator': 'in',
-                         'value': ['Hello'],
-                         'field': 'title'})
+        'q': 'title in ["Hello"]'
     })
 
     assert r.json['results'] == [['Hello', 'World']]

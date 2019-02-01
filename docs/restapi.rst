@@ -45,15 +45,9 @@ Collection
    of fields from your resource dataset.
 
    :query group: grouping structure
-   :query q: ``rulez`` based filter query
+   :query q: ``rulez`` dsl based filter query
    :query order_by: string in ``field:order`` format where ``order`` is
                     ``asc`` or ``asc`` and ``field`` is the field name.
-
-   .. note:: This API is a bit ugly as it passes JSON object
-             through GET parameter. We want to use a cleaner
-             alternative, but have yet to get around it yet.
-
-             Perhaps proper GraphQL implementation later
 
    **Example request**:
 
@@ -71,17 +65,11 @@ Collection
    using Rulez query structure.
 
    :query select: jsonpath field selector
-   :query q: ``rulez`` based filter query
+   :query q: ``rulez`` dsl based filter query 
    :query order_by: string in ``field:order`` format where ``order`` is
                     ``asc`` or ``asc`` and ``field`` is the field name.
    :query offset: result offset
    :query limit: result limit
-
-   .. note:: This API is a bit ugly as it passes JSON object
-             through GET parameter. We want to use a cleaner
-             alternative, but have yet to get around it yet.
-
-             Perhaps proper GraphQL implementation later
 
    .. warning:: ``select`` query parameter would alter the response
                 data structure from ``{"data":{},"links":[]}`` to 

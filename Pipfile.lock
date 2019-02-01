@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "7a518ef1c9f66b57926c350156740b59e91e4855fbee8fe7360072a9da7676d4"
+            "sha256": "882093dafa05e76dc88fae90317e08d6a55e839459e93f5040226da45d719d4c"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -276,10 +276,10 @@
         },
         "pbr": {
             "hashes": [
-                "sha256:f59d71442f9ece3dffc17bc36575768e1ee9967756e6b6535f0ee1f0054c3d68",
-                "sha256:f6d5b23f226a2ba58e14e49aa3b1bfaf814d0199144b95d78458212444de1387"
+                "sha256:a7953f66e1f82e4b061f43096a4bcc058f7d3d41de9b94ac871770e8bdd831a2",
+                "sha256:d717573351cfe09f49df61906cd272abaa759b3e91744396b804965ff7bff38b"
             ],
-            "version": "==5.1.1"
+            "version": "==5.1.2"
         },
         "pkginfo": {
             "hashes": [
@@ -406,10 +406,10 @@
         },
         "rulez": {
             "hashes": [
-                "sha256:997e451048ee6d62a2b45795c069678e9ef06074ec9d489b81e987ad83091546"
+                "sha256:d94ebaa689b2b11bb89c71e14fc39ce04b4da1fc6950c0322f5a93c01a40a0aa"
             ],
             "index": "pypi",
-            "version": "==0.1.1"
+            "version": "==0.1.2"
         },
         "six": {
             "hashes": [
@@ -1181,10 +1181,10 @@
         },
         "rulez": {
             "hashes": [
-                "sha256:997e451048ee6d62a2b45795c069678e9ef06074ec9d489b81e987ad83091546"
+                "sha256:d94ebaa689b2b11bb89c71e14fc39ce04b4da1fc6950c0322f5a93c01a40a0aa"
             ],
             "index": "pypi",
-            "version": "==0.1.1"
+            "version": "==0.1.2"
         },
         "six": {
             "hashes": [
