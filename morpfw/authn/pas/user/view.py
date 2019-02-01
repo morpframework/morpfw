@@ -1,5 +1,5 @@
 from ..app import App
-from .model import UserCollection, UserModel
+from .model import UserCollection, UserModel, CurrentUserModel
 from ..path import get_user_collection
 from .model import UserSchema, LoginSchema
 from .model import RegistrationSchema
@@ -56,11 +56,6 @@ def login(context, request):
     }
 
 
-@App.json(model=UserCollection, name='create', request_method='POST')
-def reject_create(context, request):
-    raise HTTPNotFound()
-
-
 @App.json(model=UserCollection, name='login', request_method='POST')
 def process_login(context, request):
     """Authenticate username and password and log in user"""
@@ -94,8 +89,8 @@ def process_login(context, request):
     }
 
 
-@App.json(model=UserCollection, name='refresh_token')
-def refresh_token(context, request):
+@App.json(model=CurrentUserModel, name='refresh_token')
+def refresh_token(context: CurrentUserModel, request: morepath.Request):
     try:
         # Verifies if we're allowed to refresh the token.
         # In this case returns the userid.
@@ -122,7 +117,7 @@ def refresh_token(context, request):
         @request.after
         def remember(response):
             # create the identity with the userid and updated user info
-            identity = context.get_by_userid(userid).identity
+            identity = context.identity
             # create the updated token and set it in the response header
             request.app.remember_identity(response, request, identity)
 
@@ -153,13 +148,37 @@ def roles(context, request):
 @App.json(model=UserModel, name='change_password',
           permission=permission.ChangePassword,
           request_method='POST')
-def change_password(context, request):
+def admin_change_password(context, request):
     data = request.json
     error = None
     current_password = data.get('password', '')
-    if not has_role(request, 'administrator'):
-        if not context.validate(current_password, check_state=False):
-            error = 'Invalid password'
+
+    if not error and data['new_password'] != data['new_password_validate']:
+        error = 'Password confirmation does not match'
+
+    if error:
+        @request.after
+        def adjust_status(response):
+            response.status = 422
+        return {
+            'status': 'error',
+            'message': error
+        }
+
+    context.change_password(current_password, data['new_password'])
+    return {'status': 'success'}
+
+
+@App.json(model=CurrentUserModel, name='change_password',
+          permission=permission.ChangePassword,
+          request_method='POST')
+def user_change_password(context, request):
+    data = request.json
+    error = None
+    current_password = data.get('password', '')
+
+    if not context.validate(current_password, check_state=False):
+        error = 'Invalid password'
 
     if not error and data['new_password'] != data['new_password_validate']:
         error = 'Password confirmation does not match'

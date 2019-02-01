@@ -1,2 +1,2 @@
-GET /auth/user/+refresh_token HTTP/1.1
+GET /auth/self/+refresh_token HTTP/1.1
 Authorization: JWT {jwtoken}

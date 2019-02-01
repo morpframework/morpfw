@@ -20,7 +20,7 @@ Authentication
       :language: http
 
 
-.. http:get:: /auth/user/+refresh_token
+.. http:get:: /auth/self/+refresh_token
 
    Return new token
 
@@ -69,6 +69,27 @@ User Management
 
 
 .. note:: individual user resource management api is the same as model rest api.
+
+.. http:get:: /auth/self
+
+   Get current logged in user. This model inherits from ``UserModel`` so all 
+   the views from ``UserModel`` is inherited. 
+
+.. http:post:: /auth/self/+change_password
+
+   Change password
+
+   **Example request**:
+
+   .. literalinclude:: _http/auth-selfchangepassword-post.http
+      :language: http
+
+   **Example response**:
+
+   .. literalinclude:: _http/auth-changepassword-post-response.http
+      :language: http
+
+
 
 Group Management
 =================

@@ -1,5 +1,5 @@
 import morepath
-from ..authn.pas.user.model import UserCollection, UserModel
+from ..authn.pas.user.model import UserCollection, UserModel, CurrentUserModel
 from ..authn.pas.group.model import GroupCollection, GroupModel
 from ..authn.pas.group.schema import GroupSchema
 from ..authn.pas.apikey.model import APIKeyCollection, APIKeyModel
@@ -73,6 +73,12 @@ def allow_user_management(identity, context, permission):
 def allow_change_password(identity, context, permission):
     if _has_admin_role(context):
         return True
+    return False
+
+
+@DefaultAuthzPolicy.permission_rule(model=CurrentUserModel,
+                                    permission=authperm.ChangePassword)
+def allow_self_change_password(identity, context, permission):
     if context['uuid'] == identity.userid:
         return True
     return False

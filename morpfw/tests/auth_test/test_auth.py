@@ -112,7 +112,7 @@ def _test_authentication(c):
     # test refreshing token
     time.sleep(2)
 
-    r = c.get('/auth/user/+refresh_token')
+    r = c.get('/auth/self/+refresh_token')
 
     n = r.headers.get('Authorization').split()
 
@@ -290,8 +290,16 @@ def _test_authentication(c):
 
     login(c, 'user1', 'newpass')
 
-    # user require current password
+    # changing password through user management API is limited only to admin
     r = c.post_json('/auth/user/user1/+change_password', {
+        'new_password': 'newpass',
+        'new_password_validate': 'newpass'
+    }, expect_errors=True)
+
+    assert r.status_code == 403
+
+    # user require current password
+    r = c.post_json('/auth/self/+change_password', {
         'new_password': 'password',
         'new_password_validate': 'password'
     }, expect_errors=True)
@@ -299,7 +307,7 @@ def _test_authentication(c):
     assert r.status_code == 422
 
     # user require current password
-    r = c.post_json('/auth/user/user1/+change_password', {
+    r = c.post_json('/auth/self/+change_password', {
         'password': 'newpass',
         'new_password': 'password',
         'new_password_validate': 'password'
@@ -478,3 +486,9 @@ def _test_authentication(c):
     logout(c)
 
     r = c.delete('/auth/user/user1', expect_errors=True)
+
+    login(c, 'admin')
+
+    r = c.get('/auth/self')
+
+    assert r.json['data']['username'] == 'admin'

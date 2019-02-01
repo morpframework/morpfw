@@ -133,3 +133,7 @@ def add_user_to_default_group(app, request, obj, signal):
         gcol = GroupCollection(request, storage)
         g = gcol.create({'groupname': '__default__'})
     g.add_members([obj.userid])
+
+
+class CurrentUserModel(UserModel):
+    pass

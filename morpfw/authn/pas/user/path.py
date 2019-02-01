@@ -1,13 +1,14 @@
-from .model import UserCollection, UserModel, UserSchema
+import morepath
+from .model import UserCollection, UserModel, UserSchema, CurrentUserModel
 from ..app import App
 
 
-def get_user(request, identifier):
+def get_user(request: morepath.Request, identifier) -> UserModel:
     collection = get_user_collection(request)
     return collection.get(identifier)
 
 
-def get_user_collection(request):
+def get_user_collection(request: morepath.Request) -> UserCollection:
     authprovider = request.app.get_authn_provider(request)
     return UserCollection(request, storage=authprovider.get_storage(UserModel, request))
 
@@ -25,3 +26,15 @@ def _get_user(app, request, username):
           path='user')
 def _get_user_collection(app, request):
     return get_user_collection(request)
+
+
+@App.path(model=CurrentUserModel, path='self')
+def _get_current_user(app, request):
+    userid = request.identity.userid
+    if not userid:
+        return None
+    col = get_user_collection(request)
+    user = col.get_by_userid(userid)
+    if not user:
+        return None
+    return CurrentUserModel(request, user.storage, user.data.data)

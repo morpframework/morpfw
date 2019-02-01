@@ -22,7 +22,7 @@ class AppRoot(object):
     pass
 
 
-@App.mount(app=MountedApp, path='/api/v1')
+@App.mount(app=MountedApp, path='/api/v1/auth')
 def mount_app(app):
     return MountedApp()
 
@@ -46,12 +46,12 @@ def test_morp_framework(pgsql_db):
     c = get_client(App, config='settings-mount.yml')
 
     r = c.post_json(
-        '/api/v1/user/+login', {'username': 'admin',
-                                'password': 'password'})
+        '/api/v1/auth/user/+login', {'username': 'admin',
+                                     'password': 'password'})
 
     c.authorization = ('JWT', r.headers.get('Authorization').split()[1])
 
-    r = c.get('/api/v1/user/+refresh_token')
+    r = c.get('/api/v1/auth/self/+refresh_token')
 
     c.authorization = ('JWT', r.headers.get('Authorization').split()[1])
 
