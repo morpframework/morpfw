@@ -23,5 +23,7 @@ class StateMachine(IStateMachine):
     def _set_state(self, val):
         self._context.data['state'] = val
 
+    state = property(_get_state, _set_state)
+
     def get_triggers(self):
         return [i for i in self._machine.get_triggers(self.state) if not i.startswith('to_')]
