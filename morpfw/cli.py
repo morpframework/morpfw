@@ -1,4 +1,3 @@
-from argh import arg, dispatch_commands
 import importlib
 import os
 import sys
@@ -13,6 +12,7 @@ import socket
 import json
 from datetime import datetime
 from .main import default_settings
+import click
 
 
 def load(app_path, settings_file=None, host=None, port=None):
@@ -59,24 +59,33 @@ def load(app_path, settings_file=None, host=None, port=None):
     }
 
 
-@arg('-s', '--settings', required=False, default=None, help='Path to settings.yml')
-@arg('-a', '--app', required=False, default=None, help='Path to App class')
-@arg('-h', '--host', default=None, help='Host')
-@arg('-p', '--port', default=None, type=int, help='Port')
-def start(app=None, settings=None, host=None, port=None):
+@click.group()
+@click.option('-s', '--settings', type=str, default=None, help='path to settings.yml')
+@click.option('-a', '--app', type=str, default=None,
+              help='path to App class (eg: myapp.app:App)')
+@click.pass_context
+def cli(ctx, settings, app):
     if app is None and settings is None:
         print('Either --app or --settings must be supplied')
-    param = load(app, settings, host, port)
+    ctx.ensure_object(dict)
+    ctx.obj['app'] = app
+    ctx.obj['settings'] = settings
+
+
+@cli.command(help='start web server')
+@click.option('-h', '--host', default=None, help='Host')
+@click.option('-p', '--port', default=None, type=int, help='Port')
+@click.pass_context
+def start(ctx, host, port):
+    param = load(ctx.obj['app'], ctx.obj['settings'], host, port)
     morpfw.run(param['app_cls'], settings=param['settings'], host=param['host'],
                port=param['port'], ignore_cli=True)
 
 
-@arg('-s', '--settings', required=False, default=None, help='Path to settings.yml')
-@arg('-a', '--app', required=False, default=None, help='Path to App class')
-def solo_worker(app=None, settings=None):
-    if app is None and settings is None:
-        print('Either --app or --settings must be supplied')
-    param = load(app, settings)
+@cli.command(help='start celery worker')
+@click.pass_context
+def solo_worker(ctx):
+    param = load(ctx.obj['app'], ctx.obj['settings'])
     hostname = socket.gethostname()
     ws = param['settings']['worker']['celery_settings']
     now = datetime.utcnow().strftime(r'%Y%m%d%H%M')
@@ -86,12 +95,10 @@ def solo_worker(app=None, settings=None):
     worker.start()
 
 
-@arg('-s', '--settings', required=False, default=None, help='Path to settings.yml')
-@arg('-a', '--app', required=False, default=None, help='Path to App class')
-def scheduler(app=None, settings=None):
-    if app is None and settings is None:
-        print('Either --app or --settings must be supplied')
-    param = load(app, settings)
+@cli.command(help='start celery beat scheduler')
+@click.pass_context
+def scheduler(ctx):
+    param = load(ctx.obj['app'], ctx.obj['settings'])
     hostname = socket.gethostname()
     ss = param['settings']['worker']['celery_settings']
     app = create_app(param['app_cls'], param['settings'])
@@ -100,19 +107,14 @@ def scheduler(app=None, settings=None):
     sched.run()
 
 
-@arg('-s', '--settings', required=False, default=None, help='Path to settings.yml')
-@arg('-a', '--app', required=False, default=None, help='Path to App class')
-@arg('-u', '--username', required=True, help='Username')
-@arg('-e', '--email', required=True, help='Email address')
-def register_admin(app=None, settings=None, username=None, email=None):
-    if app is None and settings is None:
-        print('Either --app or --settings must be supplied')
-    param = load(app, settings)
-    password = getpass.getpass('Enter password for %s: ' % username)
-    confirm_password = getpass.getpass('Confirm password for %s: ' % username)
-    if password != confirm_password:
-        print("Passwords does not match!!")
-        sys.exit(1)
+@cli.command(help='register administrator user (only for app using PAS)')
+@click.option('-u', '--username', required=True, help='Username', prompt=True)
+@click.option('-e', '--email', required=True, help='Email address', prompt=True)
+@click.option('-p', '--password', required=True, help='Password', prompt=True,
+              hide_input=True, confirmation_prompt=True)
+@click.pass_context
+def register_admin(ctx, username, email, password):
+    param = load(ctx.obj['app'], ctx.obj['settings'])
     app = create_app(param['app_cls'], param['settings'])
     while not isinstance(app, morepath.App):
         wrapped = getattr(app, 'app', None)
@@ -121,9 +123,11 @@ def register_admin(app=None, settings=None, username=None, email=None):
         else:
             raise ValueError(
                 'Unable to locate app object from middleware')
-    create_admin(app=app, username=username,
-                 password=password, email=email)
+    user = create_admin(app=app, username=username,
+                        password=password, email=email)
+    if user is None:
+        print('Application is not using Pluggable Auth Service')
 
 
 def run():
-    dispatch_commands([start, solo_worker, register_admin, scheduler])
+    cli()

@@ -22,7 +22,6 @@ setup(name='morpfw',
       zip_safe=False,
       install_requires=[
           # -*- Extra requirements: -*-
-          'argh',
           'rulez>=0.1.2,<0.2.0',
           'more.cors',
           'celery',
@@ -64,6 +63,7 @@ setup(name='morpfw',
           'cryptography',
           'elasticsearch>=5.0.0,<6.0.0',
           'pamela',
+          'click',
       ],
       extras_require={
           'test': [

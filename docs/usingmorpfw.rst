@@ -31,7 +31,7 @@ And start your project using:
 .. code-block:: bash
 
    cd $PROJECTNAME/ # replace with your project directory name
-   pipenv install -e .
+   pipenv install --python=python3.7 -e .
    pipenv run morpfw start -s settings.yml
 
 

@@ -98,7 +98,8 @@ def create_baseapp(app, settings, scan=True, **kwargs):
 
     app.identity_policy()(get_identity_policy)
     app.verify_identity()(verify_identity)
-    app.authn_provider()(lambda: authnpolicy.app_cls())
+    if authnpolicy.app_cls:
+        app.authn_provider()(lambda: authnpolicy.app_cls())
     app.init_settings(settings)
     app._raw_settings = settings
 
@@ -125,7 +126,11 @@ def create_sqlapp(app, settings, scan=True, **kwargs):
 
 def create_admin(app: morepath.App, username: str, password: str, email: str, session=Session):
     appreq = app.request_class(app=app, environ={'PATH_INFO': '/'})
-    authapp = app.get_authn_provider(appreq)
+    try:
+        authapp = app.get_authn_provider(appreq)
+    except NotImplementedError:
+        return 
+
     request = authapp.request_class(app=authapp, environ={'PATH_INFO': '/'})
 
     transaction.manager.begin()

@@ -80,4 +80,5 @@ Documentation
    pas
    pas-restapi
    worker
+   cli
    community

@@ -94,6 +94,10 @@ class BaseApp(CRUDApp, cors.CORSApp, SignalApp):
                                               self.__class__.__name__)
 
 
+class App(BaseApp):
+    pass
+
+
 class SQLApp(TransactionApp, BaseApp):
 
     request_class = DBSessionRequest
