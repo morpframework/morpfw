@@ -69,6 +69,7 @@ Documentation
    settings
    resourcetype
    restapi
+   xattr
    event
    views
    authn

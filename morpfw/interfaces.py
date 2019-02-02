@@ -1,7 +1,9 @@
 import abc
 import morepath
 import webob
-from typing import Optional, Union, BinaryIO, List, Sequence, Type
+from typing import Optional, Union, BinaryIO, List, Sequence, Type, Any
+
+_marker = object()
 
 
 class ISchema(object):
@@ -359,4 +361,57 @@ class ICollection(abc.ABC):
     @abc.abstractmethod
     def links(self) -> list:
         """Links related to this collection"""
+        raise NotImplementedError
+
+
+class IXattrProvider(abc.ABC):
+
+    # Schema to use for data validation
+    schema: Type[Any]
+
+    # Set to True to allow arbitrary properties besides
+    # the properties defined on the schema
+    additional_properties: bool = False
+
+    @abc.abstractmethod
+    def jsonschema(self) -> dict:
+        """Returns JSON Schema for Xattr"""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def as_dict(self):
+        """Returns dictionary representation of the data, where python objects 
+        such as ``datetime`` remains as python objects"""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def as_json(self):
+        """Returns JSON-safe dictionary representation of the data. Any python
+        objects are serialized into JSON-safe data type"""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def process_update(self, newdata: dict):
+        """Validate received data and then update the extended attributes"""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def update(self, newdata: dict):
+        """Update extended attributes"""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def __setitem__(self, key, value):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def __getitem__(self, key):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def __delitem__(self, key):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get(self, key, default=_marker):
         raise NotImplementedError

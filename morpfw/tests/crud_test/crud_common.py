@@ -5,7 +5,8 @@ from webtest import TestApp as Client
 from morpfw.crud.model import Collection, Model
 from morpfw.crud.schema import Schema
 from morpfw.crud import permission as crudperm
-from morpfw.crud.model import StateMachine, XattrProvider
+from morpfw.crud.model import StateMachine
+from morpfw.crud.xattrprovider.base import XattrProvider
 from morpfw.crud.xattrprovider import FieldXattrProvider
 from morpfw.app import BaseApp
 from morpfw.authn.base import AuthnPolicy as BaseAuthnPolicy
@@ -105,6 +106,7 @@ class ObjectXattrSchema(ISchema):
 class ObjectXattrProvider(FieldXattrProvider):
 
     schema = ObjectXattrSchema
+    additional_properties = False
 
 
 @App.xattrprovider(model=ObjectModel)
@@ -398,6 +400,16 @@ def run_jslcrud_test(c, skip_aggregate=False):
 
     r = c.get(obj_link)
     assert r.json['data']['xattrs'] == {'message': 'hello world'}
+
+    r = c.patch_json(obj_xattr_link, {'message': 'hello world',
+                                      'anotherkey': 'boo'}, expect_errors=True)
+
+    r.status_code == 422
+
+    r = c.patch_json(
+        obj_link, {'xattr': {'message': 'invalid'}}, expect_errors=True)
+
+    r.status_code == 422
 
     # test creation of named object
     r = c.post_json('/named_objects/',

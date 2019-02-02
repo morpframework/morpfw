@@ -200,11 +200,13 @@ def _set_nullable(prop):
     return prop
 
 
-def dataclass_to_jsl(schema, nullable=False):
+def dataclass_to_jsl(schema, nullable=False, additional_properties=False):
     attrs = {}
 
+    _additional_properties = additional_properties
+
     class Options(object):
-        additional_properties = True
+        additional_properties = _additional_properties
 
     for attr, prop in schema.__dataclass_fields__.items():
         prop = dataclass_field_to_jsl_field(prop, nullable=False)
