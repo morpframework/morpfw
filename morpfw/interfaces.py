@@ -192,8 +192,10 @@ class IModel(abc.ABC):
     #: will have links attribute
     linkable: bool
 
-    #: The dataclass schema which this model will be using
-    schema: Type[ISchema]
+    @abc.abstractproperty
+    def schema(self) -> Type[ISchema]:
+        """The dataclass schema which this model will be using"""
+        raise NotImplementedError
 
     #: When set to True, will enable PATCH view to update model
     update_view_enabled: bool
@@ -364,10 +366,42 @@ class ICollection(abc.ABC):
         raise NotImplementedError
 
 
+class IStateMachine(abc.ABC):
+
+    @abc.abstractproperty
+    def states(self) -> List:
+        """List of ``pytransitions`` states"""
+        raise NotImplementedError
+
+    @abc.abstractproperty
+    def transitions(self) -> List:
+        """List of ``pytransitions`` transitions"""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def _get_state(self) -> Optional[str]:
+        """Get current state"""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def _set_state(self, val):
+        """Set current state"""
+        raise NotImplementedError
+
+    state = property(_get_state, _set_state, doc="Current resource state")
+
+    @abc.abstractmethod
+    def get_triggers(self) -> List:
+        """Returns list of available triggers"""
+        raise NotImplementedError
+
+
 class IXattrProvider(abc.ABC):
 
-    # Schema to use for data validation
-    schema: Type[Any]
+    @abc.abstractproperty
+    def schema(self) -> Type[Any]:
+        """Schema to use for data validation"""
+        raise NotImplementedError
 
     # Set to True to allow arbitrary properties besides
     # the properties defined on the schema

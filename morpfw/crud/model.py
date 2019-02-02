@@ -380,37 +380,3 @@ class Model(IModel):
     def delete_blob(self, field):
         uuid = self.data[self.blobstorage_field][field]
         self.storage.delete_blob(uuid)
-
-
-class StateMachine(object):
-
-    @property
-    def states(self):
-        raise NotImplementedError
-
-    @property
-    def transitions(self):
-        raise NotImplementedError
-
-    def __init__(self, context):
-        self._context = context
-        self._request = context.request
-        self._app = context.request.app
-        initial = self.state or self.states[0]
-        self._machine = Machine(
-            model=self, transitions=self.transitions,
-            states=self.states, initial=initial)
-
-    @property
-    def state(self):
-        try:
-            return self._context.data['state']
-        except KeyError:
-            return None
-
-    @state.setter
-    def state(self, val):
-        self._context.data['state'] = val
-
-    def get_triggers(self):
-        return [i for i in self._machine.get_triggers(self.state) if not i.startswith('to_')]

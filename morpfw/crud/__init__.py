@@ -9,7 +9,7 @@ import os
 from .model import Collection, Model
 from .rulesadapter import Adapter
 from .schema import Schema
-from .model import StateMachine
+from .statemachine.base import StateMachine
 from .util import resolve_model
 from .app import App
 from .storage.sqlstorage import SQLStorage

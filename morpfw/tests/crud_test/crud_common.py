@@ -5,7 +5,7 @@ from webtest import TestApp as Client
 from morpfw.crud.model import Collection, Model
 from morpfw.crud.schema import Schema
 from morpfw.crud import permission as crudperm
-from morpfw.crud.model import StateMachine
+from morpfw.crud.statemachine.base import StateMachine
 from morpfw.crud.xattrprovider.base import XattrProvider
 from morpfw.crud.xattrprovider import FieldXattrProvider
 from morpfw.app import BaseApp
