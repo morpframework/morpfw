@@ -69,6 +69,7 @@ Documentation
    settings
    resourcetype
    restapi
+   statemachine
    xattr
    event
    views
