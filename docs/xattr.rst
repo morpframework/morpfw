@@ -13,9 +13,9 @@ For example, a generic ``Event`` model would probably have ``title``,
 ``start_datetime`` and ``end_datetime`` on its model, and you have
 created multiple views to display the Event, such as ``ical_view`` and
 ``xml_view``. Now, you are doing a project for CustomerA, which you need
-to add additional data fields to ``Event`` model, which would be
-``department_name``. Normally you would have to modify ``EventSchema`` with
-additional fields, but with extended attributes, you can simply register a
+to add additional data fields to ``Event`` model, eg: ``department_name``.
+Normally you would have to modify ``EventSchema`` and its respected db schema
+with additional fields, but with extended attributes, you can simply register a
 extended attribute provider for ``Event`` model which would store the
 value of ``department_name``.
 
@@ -32,8 +32,8 @@ MorpFW provides a default implementation for extended attribute provider
 called ``FieldXattrProvider`` which stores extended attributes in ``xattr``
 field of the resource.
 
-To override the default extended attribute provider with your own schema, add
-the following code:
+To register an extended attribute provider for your model using
+``FieldXattrProvider``, add the following code:
 
 .. literalinclude:: _code/xattr.py
    :language: python

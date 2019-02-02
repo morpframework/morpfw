@@ -150,11 +150,13 @@ Model
 
 .. http:get:: /page/{uuid}/+xattr-schema
 
-   Get JSON schema for validating extended attributes
+   Get JSON schema for validating extended attributes. This view is only
+   available if your model have an extended attribute provider registered
 
 .. http:get:: /page/{uuid}/+xattr
 
-   Return extended attributes
+   Return extended attributes. This view is only
+   available if your model have an extended attribute provider registered
 
    **Example response**:
 
@@ -163,7 +165,9 @@ Model
 
 .. http:patch:: /page/{uuid}/+xattr
 
-   Update extended attributes
+   Update extended attributes. This view is only
+   available if your model have an extended attribute provider registered
+
 
    **Example request**:
 
@@ -178,7 +182,8 @@ Model
 
 .. http:post:: /pages/{uuid}/+statemachine
 
-   Apply transition
+   Apply transition. This view is only available if your model have a
+   state machine registered.
 
    **Example request**:
 

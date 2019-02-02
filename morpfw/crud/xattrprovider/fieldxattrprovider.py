@@ -7,17 +7,9 @@ import typing
 _marker = object()
 
 
-@dataclass
-class DefaultXattrSchema(object):
-    pass
-
-
 class FieldXattrProvider(XattrProvider):
 
     field = 'xattrs'
-
-    schema: typing.Type[typing.Any] = DefaultXattrSchema
-    additional_properties = True
 
     def __getitem__(self, key):
         return self.context[self.field][key]
@@ -47,8 +39,3 @@ class FieldXattrProvider(XattrProvider):
         data = self.context[self.field] or {}
         data.update(newdata)
         self.context.update({self.field: data})
-
-
-@App.xattrprovider(model=Model)
-def get_default_xattrprovider(context):
-    return FieldXattrProvider(context)

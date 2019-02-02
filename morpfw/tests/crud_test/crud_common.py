@@ -106,7 +106,6 @@ class ObjectXattrSchema(ISchema):
 class ObjectXattrProvider(FieldXattrProvider):
 
     schema = ObjectXattrSchema
-    additional_properties = False
 
 
 @App.xattrprovider(model=ObjectModel)
