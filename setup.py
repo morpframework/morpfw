@@ -14,7 +14,7 @@ setup(name='morpfw',
       classifiers=[],  # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
       keywords='',
       author='Izhar Firdaus',
-      author_email='izhar@abyres.net',
+      author_email='izhar@kagesenshi.org',
       url='http://github.com/morpframework/morpfw',
       license='MIT',
       packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
