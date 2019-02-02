@@ -58,10 +58,6 @@ framework which supports:
   * Powered by `morepath <https://morepath.readthedocs.io>`_, `dectate
     <https://dectate.readthedocs.io>`_ and `reg <https://reg.readthedocs.io>`_
 
-.. note:: Morp at the moment is still highly experimental, there is no promise 
-          of API stability as of yet. However, because the author is using it
-          in a production project, there is some level of stability. 
-
 
 Documentation
 ==============
