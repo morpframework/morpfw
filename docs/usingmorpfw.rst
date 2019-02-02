@@ -32,7 +32,7 @@ And start your project using:
 
    cd $PROJECTNAME/ # replace with your project directory name
    pipenv install --python=python3.7 -e .
-   pipenv run morpfw start -s settings.yml
+   pipenv run morpfw -s settings.yml start
 
 
 Creating a simple CRUD model
@@ -43,7 +43,7 @@ Creating a simple CRUD model
 
 save as ``pages.py``, and lets start the application::
 
-   pipenv run morpfw start -s settings.yml
+   pipenv run morpfw -s settings.yml start
 
 
 Accessing API

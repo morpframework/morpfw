@@ -55,7 +55,7 @@ Worker and beat scheduler can be easily started up using:
 .. code-block:: bash
 
    # start worker
-   pipenv run morpfw solo-worker -s settings.yml
+   pipenv run morpfw -s settings.yml solo-worker
 
    # start scheduler
-   pipenv run morpfw scheduler -s settings.yml
+   pipenv run morpfw -s settings.yml scheduler
