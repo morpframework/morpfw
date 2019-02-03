@@ -266,7 +266,7 @@ class IModel(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def rules_adapter(self):
+    def rulesprovider(self):
         """Return pluggable business rule adapter for this model"""
         raise NotImplementedError
 

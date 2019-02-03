@@ -326,14 +326,14 @@ class Model(IModel):
                 'method': 'POST'
             })
         links += self._links()
-        links += self.rules_adapter().links()
+        links += self.rulesprovider().links()
         return links
 
     def _links(self):
         return []
 
-    def rules_adapter(self):
-        return self.app.get_rulesadapter(self)
+    def rulesprovider(self):
+        return self.app.get_rulesprovider(self)
 
     def statemachine(self):
         if self.app.get_statemachine.by_args(self).all_matches:

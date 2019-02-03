@@ -20,7 +20,7 @@ class App(JsonSchemaApp, signals.SignalApp):
     formvalidators = dectate.directive(actions.FormValidatorAction)
     identifierfields = dectate.directive(actions.IdentifierFieldsAction)
     default_identifier = dectate.directive(actions.DefaultIdentifierAction)
-    rulesadapter = dectate.directive(actions.RulesAdapterAction)
+    rulesprovider = dectate.directive(actions.RulesProviderAction)
     uuidfield = dectate.directive(actions.UUIDFieldAction)
     statemachine = dectate.directive(actions.StateMachineAction)
     searchprovider = dectate.directive(actions.SearchProviderAction)
@@ -80,8 +80,9 @@ class App(JsonSchemaApp, signals.SignalApp):
     def get_default_identifier(self, schema, obj, request):
         return None
 
-    @reg.dispatch_method(reg.match_instance('model', lambda self, obj: obj))
-    def get_rulesadapter(self, obj):
+    @reg.dispatch_method(reg.match_instance('model',
+                                            lambda self, context: context))
+    def get_rulesprovider(self, context):
         raise NotImplementedError
 
     @reg.dispatch_method(reg.match_instance('model',

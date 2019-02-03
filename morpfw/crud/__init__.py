@@ -7,7 +7,7 @@ import yaml
 import sqlalchemy
 import os
 from .model import Collection, Model
-from .rulesadapter import Adapter
+from .rulesprovider.base import RulesProvider
 from .schema import Schema
 from .statemachine.base import StateMachine
 from .util import resolve_model

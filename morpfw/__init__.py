@@ -1,8 +1,9 @@
 #
 from . import crud
-from .crud import Collection, Model, Adapter
+from .crud import Collection, Model
 from .crud.schema import Schema, BaseSchema
-from .crud import StateMachine
+from .crud.statemachine.base import StateMachine
+from .crud.rulesprovider.base import RulesProvider
 from .crud.storage.sqlstorage import SQLStorage
 from .crud.blobstorage.fsblobstorage import FSBlobStorage
 from .crud.storage.elasticsearchstorage import ElasticSearchStorage

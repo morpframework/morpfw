@@ -1,8 +1,8 @@
-from .app import App
-from .model import Model
+from ..app import App
+from ..model import Model
 
 
-class Adapter(object):
+class RulesProvider(object):
 
     def __init__(self, context: Model):
         self.context = context
@@ -33,10 +33,7 @@ class Adapter(object):
     def links(self):
         return []
 
-    def __repr__(self):
-        return "<Adapted %s:(%s)>" % (self.__class__.__name__, self.context)
 
-
-@App.rulesadapter(model=Model)
-def get_default_rulesadapter(obj):
-    return Adapter(obj)
+@App.rulesprovider(model=Model)
+def get_default_rulesprovider(context):
+    return RulesProvider(context)

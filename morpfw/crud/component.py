@@ -130,7 +130,7 @@ class FormValidatorAction(dectate.Action):
             reg.methodify(obj), schema=self.schema)
 
 
-class RulesAdapterAction(dectate.Action):
+class RulesProviderAction(dectate.Action):
 
     app_class_arg = True
 
@@ -141,7 +141,7 @@ class RulesAdapterAction(dectate.Action):
         return str((app_class, self.model))
 
     def perform(self, obj, app_class):
-        app_class.get_rulesadapter.register(
+        app_class.get_rulesprovider.register(
             reg.methodify(obj), model=self.model)
 
 
