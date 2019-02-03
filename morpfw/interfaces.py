@@ -456,3 +456,47 @@ class IXattrProvider(abc.ABC):
     @abc.abstractmethod
     def get(self, key, default=_marker):
         raise NotImplementedError
+
+
+class ISearchProvider(abc.ABC):
+
+    @abc.abstractmethod
+    def parse_query(self, qs: str) -> dict:
+        """Parse query string from search query and convert it into rulez query
+        dictionary. The dictionary would be passed to search method afterwards, 
+        which you can then parse into your backend search query.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def search(self, query: Optional[dict] = None,
+               offset: int = 0, limit: Optional[int] = None,
+               order_by: Union[None, list, tuple] = None) -> List[IModel]:
+        """Execute search and return list of model objects"""
+        raise NotImplementedError
+
+
+class IAggregateProvider(abc.ABC):
+
+    @abc.abstractmethod
+    def parse_query(self, qs: str) -> dict:
+        """Parse query string from search query and convert it into rulez query
+        dictionary. The dictionary would be passed to aggregate method afterwards, 
+        which you can then parse into your backend search query.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def parse_group(self, qs: str) -> dict:
+        """Parse query string from group query and convert it into dictionary
+        representation. The dictionary would be passed to aggregate method afterwards, 
+        which you can then parse into your backend aggregate query.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def aggregate(self, query: Optional[dict] = None,
+                  group: Optional[dict] = None,
+                  order_by: Union[None, list, tuple] = None) -> list:
+        """return aggregation result based on specified rulez query and group"""
+        raise NotImplementedError

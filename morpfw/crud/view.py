@@ -36,15 +36,16 @@ def aggregate(context, request):
     qs = request.GET.get('q', '').strip()
 
     query = None
+
+    aggregateprovider = context.aggregateprovider()
+
     if qs:
-        searchprovider = context.searchprovider()
-        query = searchprovider.parse_query(qs)
+        query = aggregateprovider.parse_query(qs)
 
     order_by = request.GET.get('order_by', None)
     gs = request.GET.get('group', '').strip()
     group = None
     if gs:
-        aggregateprovider = context.aggregateprovider()
         group = aggregateprovider.parse_group(gs)
 
     if order_by:

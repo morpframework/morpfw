@@ -4,6 +4,8 @@ from .crud import Collection, Model
 from .crud.schema import Schema, BaseSchema
 from .crud.statemachine.base import StateMachine
 from .crud.rulesprovider.base import RulesProvider
+from .crud.aggregateprovider.base import AggregateProvider
+from .crud.searchprovider.base import SearchProvider
 from .crud.storage.sqlstorage import SQLStorage
 from .crud.blobstorage.fsblobstorage import FSBlobStorage
 from .crud.storage.elasticsearchstorage import ElasticSearchStorage

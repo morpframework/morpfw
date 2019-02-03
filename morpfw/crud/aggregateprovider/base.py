@@ -1,10 +1,11 @@
 from ..model import Collection
 from ..errors import UnprocessableError
-from ..app import App
+from ...interfaces import IAggregateProvider
 import re
+from rulez import parse_dsl, OperatorNotAllowedError
 
 
-class AggregateProvider(object):
+class AggregateProvider(IAggregateProvider):
 
     pattern = re.compile(r'(\w+):(\w+)\((\w+)\)')
 
@@ -24,6 +25,17 @@ class AggregateProvider(object):
             result.append((g[0], {'function': g[1], 'field': g[2]}))
         return dict(result)
 
+    def parse_query(self, qs):
+        if not qs.strip():
+            return None
+        try:
+            return parse_dsl(qs)
+        except ValueError:
+            raise UnprocessableError("Invalid search query '%s'" % qs)
+        except OperatorNotAllowedError:
+            raise UnprocessableError("Invalid search query '%s'" % qs)
+        return None
+
     def parse_group(self, qs):
         if not qs.strip():
             return None
@@ -32,11 +44,3 @@ class AggregateProvider(object):
         except ValueError:
             raise UnprocessableError("Invalid aggregate query '%s'" % qs)
         return None
-
-    def aggregate(self, query=None, group=None, order_by=None):
-        return self.storage.aggregate(query, group=group, order_by=order_by)
-
-
-@App.aggregateprovider(model=Collection)
-def get_aggregateprovider(context):
-    return AggregateProvider(context)

@@ -1,10 +1,10 @@
 from ..errors import UnprocessableError
 from ..model import Collection
-from ..app import App
+from ...interfaces import ISearchProvider
 from rulez import parse_dsl, OperatorNotAllowedError
 
 
-class SearchProvider(object):
+class SearchProvider(ISearchProvider):
 
     def __init__(self, context: Collection):
         self.context = context
@@ -21,11 +21,3 @@ class SearchProvider(object):
         except OperatorNotAllowedError:
             raise UnprocessableError("Invalid search query '%s'" % qs)
         return None
-
-    def search(self, query=None, offset=0, limit=None, order_by=None):
-        return self.storage.search(query, offset, limit, order_by)
-
-
-@App.searchprovider(model=Collection)
-def get_searchprovider(context):
-    return SearchProvider(context)

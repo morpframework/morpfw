@@ -72,6 +72,8 @@ Documentation
    statemachine
    xattr
    rulesprovider
+   searchprovider
+   aggregateprovider
    event
    views
    authn
