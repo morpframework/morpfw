@@ -7,9 +7,6 @@
 MorpFW: Highly pluggable Python framework
 ==================================================
 
-Introduction
-===============
-
 Github: https://github.com/morpframework/morpfw
 
 Morp is a python web development framework for developers who need a framework
@@ -58,28 +55,3 @@ framework which supports:
   * Powered by `morepath <https://morepath.readthedocs.io>`_, `dectate
     <https://dectate.readthedocs.io>`_ and `reg <https://reg.readthedocs.io>`_
 
-
-Documentation
-==============
-
-.. toctree::
-   :maxdepth: 2
-
-   usingmorpfw
-   settings
-   resourcetype
-   restapi
-   statemachine
-   xattr
-   rulesprovider
-   searchprovider
-   aggregateprovider
-   event
-   views
-   authn
-   authz
-   pas
-   pas-restapi
-   worker
-   cli
-   community
