@@ -14,7 +14,7 @@ For example, a generic ``Event`` model would probably have ``title``,
 created multiple views to display the Event, such as ``ical_view`` and
 ``xml_view``. Now, you are doing a project for CustomerA, which you need
 to add additional data fields to ``Event`` model, eg: ``department_name``.
-Normally you would have to modify ``EventSchema`` and its respected db schema
+Normally you would have to modify ``EventSchema`` and its respective db schema
 with additional fields, but with extended attributes, you can simply register a
 extended attribute provider for ``Event`` model which would store the
 value of ``department_name``.
