@@ -326,7 +326,6 @@ class Model(IModel):
                 'method': 'POST'
             })
         links += self._links()
-        links += self.rulesprovider().links()
         return links
 
     def _links(self):

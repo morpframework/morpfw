@@ -71,6 +71,7 @@ Documentation
    restapi
    statemachine
    xattr
+   rulesprovider
    event
    views
    authn
