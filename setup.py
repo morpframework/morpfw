@@ -64,6 +64,7 @@ setup(name='morpfw',
           'elasticsearch>=5.0.0,<6.0.0',
           'pamela',
           'click',
+          'cookiecutter'
       ],
       extras_require={
           'test': [
@@ -81,7 +82,8 @@ setup(name='morpfw',
       entry_points={
           'morepath': ['scan=morpfw'],
           'console_scripts': [
-              'morpfw=morpfw.cli:run'
+              'morpfw=morpfw.cli:cli',
+              'morp-project=morpfw.cli:run_project'
           ]
       }
       )

@@ -1,0 +1,19 @@
+server:
+  listen_host: 127.0.0.1
+  listen_port: 5000
+  server_url: http://localhost:5000
+
+morpfw:
+  scan:
+    - {{ cookiecutter.project_name }}
+
+application:
+  title: {{ cookiecutter.project_name }}
+  app: {{ cookiecutter.project_name }}.app:App
+  dburi: 'sqlite:///%(here)s/app.db'
+  fsblobstorage_path: '%(here)s/blobstorage'
+  authn_policy: morpfw.authn.useridparam:AuthnPolicy
+
+security:
+  jwt:
+    master_secret: secret

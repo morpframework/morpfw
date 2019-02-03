@@ -129,5 +129,11 @@ def register_admin(ctx, username, email, password):
         print('Application is not using Pluggable Auth Service')
 
 
-def run():
-    cli()
+@click.group()
+def project():
+    pass
+
+
+def run_project():
+    morepath.scan()
+    project()

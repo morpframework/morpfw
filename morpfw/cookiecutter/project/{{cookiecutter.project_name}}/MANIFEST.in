@@ -1,0 +1,5 @@
+recursive-include {{ cookiecutter.project_name }} *
+include *.txt
+include *.rst
+recursive-include docs *
+global-exclude *pyc

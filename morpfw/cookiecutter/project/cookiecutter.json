@@ -1,0 +1,9 @@
+{
+    "project_name": "myproject",
+    "project_url": "http://myproject.com",
+    "version": "0.1.0",
+    "author_name": "John Doe",
+    "author_email": "johndoe@example.com",
+    "short_description": "",
+    "license": "AGPLv3+"
+}
