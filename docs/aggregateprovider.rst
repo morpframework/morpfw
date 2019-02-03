@@ -9,6 +9,12 @@ aggregate storage.
 MorpFW provides a overrideable aggregate provider API for you to intercept the
 aggregate mechanism and put your own aggregate logic.
 
+.. autoclass:: morpfw.interfaces.IAggregateProvider
+   :members:
+   :member-order: groupwise
+
+
+
 Overriding Aggregate Provider
 ==============================
 
