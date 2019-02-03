@@ -1,4 +1,4 @@
-from morpfw.crud import Schema
+from morpfw import Schema, BaseSchema
 from morpfw.crud.validator import regex_validator
 from ..model import NAME_PATTERN, EMAIL_PATTERN
 from ..app import App
@@ -7,7 +7,7 @@ import typing
 
 
 @dataclass
-class RegistrationSchema(object):
+class RegistrationSchema(BaseSchema):
     # pattern=NAME_PATTERN)
     username: typing.Optional[str] = field(default=None, metadata={
         'morpfw': {
@@ -30,7 +30,7 @@ class RegistrationSchema(object):
 
 
 @dataclass
-class LoginSchema(object):
+class LoginSchema(BaseSchema):
     username: typing.Optional[str] = field(default=None, metadata={
         'morpfw': {'required': True}})
 

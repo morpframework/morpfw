@@ -30,9 +30,6 @@ class Adapter(object):
     def delete(self):
         return self.context.delete()
 
-    def transform_json(self, data):
-        return data
-
     def links(self):
         return []
 

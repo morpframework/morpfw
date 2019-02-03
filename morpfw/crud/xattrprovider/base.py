@@ -19,7 +19,8 @@ class XattrProvider(IXattrProvider):
     def jsonschema(self):
         schema = dataclass_to_jsl(
             self.schema, nullable=True,
-            additional_properties=self.additional_properties).get_schema(ordered=True)
+            additional_properties=self.additional_properties
+        ).get_schema(ordered=True)
         return {
             'schema': schema
         }
@@ -27,7 +28,5 @@ class XattrProvider(IXattrProvider):
     def process_update(self, newdata: dict):
         data = self.as_json()
         data.update(newdata)
-        schema = dataclass_to_jsl(
-            self.schema, nullable=True).get_schema(ordered=True)
-        validate(data, schema)
+        self.schema.validate(self.request, data)
         self.update(data)

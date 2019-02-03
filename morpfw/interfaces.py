@@ -12,7 +12,6 @@ class ISchema(object):
     python dataclass as its schema we provide transformation function to
     transform dataclass into other schema format (eg: JSL, colander, etc)
     """
-    pass
 
 
 class IDataProvider(abc.ABC):
@@ -203,9 +202,6 @@ class IModel(abc.ABC):
     #: When set to True, will enable DELETE view to delete model
     delete_view_enabled: bool
 
-    #: When set to True, will enable ``+statemachine`` view for state management
-    statemachine_view_enabled: bool
-
     #: Field name on the model data which will be storing blob references
     blobstorage_field: str
 
@@ -220,6 +216,12 @@ class IModel(abc.ABC):
 
     #: Data provider
     data: IDataProvider
+
+    #: List of fields that are not allowed to be updated
+    protected_fields: list
+
+    #: List of fields that should be hidden from output
+    hidden_fields: list
 
     @abc.abstractmethod
     def __init__(self, request: morepath.Request,
@@ -271,6 +273,11 @@ class IModel(abc.ABC):
     @abc.abstractmethod
     def statemachine(self):
         """Return PyTransition statemachine adapter for this model"""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def xattrprovider(self):
+        """Return extended attributes provider for this model"""
         raise NotImplementedError
 
     @abc.abstractmethod

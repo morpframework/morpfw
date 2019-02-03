@@ -34,34 +34,9 @@ def load(validator, schema, request):
         dc = context.schema
     else:
         dc = schema
-    jslschema = dataclass_to_jsl(dc, nullable=True)
-    schema = jslschema.get_schema(ordered=True)
-    form_validators = request.app.get_formvalidators(dc)
-    params = {}
 
-    validator.check_schema(schema)
-    v = validator(schema)
     data = get_data(context, request)
-    field_errors = sorted(v.iter_errors(data), key=lambda e: e.path)
-    if field_errors:
-        params['field_errors'] = field_errors
-    form_errors = []
-    for form_validator in form_validators:
-        e = form_validator(request, request.json)
-        if e:
-            form_errors.append(FormValidationError(e))
-
-    if form_errors:
-        params['form_errors'] = form_errors
-
-    if params:
-        raise ValidationError(**params)
-
-    # field errors
-    for k, f in dc.__dataclass_fields__.items():
-        t = dataclass_get_type(f)
-        for validate in t['metadata']['validators']:
-            validate(data[k])
+    dc.validate(request, data)
     return request.json
 
 

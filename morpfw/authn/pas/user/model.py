@@ -50,6 +50,7 @@ class UserModel(Model):
 
     blob_fields = ['profile-photo']
     protected_fields = Model.protected_fields + ['username', 'password']
+    hidden_fields = Model.hidden_fields + ['password']
 
     @property
     def userid(self):
@@ -107,21 +108,6 @@ class UserStateMachine(StateMachine):
 @App.statemachine(model=UserModel)
 def userstatemachine(context):
     return UserStateMachine(context)
-
-
-class UserRulesAdapter(Adapter):
-
-    def transform_json(self, data):
-        data = data.copy()
-        for f in ['password', 'password_validate']:
-            if f in data.keys():
-                del data[f]
-        return data
-
-
-@App.rulesadapter(model=UserModel)
-def get_rulesadapter(obj):
-    return UserRulesAdapter(obj)
 
 
 @App.subscribe(signal=crudsignal.OBJECT_CREATED, model=UserModel)

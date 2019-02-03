@@ -1,6 +1,7 @@
 #
 from . import crud
-from .crud import Collection, Model, Adapter, Schema
+from .crud import Collection, Model, Adapter
+from .crud.schema import Schema, BaseSchema
 from .crud import StateMachine
 from .crud.storage.sqlstorage import SQLStorage
 from .crud.blobstorage.fsblobstorage import FSBlobStorage

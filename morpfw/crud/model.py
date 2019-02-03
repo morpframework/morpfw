@@ -170,6 +170,7 @@ class Model(IModel):
         'modified', 'created', 'uuid',
         'creator', 'deleted'
     ]
+    hidden_fields: list = []
 
     def __setitem__(self, key, value):
         self.data[key] = value
@@ -185,7 +186,7 @@ class Model(IModel):
 
     @property
     def statemachine_view_enabled(self):
-        if self.state_machine():
+        if self.statemachine():
             return True
         return False
 
@@ -272,12 +273,12 @@ class Model(IModel):
             self.storage.update(self.identifier, data)
 
     def _raw_json(self):
-        schema = dataclass_to_jsl(
-            self.schema, nullable=True).get_schema(ordered=True)
         jsondata = self.app.get_jsonprovider(self.data)
-        jsondata = self.rules_adapter().transform_json(copy.deepcopy(jsondata))
+        for k in self.hidden_fields:
+            if k in jsondata:
+                del jsondata[k]
         try:
-            validate(jsondata, schema)
+            self.schema.validate(self.request, jsondata)
         except ValidationError as e:
             logger.warn('%s(%s) : %s' % (self.schema.__name__,
                                          '/'.join(list(e.path)), e.message))
@@ -334,9 +335,6 @@ class Model(IModel):
     def rules_adapter(self):
         return self.app.get_rulesadapter(self)
 
-    def state_machine(self):
-        return self.statemachine()
-
     def statemachine(self):
         if self.app.get_statemachine.by_args(self).all_matches:
             return self.app.get_statemachine(self)
@@ -348,7 +346,7 @@ class Model(IModel):
         return None
 
     def set_initial_state(self):
-        self.state_machine()
+        self.statemachine()
 
     def _blob_guard(self, field):
         if self.blobstorage_field not in self.schema.__dataclass_fields__.keys():

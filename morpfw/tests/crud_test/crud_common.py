@@ -3,7 +3,7 @@ import morepath
 import yaml
 from webtest import TestApp as Client
 from morpfw.crud.model import Collection, Model
-from morpfw.crud.schema import Schema
+from morpfw.crud.schema import Schema, BaseSchema
 from morpfw.crud import permission as crudperm
 from morpfw.crud.statemachine.base import StateMachine
 from morpfw.crud.xattrprovider.base import XattrProvider
@@ -98,7 +98,7 @@ def object_updated(app, request, obj, signal):
 
 
 @dataclass
-class ObjectXattrSchema(ISchema):
+class ObjectXattrSchema(BaseSchema):
 
     message: typing.Optional[str] = None
 
@@ -403,12 +403,17 @@ def run_jslcrud_test(c, skip_aggregate=False):
     r = c.patch_json(obj_xattr_link, {'message': 'hello world',
                                       'anotherkey': 'boo'}, expect_errors=True)
 
-    r.status_code == 422
+    assert r.status_code == 422
 
     r = c.patch_json(
         obj_link, {'xattr': {'message': 'invalid'}}, expect_errors=True)
 
-    r.status_code == 422
+    assert r.status_code == 422
+
+    # object output valiidation should bail out with additional xattr
+    r = c.get(obj_link)
+
+    assert r.status_code == 200
 
     # test creation of named object
     r = c.post_json('/named_objects/',

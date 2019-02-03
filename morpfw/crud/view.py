@@ -171,7 +171,7 @@ def statemachine(context, request):
     if not context.statemachine_view_enabled:
         raise HTTPNotFound()
 
-    sm = context.state_machine()
+    sm = context.statemachine()
     transition = request.json['transition']
     attr = getattr(sm, transition, None)
     if attr is None:
