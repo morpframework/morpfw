@@ -65,6 +65,7 @@ def load(app_path, settings_file=None, host=None, port=None):
               help='path to App class (eg: myapp.app:App)')
 @click.pass_context
 def cli(ctx, settings, app):
+    """Manage Morp application services"""
     if app is None and settings is None:
         print('Either --app or --settings must be supplied')
     ctx.ensure_object(dict)
@@ -132,6 +133,7 @@ def register_admin(ctx, username, email, password):
 @click.group()
 @click.pass_context
 def project(ctx=None):
+    """Cookiecutter templates for Morp Framework"""
     localrc = os.path.join(os.getcwd(), '.morpprojectrc')
     c = {}
     if os.path.exists(localrc):
