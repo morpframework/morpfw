@@ -18,12 +18,12 @@ If you don't have pipenv installed yet, do:
    sudo pip install pipenv>=2018.11.26
 
 Lets create a new project. You can initialize new project using
-``cookiecutter-morpfw``:
+``mfw-template`` tool:
 
 .. code-block:: bash
 
-   sudo pip install cookiecutter
-   cookiecutter https://github.com/morpframework/cookiecutter-morpfw
+   sudo pip install mfw-template
+   mfw-template create-project
 
 
 And start your project using:
@@ -35,13 +35,24 @@ And start your project using:
    pipenv run morpfw -s settings.yml start
 
 
-Creating a simple CRUD model
-===================================
+Creating a simple resource type / CRUD model
+=============================================
 
-.. literalinclude:: exampleapp.py
-   :language: python
+``mfw-template`` tool provide a quick way for you to generate a skeleton
+resource type. Lets say you want to create a resource type called ``Page``
 
-save as ``pages.py``, and lets start the application::
+.. code-block:: console
+
+   $ # run this inside your project root directory
+   $ mfw-template create-resource
+   type_name [Content]: Page
+   module_name [page]:
+   api_mount_path [/api/v1/page]: /pages
+
+
+Lets start your application:
+
+.. code-block:: bash
 
    pipenv run morpfw -s settings.yml start
 
