@@ -16,7 +16,7 @@ class ISchema(object):
 
 class IDataProvider(abc.ABC):
     """
-    Data provider wraps around backend storage model object 
+    Data provider wraps around backend storage model object
     (eg: SQLAlchemy model object) and provide a bridge for getting and setting
     data from model.
     """
@@ -59,7 +59,7 @@ class IDataProvider(abc.ABC):
 
     @abc.abstractmethod
     def as_dict(self):
-        """Returns dictionary representation of the data, where python objects 
+        """Returns dictionary representation of the data, where python objects
         such as ``datetime`` remains as python objects"""
         raise NotImplementedError
 
@@ -173,7 +173,7 @@ class IStorage(IStorageBase):
 
 
 class IModel(abc.ABC):
-    """Model is a representation of a data object. It 
+    """Model is a representation of a data object. It
     provide a common set of API which is then delegated down
     to the storage provider.
 
@@ -304,6 +304,33 @@ class IModel(abc.ABC):
         """Delete blob"""
         raise NotImplementedError
 
+    # event hooks
+
+    def after_created(self) -> None:
+        """Triggered after resource have been created"""
+
+    def before_update(self, newdata: dict) -> None:
+        """Triggered before updating resource with new values"""
+
+    def after_updated(self) -> None:
+        """Triggered after resource have been created"""
+
+    def before_delete(self) -> None:
+        """Triggered before deleting resource"""
+
+    def before_blobput(self, field: str, fileobj: BinaryIO,
+                       filename: str,
+                       mimetype: Optional[str] = None,
+                       size: Optional[int] = None,
+                       encoding: Optional[str] = None) -> None:
+        """Triggered before BLOB is stored"""
+
+    def after_blobput(self, blob: IBlob) -> None:
+        """Triggered after BLOB is stored"""
+
+    def before_blobdelete(self) -> None:
+        """Triggered before BLOB is deleted"""
+
 
 class ICollection(abc.ABC):
     """Collection provide an API for querying group of model from its storage"""
@@ -316,18 +343,18 @@ class ICollection(abc.ABC):
                secure: bool = False) -> List[IModel]:
         """Search for models
 
-        Filtering is done through ``rulez`` based JSON/dict query, which 
+        Filtering is done through ``rulez`` based JSON/dict query, which
         defines boolean statements in JSON/dict structure.
 
-        :param query: Rulez based query
-        :param offset: Result offset
-        :param limit: Maximum number of result
-        :param order_by: Tuple of ``(field, order)`` where ``order`` is 
+        : param query: Rulez based query
+        : param offset: Result offset
+        : param limit: Maximum number of result
+        : param order_by: Tuple of ``(field, order)`` where ``order`` is
                          ``'asc'`` or ``'desc'``
-        :param secure: When set to True, this will filter out any object which
+        : param secure: When set to True, this will filter out any object which
                        current logged in user is not allowed to see
 
-        :todo: ``order_by`` need to allow multiple field ordering
+        : todo: ``order_by`` need to allow multiple field ordering
         """
         raise NotImplementedError
 
@@ -337,12 +364,12 @@ class ICollection(abc.ABC):
                   order_by: Optional[tuple] = None) -> List[IModel]:
         """Get aggregated results
 
-        :param query: Rulez based query
-        :param group: Grouping structure
-        :param order_by: Tuple of ``(field, order)`` where ``order`` is 
+        : param query: Rulez based query
+        : param group: Grouping structure
+        : param order_by: Tuple of ``(field, order)`` where ``order`` is
                          ``'asc'`` or ``'desc'``
 
-        :todo: Grouping structure need to be documented
+        : todo: Grouping structure need to be documented
 
         """
         raise NotImplementedError
@@ -371,6 +398,9 @@ class ICollection(abc.ABC):
     def links(self) -> list:
         """Links related to this collection"""
         raise NotImplementedError
+
+    def before_create(self, data: dict) -> None:
+        """Triggered before the creation of resource"""
 
 
 class IStateMachine(abc.ABC):
@@ -421,7 +451,7 @@ class IXattrProvider(abc.ABC):
 
     @abc.abstractmethod
     def as_dict(self):
-        """Returns dictionary representation of the data, where python objects 
+        """Returns dictionary representation of the data, where python objects
         such as ``datetime`` remains as python objects"""
         raise NotImplementedError
 
@@ -463,7 +493,7 @@ class ISearchProvider(abc.ABC):
     @abc.abstractmethod
     def parse_query(self, qs: str) -> dict:
         """Parse query string from search query and convert it into rulez query
-        dictionary. The dictionary would be passed to search method afterwards, 
+        dictionary. The dictionary would be passed to search method afterwards,
         which you can then parse into your backend search query.
         """
         raise NotImplementedError
@@ -481,7 +511,7 @@ class IAggregateProvider(abc.ABC):
     @abc.abstractmethod
     def parse_query(self, qs: str) -> dict:
         """Parse query string from search query and convert it into rulez query
-        dictionary. The dictionary would be passed to aggregate method afterwards, 
+        dictionary. The dictionary would be passed to aggregate method afterwards,
         which you can then parse into your backend search query.
         """
         raise NotImplementedError
@@ -489,7 +519,7 @@ class IAggregateProvider(abc.ABC):
     @abc.abstractmethod
     def parse_group(self, qs: str) -> dict:
         """Parse query string from group query and convert it into dictionary
-        representation. The dictionary would be passed to aggregate method afterwards, 
+        representation. The dictionary would be passed to aggregate method afterwards,
         which you can then parse into your backend aggregate query.
         """
         raise NotImplementedError

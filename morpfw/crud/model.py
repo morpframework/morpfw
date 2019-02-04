@@ -109,6 +109,7 @@ class Collection(ICollection):
         return None
 
     def create(self, data):
+        self.before_create(data)
         identifier = self.app.get_default_identifier(
             self.schema, data, self.request)
         if identifier and self.get(identifier):
@@ -117,6 +118,7 @@ class Collection(ICollection):
         obj.set_initial_state()
         dispatch = self.request.app.dispatcher(signals.OBJECT_CREATED)
         dispatch.dispatch(self.request, obj)
+        obj.after_created()
         return obj
 
     def _create(self, data):
@@ -250,6 +252,7 @@ class Model(IModel):
                         "%s is not allowed to be updated in this context" % protected)
 
         data = self._raw_json()
+        self.before_update(newdata)
         data.update(newdata)
         schema = dataclass_to_jsl(
             self.schema, nullable=True).get_schema(ordered=True)
@@ -257,11 +260,13 @@ class Model(IModel):
         self.storage.update(self.identifier, data)
         dispatch = self.request.app.dispatcher(signals.OBJECT_UPDATED)
         dispatch.dispatch(self.request, self)
+        self.after_updated()
 
     def delete(self):
         dispatch = self.request.app.dispatcher(
             signals.OBJECT_TOBEDELETED)
         dispatch.dispatch(self.request, self)
+        self.before_delete()
         self.storage.delete(self.identifier, model=self)
 
     def save(self):
@@ -357,6 +362,7 @@ class Model(IModel):
 
     def put_blob(self, field, fileobj, filename, mimetype=None, size=None, encoding=None):
         self._blob_guard(field)
+        self.before_blobput(field, fileobj, filename, mimetype, size, encoding)
         blob_data = self.data[self.blobstorage_field] or {}
         existing = blob_data.get(field, None)
         blob = self.storage.put_blob(
@@ -365,6 +371,7 @@ class Model(IModel):
         self.update({self.blobstorage_field: blob_data})
         if existing:
             self.storage.delete_blob(existing)
+        self.after_blobput(blob)
         return blob
 
     def get_blob(self, field):
@@ -375,5 +382,6 @@ class Model(IModel):
         return blob
 
     def delete_blob(self, field):
+        self.before_blobdelete()
         uuid = self.data[self.blobstorage_field][field]
         self.storage.delete_blob(uuid)
