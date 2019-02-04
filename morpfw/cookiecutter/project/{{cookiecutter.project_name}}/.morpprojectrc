@@ -1,2 +1,0 @@
-project_name: {{cookiecutter.project_name}}
-license: {{cookiecutter.license}}

@@ -130,20 +130,3 @@ def register_admin(ctx, username, email, password):
         print('Application is not using Pluggable Auth Service')
 
 
-@click.group()
-@click.pass_context
-def project(ctx=None):
-    """Cookiecutter templates for Morp Framework"""
-    localrc = os.path.join(os.getcwd(), '.morpprojectrc')
-    c = {}
-    if os.path.exists(localrc):
-        with open(localrc, 'r') as f:
-            c = yaml.load(f)
-
-    ctx.ensure_object(dict)
-    ctx.obj['PROJECTRC'] = c
-
-
-def run_project():
-    morepath.scan()
-    project()

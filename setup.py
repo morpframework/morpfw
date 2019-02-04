@@ -83,7 +83,6 @@ setup(name='morpfw',
           'morepath': ['scan=morpfw'],
           'console_scripts': [
               'morpfw=morpfw.cli:cli',
-              'morp-project=morpfw.cli:run_project'
           ]
       }
       )
