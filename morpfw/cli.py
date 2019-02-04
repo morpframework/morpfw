@@ -130,8 +130,16 @@ def register_admin(ctx, username, email, password):
 
 
 @click.group()
-def project():
-    pass
+@click.pass_context
+def project(ctx=None):
+    localrc = os.path.join(os.getcwd(), '.morpprojectrc')
+    c = {}
+    if os.path.exists(localrc):
+        with open(localrc, 'r') as f:
+            c = yaml.load(f)
+
+    ctx.ensure_object(dict)
+    ctx.obj['PROJECTRC'] = c
 
 
 def run_project():

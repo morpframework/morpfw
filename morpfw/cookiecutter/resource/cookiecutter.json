@@ -1,0 +1,5 @@
+{
+    "type_name": "Content",
+    "module_name": "{{ cookiecutter.type_name.lower() }}",
+    "api_mount_path": "/api/v1/content"
+}

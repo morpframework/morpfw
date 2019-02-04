@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
-import sys, os
+import sys
+import os
 
 version = '{{ cookiecutter.version }}'
 
@@ -7,8 +8,8 @@ setup(name='{{ cookiecutter.project_name }}',
       version=version,
       description="{{ cookiecutter.short_description }}",
       long_description="""\
-""",
-      classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
+      """,
+      classifiers=[],  # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
       keywords='',
       author='{{ cookiecutter.author_name }}',
       author_email='{{ cookiecutter.author_email }}',
@@ -23,9 +24,9 @@ setup(name='{{ cookiecutter.project_name }}',
           'morpfw>=0.2.1rc2',
       ],
       extras_require={
-         'test': [
-            'morpfw[test]',
-         ]
+          'test': [
+              'morpfw[test]',
+          ]
       },
       entry_points="""
       # -*- Entry points: -*-
