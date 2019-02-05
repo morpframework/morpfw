@@ -13,26 +13,33 @@ The recommended way to install morpfw is to use
 
 If you don't have pipenv installed yet, do:
 
-.. code-block:: bash
+.. code-block:: console
 
-   sudo pip install pipenv>=2018.11.26
+   $ sudo pip install pipenv>=2018.11.26
 
 Lets create a new project. You can initialize new project using
 ``mfw-template`` tool:
 
-.. code-block:: bash
+.. code-block:: console
 
-   sudo pip install mfw-template
-   mfw-template create-project
+   $ sudo pip install mfw-template
+   $ mfw-template create-project
+   project_name [myproject]:
+   project_url [http://myproject.com]:
+   version [0.1.0]:
+   author_name [John Doe]:
+   author_email [johndoe@example.com]:
+   short_description []:
+   license [AGPLv3+]:
 
 
 And start your project using:
 
 .. code-block:: bash
 
-   cd $PROJECTNAME/ # replace with your project directory name
-   pipenv install --python=python3.7 -e .
-   pipenv run morpfw -s settings.yml start
+   $ cd myproject/ # replace with your project directory name
+   $ pipenv install --python=python3.7 -e .
+   $ pipenv run morpfw -s settings.yml start
 
 
 Creating a simple resource type / CRUD model
@@ -43,7 +50,6 @@ resource type. Lets say you want to create a resource type called ``Page``
 
 .. code-block:: console
 
-   $ # run this inside your project root directory
    $ mfw-template create-resource
    type_name [Content]: Page
    module_name [page]:
@@ -52,9 +58,9 @@ resource type. Lets say you want to create a resource type called ``Page``
 
 Lets start your application:
 
-.. code-block:: bash
+.. code-block:: console
 
-   pipenv run morpfw -s settings.yml start
+   $ pipenv run morpfw -s settings.yml start
 
 
 Accessing API

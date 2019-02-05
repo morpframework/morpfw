@@ -52,10 +52,10 @@ Starting Celery Worker & Celery Beat Scheduler
 
 Worker and beat scheduler can be easily started up using:
 
-.. code-block:: bash
+.. code-block:: console
 
-   # start worker
-   pipenv run morpfw -s settings.yml solo-worker
+   $ # start worker
+   $ pipenv run morpfw -s settings.yml solo-worker
 
-   # start scheduler
-   pipenv run morpfw -s settings.yml scheduler
+   $ # start scheduler
+   $ pipenv run morpfw -s settings.yml scheduler
