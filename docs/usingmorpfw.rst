@@ -35,7 +35,7 @@ Lets create a new project. You can initialize new project using
 
 And start your project using:
 
-.. code-block:: bash
+.. code-block:: console
 
    $ cd myproject/ # replace with your project directory name
    $ pipenv install --python=python3.7 -e .
