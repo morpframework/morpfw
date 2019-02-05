@@ -325,10 +325,10 @@ class IModel(abc.ABC):
                        encoding: Optional[str] = None) -> None:
         """Triggered before BLOB is stored"""
 
-    def after_blobput(self, blob: IBlob) -> None:
+    def after_blobput(self, field: str, blob: IBlob) -> None:
         """Triggered after BLOB is stored"""
 
-    def before_blobdelete(self) -> None:
+    def before_blobdelete(self, field: str) -> None:
         """Triggered before BLOB is deleted"""
 
 

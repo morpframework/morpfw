@@ -8,6 +8,7 @@ Features
    settings
    resourcetype
    restapi
+   hooks
    views
    statemachine
    xattr
