@@ -13,6 +13,10 @@ import json
 from datetime import datetime
 from .main import default_settings
 import click
+from urllib.parse import urlparse
+import code
+import readline
+import rlcompleter
 
 
 def load(app_path, settings_file=None, host=None, port=None):
@@ -130,3 +134,39 @@ def register_admin(ctx, username, email, password):
         print('Application is not using Pluggable Auth Service')
 
 
+@cli.command(help='Start MorpFW shell')
+@click.pass_context
+def shell(ctx):
+    from morepath.authentication import Identity
+    param = load(ctx.obj['app'], ctx.obj['settings'])
+    app = create_app(param['app_cls'], param['settings'])
+    settings = param['settings']
+
+    server_url = settings.get('server', {}).get(
+        'server_url', 'http://localhost')
+    parsed = urlparse(server_url)
+    environ = {
+        'PATH_INFO': '/',
+        'wsgi.url_scheme': parsed.scheme,
+        'SERVER_PROTOCOL': 'HTTP/1.1',
+        'HTTP_HOST': parsed.netloc,
+    }
+    request = app.request_class(app=app, environ=environ)
+    session = request.db_session
+    _shell({
+        'session': session,
+        'request': request,
+        'app': app,
+        'settings': settings,
+        'Identity': Identity
+    })
+
+
+def _shell(vars):
+
+    # do something here
+
+    readline.set_completer(rlcompleter.Completer(vars).complete)
+    readline.parse_and_bind("tab: complete")
+    shell = code.InteractiveConsole(vars)
+    shell.interact()
