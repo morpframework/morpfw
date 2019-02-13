@@ -119,6 +119,7 @@ class Collection(ICollection):
         dispatch = self.request.app.dispatcher(signals.OBJECT_CREATED)
         dispatch.dispatch(self.request, obj)
         obj.after_created()
+        obj.save()
         return obj
 
     def _create(self, data):
@@ -372,6 +373,7 @@ class Model(IModel):
         if existing:
             self.storage.delete_blob(existing)
         self.after_blobput(field, blob)
+        self.save()
         return blob
 
     def get_blob(self, field):
@@ -385,3 +387,4 @@ class Model(IModel):
         self.before_blobdelete(field)
         uuid = self.data[self.blobstorage_field][field]
         self.storage.delete_blob(uuid)
+        self.save()

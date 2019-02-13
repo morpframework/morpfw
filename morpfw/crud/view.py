@@ -134,7 +134,6 @@ def create(context, request, json):
     if not context.create_view_enabled:
         raise HTTPNotFound()
     obj = context.create(request.json)
-    obj.save()
     return obj.json()
 
 
