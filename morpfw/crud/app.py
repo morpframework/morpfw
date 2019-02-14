@@ -28,6 +28,7 @@ class App(JsonSchemaApp, signals.SignalApp):
     xattrprovider = dectate.directive(actions.XattrProviderAction)
     storage = dectate.directive(actions.StorageAction)
     blobstorage = dectate.directive(actions.BlobStorageAction)
+    typeinfo = dectate.directive(actions.TypeInfoFactoryAction)
 
     def get_storage(self, model, request):
         blobstorage = self.get_blobstorage(model, request)

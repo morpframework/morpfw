@@ -2,7 +2,8 @@ import jsl
 from morpfw.crud.storage.memorystorage import MemoryStorage
 from morpfw.crud.blobstorage.fsblobstorage import FSBlobStorage
 import morpfw.crud.signals as signals
-from .crud_common import get_client, run_jslcrud_test, PageCollection, PageModel
+from .crud_common import get_client, run_jslcrud_test
+from .crud_common import PageCollection, PageModel, PageSchema
 from .crud_common import ObjectCollection, ObjectModel
 from .crud_common import NamedObjectCollection, NamedObjectModel
 from .crud_common import App as BaseApp
@@ -30,6 +31,19 @@ def collection_factory(request):
 def model_factory(request, identifier):
     storage = PageStorage(request)
     return storage.get(identifier)
+
+
+@App.typeinfo(name='tests.page')
+def get_page_typeinfo(request):
+    return {
+        'title': 'Page',
+        'description': 'Page type',
+        'schema': PageSchema,
+        'collection': PageCollection,
+        'collection_factory': collection_factory,
+        'model': PageModel,
+        'model_factory': model_factory,
+    }
 
 
 class ObjectStorage(MemoryStorage):

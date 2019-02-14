@@ -3,6 +3,8 @@ import reg
 import morepath
 from .blobstorage.base import BlobStorage
 from . import signals
+from .typeregistry import TypeRegistry
+from morepath.directive import SettingAction
 
 
 class StorageAction(dectate.Action):
@@ -203,3 +205,22 @@ class XattrProviderAction(dectate.Action):
     def perform(self, obj, app_class):
         app_class.get_xattrprovider.register(
             reg.methodify(obj), model=self.model)
+
+
+class TypeInfoFactoryAction(dectate.Action):
+
+    config = {
+        'type_registry': TypeRegistry
+    }
+
+    depends = [SettingAction]
+
+    def __init__(self, name):
+        self.name = name
+
+    def identifier(self, type_registry: TypeRegistry):
+        return self.name
+
+    def perform(self, obj, type_registry: TypeRegistry):
+        type_registry.register_typeinfo_factory(
+            info_factory=obj, name=self.name)

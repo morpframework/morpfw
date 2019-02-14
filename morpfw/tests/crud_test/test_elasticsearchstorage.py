@@ -3,7 +3,8 @@ from morpfw.crud.model import Collection, Model
 from morpfw.crud.schema import Schema
 from morpfw.crud.storage.elasticsearchstorage import ElasticSearchStorage
 from morpfw.crud.blobstorage.fsblobstorage import FSBlobStorage
-from .crud_common import get_client, run_jslcrud_test, PageCollection, PageModel
+from .crud_common import get_client, run_jslcrud_test
+from .crud_common import PageCollection, PageModel, PageSchema
 from .crud_common import NamedObjectCollection, NamedObjectModel
 from .crud_common import BlobObjectCollection, BlobObjectModel
 from .crud_common import ObjectXattrProvider, ObjectXattrSchema
@@ -54,6 +55,19 @@ def collection_factory(request):
 def model_factory(request, identifier):
     storage = PageStorage(request)
     return storage.get(identifier)
+
+
+@App.typeinfo(name='tests.page')
+def get_page_typeinfo(request):
+    return {
+        'title': 'Page',
+        'description': 'Page type',
+        'schema': PageSchema,
+        'collection': PageCollection,
+        'collection_factory': collection_factory,
+        'model': PageModel,
+        'model_factory': model_factory,
+    }
 
 
 @dataclass
