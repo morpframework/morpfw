@@ -106,6 +106,10 @@ class App(JsonSchemaApp, signals.SignalApp):
     def get_xattrprovider(self, context):
         raise NotImplementedError
 
+    @reg.dispatch_method(reg.match_key('name'))
+    def get_typeinfo_factory(self, name):
+        raise NotImplementedError
+
     def get_compositekey_separator(self):
         morp_settings = self.settings.application
         return morp_settings.compositekey_separator

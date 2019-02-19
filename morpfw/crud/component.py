@@ -213,14 +213,19 @@ class TypeInfoFactoryAction(dectate.Action):
         'type_registry': TypeRegistry
     }
 
+    app_class_arg = True
+
     depends = [SettingAction]
 
     def __init__(self, name):
         self.name = name
 
-    def identifier(self, type_registry: TypeRegistry):
+    def identifier(self, app_class, type_registry: TypeRegistry):
         return self.name
 
-    def perform(self, obj, type_registry: TypeRegistry):
-        type_registry.register_typeinfo_factory(
-            info_factory=obj, name=self.name)
+    def perform(self, obj, app_class, type_registry: TypeRegistry):
+        def factory(name):
+            return obj
+        app_class.get_typeinfo_factory.register(
+            reg.methodify(factory), name=self.name)
+        type_registry.register_type(name=self.name)
