@@ -140,6 +140,15 @@ def shell(ctx):
     from morepath.authentication import Identity
     param = load(ctx.obj['app'], ctx.obj['settings'])
     app = create_app(param['app_cls'], param['settings'])
+
+    while not isinstance(app, morepath.App):
+        wrapped = getattr(app, 'app', None)
+        if wrapped:
+            app = wrapped
+        else:
+            raise ValueError(
+                'Unable to locate app object from middleware')
+
     settings = param['settings']
 
     server_url = settings.get('server', {}).get(
