@@ -41,6 +41,7 @@ class SQLStorage(BaseStorage):
 
     def aggregate(self, query=None, group=None, order_by=None):
         group_bys = []
+        group_bys_map = {}
 
         if group:
             fields = []
@@ -54,23 +55,45 @@ class SQLStorage(BaseStorage):
                     f = v['field']
                     c = getattr(self.orm_model, f)
                     if ff == 'count':
-                        fields.append(func.count(c).label(k))
+                        op = func.count(c).label(k)
+                        fields.append(op)
+                        group_bys_map[k] = op
                     elif ff == 'sum':
-                        fields.append(func.sum(c).label(k))
+                        op = func.sum(c).label(k)
+                        fields.append(op)
+                        group_bys_map[k] = op
                     elif ff == 'avg':
-                        fields.append(func.avg(c).label(k))
+                        op = func.avg(c).label(k)
+                        fields.append(op)
+                        group_bys_map[k] = op
+                    elif ff == 'min':
+                        op = func.min(c).label(k)
+                        fields.append(op)
+                        group_bys_map[k] = op
+                    elif ff == 'max':
+                        op = func.max(c).label(k)
+                        fields.append(op)
+                        group_bys_map[k] = op
                     elif ff == 'year':
                         op = func.date_part('YEAR', c).label(k)
                         fields.append(op)
                         group_bys.append(op)
+                        group_bys_map[k] = op
                     elif ff == 'month':
                         op = func.date_part('MONTH', c).label(k)
                         fields.append(op)
                         group_bys.append(op)
+                        group_bys_map[k] = op
                     elif ff == 'day':
                         op = func.date_part('DAY', c).label(k)
                         fields.append(op)
                         group_bys.append(op)
+                        group_bys_map[k] = op
+                    elif ff == 'date':
+                        op = func.to_char(c, 'YYYY-MM-DD').label(k)
+                        fields.append(op)
+                        group_bys.append(op)
+                        group_bys_map[k] = op
                     else:
                         raise ValueError('Unknown function %s' % ff)
         else:
@@ -91,7 +114,10 @@ class SQLStorage(BaseStorage):
             d = order_by[1]
             if d not in ['asc', 'desc']:
                 raise KeyError(d)
-            colattr = getattr(self.orm_model, col)
+            if col in group_bys_map:
+                colattr = group_bys_map[col]
+            else:
+                colattr = getattr(self.orm_model, col)
             if d == 'desc':
                 q = q.order_by(colattr.desc())
             else:
