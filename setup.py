@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import sys
 import os
 
-version = '0.2.1rc4'
+version = '0.2.1'
 
 long_description = open(
     os.path.join(os.path.dirname(__file__), 'README.rst')).read()
