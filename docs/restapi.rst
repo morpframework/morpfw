@@ -148,6 +148,10 @@ Model
 
    Download blob
 
+.. http:delete:: /page/{uuid}/+blobs?field={blobfieldname}
+
+   Delete blob
+
 .. http:get:: /page/{uuid}/+xattr-schema
 
    Get JSON schema for validating extended attributes. This view is only

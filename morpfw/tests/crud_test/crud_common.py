@@ -487,6 +487,14 @@ def run_jslcrud_test(c, skip_aggregate=False):
 
     assert r.headers.get('Content-Type') == 'image/png'
 
+    r = c.delete(bloburl + '/+blobs?field=blobfile')
+
+    assert r.status_code == 200
+
+    r = c.get(bloburl + '/+blobs?field=blobfile', expect_errors=True)
+
+    assert r.status_code == 404
+
     # unocide textfile upload test
 
     r = c.post_json('/blob_objects', {})

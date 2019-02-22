@@ -204,7 +204,13 @@ def get_blob(context, request):
     if field is None or context.storage.blobstorage is None:
         raise HTTPNotFound()
 
+    if field not in context.blob_fields:
+        raise HTTPNotFound()
+
     blob = context.get_blob(field)
+
+    if blob is None:
+        raise HTTPNotFound()
 
     return request.get_response(blob)
 
@@ -213,6 +219,9 @@ def get_blob(context, request):
 def put_blob(context, request):
     field = request.GET.get('field', None)
     if field is None or context.storage.blobstorage is None:
+        raise HTTPNotFound()
+
+    if field not in context.blob_fields:
         raise HTTPNotFound()
 
     upload = request.POST.get('upload')
@@ -224,6 +233,20 @@ def put_blob(context, request):
         upload.filename), mimetype=upload.type,
         fileobj=upload.file)
     return {"status": "success"}
+
+
+@App.json(model=Model, name='blobs', request_method='DELETE', permission=permission.Edit)
+def delete_blob(context, request):
+    field = request.GET.get('field', None)
+    if field is None or context.storage.blobstorage is None:
+        raise HTTPNotFound()
+
+    if field not in context.blob_fields:
+        raise HTTPNotFound()
+
+    context.delete_blob(field)
+
+    return {'status': 'success'}
 
 
 @App.json(model=Model, name='xattr-schema', permission=permission.View)
