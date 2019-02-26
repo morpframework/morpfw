@@ -92,7 +92,9 @@ class UserModel(Model):
         return self.storage.validate(self.data['username'], password)
 
     def groups(self):
-        return self.storage.get_user_groups(self.data['username'])
+        groups = self.storage.get_user_groups(self.data['username'])
+        filtered = [m for m in groups if not m.data['deleted']]
+        return filtered
 
     def group_roles(self):
         group_roles = {}
