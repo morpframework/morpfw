@@ -93,7 +93,7 @@ class UserModel(Model):
 
     def groups(self):
         groups = self.storage.get_user_groups(self.data['username'])
-        filtered = [m for m in groups if not m.data['deleted']]
+        filtered = [m for m in groups if not m.data.get('deleted', None)]
         return filtered
 
     def group_roles(self):
