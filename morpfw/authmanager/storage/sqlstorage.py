@@ -53,7 +53,8 @@ class UserSQLStorage(SQLStorage):
             self.request, GroupSchema)
         res = [groupstorage.get_by_uuid(m.group_id)
                for m in membership]
-        return res
+        filtered = [m for m in res if not m.data['deleted']]
+        return filtered
 
     def validate(self, username, password):
 

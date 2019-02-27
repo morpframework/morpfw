@@ -49,6 +49,9 @@ class GroupMemoryStorage(MemoryStorage):
     def get_user_groups(self, username):
         res = []
         for gid, group in self.datastore.items():
+            group.data.setdefault('attrs', {})
+            attrs = group.data['attrs']
+            attrs.setdefault('members', [])
             if username in group.data['attrs'].get('members'):
                 res.append(group)
         return res
