@@ -382,6 +382,7 @@ def _test_authentication(c):
 
     assert r.json['data']['groupname'] == 'group1'
 
+
     r = c.post_json('/auth/group/', {'groupname': 'group1'},
                     expect_errors=True)
 
@@ -492,3 +493,32 @@ def _test_authentication(c):
     r = c.get('/auth/self')
 
     assert r.json['data']['username'] == 'admin'
+
+    # Test delete group and ensure group is not return when user get info
+    r = c.post_json('/auth/group/', {'groupname': 'group2'})
+
+    assert r.json['data']['groupname'] == 'group2'
+    
+    # Grant role member to user2 in group2
+    r = c.post_json('/auth/group/group2/+grant', {'mapping': [{
+        'user': {'username': 'user2'},
+        'roles': ['member']
+    }]})
+
+    assert r.json == {'status': 'success'}
+
+    r = c.get('/auth/user/user2')
+
+    assert list(
+        [l['name'] for l in r.json['links'] if l['rel'] == 'group']
+    ) == ['__default__', 'group2']
+
+    r = c.delete('/auth/group/group2')
+
+    assert r.json == {'status': 'success'}
+
+    r = c.get('/auth/user/user2')
+
+    assert list(
+        [l['name'] for l in r.json['links'] if l['rel'] == 'group']
+    ) == ['__default__']
