@@ -372,6 +372,10 @@ def _test_authentication(c):
 
     assert r.json['data']['groupname'] == 'group1'
 
+    r = c.post_json('/api/v1/group/', {'groupname': 'group2'})
+
+    assert r.json['data']['groupname'] == 'group2'
+
     r = c.post_json('/api/v1/group/', {'groupname': 'group1'},
                     expect_errors=True)
 
@@ -387,6 +391,11 @@ def _test_authentication(c):
 
     assert r.json == {'status': 'success'}
 
+    r = c.post_json('/api/v1/group/group2/+grant',
+                    {'mapping': {'user2': ['member']}})
+
+    assert r.json == {'status': 'success'}
+
     r = c.post_json('/api/v1/group/group1/+grant',
                     {'mapping': {'dummyuser': ['member']}},
                     expect_errors=True)
@@ -397,6 +406,11 @@ def _test_authentication(c):
 
     assert list(sorted(r.json['data']['groups'])) == [
         '__default__', 'group1']
+    
+    r = c.get('/api/v1/user/user2')
+
+    assert list(sorted(r.json['data']['groups'])) == [
+        '__default__', 'group2']
 
     r = c.get('/api/v1/group/group1/+members')
 
@@ -463,3 +477,12 @@ def _test_authentication(c):
     r = c.get('/api/v1/user/user1', expect_errors=True)
 
     assert r.status_code == 404
+
+    r = c.delete('/api/v1/group/group2')
+
+    assert r.json == {'status': 'success'}
+
+    r = c.get('/api/v1/user/user2')
+
+    assert list(sorted(r.json['data']['groups'])) == [
+        '__default__']
