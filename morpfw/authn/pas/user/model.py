@@ -39,6 +39,9 @@ class UserCollection(Collection):
     def get_by_userid(self, userid):
         return self.storage.get_by_userid(userid)
 
+    def get_by_email(self, email):
+        return self.storage.get_by_email(email)
+
     def _create(self, data):
         return super(UserCollection, self)._create(data)
 
