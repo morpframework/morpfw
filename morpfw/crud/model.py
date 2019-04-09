@@ -168,6 +168,7 @@ class Model(IModel):
 
     blobstorage_field: str = 'blobs'
     blob_fields: list = []
+    blob_field_options: dict = {}
     protected_fields: list = [
         'id', 'blobs', 'state', 'xattrs',
         'modified', 'created', 'uuid',
@@ -363,6 +364,10 @@ class Model(IModel):
 
     def put_blob(self, field, fileobj, filename, mimetype=None, size=None, encoding=None):
         self._blob_guard(field)
+        allowed_types = self.blob_field_options.get(
+            field, {}).get('allowed_types', [])
+        if mimetype and allowed_types and mimetype not in allowed_types:
+            raise ValueError("Mimetype %s not allowed" % mimetype)
         self.before_blobput(field, fileobj, filename, mimetype, size, encoding)
         blob_data = self.data[self.blobstorage_field] or {}
         existing = blob_data.get(field, None)
