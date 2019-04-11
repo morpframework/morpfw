@@ -129,7 +129,7 @@ def create_admin(app: morepath.App, username: str, password: str, email: str, se
     try:
         authapp = app.get_authn_provider(appreq)
     except NotImplementedError:
-        return 
+        return
 
     request = authapp.request_class(app=authapp, environ={'PATH_INFO': '/'})
 

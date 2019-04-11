@@ -21,7 +21,6 @@ def get_client(app, config='settings.yml', **kwargs):
             settings = yaml.load(f)
     else:
         settings = config
-
     kwargs = {}
     appobj = create_app(app, settings, **kwargs)
     request = appobj.request_class(

@@ -5,6 +5,7 @@ from .blobstorage.base import BlobStorage
 from . import signals
 from .typeregistry import TypeRegistry
 from morepath.directive import SettingAction
+import typing
 
 
 class StorageAction(dectate.Action):
@@ -48,7 +49,7 @@ class DataProviderAction(dectate.Action):
         self.storage = storage
 
     def identifier(self, app_class):
-        return str((app_class, self.schema, self.obj, self.storage))
+        return (self.schema, self.obj, self.storage)
 
     def perform(self, obj, app_class):
         app_class.get_dataprovider.register(reg.methodify(obj),
@@ -65,7 +66,7 @@ class JSONProviderAction(dectate.Action):
         self.obj = obj
 
     def identifier(self, app_class):
-        return str((app_class, self.obj))
+        return (self.obj,)
 
     def perform(self, obj, app_class):
         app_class.get_jsonprovider.register(
@@ -80,7 +81,7 @@ class IdentifierFieldsAction(dectate.Action):
         self.schema = schema
 
     def identifier(self, app_class):
-        return str((app_class, self.schema))
+        return (self.schema,)
 
     def perform(self, obj, app_class):
         app_class.get_identifierfields.register(
@@ -95,7 +96,7 @@ class UUIDFieldAction(dectate.Action):
         self.schema = schema
 
     def identifier(self, app_class):
-        return str((app_class, self.schema))
+        return (self.schema,)
 
     def perform(self, obj, app_class):
         app_class.get_uuidfield.register(
@@ -110,7 +111,7 @@ class DefaultIdentifierAction(dectate.Action):
         self.schema = schema
 
     def identifier(self, app_class):
-        return str((app_class, self.schema))
+        return (self.schema,)
 
     def perform(self, obj, app_class):
         app_class.get_default_identifier.register(
@@ -125,7 +126,7 @@ class FormValidatorAction(dectate.Action):
         self.schema = schema
 
     def identifier(self, app_class):
-        return str((app_class, self.schema))
+        return (self.schema,)
 
     def perform(self, obj, app_class):
         app_class.get_formvalidators.register(
@@ -140,7 +141,7 @@ class RulesProviderAction(dectate.Action):
         self.model = model
 
     def identifier(self, app_class):
-        return str((app_class, self.model))
+        return (self.model,)
 
     def perform(self, obj, app_class):
         app_class.get_rulesprovider.register(
@@ -155,7 +156,7 @@ class StateMachineAction(dectate.Action):
         self.model = model
 
     def identifier(self, app_class):
-        return str((app_class, self.model))
+        return (self.model,)
 
     def perform(self, obj, app_class):
         app_class.get_statemachine.register(
@@ -170,7 +171,7 @@ class SearchProviderAction(dectate.Action):
         self.model = model
 
     def identifier(self, app_class):
-        return str((app_class, self.model))
+        return (self.model,)
 
     def perform(self, obj, app_class):
         app_class.get_searchprovider.register(
@@ -185,7 +186,7 @@ class AggregateProviderAction(dectate.Action):
         self.model = model
 
     def identifier(self, app_class):
-        return str((app_class, self.model))
+        return (self.model,)
 
     def perform(self, obj, app_class):
         app_class.get_aggregateprovider.register(
@@ -200,7 +201,7 @@ class XattrProviderAction(dectate.Action):
         self.model = model
 
     def identifier(self, app_class):
-        return str((app_class, self.model))
+        return (self.model,)
 
     def perform(self, obj, app_class):
         app_class.get_xattrprovider.register(

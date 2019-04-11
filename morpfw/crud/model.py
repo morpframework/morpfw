@@ -15,7 +15,7 @@ from transitions import Machine
 import copy
 from .errors import StateUpdateProhibitedError, AlreadyExistsError, BlobStorageNotImplementedError
 from .errors import UnprocessableError
-from ..interfaces import IModel, ICollection
+from ..interfaces import IModel, ICollection, IStorage
 import json
 import re
 
@@ -51,7 +51,7 @@ class Collection(ICollection):
     def __delitem__(self, key):
         del self.data[key]
 
-    def __init__(self, request, storage, data=None):
+    def __init__(self, request: morepath.Request, storage: IStorage, data=None):
         self.request = request
         self.app = request.app
         self.storage = storage
