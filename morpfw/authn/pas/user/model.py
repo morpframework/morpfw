@@ -62,16 +62,13 @@ class UserModel(Model):
     def identity(self):
         return morepath.Identity(self.userid)
 
-    def change_password(self, password, new_password):
-        if not has_role(self.request, 'administrator'):
-            if not self.validate(password, check_state=False):
-                raise exc.InvalidPasswordError(self.userid)
-        self.storage.change_password(self.identity.userid, new_password)
+    def change_password(self, password: str, new_password: str):
+        rules = self.rulesprovider()
+        return rules.change_password(password, new_password)
 
-    def validate(self, password, check_state=True):
-        if check_state and self.data['state'] != 'active':
-            return False
-        return self.storage.validate(self.userid, password)
+    def validate(self, password: str, check_state: bool = True):
+        rules = self.rulesprovider()
+        return rules.validate(password, check_state)
 
     def groups(self):
         return self.storage.get_user_groups(self.userid)
