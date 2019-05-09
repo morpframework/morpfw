@@ -25,3 +25,6 @@ security:
     master_secret: secret
     leeway: 10
     allow_refresh: true
+
+logging:
+  log_directory: /tmp/

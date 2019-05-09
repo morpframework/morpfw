@@ -161,7 +161,8 @@ def runprod(app, settings, host='127.0.0.1', port=5000, ignore_cli=True):
     server = {'listen_address': host, 'listen_port': port}
     opts = {}
     opts['loglevel'] = server.get('log_level', 'INFO')
-    opts['log_directory'] = '/tmp/applog'
+    opts['log_directory'] = settings.get(
+        'logging', {}).get('log_directory', '/tmp')
     appdn = '%s:%s' % (app.__module__, app.__name__)
     os.environ['MORP_APP'] = appdn
     logconfig = '''
