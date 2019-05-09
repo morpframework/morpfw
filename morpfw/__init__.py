@@ -11,7 +11,7 @@ from .crud.blobstorage.fsblobstorage import FSBlobStorage
 from .crud.storage.elasticsearchstorage import ElasticSearchStorage
 from .sql import Base as SQLBase
 from .app import SQLApp, BaseApp, App
-from .main import create_app, run
+from .main import create_app, run, runprod
 from .main import create_admin
 from .crud import signals as crudsignals
 from .util import get_group, get_user

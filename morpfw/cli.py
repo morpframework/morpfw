@@ -80,11 +80,16 @@ def cli(ctx, settings, app):
 @cli.command(help='start web server')
 @click.option('-h', '--host', default=None, help='Host')
 @click.option('-p', '--port', default=None, type=int, help='Port')
+@click.option('--prod', default=False, type=bool, is_flag=True, help='Production mode')
 @click.pass_context
-def start(ctx, host, port):
+def start(ctx, host, port, prod):
     param = load(ctx.obj['app'], ctx.obj['settings'], host, port)
-    morpfw.run(param['app_cls'], settings=param['settings'], host=param['host'],
-               port=param['port'], ignore_cli=True)
+    if prod:
+        morpfw.runprod(param['app_cls'], settings=param['settings'], host=param['host'],
+                       port=param['port'], ignore_cli=True)
+    else:
+        morpfw.run(param['app_cls'], settings=param['settings'], host=param['host'],
+                   port=param['port'], ignore_cli=True)
 
 
 @cli.command(help='start celery worker')

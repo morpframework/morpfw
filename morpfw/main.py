@@ -14,6 +14,9 @@ import sqlalchemy
 from celery import Celery
 import yaml
 import copy
+import tempfile
+import multiprocessing
+import subprocess
 
 default_settings = open(os.path.join(
     os.path.dirname(__file__), 'default_settings.yml')).read()
@@ -151,3 +154,83 @@ def create_admin(app: morepath.App, username: str, password: str, email: str, se
 def run(app, settings, host='127.0.0.1', port=5000, ignore_cli=True):
     application = create_app(app, settings)
     morepath.run(application, host=host, port=port, ignore_cli=ignore_cli)
+
+
+def runprod(app, settings, host='127.0.0.1', port=5000, ignore_cli=True):
+    service = 'gunicorn'
+    server = {'listen_address': host, 'listen_port': port}
+    opts = {}
+    opts['loglevel'] = server.get('log_level', 'INFO')
+    opts['log_directory'] = '/tmp/applog'
+    appdn = '%s:%s' % (app.__module__, app.__name__)
+    os.environ['MORP_APP'] = appdn
+    logconfig = '''
+[loggers]
+keys=root, gunicorn.error, gunicorn.access
+
+[handlers]
+keys=console, error_file, access_file, application_file
+
+[formatters]
+keys=generic, access
+
+[logger_root]
+level=%(loglevel)s
+handlers=console, application_file
+
+[logger_gunicorn.error]
+level=%(loglevel)s
+handlers=error_file
+propagate=1
+qualname=gunicorn.error
+
+[logger_gunicorn.access]
+level=%(loglevel)s
+handlers=access_file
+propagate=0
+qualname=gunicorn.access
+
+[handler_console]
+class=StreamHandler
+formatter=generic
+args=(sys.stdout, )
+
+[handler_error_file]
+class=logging.FileHandler
+formatter=generic
+args=('%(log_directory)s/errors.log',)
+
+[handler_access_file]
+class=logging.FileHandler
+formatter=access
+args=('%(log_directory)s/access.log',)
+
+[handler_application_file]
+class=logging.FileHandler
+formatter=generic
+args=('%(log_directory)s/application.log',)
+
+
+[formatter_generic]
+format=%%(asctime)s [%%(process)d] [%%(levelname)s] %%(message)s
+datefmt=%%Y-%%m-%%d %%H:%%M:%%S
+class=logging.Formatter
+
+[formatter_access]
+format=%%(message)s
+class=logging.Formatter
+    ''' % opts
+    workers = (multiprocessing.cpu_count() * 2) + 1
+    logconf = tempfile.mktemp()
+    with open(logconf, 'w') as f:
+        f.write(logconfig)
+    subprocess.call([
+        service,
+        '--log-config', logconf,
+        '-b', '%(listen_address)s:%(listen_port)s' % server,
+        '-k', 'eventlet',
+        '--workers', str(server.get('workers', workers)),
+        '--max-requests', str(server.get('max_requests', 1000)),
+        '--max-requests-jitter', str(server.get('max_requests_jitter', 1000)),
+        '--worker-connections', str(server.get('worker_connections', 1000)),
+        '--timeout', str(server.get('worker_timeout', 30)), 'morpfw.wsgi:app'])

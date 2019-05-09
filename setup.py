@@ -64,7 +64,9 @@ setup(name='morpfw',
           'elasticsearch>=5.0.0,<6.0.0',
           'pamela',
           'click',
-          'cookiecutter'
+          'cookiecutter',
+          'eventlet',
+          'wsgigzip',
       ],
       extras_require={
           'test': [
