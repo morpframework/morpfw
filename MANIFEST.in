@@ -1,0 +1,6 @@
+recursive-include morpfw *
+include *.txt
+include *.rst
+include *.yml
+recursive-include docs *
+global-exclude *pyc
