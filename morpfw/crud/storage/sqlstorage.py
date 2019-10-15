@@ -169,12 +169,10 @@ class SQLStorage(BaseStorage):
 
     def get(self, identifier):
         qs = []
-        for f, v in zip(
-                self.app.get_identifierfields(self.model.schema),
-                identifier.split(self.app.get_compositekey_separator())):
-            qs.append(getattr(self.orm_model, f) == v)
+        idfield = self.app.get_identifierfield(self.model.schema)
         q = self.session.query(self.orm_model).filter(
-            sa.and_(self.orm_model.deleted.is_(None), *qs))
+            sa.and_(self.orm_model.deleted.is_(None),
+                    getattr(self.orm_model, idfield) == identifier))
         r = q.first()
         if not r:
             return None
@@ -201,11 +199,9 @@ class SQLStorage(BaseStorage):
 
     def update(self, identifier, data):
         qs = []
-        for f, v in zip(
-                self.app.get_identifierfields(self.model.schema),
-                identifier.split(
-                    self.app.get_compositekey_separator())):
-            qs.append(getattr(self.orm_model, f) == v)
+
+        idfield = self.app.get_identifierfield(self.model.schema)
+        qs.append(getattr(self.orm_model, idfield) == identifier)
         qs.append(self.orm_model.deleted.is_(None))
         q = self.session.query(self.orm_model).filter(sa.and_(*qs))
 

@@ -76,9 +76,9 @@ class ObjectSchema(BaseObjectSchema):
     id: typing.Optional[str] = None
 
 
-@App.identifierfields(schema=ObjectSchema)
-def object_identifierfields(schema):
-    return ['id']
+@App.identifierfield(schema=ObjectSchema)
+def object_identifierfield(schema):
+    return 'id'
 
 
 @App.default_identifier(schema=ObjectSchema)

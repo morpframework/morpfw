@@ -38,9 +38,9 @@ class PageSchema(Schema):
     body: typing.Optional[str] = None
 
 
-@App.identifierfields(schema=PageSchema)
+@App.identifierfield(schema=PageSchema)
 def page_schema_identifier(schema):
-    return ['uuid']
+    return 'uuid'
 
 
 class PageCollection(morpfw.Collection):

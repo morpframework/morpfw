@@ -73,18 +73,14 @@ class Schema(BaseSchema):
         }})
 
 
-@App.identifierfields(schema=Schema)
-def identifierfields(schema):
-    return ['uuid']
+@App.identifierfield(schema=Schema)
+def identifierfield(schema):
+    return 'uuid'
 
 
 @App.default_identifier(schema=Schema)
 def default_identifier(schema, obj, request):
-    fields = request.app.get_identifierfields(schema)
-    res = []
-    for f in fields:
-        if f == 'uuid':
-            res.append(uuid4().hex)
-        else:
-            res.append(obj[f])
-    return res
+    idfield = request.app.get_identifierfield(schema)
+    if idfield == 'uuid':
+        return uuid4().hex
+    return obj[idfield]

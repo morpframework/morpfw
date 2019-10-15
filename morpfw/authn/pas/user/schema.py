@@ -59,6 +59,6 @@ class UserSchema(Schema):
     source: typing.Optional[str] = field(default='local')
 
 
-@App.identifierfields(schema=UserSchema)
-def user_identifierfields(schema):
-    return ['username']
+@App.identifierfield(schema=UserSchema)
+def user_identifierfield(schema):
+    return 'username'

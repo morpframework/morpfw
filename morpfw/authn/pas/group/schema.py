@@ -11,9 +11,9 @@ class GroupSchema(Schema):
         'morpfw': {'required': True}})
 
 
-@App.identifierfields(schema=GroupSchema)
-def group_identifierfields(schema):
-    return ['groupname']
+@App.identifierfield(schema=GroupSchema)
+def group_identifierfield(schema):
+    return 'groupname'
 
 
 @dataclass

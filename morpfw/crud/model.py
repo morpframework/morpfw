@@ -209,24 +209,14 @@ class Model(IModel):
     def identifier(self):
         if self._cached_identifier:
             return self._cached_identifier
-        res = []
-        for f in self.app.get_identifierfields(self.schema):
-            d = self.data.get(f)
-            if d is not None:
-                d = str(d)
-            res.append(d)
-        if None in res:
+        idfield = self.app.get_identifierfield(self.schema)
+        identifier = self.data.get(idfield)
+        if identifier is None:
             identifier = self.app.get_default_identifier(
                 self.schema, self.data, self.request)
             if identifier is None:
                 return None
-            if isinstance(identifier, list) or isinstance(identifier, tuple):
-                identifier = self.app.join_identifier(*identifier)
-            self.storage.set_identifier(self.data, identifier)
-            self._cached_identifier = identifier
             return identifier
-        separator = self.request.app.get_compositekey_separator()
-        identifier = separator.join(res)
         self._cached_identifier = identifier
         return identifier
 

@@ -137,9 +137,9 @@ class NamedObjectSchema(Schema):
     updated_flag: typing.Optional[bool] = False
 
 
-@App.identifierfields(schema=NamedObjectSchema)
-def namedobject_identifierfields(schema):
-    return ['name']
+@App.identifierfield(schema=NamedObjectSchema)
+def namedobject_identifierfield(schema):
+    return 'name'
 
 
 @App.default_identifier(schema=NamedObjectSchema)

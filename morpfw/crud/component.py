@@ -73,7 +73,7 @@ class JSONProviderAction(dectate.Action):
             reg.methodify(obj), obj=self.obj)
 
 
-class IdentifierFieldsAction(dectate.Action):
+class IdentifierFieldAction(dectate.Action):
 
     app_class_arg = True
 
@@ -84,7 +84,7 @@ class IdentifierFieldsAction(dectate.Action):
         return (self.schema,)
 
     def perform(self, obj, app_class):
-        app_class.get_identifierfields.register(
+        app_class.get_identifierfield.register(
             reg.methodify(obj), schema=self.schema)
 
 

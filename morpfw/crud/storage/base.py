@@ -21,11 +21,8 @@ class BaseStorage(IStorage):
         super().__init__(request, blobstorage)
 
     def set_identifier(self, obj, identifier):
-        for f, v in zip(
-                self.app.get_identifierfields(self.model.schema),
-                identifier.split(
-                    self.app.get_compositekey_separator())):
-            obj[f] = v
+        idfield = self.app.get_identifierfield(self.model.schema)
+        obj[idfield] = identifier
 
     def set_schema_defaults(self, data):
         obj = self.model.schema(**data)

@@ -18,7 +18,7 @@ class App(JsonSchemaApp, signals.SignalApp):
     dataprovider = dectate.directive(actions.DataProviderAction)
     jsonprovider = dectate.directive(actions.JSONProviderAction)
     formvalidators = dectate.directive(actions.FormValidatorAction)
-    identifierfields = dectate.directive(actions.IdentifierFieldsAction)
+    identifierfield = dectate.directive(actions.IdentifierFieldAction)
     default_identifier = dectate.directive(actions.DefaultIdentifierAction)
     rulesprovider = dectate.directive(actions.RulesProviderAction)
     uuidfield = dectate.directive(actions.UUIDFieldAction)
@@ -67,8 +67,8 @@ class App(JsonSchemaApp, signals.SignalApp):
 
     @reg.dispatch_method(reg.match_class('schema',
                                          lambda self, schema: schema))
-    def get_identifierfields(self, schema):
-        raise NotImplementedError('IdentifierFields for %s' % schema)
+    def get_identifierfield(self, schema):
+        raise NotImplementedError('IdentifierField for %s' % schema)
 
     @reg.dispatch_method(reg.match_class('schema',
                                          lambda self, schema: schema))
@@ -111,12 +111,10 @@ class App(JsonSchemaApp, signals.SignalApp):
         raise NotImplementedError
 
     def get_compositekey_separator(self):
-        morp_settings = self.settings.application
-        return morp_settings.compositekey_separator
+        raise Exception('BOOO')
 
     def join_identifier(self, *args):
-        separator = self.get_compositekey_separator()
-        return separator.join(args)
+        raise Exception('BOOO')
 
     def permits(self, request: morepath.Request,
                 context: Model, permission: str):
