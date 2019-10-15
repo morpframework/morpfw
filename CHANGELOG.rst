@@ -1,13 +1,15 @@
-Changelog
-==========
+0.3.0 (2019-10-15)
+------------------
 
-0.2.1
------
+Changes since 0.2.x:
 
-* Move from JSL based schema definition to dataclass based schema definition
-* Major rearrangement and cleanup of source code
+ * Authentication is no longer a mounted app, this simplify programming as auth
+   models are no longer treated special
 
-0.1.0
-------
+ * Get rid of composite identifier as flat management of models is more
+   maintainable and less confusing
 
-* Initial release
+ * Allow specifying prefix url for auth models, or devs can simply mount them
+   wherever they link
+
+
