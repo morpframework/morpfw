@@ -95,6 +95,8 @@ class DictProvider(IDataProvider):
             if isinstance(v, datetime.datetime):
                 result[k] = datestr(v.isoformat())
             else:
+                if not self._is_json_type(v):
+                    raise TypeError("Invalid type '%s'" % type(v))
                 result[k] = v
         return result
 

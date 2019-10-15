@@ -69,6 +69,16 @@ class IDataProvider(abc.ABC):
         objects are serialized into JSON-safe data type"""
         raise NotImplementedError
 
+    def _is_json_type(self, value):
+        """Check if a value is JSON-safe"""
+        if value is None:
+            return True
+        return (isinstance(value, str) or
+                isinstance(value, list) or
+                isinstance(value, dict) or
+                isinstance(value, float) or
+                isinstance(value, int))
+
 
 class IBlob(abc.ABC):
 

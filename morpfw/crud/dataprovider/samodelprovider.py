@@ -87,7 +87,7 @@ class SQLAlchemyModelProvider(IDataProvider):
         if default is _MARKER:
             attr = self.schema.__dataclass_fields__.get(key, None)
             if attr:
-                #t = dataclass_get_type(attr)
+                # t = dataclass_get_type(attr)
                 if attr.default is not _MISSING_TYPE:
                     default = attr.default
                 elif attr.default_factory is not _MISSING_TYPE:
@@ -137,6 +137,8 @@ class SQLAlchemyModelProvider(IDataProvider):
             if isinstance(v, datetime.datetime):
                 result[n] = datestr(v.isoformat())
             else:
+                if not self._is_json_type(v):
+                    raise TypeError("Invalid type '%s'" % type(v))
                 result[n] = v
         return result
 
