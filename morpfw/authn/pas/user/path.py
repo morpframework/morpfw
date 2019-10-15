@@ -9,8 +9,7 @@ def get_user(request: morepath.Request, identifier) -> UserModel:
 
 
 def get_user_collection(request: morepath.Request) -> UserCollection:
-    authprovider = request.app.get_authn_provider(request)
-    return UserCollection(request, storage=authprovider.get_storage(UserModel, request))
+    return UserCollection(request, storage=request.app.get_storage(UserModel, request))
 
 
 @App.path(model=UserModel,

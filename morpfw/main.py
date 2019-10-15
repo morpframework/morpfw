@@ -82,13 +82,9 @@ def create_baseapp(app, settings, scan=True, **kwargs):
             iapp_verify_identity = iapp_authnpolicy.verify_identity
             iapp_cls.identity_policy()(iapp_get_identity_policy)
             iapp_cls.verify_identity()(iapp_verify_identity)
-            if getattr(iapp_cls, 'authn_provider', None):
-                iapp_cls.authn_provider()(iapp_authnpolicy.get_app)
         else:
             iapp_cls.identity_policy()(get_identity_policy)
             iapp_cls.verify_identity()(verify_identity)
-            if getattr(iapp_cls, 'authn_provider', None):
-                iapp_cls.authn_provider()(authnpolicy.get_app)
 
         iapp_cls.init_settings(settings)
         iapp_cls._raw_settings = settings
@@ -96,8 +92,6 @@ def create_baseapp(app, settings, scan=True, **kwargs):
 
     app.identity_policy()(get_identity_policy)
     app.verify_identity()(verify_identity)
-    if authnpolicy.app_cls:
-        app.authn_provider()(lambda: authnpolicy.app_cls())
     app.init_settings(settings)
     app._raw_settings = settings
 
@@ -123,22 +117,15 @@ def create_sqlapp(app, settings, scan=True, **kwargs):
 
 
 def create_admin(app: morepath.App, username: str, password: str, email: str, session=Session):
-    appreq = app.request_class(app=app, environ={'PATH_INFO': '/'})
-    try:
-        authapp = app.get_authn_provider(appreq)
-    except NotImplementedError:
-        return
-
-    request = authapp.request_class(app=authapp, environ={'PATH_INFO': '/'})
+    request = app.request_class(app=app, environ={'PATH_INFO': '/'})
 
     transaction.manager.begin()
-    get_authn_storage = authapp.get_storage
-    usercol = UserCollection(request, get_authn_storage(UserModel, request))
+    usercol = UserCollection(request, app.get_storage(UserModel, request))
     userobj = usercol.create({'username': username,
                               'password': password,
                               'email': email,
                               'state': 'active'})
-    gstorage = get_authn_storage(GroupModel, request)
+    gstorage = app.get_storage(GroupModel, request)
     group = gstorage.get('__default__')
     group.add_members([userobj.userid])
     group.grant_member_role(userobj.userid, 'administrator')

@@ -9,8 +9,7 @@ def get_group(request: morepath.Request, identifier: str) -> GroupModel:
 
 
 def get_group_collection(request: morepath.Request) -> GroupCollection:
-    authnzprovider = request.app.get_authn_provider(request)
-    storage = authnzprovider.get_storage(GroupModel, request)
+    storage = request.app.get_storage(GroupModel, request)
     return GroupCollection(request, storage)
 
 

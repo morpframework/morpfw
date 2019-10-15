@@ -18,14 +18,6 @@ class TypeRegistry(object):
             factory = None
 
         if factory is None:
-            if hasattr(request.app, 'get_authn_provider'):
-                try:
-                    factory = request.app.get_authn_provider(
-                        request).get_typeinfo_factory(name)
-                except NotImplementedError:
-                    factory = None
-
-        if factory is None:
             raise KeyError('No type info registered for %s' % name)
 
         result = factory(request)  # self.typeinfo_factories[name](request)
