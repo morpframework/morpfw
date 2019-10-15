@@ -9,7 +9,4 @@ from typing import List, Optional, Type
 import morpfw
 from ...app import BaseApp
 
-_REGISTERED_APPS: List[morepath.App] = []
-
-
 App = BaseApp

@@ -7,16 +7,18 @@ import typing
 from .util import dataclass_to_jsl, dataclass_get_type
 from jsonschema import Draft4Validator
 from .errors import ValidationError, FormValidationError, FieldValidationError
+from pprint import pprint
 
 
 @dataclass
 class BaseSchema(ISchema):
 
     @classmethod
-    def validate(cls, request, data, additional_properties=False):
+    def validate(cls, request, data, additional_properties=False, update_mode=False):
         validator = Draft4Validator
         jslschema = dataclass_to_jsl(cls, nullable=True,
-                                     additional_properties=additional_properties)
+                                     additional_properties=additional_properties,
+                                     update_mode=update_mode)
         schema = jslschema.get_schema(ordered=True)
         form_validators = request.app.get_formvalidators(cls)
         params = {}
@@ -42,7 +44,12 @@ class BaseSchema(ISchema):
         for k, f in cls.__dataclass_fields__.items():
             t = dataclass_get_type(f)
             for validate in t['metadata']['validators']:
-                validate(data[k])
+                if update_mode:
+                    val = data.get(k, None)
+                    if val:
+                        validate(val)
+                else:
+                    validate(data[k])
         return data
 
 

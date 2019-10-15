@@ -109,6 +109,7 @@ class Collection(ICollection):
         return None
 
     def create(self, data):
+        self.schema.validate(self.request, data, additional_properties=True)
         self.before_create(data)
         identifier = self.app.get_default_identifier(
             self.schema, data, self.request)
@@ -243,8 +244,8 @@ class Model(IModel):
         self._cached_identifier = None
         super().__init__(request, storage, data)
 
-    def update(self, newdata, secure=False):
-
+    def update(self, newdata: dict, secure: bool = False):
+        self.schema.validate(self.request, newdata, update_mode=True)
         if secure:
             if 'state' in newdata:
                 raise StateUpdateProhibitedError()
@@ -256,9 +257,7 @@ class Model(IModel):
         data = self._raw_json()
         self.before_update(newdata)
         data.update(newdata)
-        schema = dataclass_to_jsl(
-            self.schema, nullable=True).get_schema(ordered=True)
-        validate(data, schema)
+        self.schema.validate(self.request, data)
         self.storage.update(self.identifier, data)
         dispatch = self.request.app.dispatcher(signals.OBJECT_UPDATED)
         dispatch.dispatch(self.request, self)
@@ -274,9 +273,7 @@ class Model(IModel):
     def save(self):
         if self.data.changed:
             data = self._raw_json()
-            schema = dataclass_to_jsl(
-                self.schema, nullable=True).get_schema(ordered=True)
-            validate(data, schema)
+            self.schema.validate(self.request, data)
             self.storage.update(self.identifier, data)
 
     def _raw_json(self):

@@ -1,4 +1,3 @@
-import jsl
 import re
 
 NAME_PATTERN = r'^[a-z0-9_@:\.]+$'

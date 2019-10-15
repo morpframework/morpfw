@@ -1,7 +1,6 @@
 from ..model import NAME_PATTERN
 from morpfw.crud import Collection, Model, Schema
 from ..app import App
-import jsl
 from morpfw.crud import errors as cruderrors
 from .. import exc
 from .schema import GroupSchema, MemberSchema

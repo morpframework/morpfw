@@ -18,20 +18,11 @@ from morpfw.crud.errors import AlreadyExistsError
 
 
 @App.json(model=UserCollection, name='register', request_method='POST',
-          permission=permission.Register, load=validate_schema(schema=RegistrationSchema))
-def register(context, request, load):
+          permission=permission.Register)
+def register(context, request):
     """Validate the username and password and create the user."""
     data = request.json
-    res = validate(data, dataclass_to_jsl(
-        RegistrationSchema).get_schema())
-    if res:
-        @request.after
-        def set_error(response):
-            response.status = 422
-        return {
-            'status': 'error',
-            'field_errors': [{'message': res[x]} for x in res.keys()]
-        }
+    RegistrationSchema.validate(request, data)
 
     if data['password'] != data['password_validate']:
         @request.after

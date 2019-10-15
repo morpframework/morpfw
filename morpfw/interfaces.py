@@ -241,7 +241,7 @@ class IModel(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def update(self, newdata: dict):
+    def update(self, newdata: dict, secure: bool):
         """Update model with new data"""
         raise NotImplementedError
 

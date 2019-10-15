@@ -18,6 +18,3 @@ class AuthnPolicy(abc.ABC):
     @abc.abstractmethod
     def verify_identity(self, app, identity):
         raise NotImplementedError
-
-    def get_app(self):
-        return self.app_cls()

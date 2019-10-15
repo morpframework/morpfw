@@ -129,8 +129,8 @@ def search(context, request):
 
 
 @App.json(model=Collection, request_method='POST',
-          load=validate_schema(), permission=permission.Create)
-def create(context, request, json):
+          permission=permission.Create)
+def create(context, request):
     if not context.create_view_enabled:
         raise HTTPNotFound()
     obj = context.create(request.json)
@@ -155,9 +155,8 @@ def read(context, request):
 
 
 @App.json(model=Model, request_method='PATCH',
-          load=validate_schema(),
           permission=permission.Edit)
-def update(context, request, json):
+def update(context, request):
     if not context.update_view_enabled:
         raise HTTPNotFound()
 

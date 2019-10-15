@@ -2,7 +2,6 @@ import morepath
 from morpfw.crud import Collection, Model, StateMachine
 from morpfw.crud import errors as cruderrors
 from ..app import App
-import jsl
 from .. import exc
 import sqlalchemy as sa
 import sqlalchemy_jsonfield as sajson
