@@ -2,6 +2,7 @@ from .test_auth import _test_authentication, get_client
 from more.jwtauth import JWTIdentityPolicy
 from morpfw.app import BaseApp
 from morpfw.authn.pas.app import App
+from morpfw.authn.pas.path import hook_auth_models
 import os
 import yaml
 from morpfw.authn.pas.policy import MemoryStorageAuthnPolicy
@@ -15,6 +16,9 @@ class MemoryStorageApp(BaseAuthApp, DefaultAuthzPolicy):
 
 class AuthnPolicy(MemoryStorageAuthnPolicy):
     pass
+
+
+MemoryStorageApp.hook_auth_models()
 
 
 def test_authentication_memorystorage():

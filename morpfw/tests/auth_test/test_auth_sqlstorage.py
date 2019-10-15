@@ -10,6 +10,7 @@ from morpfw.authn.pas.app import App
 from morpfw.authn.pas.policy import SQLStorageAuthnPolicy
 from morpfw.authn.pas.policy import SQLStorageAuthApp as BaseAuthApp
 from morpfw.authz.pas import DefaultAuthzPolicy
+from morpfw.authn.pas.path import hook_auth_models
 
 
 class SQLStorageApp(SQLApp, DefaultAuthzPolicy):
@@ -18,6 +19,9 @@ class SQLStorageApp(SQLApp, DefaultAuthzPolicy):
 
 class AuthnPolicy(SQLStorageAuthnPolicy):
     pass
+
+
+SQLStorageApp.hook_auth_models()
 
 
 def test_authentication_sqlstorage(pgsql_db):

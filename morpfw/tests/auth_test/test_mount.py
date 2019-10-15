@@ -14,7 +14,11 @@ class App(morpfw.SQLApp):
     pass
 
 
-MountedApp = morpfw.SQLApp
+class MountedApp(morpfw.SQLApp):
+    pass
+
+
+MountedApp.hook_auth_models()
 
 
 class AppRoot(object):
