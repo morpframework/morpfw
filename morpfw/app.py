@@ -80,10 +80,7 @@ class BaseApp(CRUDApp, cors.CORSApp, SignalApp):
     request_class = Request
 
     def get_authn_provider(self, request):
-        authn_app = self._get_authn_provider()
-        authn_app.root = request.app.root
-        authn_app.parent = request.app
-        return authn_app
+        return self
 
     @reg.dispatch_method()
     def _get_authn_provider(self):

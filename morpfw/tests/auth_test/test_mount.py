@@ -14,8 +14,7 @@ class App(morpfw.SQLApp):
     pass
 
 
-class MountedApp(AuthApp, morpfw.SQLApp):
-    pass
+MountedApp = morpfw.SQLApp
 
 
 class AppRoot(object):

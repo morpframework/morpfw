@@ -46,8 +46,7 @@ class DefaultAuthnPolicy(BaseAuthnPolicy):
         return True
 
 
-class SQLStorageAuthApp(BaseAuthApp, SQLApp):
-    pass
+SQLStorageAuthApp = SQLApp
 
 
 @SQLStorageAuthApp.storage(model=UserModel)
@@ -66,8 +65,7 @@ def get_apikey_sqlstorage(model, request, blobstorage):
 
 
 class SQLStorageAuthnPolicy(DefaultAuthnPolicy):
-
-    app_cls = SQLStorageAuthApp
+    pass
 
 
 class MemoryStorageAuthApp(BaseAuthApp):
@@ -90,5 +88,4 @@ def get_apikey_memorystorage(model, request, blobstorage):
 
 
 class MemoryStorageAuthnPolicy(DefaultAuthnPolicy):
-
-    app_cls = MemoryStorageAuthApp
+    pass

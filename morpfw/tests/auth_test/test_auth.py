@@ -37,7 +37,7 @@ def get_client(app, config='settings.yml', **kwargs):
 
 def login(c, username, password='password'):
 
-    r = c.post_json('/auth/user/+login', {
+    r = c.post_json('/user/+login', {
         'username': username,
         'password': password
     })
@@ -56,7 +56,7 @@ def logout(c):
 
 
 def _test_authentication(c):
-    r = c.get('/auth/user/+login')
+    r = c.get('/user/+login')
 
     # test schema access
 
@@ -78,7 +78,7 @@ def _test_authentication(c):
     logout(c)
 
     # test wrong login
-    r = c.post_json('/auth/user/+login', {
+    r = c.post_json('/user/+login', {
         'username': 'invaliduser',
         'password': 'invalidpassword'
     }, expect_errors=True)
@@ -91,7 +91,7 @@ def _test_authentication(c):
         }
     }
 
-    r = c.post_json('/auth/user/+login', {
+    r = c.post_json('/user/+login', {
         'username': 'admin',
         'password': 'invalidpassword'
     }, expect_errors=True)
@@ -111,7 +111,7 @@ def _test_authentication(c):
     # test refreshing token
     time.sleep(2)
 
-    r = c.get('/auth/self/+refresh_token')
+    r = c.get('/self/+refresh_token')
 
     n = r.headers.get('Authorization').split()
 
@@ -119,7 +119,7 @@ def _test_authentication(c):
 
     c.authorization = ('JWT', n[1])
 
-    r = c.get('/auth/user/admin')
+    r = c.get('/user/admin')
 
     assert r.json['data']['username'] == 'admin'
     assert list(
@@ -129,11 +129,11 @@ def _test_authentication(c):
 
     # query for nonexistent user
 
-    r = c.get('/auth/user/unknownuser', expect_errors=True)
+    r = c.get('/user/unknownuser', expect_errors=True)
 
     assert r.status_code == 404
 
-    r = c.get('/auth/user/')
+    r = c.get('/user/')
 
 #    assert r.json['schema']['title'] == 'user'
 
@@ -142,7 +142,7 @@ def _test_authentication(c):
     # register new user, you shouldnt be allowed to if not logged in
     # as admin
 
-    r = c.post_json('/auth/user/+register',
+    r = c.post_json('/user/+register',
                     {'username': 'user1',
                      'password': 'password',
                      'password_validate': 'password'}, expect_errors=True)
@@ -153,7 +153,7 @@ def _test_authentication(c):
 
     login(c, 'admin')
 
-    r = c.post_json('/auth/user/+register',
+    r = c.post_json('/user/+register',
                     {'username': 'user1',
                      'email': 'user1@localhost.com',
                      'password': 'password',
@@ -161,7 +161,7 @@ def _test_authentication(c):
 
     assert r.json == {'status': 'success'}
 
-    r = c.post_json('/auth/user/+register',
+    r = c.post_json('/user/+register',
                     {'username': 'user2',
                      'email': 'user2@localhost.com',
                      'password': 'password',
@@ -170,7 +170,7 @@ def _test_authentication(c):
     assert r.json == {'status': 'success'}
 
     # fail if password is not string
-    r = c.post_json('/auth/user/+register',
+    r = c.post_json('/user/+register',
                     {'username': 'user3',
                      'email': 'user3@localhost.com',
                      'password': {'hello': 'world'}},
@@ -180,7 +180,7 @@ def _test_authentication(c):
 
     # fail if duplicate user
 
-    r = c.post_json('/auth/user/+register',
+    r = c.post_json('/user/+register',
                     {'username': 'user1',
                      'email': 'user1@localhost.com',
                      'password': 'password',
@@ -193,7 +193,7 @@ def _test_authentication(c):
 
     # fail if invalid email
 
-    r = c.post_json('/auth/user/+register',
+    r = c.post_json('/user/+register',
                     {'username': 'user4',
                      'email': 'user4',
                      'password': 'password',
@@ -202,7 +202,7 @@ def _test_authentication(c):
 
     assert r.status_code == 422
 
-    r = c.post_json('/auth/user/+register',
+    r = c.post_json('/user/+register',
                     {'username': 'user4',
                      'email': 'user4@localhost',
                      'password': 'password',
@@ -211,7 +211,7 @@ def _test_authentication(c):
 
     assert r.status_code == 422
 
-    r = c.get('/auth/user/user1')
+    r = c.get('/user/user1')
 
     assert r.json['data']['username'] == 'user1'
     assert list(
@@ -229,9 +229,9 @@ def _test_authentication(c):
 
     login(c, 'admin')
     r = c.post_json(
-        '/auth/user/user1/+statemachine', {'transition': 'deactivate'})
+        '/user/user1/+statemachine', {'transition': 'deactivate'})
 
-    r = c.get('/auth/user/user1')
+    r = c.get('/user/user1')
 
     assert r.json['data']['username'] == 'user1'
     assert list(
@@ -239,7 +239,7 @@ def _test_authentication(c):
     ) == ['__default__']
     assert r.json['data']['state'] == 'inactive'
 
-    r = c.post_json('/auth/user/+login', {
+    r = c.post_json('/user/+login', {
         'username': 'user1',
         'password': 'password'
     }, expect_errors=True)
@@ -247,9 +247,9 @@ def _test_authentication(c):
     assert r.status_code == 401
 
     r = c.post_json(
-        '/auth/user/user1/+statemachine', {'transition': 'activate'})
+        '/user/user1/+statemachine', {'transition': 'activate'})
 
-    r = c.get('/auth/user/user1')
+    r = c.get('/user/user1')
 
     assert r.json['data']['username'] == 'user1'
     assert list(
@@ -262,17 +262,17 @@ def _test_authentication(c):
 
     # reject setting password through the update API
 
-    r = c.patch_json('/auth/user/user1/',
+    r = c.patch_json('/user/user1/',
                      {'password': 'newpass'}, expect_errors=True)
 
     assert r.status_code == 422
 
-    r = c.patch_json('/auth/user/user1/',
+    r = c.patch_json('/user/user1/',
                      {'password': 'newpass'}, expect_errors=True)
 
     assert r.status_code == 422
 
-    r = c.patch_json('/auth/user/user1/',
+    r = c.patch_json('/user/user1/',
                      {'username': 'newusername'}, expect_errors=True)
 
     assert r.status_code == 422
@@ -280,7 +280,7 @@ def _test_authentication(c):
     login(c, 'admin')
 
     # admin should be allowed to set password without requiring current password
-    r = c.post_json('/auth/user/user1/+change_password', {
+    r = c.post_json('/user/user1/+change_password', {
         'new_password': 'newpass',
         'new_password_validate': 'newpass'
     })
@@ -290,7 +290,7 @@ def _test_authentication(c):
     login(c, 'user1', 'newpass')
 
     # changing password through user management API is limited only to admin
-    r = c.post_json('/auth/user/user1/+change_password', {
+    r = c.post_json('/user/user1/+change_password', {
         'new_password': 'newpass',
         'new_password_validate': 'newpass'
     }, expect_errors=True)
@@ -298,7 +298,7 @@ def _test_authentication(c):
     assert r.status_code == 403
 
     # user require current password
-    r = c.post_json('/auth/self/+change_password', {
+    r = c.post_json('/self/+change_password', {
         'new_password': 'password',
         'new_password_validate': 'password'
     }, expect_errors=True)
@@ -306,7 +306,7 @@ def _test_authentication(c):
     assert r.status_code == 422
 
     # user require current password
-    r = c.post_json('/auth/self/+change_password', {
+    r = c.post_json('/self/+change_password', {
         'password': 'newpass',
         'new_password': 'password',
         'new_password_validate': 'password'
@@ -316,12 +316,12 @@ def _test_authentication(c):
 
     login(c, 'admin')
 
-    r = c.get('/auth/user/admin')
+    r = c.get('/user/admin')
 
     admin_user = r.json
 
     # api keys
-    r = c.post_json('/auth/apikey/',
+    r = c.post_json('/apikey/',
                     {'label': 'samplekey', 'password': 'password'})
 
     key_identity = r.json['data']['api_identity']
@@ -331,7 +331,7 @@ def _test_authentication(c):
     assert len(key_secret) == 32
     assert r.json['data']['userid'] == admin_user['data']['uuid']
 
-    r = c.get('/auth/apikey/%s' % key_uuid)
+    r = c.get('/apikey/%s' % key_uuid)
 
     assert key_identity == r.json['data']['api_identity']
     assert key_secret == r.json['data']['api_secret']
@@ -341,7 +341,7 @@ def _test_authentication(c):
 
     login(c, 'user1')
 
-    r = c.get('/auth/apikey/+search')
+    r = c.get('/apikey/+search')
 
     assert len(r.json['results']) == 0
 
@@ -349,13 +349,13 @@ def _test_authentication(c):
 
     # lets try deactivating user1 using API key
     r = c.post_json(
-        '/auth/user/user1/+statemachine', {'transition': 'deactivate'},
+        '/user/user1/+statemachine', {'transition': 'deactivate'},
         expect_errors=True)
 
     assert r.status_code == 403
 
     r = c.post_json(
-        '/auth/user/user1/+statemachine',
+        '/user/user1/+statemachine',
         {'transition': 'deactivate'}, headers=[
             ('X-API-KEY', '.'.join([key_identity, key_secret]))
         ])
@@ -364,7 +364,7 @@ def _test_authentication(c):
 
     # activate back
     r = c.post_json(
-        '/auth/user/user1/+statemachine',
+        '/user/user1/+statemachine',
         {'transition': 'activate'}, headers=[
             ('X-API-KEY', '.'.join([key_identity, key_secret]))
         ])
@@ -373,26 +373,25 @@ def _test_authentication(c):
 
     login(c, 'admin')
 
-    r = c.get('/auth/group/')
+    r = c.get('/group/')
 
 #    assert r.json['schema']['title'] == 'group'
 
-    r = c.post_json('/auth/group/', {'groupname': 'group1'})
+    r = c.post_json('/group/', {'groupname': 'group1'})
 
     assert r.json['data']['groupname'] == 'group1'
 
-
-    r = c.post_json('/auth/group/', {'groupname': 'group1'},
+    r = c.post_json('/group/', {'groupname': 'group1'},
                     expect_errors=True)
 
     assert r.json['status'] == 'error'
     assert r.json['type'] == 'GroupExistsError'
 
-    r = c.get('/auth/group/group1')
+    r = c.get('/group/group1')
 
     assert r.json['data']['groupname'] == 'group1'
 
-    r = c.post_json('/auth/group/group1/+grant',
+    r = c.post_json('/group/group1/+grant',
                     {'mapping': [{
                         'user': {
                             'username': 'user1'
@@ -401,7 +400,7 @@ def _test_authentication(c):
 
     assert r.json == {'status': 'success'}
 
-    r = c.post_json('/auth/group/group1/+grant',
+    r = c.post_json('/group/group1/+grant',
                     {'mapping': [{
                         'user': {
                             'username': 'dummyuser'
@@ -411,45 +410,45 @@ def _test_authentication(c):
 
     assert r.status_code == 422
 
-    r = c.get('/auth/user/user1')
+    r = c.get('/user/user1')
 
     assert list(sorted(
         [l['name'] for l in r.json['links'] if l['rel'] == 'group']
     )) == ['__default__', 'group1']
 
-    r = c.get('/auth/group/group1/+members')
+    r = c.get('/group/group1/+members')
 
     assert r.json['users'][0]['username'] == 'user1'
     assert r.json['users'][0]['roles'] == ['member']
 
-    r = c.post_json('/auth/group/group1/+grant', {'mapping': [{
+    r = c.post_json('/group/group1/+grant', {'mapping': [{
         'user': {'username': 'user1'},
         'roles': ['manager']
     }]})
 
     assert r.json == {'status': 'success'}
 
-    r = c.get('/auth/group/group1/+members')
+    r = c.get('/group/group1/+members')
 
     assert r.json['users'][0]['roles'] == ['member', 'manager']
 
-    r = c.post_json('/auth/group/group1/+grant', {'mapping': [{
+    r = c.post_json('/group/group1/+grant', {'mapping': [{
         'user': {'username': 'user1'},
         'roles': ['editor']
     }]})
 
     assert r.json == {'status': 'success'}
 
-    r = c.get('/auth/group/group1/+members')
+    r = c.get('/group/group1/+members')
 
     assert sorted(r.json['users'][0]['roles']
                   ) == sorted(['member', 'editor', 'manager'])
 
-    r = c.get('/auth/user/user1/+roles')
+    r = c.get('/user/user1/+roles')
 
     assert sorted(r.json['group1']) == sorted(['member', 'editor', 'manager'])
 
-    r = c.post_json('/auth/group/group1/+revoke',
+    r = c.post_json('/group/group1/+revoke',
                     {'mapping': [{
                         'user': {
                             'username': 'user1'
@@ -459,11 +458,11 @@ def _test_authentication(c):
 
     assert r.json == {'status': 'success'}
 
-    r = c.get('/auth/group/group1/+members')
+    r = c.get('/group/group1/+members')
 
     assert r.json['users'][0]['roles'] == ['member', 'editor']
 
-    r = c.post_json('/auth/group/group1/+revoke', {
+    r = c.post_json('/group/group1/+revoke', {
         'mapping': [{
             'user': {'username': 'user1'},
             'roles': ['editor', 'member']}]
@@ -471,52 +470,52 @@ def _test_authentication(c):
 
     assert r.json == {'status': 'success'}
 
-    r = c.get('/auth/group/group1/+members')
+    r = c.get('/group/group1/+members')
 
     assert len(r.json['users']) == 0
 
-    r = c.delete('/auth/user/user1')
+    r = c.delete('/user/user1')
 
     assert r.json == {'status': 'success'}
 
-    r = c.get('/auth/user/user1', expect_errors=True)
+    r = c.get('/user/user1', expect_errors=True)
 
     assert r.status_code == 404
 
     logout(c)
 
-    r = c.delete('/auth/user/user1', expect_errors=True)
+    r = c.delete('/user/user1', expect_errors=True)
 
     login(c, 'admin')
 
-    r = c.get('/auth/self')
+    r = c.get('/self')
 
     assert r.json['data']['username'] == 'admin'
 
     # Test delete group and ensure group is not return when user get info
-    r = c.post_json('/auth/group/', {'groupname': 'group2'})
+    r = c.post_json('/group/', {'groupname': 'group2'})
 
     assert r.json['data']['groupname'] == 'group2'
-    
+
     # Grant role member to user2 in group2
-    r = c.post_json('/auth/group/group2/+grant', {'mapping': [{
+    r = c.post_json('/group/group2/+grant', {'mapping': [{
         'user': {'username': 'user2'},
         'roles': ['member']
     }]})
 
     assert r.json == {'status': 'success'}
 
-    r = c.get('/auth/user/user2')
+    r = c.get('/user/user2')
 
     assert list(
         [l['name'] for l in r.json['links'] if l['rel'] == 'group']
     ) == ['__default__', 'group2']
 
-    r = c.delete('/auth/group/group2')
+    r = c.delete('/group/group2')
 
     assert r.json == {'status': 'success'}
 
-    r = c.get('/auth/user/user2')
+    r = c.get('/user/user2')
 
     assert list(
         [l['name'] for l in r.json['links'] if l['rel'] == 'group']

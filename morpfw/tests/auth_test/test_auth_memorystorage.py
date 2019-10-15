@@ -9,21 +9,12 @@ from morpfw.authn.pas.policy import MemoryStorageAuthApp as BaseAuthApp
 from morpfw.authz.pas import DefaultAuthzPolicy
 
 
-class MemoryStorageAuthApp(BaseAuthApp, DefaultAuthzPolicy):
-    pass
-
-
-class MemoryStorageApp(BaseApp, DefaultAuthzPolicy):
+class MemoryStorageApp(BaseAuthApp, DefaultAuthzPolicy):
     pass
 
 
 class AuthnPolicy(MemoryStorageAuthnPolicy):
-    app_cls = MemoryStorageAuthApp
-
-
-@MemoryStorageApp.mount(app=AuthnPolicy.app_cls, path='/auth')
-def mount_app(app):
-    return AuthnPolicy.app_cls()
+    pass
 
 
 def test_authentication_memorystorage():

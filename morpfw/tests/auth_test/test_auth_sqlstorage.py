@@ -12,21 +12,12 @@ from morpfw.authn.pas.policy import SQLStorageAuthApp as BaseAuthApp
 from morpfw.authz.pas import DefaultAuthzPolicy
 
 
-class SQLStorageAuthApp(BaseAuthApp, DefaultAuthzPolicy):
-    pass
-
-
 class SQLStorageApp(SQLApp, DefaultAuthzPolicy):
     pass
 
 
 class AuthnPolicy(SQLStorageAuthnPolicy):
-    app_cls = SQLStorageAuthApp
-
-
-@SQLStorageApp.mount(app=AuthnPolicy.app_cls, path='/auth')
-def mount_app(app):
-    return AuthnPolicy.app_cls()
+    pass
 
 
 def test_authentication_sqlstorage(pgsql_db):

@@ -63,12 +63,7 @@ def create_baseapp(app, settings, scan=True, **kwargs):
     verify_identity = authnpolicy.verify_identity
 
     mounted_apps = app_settings['mounted_apps']
-    if getattr(authnpolicy, 'app_cls', None):
-        mounted_apps.append({
-            'app_cls': authnpolicy.app_cls,
-            'authn_policy': app_settings['authn_policy'],
-            'authn_policy_settings': app_settings['authn_policy_settings']
-        })
+
     for iapp in mounted_apps:
         if 'app_cls' in iapp.keys():
             iapp_cls = iapp['app_cls']

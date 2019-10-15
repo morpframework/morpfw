@@ -12,5 +12,4 @@ from ...app import BaseApp
 _REGISTERED_APPS: List[morepath.App] = []
 
 
-class App(BaseApp):
-    pass
+App = BaseApp
