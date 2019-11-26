@@ -19,7 +19,7 @@ import readline
 import rlcompleter
 
 
-def load_settings(settings_file):
+def load_settings(settings_file, default=default_settings):
     if settings_file is None:
         settings = {}
     elif not os.path.exists(settings_file):
@@ -29,7 +29,7 @@ def load_settings(settings_file):
         raw_file = raw_file.replace(r'%(here)s', os.getcwd())
         settings = yaml.load(raw_file)
 
-    s = copy.deepcopy(default_settings)
+    s = copy.deepcopy(default)
     for k in settings.keys():
         if k in s.keys():
             for j, v in settings[k].items():
