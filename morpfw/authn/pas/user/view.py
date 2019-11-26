@@ -33,7 +33,7 @@ def register(context, request):
                 'message': 'Password confirmation does not match'}
 
     if 'state' not in data.keys() or not data['state']:
-        data['state'] = request.app.settings.application.new_user_state
+        data['state'] = request.app.get_config('morpfw.user.new_user_state')
     del data['password_validate']
     obj = context.create(data)
     return {'status': 'success'}

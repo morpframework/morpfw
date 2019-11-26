@@ -43,18 +43,17 @@ def create_baseapp(app, settings, scan=True, **kwargs):
     settings = s
 
     # initialize app
+    config = settings['configuration']
 
     if scan:
         morepath.autoscan()
-        for scanmodpath in (settings['morpfw']['scan'] or []):
+        for scanmodpath in (config['morpfw.scan'] or []):
             scanmod = importlib.import_module(scanmodpath)
             morepath.scan(package=scanmod)
 
-    app_settings = settings['application']
-
-    authnpolicy_settings = app_settings['authn_policy_settings']
+    authnpolicy_settings = config['morpfw.authn.policy.settings']
     authnpol_mod, authnpol_clsname = (
-        app_settings['authn_policy'].strip().split(':'))
+        config['morpfw.authn.policy'].strip().split(':'))
 
     authnpolicy = getattr(importlib.import_module(
         authnpol_mod), authnpol_clsname)(authnpolicy_settings)
@@ -62,45 +61,17 @@ def create_baseapp(app, settings, scan=True, **kwargs):
     get_identity_policy = authnpolicy.get_identity_policy
     verify_identity = authnpolicy.verify_identity
 
-    mounted_apps = app_settings['mounted_apps']
-
-    for iapp in mounted_apps:
-        if 'app_cls' in iapp.keys():
-            iapp_cls = iapp['app_cls']
-        else:
-            iapp_path = iapp['app']
-            iapp_mod, iapp_clsname = iapp_path.strip().split(':')
-            iapp_cls = getattr(importlib.import_module(iapp_mod), iapp_clsname)
-
-        if iapp.get('authn_policy', None):
-            iapp_authnpolicy_settings = iapp.get('authn_policy_settings', {})
-            iapp_authnpol_mod, iapp_authnpol_clsname = (
-                iapp['authn_policy'].strip().split(':'))
-            iapp_authnpolicy = getattr(importlib.import_module(
-                iapp_authnpol_mod), iapp_authnpol_clsname)(iapp_authnpolicy_settings)
-            iapp_get_identity_policy = iapp_authnpolicy.get_identity_policy
-            iapp_verify_identity = iapp_authnpolicy.verify_identity
-            iapp_cls.identity_policy()(iapp_get_identity_policy)
-            iapp_cls.verify_identity()(iapp_verify_identity)
-        else:
-            iapp_cls.identity_policy()(get_identity_policy)
-            iapp_cls.verify_identity()(verify_identity)
-
-        iapp_cls.init_settings(settings)
-        iapp_cls._raw_settings = settings
-        iapp_cls.commit()
-
     app.identity_policy()(get_identity_policy)
     app.verify_identity()(verify_identity)
     app.init_settings(settings)
     app._raw_settings = settings
 
-    if settings['application']['development_mode']:
+    if config['app.development_mode']:
         os.environ['MOREPATH_TEMPLATE_AUTO_RELOAD'] = "1"
 
     app.commit()
 
-    celery_settings = settings['worker']['celery_settings']
+    celery_settings = config['morpfw.celery']
     app.celery.conf.update(**celery_settings)
     application = app()
     return application

@@ -30,7 +30,6 @@ class Page(Base):
 
     __tablename__ = 'jslcrud_test_page'
 
-    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     title = sa.Column(sa.String(length=1024), default='')
     body = sa.Column(sa.Text(), default='')
     value = sa.Column(sa.Integer)
@@ -98,7 +97,7 @@ class NamedObject(Base):
 
     __tablename__ = 'jslcrud_test_namedobject'
 
-    name = sa.Column(sa.String(length=1024), primary_key=True)
+    name = sa.Column(sa.String(length=1024), default='')
     body = sa.Column(sa.String(length=1024), default='')
     created_flag = sa.Column(sa.Boolean, default=False)
     updated_flag = sa.Column(sa.Boolean, default=False)

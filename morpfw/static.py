@@ -1,4 +1,4 @@
-from .app import App
+from .app import BaseApp as App
 from webob import static
 from webob.exc import HTTPNotFound, HTTPUnauthorized, HTTPNotModified
 from pkg_resources import resource_filename

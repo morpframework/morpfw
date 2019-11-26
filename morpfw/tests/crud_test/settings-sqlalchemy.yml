@@ -1,3 +1,3 @@
-application:
-  authn_policy: morpfw.tests.crud_test.crud_common:AuthnPolicy
-  dburi: 'postgresql://postgres@localhost:45678/morp_tests'
+configuration:
+  morpfw.authn.policy: morpfw.tests.crud_test.crud_common:AuthnPolicy
+  morpfw.storage.sqlstorage.dburi: 'postgresql://postgres@localhost:45678/morp_tests'

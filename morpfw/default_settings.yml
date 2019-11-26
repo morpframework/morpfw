@@ -3,28 +3,18 @@ server:
   listen_port: 5000
   server_url: http://localhost:5000
 
-morpfw:
-  scan: []
-
-application:
-  mounted_apps: []
-  new_user_state: active
-  dburi: 'sqlite:///%(here)s/app.db'
-  compositekey_separator: '!!!!'
-  authn_policy: morpfw.authn.noauth:AuthnPolicy
-  authn_policy_settings: {}
-  development_mode: true
-
-worker:
-  celery_settings: {}
-
-security:
-  allowed_nets:
+configuration:
+  app.development_mode: true
+  morpfw.scan: []
+  morpfw.log_directory: /tmp
+  morpfw.authn.policy: morpfw.authn.noauth:AuthnPolicy
+  morpfw.authn.policy.settings: {}
+  morpfw.user.new_user_state: active
+  morpfw.storage.sqlstorage.dburi: 'sqlite:///%(here)s/app.db'
+  morpfw.security.allowed_nets: 
     - 127.0.0.1/32
-  jwt:
+  morpfw.security.jwt: 
     master_secret: secret
     leeway: 10
     allow_refresh: true
-
-logging:
-  log_directory: /tmp/
+  morpfw.celery: {}

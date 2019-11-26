@@ -12,6 +12,8 @@ from .blobstorage.base import NullBlobStorage
 
 Session = sessionmaker()
 
+MARKER = object()
+
 
 class App(JsonSchemaApp, signals.SignalApp):
 
@@ -120,3 +122,9 @@ class App(JsonSchemaApp, signals.SignalApp):
                 context: Model, permission: str):
         identity = request.identity
         return self._permits(identity, context, permission)
+
+    def get_config(self, key, default=MARKER):
+        registry = self.settings.configuration.__dict__
+        if default is MARKER:
+            return registry.get(key)
+        return registry.get(key, default)

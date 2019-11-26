@@ -98,17 +98,18 @@ class SQLApp(TransactionApp, BaseApp):
     def _init_engine(self, session=Session) -> Engine:
 
         settings = self._raw_settings
+        config = settings['configuration']
 
         if self.engine is not None:
             return self.engine
 
         # initialize SQLAlchemy
-        if not settings['application']['dburi']:
+        if not config['morpfw.storage.sqlstorage.dburi']:
             raise ConfigurationError('SQLAlchemy settings not found')
 
         cwd = os.environ.get('MORP_WORKDIR', os.getcwd())
         os.chdir(cwd)
-        dburi = settings['application']['dburi']
+        dburi = config['morpfw.storage.sqlstorage.dburi']
         engine = sqlalchemy.create_engine(dburi, poolclass=NullPool)
         session.configure(bind=engine)
 

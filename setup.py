@@ -67,6 +67,7 @@ setup(name='morpfw',
           'cookiecutter',
           'eventlet',
           'wsgigzip',
+          'hydra-core',
       ],
       extras_require={
           'test': [

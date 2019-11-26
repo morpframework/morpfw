@@ -19,8 +19,10 @@ import readline
 import rlcompleter
 
 
-def load(app_path, settings_file=None, host=None, port=None):
+def load_settings(settings_file):
     if settings_file is None:
+        settings = {}
+    elif not os.path.exists(settings_file):
         settings = {}
     else:
         raw_file = open(settings_file).read()
@@ -36,6 +38,12 @@ def load(app_path, settings_file=None, host=None, port=None):
             s[k] = settings[k]
 
     settings = s
+    os.environ['MORP_SETTINGS'] = json.dumps(settings)
+    return settings
+
+
+def load(app_path, settings_file=None, host=None, port=None):
+    settings = load_settings(settings_file)
 
     if not app_path:
         if 'application' not in settings:
@@ -54,7 +62,7 @@ def load(app_path, settings_file=None, host=None, port=None):
     sys.path.append(os.getcwd())
     mod, clsname = app_path.split(':')
     app_cls = getattr(importlib.import_module(mod), clsname)
-    os.environ['MORP_SETTINGS'] = json.dumps(settings)
+
     return {
         'app_cls': app_cls,
         'settings': settings,
