@@ -18,13 +18,15 @@ import code
 import readline
 import rlcompleter
 import hydra
+import threading
 
 
 def load_settings(settings_file, default=default_settings):
+    default_settings = os.environ.get("MORP_SETTINGS", {})
     if settings_file is None:
-        settings = {}
+        settings = default_settings
     elif not os.path.exists(settings_file):
-        settings = {}
+        settings = default_settings
     else:
         raw_file = open(settings_file).read()
         raw_file = raw_file.replace(r'%(here)s', os.getcwd())
@@ -51,8 +53,10 @@ def load(settings_file: str = None, host: str = None, port: int = None):
         sys.exit(1)
     if 'factory' not in settings['application']:
         print("Missing application:factory entry in settings")
-
-    factory_path = settings['application']['factory']
+        sys.exit(1)
+    if 'class' not in settings['application']:
+        print("Missing application:class entry in settings")
+        sys.exit(1)
 
     if 'server' in settings:
         if not host:
@@ -61,11 +65,17 @@ def load(settings_file: str = None, host: str = None, port: int = None):
             port = settings['server'].get('listen_port', 5432)
 
     sys.path.append(os.getcwd())
+
+    factory_path = settings['application']['factory']
     mod, fname = factory_path.split(':')
     factory = getattr(importlib.import_module(mod), fname)
 
+    app_path = settings['application']['class']
+    mod, clsname = app_path.split(':')
+    app_cls = getattr(importlib.import_module(mod), clsname)
     return {
         'factory': factory,
+        'class': app_cls,
         'settings': settings,
         'host': host,
         'port': port
@@ -99,12 +109,13 @@ def start(ctx, host, port, prod):
 @cli.command(help='start celery worker')
 @click.pass_context
 def solo_worker(ctx):
+    print(threading.get_ident())
     param = load(ctx.obj['settings'])
     hostname = socket.gethostname()
     ws = param['settings']['configuration']['morpfw.celery']
     now = datetime.utcnow().strftime(r'%Y%m%d%H%M')
-    app = param['factory'](param['settings'])
-    worker = app.celery.Worker(
+    param['factory'](param['settings'], instantiate=False)
+    worker = param['class'].celery.Worker(
         hostname='worker%s.%s' % (now, hostname), **ws)
     worker.start()
 
@@ -115,8 +126,7 @@ def scheduler(ctx):
     param = load(ctx.obj['settings'])
     hostname = socket.gethostname()
     ss = param['settings']['configuration']['morpfw.celery']
-    app = param['factory'](param['settings'])
-    sched = app.celery.Beat(
+    sched = param['class'].celery.Beat(
         hostname='scheduler.%s' % hostname, **ss)
     sched.run()
 

@@ -3,6 +3,7 @@ import morepath
 import dectate
 import json
 import os
+import importlib
 from urllib.parse import urlparse
 from celery import Celery, Task
 from celery import shared_task
@@ -19,6 +20,7 @@ from billiard.einfo import ExceptionInfo
 import transaction
 from . import directive
 from uuid import uuid4
+import threading
 
 
 class MorpTask(Task):
@@ -70,9 +72,11 @@ class AsyncDispatcher(object):
         return tasks
 
 
-def periodic_transaction_handler(app_class, func):
+def periodic_transaction_handler(func):
     def transaction_wrapper():
         settings = json.loads(os.environ['MORP_SETTINGS'])
+        mod, clsname = settings['application']['class'].split(':')
+        app_class = getattr(importlib.import_module(mod), clsname)
         app_class.commit()
         app = app_class()
         server_url = settings.get('server', {}).get(
@@ -99,10 +103,12 @@ def periodic_transaction_handler(app_class, func):
     return transaction_wrapper
 
 
-def transaction_handler(app_class, func):
+def transaction_handler(func):
+
     def transaction_wrapper(request, obj):
         settings = json.loads(os.environ['MORP_SETTINGS'])
-        app_class.commit()
+        mod, clsname = settings['application']['class'].split(':')
+        app_class = getattr(importlib.import_module(mod), clsname)
         app = app_class()
         req = app.request_class(app=app, **request)
         transaction.begin()
@@ -134,7 +140,7 @@ class SignalApp(morepath.App):
                 name = '.'.join([wrapped.__module__, wrapped.__name__])
             else:
                 name = task_name
-            func = transaction_handler(klass, wrapped)
+            func = transaction_handler(wrapped)
             task = shared_task(name=name,  base=MorpTask)(func)
             klass._celery_subscribe(signal)(task)
             return task
@@ -144,7 +150,7 @@ class SignalApp(morepath.App):
     def cron(klass, name: str, minute: str = '*', hour: str = '*', day_of_week: str = '*',
              day_of_month: str = '*', month_of_year: str = '*'):
         def wrapper(wrapped):
-            func = periodic_transaction_handler(klass, wrapped)
+            func = periodic_transaction_handler(wrapped)
             task_name = '.'.join([wrapped.__module__, wrapped.__name__])
             task = shared_task(name=task_name, base=MorpTask)(func)
             klass.celery.conf.beat_schedule[name] = {
@@ -160,7 +166,7 @@ class SignalApp(morepath.App):
     @classmethod
     def periodic(klass, name: str, seconds: int = 1):
         def wrapper(wrapped):
-            func = periodic_transaction_handler(klass, wrapped)
+            func = periodic_transaction_handler(wrapped)
             task_name = '.'.join([wrapped.__module__, wrapped.__name__])
             task = shared_task(name=task_name, base=MorpTask)(func)
             klass.celery.conf.beat_schedule[name] = {
