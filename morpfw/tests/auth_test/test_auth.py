@@ -15,26 +15,6 @@ import time
 import transaction
 
 
-def get_client(app, config='settings.yml', **kwargs):
-    if isinstance(config, str):
-        with open(os.path.join(os.path.dirname(__file__), config)) as f:
-            settings = yaml.load(f)
-    else:
-        settings = config
-    kwargs = {}
-    appobj = create_app(app, settings, **kwargs)
-    request = appobj.request_class(
-        app=appobj, environ={'PATH_INFO': '/'})
-
-    username = 'admin'
-    password = 'password'
-    create_admin(appobj, username, password,
-                 '%s@localhost.localdomain' % username)
-    transaction.commit()
-    c = Client(appobj)
-    return c
-
-
 def login(c, username, password='password'):
 
     r = c.post_json('/user/+login', {

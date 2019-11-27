@@ -1,9 +1,11 @@
 import jsl
+import os
 from .crud_common import App as BaseApp
 from morpfw.crud.model import Collection, Model
 from morpfw.crud.storage.sqlstorage import SQLStorage, Base, GUID
 from morpfw.crud.blobstorage.fsblobstorage import FSBlobStorage
-from .crud_common import get_client, run_jslcrud_test
+from ..common import get_client
+from .crud_common import run_jslcrud_test
 from .crud_common import PageCollection, PageModel, PageSchema
 from .crud_common import ObjectCollection, ObjectModel
 from .crud_common import NamedObjectCollection, NamedObjectModel
@@ -155,5 +157,7 @@ def blobobject_model_factory(request, identifier):
 
 
 def test_sqlstorage(pgsql_db):
-    c = get_client(App, config='settings-sqlalchemy.yml')
+    config = os.path.join(os.path.dirname(__file__),
+                          'test_sqlstorage-settings.yml')
+    c = get_client(config)
     run_jslcrud_test(c)

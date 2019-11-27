@@ -1,4 +1,5 @@
 import morpfw
+import os
 from morpfw import sql as morpsql
 from morpfw.crud.schema import Schema
 from morpfw.crud import Collection, Model
@@ -69,7 +70,8 @@ def get_page(request, identifier):
 
 
 def test_morp_framework(pgsql_db):
-    c = get_client(App)
+    c = get_client(os.path.join(os.path.dirname(
+        __file__), 'test_sqlapp-settings.yml'))
 
     r = c.get('/')
 

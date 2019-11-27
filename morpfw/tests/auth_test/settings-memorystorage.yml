@@ -1,2 +1,5 @@
+application:
+  class: morpfw.tests.auth_test.test_auth_memorystorage:MemoryStorageApp
+
 configuration:
   morpfw.authn.policy: morpfw.tests.auth_test.test_auth_memorystorage:AuthnPolicy

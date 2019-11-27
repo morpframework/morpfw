@@ -1,0 +1,8 @@
+application:
+  class: morpfw.tests.test_worker:App
+
+configuration:
+  morpfw.storage.sqlstorage.dburi: postgresql://postgres@localhost:45678/morp_tests
+  morpfw.celery:
+    broker_url: 'amqp://guest:guest@localhost:34567/'
+    result_backend: 'db+postgresql://postgres@localhost:45678/morp_tests'

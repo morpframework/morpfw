@@ -9,18 +9,25 @@ from webtest import TestApp as Client
 from more.jwtauth import JWTIdentityPolicy
 from more.basicauth import BasicAuthIdentityPolicy
 from morpfw.main import create_app
-from morpfw.main import create_admin
+from morpfw.main import create_admin as morpfw_create_admin
 from morpfw import cli
 from morpfw.authn.pas.exc import UserExistsError
+import transaction
 
 
-def get_client(app, config='settings.yml', **kwargs):
-    configpath = os.path.join(os.path.dirname(__file__), config)
-    settings = cli.load_settings(configpath)
-    appobj = create_app(app, settings, **kwargs)
-    appobj.initdb()
+def get_client(config='settings.yml', **kwargs):
+    param = cli.load(config)
+    appobj = param['factory'](param['settings'], **kwargs)
+    if hasattr(appobj, 'initdb'):
+        appobj.initdb()
     c = Client(appobj)
     return c
+
+
+def create_admin(client: Client, user: str, password: str, email: str):
+    appobj = client.app
+    morpfw_create_admin(appobj, user, password, email)
+    transaction.commit()
 
 
 def start_scheduler(app):

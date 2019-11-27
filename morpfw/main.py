@@ -24,13 +24,10 @@ default_settings = default_settings.replace(r'%(here)s', os.getcwd())
 default_settings = yaml.load(default_settings)
 
 
-@reg.dispatch(reg.match_class('app', lambda app, *args, **kwargs: app))
-def create_app(app, settings, scan=True, **kwargs):
-    raise NotImplementedError
-
-
-@create_app.register(app=BaseApp)
-def create_baseapp(app, settings, scan=True, **kwargs):
+def create_app(settings, scan=True, **kwargs):
+    assert 'class' in settings['application']
+    app_mod, app_clsname = settings['application']['class'].split(':')
+    app = getattr(importlib.import_module(app_mod), app_clsname)
 
     s = copy.deepcopy(default_settings)
     for k in settings.keys():
@@ -77,16 +74,6 @@ def create_baseapp(app, settings, scan=True, **kwargs):
     return application
 
 
-@create_app.register(app=SQLApp)
-def create_sqlapp(app, settings, scan=True, **kwargs):
-
-    application = create_baseapp(app=app, settings=settings, scan=scan,
-                                 **kwargs)
-
-    application.initdb()
-    return application
-
-
 def create_admin(app: morepath.App, username: str, password: str, email: str, session=Session):
     request = app.request_class(app=app, environ={'PATH_INFO': '/'})
 
@@ -105,8 +92,7 @@ def create_admin(app: morepath.App, username: str, password: str, email: str, se
 
 
 def run(app, settings, host='127.0.0.1', port=5000, ignore_cli=True):
-    application = create_app(app, settings)
-    morepath.run(application, host=host, port=port, ignore_cli=ignore_cli)
+    morepath.run(app, host=host, port=port, ignore_cli=ignore_cli)
 
 
 def runprod(app, settings, host='127.0.0.1', port=5000, ignore_cli=True):
@@ -116,8 +102,7 @@ def runprod(app, settings, host='127.0.0.1', port=5000, ignore_cli=True):
     opts['loglevel'] = server.get('log_level', 'INFO')
     opts['log_directory'] = settings.get(
         'logging', {}).get('log_directory', '/tmp')
-    appdn = '%s:%s' % (app.__module__, app.__name__)
-    os.environ['MORP_APP'] = appdn
+    os.environ['MORP_APP_FACTORY'] = settings['application']['factory']
     logconfig = '''
 [loggers]
 keys=root, gunicorn.error, gunicorn.access

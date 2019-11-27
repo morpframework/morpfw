@@ -9,7 +9,7 @@ import importlib
 APP = {'instance': None}
 
 
-def wsgi_factory(app_cls):
+def wsgi_factory(app_factory):
 
     @gzip(mime_types=['application/json', 'text/json', 'text/plain', 'text/html'])
     def app(environ, start_response):
@@ -18,7 +18,7 @@ def wsgi_factory(app_cls):
 
         settings = json.loads(os.environ.get('MORP_SETTINGS'))
 
-        application = create_app(app_cls, settings)
+        application = app_factory(settings)
         APP['instance'] = application
         return application(environ, start_response)
 
@@ -26,6 +26,6 @@ def wsgi_factory(app_cls):
 
 
 def app(environ, start_response):
-    app_mod, app_clsname = os.environ['MORP_APP'].split(':')
-    app_cls = getattr(importlib.import_module(app_mod), app_clsname)
-    return wsgi_factory(app_cls)(environ, start_response)
+    app_mod, app_fname = os.environ['MORP_APP_FACTORY'].split(':')
+    app_factory = getattr(importlib.import_module(app_mod), app_fname)
+    return wsgi_factory(app_factory)(environ, start_response)

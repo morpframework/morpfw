@@ -14,6 +14,7 @@ from typing import Optional
 from celery.local import Proxy
 from celery.result import AsyncResult
 from celery.schedules import crontab
+from celery.contrib import rdb
 from billiard.einfo import ExceptionInfo
 import transaction
 from . import directive
@@ -72,7 +73,7 @@ class AsyncDispatcher(object):
 def periodic_transaction_handler(app_class, func):
     def transaction_wrapper():
         settings = json.loads(os.environ['MORP_SETTINGS'])
-        app_class._raw_settings = settings
+        app_class.commit()
         app = app_class()
         server_url = settings.get('server', {}).get(
             'server_url', 'http://localhost')
@@ -101,7 +102,7 @@ def periodic_transaction_handler(app_class, func):
 def transaction_handler(app_class, func):
     def transaction_wrapper(request, obj):
         settings = json.loads(os.environ['MORP_SETTINGS'])
-        app_class._raw_settings = settings
+        app_class.commit()
         app = app_class()
         req = app.request_class(app=app, **request)
         transaction.begin()

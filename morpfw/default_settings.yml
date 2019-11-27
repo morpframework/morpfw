@@ -3,6 +3,9 @@ server:
   listen_port: 5000
   server_url: http://localhost:5000
 
+application:
+  factory: morpfw.main:create_app
+
 configuration:
   app.development_mode: true
   morpfw.scan: []

@@ -1,4 +1,5 @@
 from .common import get_client, start_scheduler, start_worker
+import os
 import morpfw
 import pytest
 import morepath
@@ -73,7 +74,9 @@ def tick(request):
 
 
 def test_scheduler(pgsql_db, pika_connection_channel):
-    c = get_client(App)
+    config = os.path.join(os.path.dirname(__file__),
+                          'test_workerscheduler-settings.yml')
+    c = get_client(config)
 
     r = c.get('/+search')
 

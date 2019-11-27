@@ -1,2 +1,5 @@
+application:
+  class: morpfw.tests.crud_test.test_memorystorage:App
+
 configuration:
   morpfw.authn.policy: morpfw.tests.crud_test.crud_common:AuthnPolicy

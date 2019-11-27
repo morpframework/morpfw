@@ -1,6 +1,7 @@
 import yaml
 import os
-from .test_auth import _test_authentication, get_client
+from .test_auth import _test_authentication
+from ..common import get_client, create_admin
 from more.jwtauth import JWTIdentityPolicy
 from more.transaction import TransactionApp
 from morepath.reify import reify
@@ -25,10 +26,8 @@ SQLStorageApp.hook_auth_models()
 
 
 def test_authentication_sqlstorage(pgsql_db):
-    with open(os.path.join(os.path.dirname(__file__),
-                           'settings-sqlalchemy.yml')) as f:
-        settings = yaml.load(f)
+    config = os.path.join(os.path.dirname(__file__), 'settings-sqlalchemy.yml')
 
-    c = get_client(SQLStorageApp, settings)
-
+    c = get_client(config)
+    create_admin(c, 'admin', 'password', 'admin@localhost.localdomain')
     _test_authentication(c)

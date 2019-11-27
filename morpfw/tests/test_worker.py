@@ -1,3 +1,4 @@
+import os
 from .common import get_client, start_worker
 from morpfw.app import SQLApp
 from more.basicauth import BasicAuthIdentityPolicy
@@ -60,16 +61,10 @@ def handler3(request, obj):
     raise Exception('Error')
 
 
-# @pytest.fixture(scope='session')
-# def celery_config():
-#	return {
-#		'broker_url': 'amqp://guest:guest@localhost:34567/',
-#		'result_backend': 'db+postgresql://postgres@localhost:45678/morp_tests'
-#	}
-
-
 def test_signal(pgsql_db, pika_connection_channel, celery_worker):
-    c = get_client(App, get_identity_policy=get_identity_policy,
+    config = os.path.join(os.path.dirname(__file__),
+                          'test_worker-settings.yml')
+    c = get_client(config, get_identity_policy=get_identity_policy,
                    verify_identity=verify_identity)
 
     c.authorization = ('Basic', ('dummy', 'dummy'))

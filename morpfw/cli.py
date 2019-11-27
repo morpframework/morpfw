@@ -17,6 +17,7 @@ from urllib.parse import urlparse
 import code
 import readline
 import rlcompleter
+import hydra
 
 
 def load_settings(settings_file, default=default_settings):
@@ -42,16 +43,16 @@ def load_settings(settings_file, default=default_settings):
     return settings
 
 
-def load(app_path, settings_file=None, host=None, port=None):
+def load(settings_file: str = None, host: str = None, port: int = None):
     settings = load_settings(settings_file)
 
-    if not app_path:
-        if 'application' not in settings:
-            print("'application' section is required in settings")
-            sys.exit(1)
-        if 'app' not in settings['application']:
-            print("Missing application:app entry in settings")
-        app_path = settings['application']['app']
+    if 'application' not in settings:
+        print("'application' section is required in settings")
+        sys.exit(1)
+    if 'factory' not in settings['application']:
+        print("Missing application:factory entry in settings")
+
+    factory_path = settings['application']['factory']
 
     if 'server' in settings:
         if not host:
@@ -60,11 +61,11 @@ def load(app_path, settings_file=None, host=None, port=None):
             port = settings['server'].get('listen_port', 5432)
 
     sys.path.append(os.getcwd())
-    mod, clsname = app_path.split(':')
-    app_cls = getattr(importlib.import_module(mod), clsname)
+    mod, fname = factory_path.split(':')
+    factory = getattr(importlib.import_module(mod), fname)
 
     return {
-        'app_cls': app_cls,
+        'factory': factory,
         'settings': settings,
         'host': host,
         'port': port
@@ -73,15 +74,10 @@ def load(app_path, settings_file=None, host=None, port=None):
 
 @click.group()
 @click.option('-s', '--settings', type=str, default=None, help='path to settings.yml')
-@click.option('-a', '--app', type=str, default=None,
-              help='path to App class (eg: myapp.app:App)')
 @click.pass_context
-def cli(ctx, settings, app):
+def cli(ctx, settings):
     """Manage Morp application services"""
-    if app is None and settings is None:
-        print('Either --app or --settings must be supplied')
     ctx.ensure_object(dict)
-    ctx.obj['app'] = app
     ctx.obj['settings'] = settings
 
 
@@ -91,24 +87,24 @@ def cli(ctx, settings, app):
 @click.option('--prod', default=False, type=bool, is_flag=True, help='Production mode')
 @click.pass_context
 def start(ctx, host, port, prod):
-    param = load(ctx.obj['app'], ctx.obj['settings'], host, port)
+    param = load(ctx.obj['settings'], host, port)
     if prod:
-        morpfw.runprod(param['app_cls'], settings=param['settings'], host=param['host'],
+        morpfw.runprod(param['factory'](param['settings']), settings=param['settings'], host=param['host'],
                        port=param['port'], ignore_cli=True)
     else:
-        morpfw.run(param['app_cls'], settings=param['settings'], host=param['host'],
+        morpfw.run(param['factory'](param['settings']), settings=param['settings'], host=param['host'],
                    port=param['port'], ignore_cli=True)
 
 
 @cli.command(help='start celery worker')
 @click.pass_context
 def solo_worker(ctx):
-    param = load(ctx.obj['app'], ctx.obj['settings'])
+    param = load(ctx.obj['settings'])
     hostname = socket.gethostname()
-    ws = param['settings']['worker']['celery_settings']
+    ws = param['settings']['configuration']['morpfw.celery']
     now = datetime.utcnow().strftime(r'%Y%m%d%H%M')
-    app = create_app(param['app_cls'], param['settings'])
-    worker = param['app_cls'].celery.Worker(
+    app = param['factory'](param['settings'])
+    worker = app.celery.Worker(
         hostname='worker%s.%s' % (now, hostname), **ws)
     worker.start()
 
@@ -116,11 +112,11 @@ def solo_worker(ctx):
 @cli.command(help='start celery beat scheduler')
 @click.pass_context
 def scheduler(ctx):
-    param = load(ctx.obj['app'], ctx.obj['settings'])
+    param = load(ctx.obj['settings'])
     hostname = socket.gethostname()
-    ss = param['settings']['worker']['celery_settings']
-    app = create_app(param['app_cls'], param['settings'])
-    sched = param['app_cls'].celery.Beat(
+    ss = param['settings']['configuration']['morpfw.celery']
+    app = param['factory'](param['settings'])
+    sched = app.celery.Beat(
         hostname='scheduler.%s' % hostname, **ss)
     sched.run()
 
@@ -132,8 +128,8 @@ def scheduler(ctx):
               hide_input=True, confirmation_prompt=True)
 @click.pass_context
 def register_admin(ctx, username, email, password):
-    param = load(ctx.obj['app'], ctx.obj['settings'])
-    app = create_app(param['app_cls'], param['settings'])
+    param = load(ctx.obj['settings'])
+    app = param['factory'](param['settings'])
     while not isinstance(app, morepath.App):
         wrapped = getattr(app, 'app', None)
         if wrapped:
@@ -151,8 +147,8 @@ def register_admin(ctx, username, email, password):
 @click.pass_context
 def shell(ctx):
     from morepath.authentication import Identity
-    param = load(ctx.obj['app'], ctx.obj['settings'])
-    app = create_app(param['app_cls'], param['settings'])
+    param = load(ctx.obj['settings'])
+    app = param['factory'](param['settings'])
 
     while not isinstance(app, morepath.App):
         wrapped = getattr(app, 'app', None)

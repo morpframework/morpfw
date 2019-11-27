@@ -186,18 +186,6 @@ class AuthnPolicy(BaseAuthnPolicy):
         return False
 
 
-def get_client(app, config='settings.yml'):
-    if isinstance(config, str):
-        with open(os.path.join(os.path.dirname(__file__), config)) as f:
-            settings = yaml.load(f) or {}
-    else:
-        settings = config
-
-    appobj = create_app(app, settings)
-    c = Client(appobj)
-    return c
-
-
 def run_jslcrud_test(c, skip_aggregate=False):
 
     c.authorization = ('Basic', ('admin', 'admin'))

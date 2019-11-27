@@ -1,9 +1,11 @@
+import os
 from .crud_common import App as BaseApp
 from morpfw.crud.model import Collection, Model
 from morpfw.crud.schema import Schema
 from morpfw.crud.storage.elasticsearchstorage import ElasticSearchStorage
 from morpfw.crud.blobstorage.fsblobstorage import FSBlobStorage
-from .crud_common import get_client, run_jslcrud_test
+from ..common import get_client
+from .crud_common import run_jslcrud_test
 from .crud_common import PageCollection, PageModel, PageSchema
 from .crud_common import NamedObjectCollection, NamedObjectModel
 from .crud_common import BlobObjectCollection, BlobObjectModel
@@ -199,5 +201,8 @@ def test_elasticsearchstorage(es_client):
                                                 }
                                             }
                                         })
-    client = get_client(App)
+
+    config = os.path.join(os.path.dirname(__file__),
+                          'test_elasticsearchstorage-settings.yml')
+    client = get_client(config)
     run_jslcrud_test(client)

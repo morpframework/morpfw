@@ -1,8 +1,10 @@
 import jsl
+import os
 from morpfw.crud.storage.memorystorage import MemoryStorage
 from morpfw.crud.blobstorage.fsblobstorage import FSBlobStorage
 import morpfw.crud.signals as signals
-from .crud_common import get_client, run_jslcrud_test
+from ..common import get_client
+from .crud_common import run_jslcrud_test
 from .crud_common import PageCollection, PageModel, PageSchema
 from .crud_common import ObjectCollection, ObjectModel
 from .crud_common import NamedObjectCollection, NamedObjectModel
@@ -108,5 +110,7 @@ def blobobject_model_factory(request, identifier):
 
 
 def test_memorystorage():
-    client = get_client(App)
+    config = os.path.join(os.path.dirname(__file__),
+                          'test_memorystorage-settings.yml')
+    client = get_client(config)
     run_jslcrud_test(client, skip_aggregate=True)
