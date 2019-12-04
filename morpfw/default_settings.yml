@@ -20,4 +20,5 @@ configuration:
     master_secret: secret
     leeway: 10
     allow_refresh: true
+    refresh_nonce_handler: morpfw.authn.pas.user.path.refresh_nonce_handler
   morpfw.celery: {}

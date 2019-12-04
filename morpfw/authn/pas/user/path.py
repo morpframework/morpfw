@@ -10,3 +10,14 @@ def get_user(request: morepath.Request, identifier) -> UserModel:
 
 def get_user_collection(request: morepath.Request) -> UserCollection:
     return UserCollection(request, storage=request.app.get_storage(UserModel, request))
+
+
+def get_current_user(request: morepath.Request) -> UserModel:
+    userid = request.identity.userid
+    collection = get_user_collection(request)
+    return collection.get_by_userid(userid)
+
+
+def refresh_nonce_handler(request, userid):
+    collection = get_user_collection(request)
+    return collection.get_by_userid(userid)['nonce']

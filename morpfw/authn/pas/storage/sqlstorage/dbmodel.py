@@ -14,6 +14,7 @@ class User(Base):
     email = sa.Column(sa.String)
     password = sa.Column(sa.String(length=1024))
     source = sa.Column(sa.String(length=1024))
+    nonce = sa.Column(sa.String(length=24))
 
 
 class APIKey(Base):

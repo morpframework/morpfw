@@ -4,6 +4,7 @@ from ..model import NAME_PATTERN, EMAIL_PATTERN
 from ..app import App
 from dataclasses import dataclass, field
 import typing
+import secrets
 
 
 @dataclass
@@ -56,6 +57,8 @@ class UserSchema(Schema):
     })
 
     password: typing.Optional[str] = field(default=None)
+    nonce: typing.Optional[str] = field(
+        default_factory=lambda: secrets.token_hex(8))
     source: typing.Optional[str] = field(default='local')
 
 

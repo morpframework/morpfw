@@ -16,6 +16,7 @@ import re
 from .schema import RegistrationSchema, UserSchema, LoginSchema
 from ..exc import UserExistsError
 from ..utils import has_role
+import secrets
 
 
 class UserCollection(Collection):
@@ -63,7 +64,9 @@ class UserModel(Model):
 
     def change_password(self, password: str, new_password: str):
         rules = self.rulesprovider()
-        return rules.change_password(password, new_password)
+        result = rules.change_password(password, new_password)
+        self['nonce'] = secrets.token_hex(8)
+        return result
 
     def validate(self, password: str, check_state: bool = True):
         rules = self.rulesprovider()

@@ -15,3 +15,4 @@ from .main import create_app, run, runprod
 from .main import create_admin
 from .crud import signals as crudsignals
 from .util import get_group, get_user
+from .authn.pas.user.path import get_current_user
