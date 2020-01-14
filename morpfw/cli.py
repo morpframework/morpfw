@@ -198,3 +198,42 @@ def _shell(vars):
     readline.parse_and_bind("tab: complete")
     shell = code.InteractiveConsole(vars)
     shell.interact()
+
+
+@cli.command(help='Initialize Database')
+@click.pass_context
+def initdb(ctx):
+    param = load(ctx.obj['settings'])
+    app = param['factory'](param['settings'])
+
+    while not isinstance(app, morepath.App):
+        wrapped = getattr(app, 'app', None)
+        if wrapped:
+            app = wrapped
+        else:
+            raise ValueError(
+                'Unable to locate app object from middleware')
+
+    settings = param['settings']
+
+    app.initdb()
+
+
+@cli.command(help='Reset database')
+@click.pass_context
+def resetdb(ctx):
+    param = load(ctx.obj['settings'])
+    app = param['factory'](param['settings'])
+
+    while not isinstance(app, morepath.App):
+        wrapped = getattr(app, 'app', None)
+        if wrapped:
+            app = wrapped
+        else:
+            raise ValueError(
+                'Unable to locate app object from middleware')
+
+    settings = param['settings']
+
+    app.resetdb()
+    app.initdb()

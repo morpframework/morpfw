@@ -68,6 +68,7 @@ setup(name='morpfw',
           'eventlet',
           'wsgigzip',
           'hydra-core',
+          'psycopg2'
       ],
       extras_require={
           'test': [

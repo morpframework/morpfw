@@ -23,7 +23,7 @@ import transaction
 import os
 from zope.sqlalchemy import register as register_session
 import transaction
-from zope.sqlalchemy import ZopeTransactionExtension
+from zope.sqlalchemy import ZopeTransactionEvents
 from .exc import ConfigurationError
 import warnings
 import sqlalchemy.orm
@@ -39,7 +39,7 @@ from billiard.einfo import ExceptionInfo
 from .signal.app import SignalApp
 import reg
 
-Session = sessionmaker(extension=ZopeTransactionExtension())
+Session = sessionmaker()
 register_session(Session)
 
 
@@ -118,3 +118,7 @@ class SQLApp(TransactionApp, BaseApp):
 
     def initdb(self, session=Session):
         Base.metadata.create_all(self.engine)
+
+    def resetdb(self, session=Session):
+        Base.metadata.drop_all(self.engine)
+        transaction.commit()

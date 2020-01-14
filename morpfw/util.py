@@ -17,3 +17,8 @@ def delete_group(request, groupname):
 def get_user(request, username):
     collection = get_user_collection(request)
     return collection.get(username)
+
+
+def get_user_by_userid(request, userid):
+    collection = get_user_collection(request)
+    return collection.get_by_userid(userid)
