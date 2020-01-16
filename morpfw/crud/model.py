@@ -8,6 +8,8 @@ from . import permission
 from . import signals
 from .log import logger
 from rulez import validate_condition, parse_dsl, OperatorNotAllowedError
+from rulez import field as rfield
+import rulez
 from morepath import reify
 from DateTime import DateTime
 from uuid import uuid4
@@ -115,6 +117,15 @@ class Collection(ICollection):
             self.schema, data, self.request)
         if identifier and self.get(identifier):
             raise self.exist_exc(identifier)
+        unique_constraint = getattr(self.schema, '__unique_constraint__', None)
+        if unique_constraint:
+            unique_search = []
+            msg = []
+            for c in unique_constraint:
+                unique_search.append(rfield[c] == data[c])
+                msg.append(f'{c}=({data[c]})')
+            if self.search(rulez.and_(*unique_search)):
+                raise self.exist_exc(' '.join(msg))
         obj = self._create(data)
         obj.set_initial_state()
         dispatch = self.request.app.dispatcher(signals.OBJECT_CREATED)
