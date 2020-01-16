@@ -1,6 +1,7 @@
 import sqlalchemy as sa
 import uuid
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.exc import StatementError
 from rulez import compile_condition
 from sqlalchemy.types import TypeDecorator, CHAR
 from sqlalchemy.dialects.postgresql import UUID
@@ -173,7 +174,10 @@ class SQLStorage(BaseStorage):
         q = self.session.query(self.orm_model).filter(
             sa.and_(self.orm_model.deleted.is_(None),
                     getattr(self.orm_model, idfield) == identifier))
-        r = q.first()
+        try:
+            r = q.first()
+        except StatementError:
+            return None
         if not r:
             return None
         return self.model(self.request, self, r)
