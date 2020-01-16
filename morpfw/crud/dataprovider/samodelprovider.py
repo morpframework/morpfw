@@ -132,7 +132,7 @@ class SQLAlchemyModelProvider(IDataProvider):
         for n, f in fields:
             t = dataclass_get_type(f)
             v = self.get(n)
-            if not v and t['metadata']['exclude_if_empty']:
+            if v is None and t['metadata']['exclude_if_empty']:
                 continue
             if isinstance(v, datetime.datetime):
                 result[n] = datestr(v.isoformat())
