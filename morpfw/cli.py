@@ -237,3 +237,7 @@ def resetdb(ctx):
 
     app.resetdb()
     app.initdb()
+
+
+if __name__ == "__main__":
+    cli()
