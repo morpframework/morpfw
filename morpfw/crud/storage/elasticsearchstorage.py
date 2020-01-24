@@ -147,13 +147,10 @@ class ElasticSearchStorage(BaseStorage):
     refresh: Optional[str] = None
     auto_id = False
     use_transactions = False
+    doc_type = '_doc'
 
     @property
     def index_name(self):
-        raise NotImplementedError
-
-    @property
-    def doc_type(self):
         raise NotImplementedError
 
     @property

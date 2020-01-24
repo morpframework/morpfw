@@ -15,18 +15,18 @@ from DateTime import DateTime
 from uuid import uuid4
 from transitions import Machine
 import copy
-from .errors import StateUpdateProhibitedError, AlreadyExistsError, BlobStorageNotImplementedError
+from .errors import (
+    StateUpdateProhibitedError,
+    AlreadyExistsError,
+    BlobStorageNotImplementedError,
+)
 from .errors import UnprocessableError
 from ..interfaces import IModel, ICollection, IStorage
 import json
 import re
 
 
-ALLOWED_SEARCH_OPERATORS = [
-    'and', 'or', '==', 'in',
-    '~', '!=', '>', '<', '>=',
-    '<='
-]
+ALLOWED_SEARCH_OPERATORS = ["and", "or", "==", "in", "~", "!=", ">", "<", ">=", "<="]
 
 _marker = object()
 
@@ -60,37 +60,41 @@ class Collection(ICollection):
         self.data = None
         if data:
             # FIXME: what is this for again? o_O
-            self.data = request.app.get_dataprovider(self.schema, data,
-                                                     self.storage)
+            self.data = request.app.get_dataprovider(self.schema, data, self.storage)
 
-    def search(self, query=None, offset=0, limit=None, order_by=None,
-               secure=False):
+    def search(self, query=None, offset=0, limit=None, order_by=None, secure=False):
         objs = self._search(query, offset, limit, order_by, secure)
         if secure and limit:
-            nextpage = {'query': query,
-                        'offset': offset + limit,
-                        'limit': limit, 'order_by': order_by}
+            nextpage = {
+                "query": query,
+                "offset": offset + limit,
+                "limit": limit,
+                "order_by": order_by,
+            }
             while len(objs) < limit:
                 nextobjs = self._search(secure=True, **nextpage)
                 if len(nextobjs) == 0:
                     return list(objs[:limit])
-                nextpage['offset'] = nextpage['offset'] + limit
+                nextpage["offset"] = nextpage["offset"] + limit
                 objs = objs + nextobjs
         return objs
 
-    def _search(self, query=None, offset=0, limit=None, order_by=None,
-                secure=False):
+    def _search(self, query=None, offset=0, limit=None, order_by=None, secure=False):
         if query:
             validate_condition(query, ALLOWED_SEARCH_OPERATORS)
 
         prov = self.searchprovider()
 
-        objs = prov.search(
-            query, offset=offset, limit=limit, order_by=order_by)
+        objs = prov.search(query, offset=offset, limit=limit, order_by=order_by)
 
         if secure:
-            objs = list([obj for obj in objs if self.request.app.permits(
-                self.request, obj, permission.View)])
+            objs = list(
+                [
+                    obj
+                    for obj in objs
+                    if self.request.app.permits(self.request, obj, permission.View)
+                ]
+            )
         return list(objs)
 
     def aggregate(self, query=None, group=None, order_by=None):
@@ -113,19 +117,21 @@ class Collection(ICollection):
     def create(self, data):
         self.schema.validate(self.request, data, additional_properties=True)
         self.before_create(data)
-        identifier = self.app.get_default_identifier(
-            self.schema, data, self.request)
+        identifier = self.app.get_default_identifier(self.schema, data, self.request)
         if identifier and self.get(identifier):
             raise self.exist_exc(identifier)
-        unique_constraint = getattr(self.schema, '__unique_constraint__', None)
+        unique_constraint = getattr(self.schema, "__unique_constraint__", None)
         if unique_constraint:
             unique_search = []
             msg = []
             for c in unique_constraint:
-                unique_search.append(rfield[c] == data[c])
-                msg.append(f'{c}=({data[c]})')
+                unique_search.append(rulez.field[c] == data[c])
+                msg.append(f"{c}=({data[c]})")
             if self.search(rulez.and_(*unique_search)):
-                raise self.exist_exc(' '.join(msg))
+                raise self.exist_exc(" ".join(msg))
+        validators = getattr(self.schema, "__validators__", [])
+        for validator in validators:
+            validator(self, self.request, data)
         obj = self._create(data)
         obj.set_initial_state()
         dispatch = self.request.app.dispatcher(signals.OBJECT_CREATED)
@@ -148,23 +154,21 @@ class Collection(ICollection):
 
     def json(self):
         return {
-            'schema': dataclass_to_jsl(self.schema).get_schema(ordered=True),
-            'links': self.links()
+            "schema": dataclass_to_jsl(self.schema).get_schema(ordered=True),
+            "links": self.links(),
         }
 
     def links(self):
         request = self.request
         links = []
         if self.create_view_enabled:
-            links.append({'rel': 'create',
-                          'href': request.link(self),
-                          'method': 'POST'})
+            links.append(
+                {"rel": "create", "href": request.link(self), "method": "POST"}
+            )
         if self.search_view_enabled:
-            links.append({'rel': 'search',
-                          'href': request.link(self, '+search')})
+            links.append({"rel": "search", "href": request.link(self, "+search")})
         if self.aggregate_view_enabled:
-            links.append({'rel': 'aggregate',
-                          'href': request.link(self, '+aggregate')})
+            links.append({"rel": "aggregate", "href": request.link(self, "+aggregate")})
         links += self._links()
         return links
 
@@ -178,13 +182,19 @@ class Model(IModel):
     update_view_enabled = True
     delete_view_enabled = True
 
-    blobstorage_field: str = 'blobs'
+    blobstorage_field: str = "blobs"
     blob_fields: list = []
     blob_field_options: dict = {}
     protected_fields: list = [
-        'id', 'blobs', 'state', 'xattrs',
-        'modified', 'created', 'uuid',
-        'creator', 'deleted'
+        "id",
+        "blobs",
+        "state",
+        "xattrs",
+        "modified",
+        "created",
+        "uuid",
+        "creator",
+        "deleted",
     ]
     hidden_fields: list = []
 
@@ -224,7 +234,8 @@ class Model(IModel):
         identifier = self.data.get(idfield)
         if identifier is None:
             identifier = self.app.get_default_identifier(
-                self.schema, self.data, self.request)
+                self.schema, self.data, self.request
+            )
             if identifier is None:
                 return None
             return identifier
@@ -240,33 +251,44 @@ class Model(IModel):
         self.request = request
         self.storage = storage
         self.app = request.app
-        self.data = request.app.get_dataprovider(self.schema, data,
-                                                 self.storage)
+        self.data = request.app.get_dataprovider(self.schema, data, self.storage)
         self._cached_identifier = None
         super().__init__(request, storage, data)
 
     def update(self, newdata: dict, secure: bool = False):
         self.schema.validate(self.request, newdata, update_mode=True)
         if secure:
-            if 'state' in newdata:
+            if "state" in newdata:
                 raise StateUpdateProhibitedError()
             for protected in self.protected_fields:
                 if protected in newdata.keys():
                     raise UnprocessableError(
-                        "%s is not allowed to be updated in this context" % protected)
+                        "%s is not allowed to be updated in this context" % protected
+                    )
 
         data = self._raw_json()
         self.before_update(newdata)
         data.update(newdata)
         self.schema.validate(self.request, data)
+        unique_constraint = getattr(self.schema, "__unique_constraint__", None)
+        if unique_constraint:
+            unique_search = []
+            msg = []
+            for c in unique_constraint:
+                unique_search.append(rulez.field[c] == data[c])
+                msg.append(f"{c}=({data[c]})")
+            if self.search(rulez.and_(*unique_search)):
+                raise self.exist_exc(" ".join(msg))
+        validators = getattr(self.schema, "__validators__", [])
+        for validator in validators:
+            validate(self, self.request, data)
         self.storage.update(self.identifier, data)
         dispatch = self.request.app.dispatcher(signals.OBJECT_UPDATED)
         dispatch.dispatch(self.request, self)
         self.after_updated()
 
     def delete(self):
-        dispatch = self.request.app.dispatcher(
-            signals.OBJECT_TOBEDELETED)
+        dispatch = self.request.app.dispatcher(signals.OBJECT_TOBEDELETED)
         dispatch.dispatch(self.request, self)
         self.before_delete()
         self.storage.delete(self.identifier, model=self)
@@ -285,8 +307,10 @@ class Model(IModel):
         try:
             self.schema.validate(self.request, jsondata)
         except ValidationError as e:
-            logger.warn('%s(%s) : %s' % (self.schema.__name__,
-                                         '/'.join(list(e.path)), e.message))
+            logger.warn(
+                "%s(%s) : %s"
+                % (self.schema.__name__, "/".join(list(e.path)), e.message)
+            )
         return jsondata
 
     def _json(self):
@@ -294,10 +318,7 @@ class Model(IModel):
 
     def json(self):
         if self.linkable:
-            return {
-                'data': self._json(),
-                'links': self.links()
-            }
+            return {"data": self._json(), "links": self.links()}
         return self._json()
 
     def as_json(self):
@@ -308,28 +329,23 @@ class Model(IModel):
 
     def links(self):
         links = []
-        links.append({
-            'rel': 'self',
-            'href': self.request.link(self)
-        })
+        links.append({"rel": "self", "href": self.request.link(self)})
         if self.update_view_enabled:
-            links.append({
-                'rel': 'update',
-                'href': self.request.link(self),
-                'method': 'PATCH'
-            })
+            links.append(
+                {"rel": "update", "href": self.request.link(self), "method": "PATCH"}
+            )
         if self.delete_view_enabled:
-            links.append({
-                'rel': 'delete',
-                'href': self.request.link(self),
-                'method': 'DELETE'
-            })
+            links.append(
+                {"rel": "delete", "href": self.request.link(self), "method": "DELETE"}
+            )
         if self.statemachine_view_enabled:
-            links.append({
-                'rel': 'statemachine',
-                'href': self.request.link(self, '+statemachine'),
-                'method': 'POST'
-            })
+            links.append(
+                {
+                    "rel": "statemachine",
+                    "href": self.request.link(self, "+statemachine"),
+                    "method": "POST",
+                }
+            )
         links += self._links()
         return links
 
@@ -355,22 +371,24 @@ class Model(IModel):
     def _blob_guard(self, field):
         if self.blobstorage_field not in self.schema.__dataclass_fields__.keys():
             raise BlobStorageNotImplementedError(
-                'Object does not implement blobs store')
+                "Object does not implement blobs store"
+            )
         if field not in self.blob_fields:
             raise BlobStorageNotImplementedError(
-                'Field %s not allowed for blobstorage' % field)
+                "Field %s not allowed for blobstorage" % field
+            )
 
-    def put_blob(self, field, fileobj, filename, mimetype=None, size=None, encoding=None):
+    def put_blob(
+        self, field, fileobj, filename, mimetype=None, size=None, encoding=None
+    ):
         self._blob_guard(field)
-        allowed_types = self.blob_field_options.get(
-            field, {}).get('allowed_types', [])
+        allowed_types = self.blob_field_options.get(field, {}).get("allowed_types", [])
         if mimetype and allowed_types and mimetype not in allowed_types:
             raise ValueError("Mimetype %s not allowed" % mimetype)
         self.before_blobput(field, fileobj, filename, mimetype, size, encoding)
         blob_data = self.data[self.blobstorage_field] or {}
         existing = blob_data.get(field, None)
-        blob = self.storage.put_blob(
-            fileobj, filename, mimetype, size, encoding)
+        blob = self.storage.put_blob(fileobj, filename, mimetype, size, encoding)
         blob_data[field] = blob.uuid
         self.update({self.blobstorage_field: blob_data})
         if existing:

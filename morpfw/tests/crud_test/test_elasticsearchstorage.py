@@ -29,10 +29,9 @@ register_session(Session)
 
 
 class ESClientRequest(Request):
-
     @reify
     def es_client(self):
-        return Elasticsearch(hosts='127.0.0.1:9085')
+        return Elasticsearch(hosts="127.0.0.1:9085")
 
 
 class App(BaseApp, TransactionApp):
@@ -41,34 +40,33 @@ class App(BaseApp, TransactionApp):
 
 
 class PageStorage(ElasticSearchStorage):
-    index_name = 'test-index'
-    doc_type = 'page'
-    refresh = 'wait_for'
+    index_name = "test-page"
+    refresh = True
     model = PageModel
 
 
-@App.path(model=PageCollection, path='pages')
+@App.path(model=PageCollection, path="pages")
 def collection_factory(request):
     storage = PageStorage(request)
     return PageCollection(request, storage)
 
 
-@App.path(model=PageModel, path='pages/{identifier}')
+@App.path(model=PageModel, path="pages/{identifier}")
 def model_factory(request, identifier):
     storage = PageStorage(request)
     return storage.get(identifier)
 
 
-@App.typeinfo(name='tests.page')
+@App.typeinfo(name="tests.page")
 def get_page_typeinfo(request):
     return {
-        'title': 'Page',
-        'description': 'Page type',
-        'schema': PageSchema,
-        'collection': PageCollection,
-        'collection_factory': collection_factory,
-        'model': PageModel,
-        'model_factory': model_factory,
+        "title": "Page",
+        "description": "Page type",
+        "schema": PageSchema,
+        "collection": PageCollection,
+        "collection_factory": collection_factory,
+        "model": PageModel,
+        "model_factory": model_factory,
     }
 
 
@@ -80,7 +78,7 @@ class ObjectSchema(BaseObjectSchema):
 
 @App.identifierfield(schema=ObjectSchema)
 def object_identifierfield(schema):
-    return 'id'
+    return "id"
 
 
 @App.default_identifier(schema=ObjectSchema)
@@ -103,63 +101,60 @@ class ObjectCollection(Collection):
 
 @App.subscribe(signal=signals.OBJECT_CREATED, model=ObjectModel)
 def object_created(app, request, obj, signal):
-    obj.data['created_flag'] = True
+    obj.data["created_flag"] = True
 
 
 @App.subscribe(signal=signals.OBJECT_UPDATED, model=ObjectModel)
 def object_updated(app, request, obj, signal):
-    obj.data['updated_flag'] = True
+    obj.data["updated_flag"] = True
 
 
 class ObjectStorage(ElasticSearchStorage):
-    index_name = 'test-index'
-    doc_type = 'object'
-    refresh = 'wait_for'
+    index_name = "test-object"
+    refresh = True
     auto_id = True
     model = ObjectModel
 
 
-@App.json(model=ObjectCollection, name='get_uuid')
+@App.json(model=ObjectCollection, name="get_uuid")
 def get_object_by_uuid(context, request):
-    uuid = request.GET.get('uuid')
+    uuid = request.GET.get("uuid")
     return context.get_by_uuid(uuid).json()
 
 
-@App.path(model=ObjectCollection, path='objects')
+@App.path(model=ObjectCollection, path="objects")
 def object_collection_factory(request):
     storage = ObjectStorage(request)
     return ObjectCollection(request, storage)
 
 
-@App.path(model=ObjectModel, path='objects/{identifier}')
+@App.path(model=ObjectModel, path="objects/{identifier}")
 def object_model_factory(request, identifier):
     storage = ObjectStorage(request)
     return storage.get(identifier)
 
 
 class NamedObjectStorage(ElasticSearchStorage):
-    index_name = 'test-index'
-    doc_type = 'namedobject'
-    refresh = 'wait_for'
+    index_name = "test-namedobject"
+    refresh = True
     model = NamedObjectModel
 
 
-@App.path(model=NamedObjectCollection, path='named_objects')
+@App.path(model=NamedObjectCollection, path="named_objects")
 def namedobject_collection_factory(request):
     storage = NamedObjectStorage(request)
     return NamedObjectCollection(request, storage)
 
 
-@App.path(model=NamedObjectModel, path='named_objects/{identifier}')
+@App.path(model=NamedObjectModel, path="named_objects/{identifier}")
 def namedobject_model_factory(request, identifier):
     storage = NamedObjectStorage(request)
     return storage.get(identifier)
 
 
 class BlobObjectStorage(ElasticSearchStorage):
-    index_name = 'test-index'
-    doc_type = 'blobobject'
-    refresh = 'wait_for'
+    index_name = "test-blobobject"
+    refresh = True
     model = BlobObjectModel
 
 
@@ -173,36 +168,32 @@ def get_blobobject_blobstorage(model, request):
     return FSBlobStorage(request, FSBLOB_DIR)
 
 
-@App.path(model=BlobObjectCollection, path='blob_objects')
+@App.path(model=BlobObjectCollection, path="blob_objects")
 def blobobject_collection_factory(request):
     storage = request.app.get_storage(BlobObjectModel, request)
     return BlobObjectCollection(request, storage)
 
 
-@App.path(model=BlobObjectModel, path='blob_objects/{identifier}')
+@App.path(model=BlobObjectModel, path="blob_objects/{identifier}")
 def blobobject_model_factory(request, identifier):
     storage = request.app.get_storage(BlobObjectModel, request)
     return storage.get(identifier)
 
 
 def test_elasticsearchstorage(es_client):
-    es_client.indices.create('test-index', body={
-        'settings': {
-            'number_of_shards': 1,
-            'number_of_replicas': 0
-        }
-    })
-    es_client.transport.perform_request('PUT', '/test-index/_mapping/page',
-                                        body={
-                                            'properties': {
-                                                'title': {
-                                                    'type': 'text',
-                                                    'fielddata': True
-                                                }
-                                            }
-                                        })
+    es_client.indices.create(
+        "test-page",
+        body={"settings": {"number_of_shards": 1, "number_of_replicas": 0}},
+    )
 
-    config = os.path.join(os.path.dirname(__file__),
-                          'test_elasticsearchstorage-settings.yml')
+    es_client.transport.perform_request(
+        "PUT",
+        "/test-page/_mapping/",
+        body={"properties": {"title": {"type": "text", "fielddata": True}}},
+    )
+
+    config = os.path.join(
+        os.path.dirname(__file__), "test_elasticsearchstorage-settings.yml"
+    )
     client = get_client(config)
     run_jslcrud_test(client)

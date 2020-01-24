@@ -6,14 +6,7 @@
         {
             "label": "Build Project",
             "type": "shell",
-            "command": "pipenv install --pre --dev -e .[test]",
-            "group": "build",
-            "problemMatcher": []
-        },
-        {
-            "label": "Install Non-Python Dependencies",
-            "type": "shell",
-            "command": "python install-deps.py",
+            "command": "./build.sh",
             "group": "build",
             "problemMatcher": []
         },
@@ -26,22 +19,22 @@
         {
             "label": "Test Project",
             "type": "shell",
-            "command": "pipenv run pytest --cov-report html --cov=morpfw --annotate-output=annotations.json --html=report.html --self-contained-html -s morpfw",
+            "command": "./bin/pytest --cov-report html --cov=morpfw --annotate-output=annotations.json --html=report.html --self-contained-html -s morpfw",
             "group": "test",
             "options": {
                 "env": {
-                    "ELASTICSEARCH_EXECUTABLE": "${workspaceRoot}/opt/elasticsearch/elasticsearch-5.6.2/bin/elasticsearch"
+                    "ELASTICSEARCH_EXECUTABLE": "${workspaceRoot}/parts/elasticsearch/bin/elasticsearch"
                 }
             }
         },
         {
             "label": "Test Current File",
             "type": "shell",
-            "command": "pipenv run pytest -s ${relativeFile}",
+            "command": "./bin/pytest -s ${relativeFile}",
             "group": "test",
             "options": {
                 "env": {
-                    "ELASTICSEARCH_EXECUTABLE": "${workspaceRoot}/opt/elasticsearch/elasticsearch-5.6.2/bin/elasticsearch"
+                    "ELASTICSEARCH_EXECUTABLE": "${workspaceRoot}/parts/elasticsearch/bin/elasticsearch"
                 }
             }
         }

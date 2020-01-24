@@ -15,7 +15,7 @@ import time
 pgsql_proc = factories.postgresql_proc(
     executable='/usr/bin/pg_ctl', host='localhost', port=45678,
     user='postgres')
-pgsql_db = factories.postgresql('pgsql_proc', db='morp_tests')
+pgsql_db = factories.postgresql('pgsql_proc', db_name='morp_tests')
 
 rabbitmq_pika_proc = rabbitmq_proc(
     server='/usr/lib/rabbitmq/bin/rabbitmq-server',
@@ -41,9 +41,9 @@ def es_proc(request):
         os.environ['ELASTICSEARCH_EXECUTABLE'],
         '-p', '/tmp/elasticsearch.%s.pid' % port,
         '-E', 'http.port=%s' % port,
-        '-E', 'default.path.logs=/tmp/elasticsearch_%s_logs' % port,
+        '-E', 'path.logs=/tmp/elasticsearch_%s_logs' % port,
         '-E', 'cluster.name=elasticsearch_cluster_%s' % port,
-        '-E', "network.publish_host='127.0.0.1'",
+        '-E', "network.publish_host=127.0.0.1",
         '-E', 'index.store.type=mmapfs'
     ]
     es_proc = mirakuru.HTTPExecutor(
