@@ -12,79 +12,82 @@ class IGroupModel(IModel):
 
 
 class IUserStorage(IStorageBase):
-
     @abc.abstractmethod
-    def create(self, data) -> IUserModel:
+    def create(self, collection, data) -> IUserModel:
         """
         Create group
         """
         raise NotImplementedError
 
     @abc.abstractmethod
-    def search(self, query: Optional[dict] = None, offset: Optional[int] = None,
-               limit: Optional[int] = None,
-               order_by: Union[None, list, tuple] = None) -> List[IUserModel]:
+    def search(
+        self,
+        collection,
+        query: Optional[dict] = None,
+        offset: Optional[int] = None,
+        limit: Optional[int] = None,
+        order_by: Union[None, list, tuple] = None,
+    ) -> List[IUserModel]:
         """return search result based on specified rulez query"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_by_id(self, id) -> IUserModel:
+    def get_by_id(self, collection, id) -> IUserModel:
         """return model from internal ID"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_by_uuid(self, uuid) -> IUserModel:
+    def get_by_uuid(self, collection, uuid) -> IUserModel:
         """return model from GUID"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def update(self, identifier, data: dict):
+    def update(self, collection, identifier, data: dict):
         """update model with values from data"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def delete(self, identifier, model: IUserModel):
+    def delete(self, collection, identifier, model: IUserModel):
         """delete model data"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_userid(self, model: IUserModel) -> str:
+    def get_userid(self, collection, model: IUserModel) -> str:
         """return the userid that will be used for internal references"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_by_email(self, email: str) -> IUserModel:
+    def get_by_email(self, collection, email: str) -> IUserModel:
         """return UserModel from email address"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_by_userid(self, userid: str) -> IUserModel:
+    def get_by_userid(self, collection, userid: str) -> IUserModel:
         """return UserModel from userid"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_by_username(self, username: str) -> IUserModel:
+    def get_by_username(self, collection, username: str) -> IUserModel:
         """return UserModel from username"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def change_password(self, userid: str, new_password: str):
+    def change_password(self, collection, userid: str, new_password: str):
         """update user's password"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_user_groups(self, userid: str) -> IGroupModel:
+    def get_user_groups(self, collection, userid: str) -> IGroupModel:
         """get groups which the userid is a member of"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def validate(self, userid: str, password: str) -> bool:
+    def validate(self, collection, userid: str, password: str) -> bool:
         """validate userid's password"""
         raise NotImplementedError
 
 
 class IGroupStorage(IStorageBase):
-
     @abc.abstractmethod
     def create(self, data):
         """
@@ -93,9 +96,13 @@ class IGroupStorage(IStorageBase):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def search(self, query: Optional[dict] = None, offset: Optional[int] = None,
-               limit: Optional[int] = None,
-               order_by: Union[None, list, tuple] = None) -> Sequence[IGroupModel]:
+    def search(
+        self,
+        query: Optional[dict] = None,
+        offset: Optional[int] = None,
+        limit: Optional[int] = None,
+        order_by: Union[None, list, tuple] = None,
+    ) -> Sequence[IGroupModel]:
         """return search result based on specified rulez query"""
         raise NotImplementedError
 
@@ -120,8 +127,7 @@ class IGroupStorage(IStorageBase):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_user_by_userid(self, userid: str,
-                           as_model: bool = True) -> IUserModel:
+    def get_user_by_userid(self, userid: str, as_model: bool = True) -> IUserModel:
         """
         get user by its userid, and return
         as UserModel if as_model is True
@@ -129,8 +135,7 @@ class IGroupStorage(IStorageBase):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_user_by_username(self, username: str,
-                             as_model: bool = True) -> IUserModel:
+    def get_user_by_username(self, username: str, as_model: bool = True) -> IUserModel:
         """
         get user by its username, and return
         as UserModel if as_model is True

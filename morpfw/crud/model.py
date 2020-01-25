@@ -142,15 +142,15 @@ class Collection(ICollection):
 
     def _create(self, data):
         data = self.storage.set_schema_defaults(data)
-        return self.storage.create(data)
+        return self.storage.create(self, data)
 
     def get(self, identifier):
         if isinstance(identifier, list) or isinstance(identifier, tuple):
             identifier = self.request.app.join_identifier(*identifier)
-        return self.storage.get(identifier)
+        return self.storage.get(self, identifier)
 
     def get_by_uuid(self, uuid):
-        return self.storage.get_by_uuid(uuid)
+        return self.storage.get_by_uuid(self, uuid)
 
     def json(self):
         return {
@@ -247,13 +247,14 @@ class Model(IModel):
         uuid_field = self.app.get_uuidfield(self.schema)
         return self.data[uuid_field]
 
-    def __init__(self, request, storage, data):
+    def __init__(self, request, collection, data):
+        self.collection = collection
         self.request = request
-        self.storage = storage
+        self.storage = collection.storage
         self.app = request.app
         self.data = request.app.get_dataprovider(self.schema, data, self.storage)
         self._cached_identifier = None
-        super().__init__(request, storage, data)
+        super().__init__(request, collection, data)
 
     def update(self, newdata: dict, secure: bool = False):
         self.schema.validate(self.request, newdata, update_mode=True)
@@ -282,7 +283,7 @@ class Model(IModel):
         validators = getattr(self.schema, "__validators__", [])
         for validator in validators:
             validate(self, self.request, data)
-        self.storage.update(self.identifier, data)
+        self.storage.update(self.collection, self.identifier, data)
         dispatch = self.request.app.dispatcher(signals.OBJECT_UPDATED)
         dispatch.dispatch(self.request, self)
         self.after_updated()
@@ -297,7 +298,7 @@ class Model(IModel):
         if self.data.changed:
             data = self._raw_json()
             self.schema.validate(self.request, data)
-            self.storage.update(self.identifier, data)
+            self.storage.update(self.collection, self.identifier, data)
 
     def _raw_json(self):
         jsondata = self.app.get_jsonprovider(self.data)

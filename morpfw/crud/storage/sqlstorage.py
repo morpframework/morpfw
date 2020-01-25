@@ -27,13 +27,13 @@ class SQLStorage(BaseStorage):
     def session(self):
         return self.request.db_session
 
-    def create(self, data):
+    def create(self, collection, data):
         o = self.orm_model()
         dst = self.app.get_dataprovider(self.model.schema, o, self)
         src = self.app.get_dataprovider(self.model.schema, data, self)
         for k, v in src.items():
             dst[k] = v
-        m = self.model(self.request, self, o)
+        m = self.model(self.request, collection, o)
         identifier = m.identifier
         self.session.add(o)
         self.session.flush()
@@ -52,74 +52,72 @@ class SQLStorage(BaseStorage):
                     fields.append(c)
                     group_bys.append(c)
                 elif isinstance(v, dict):
-                    ff = v['function']
-                    f = v['field']
+                    ff = v["function"]
+                    f = v["field"]
                     c = getattr(self.orm_model, f)
-                    if ff == 'count':
+                    if ff == "count":
                         op = func.count(c).label(k)
                         fields.append(op)
                         group_bys_map[k] = op
-                    elif ff == 'sum':
+                    elif ff == "sum":
                         op = func.sum(c).label(k)
                         fields.append(op)
                         group_bys_map[k] = op
-                    elif ff == 'avg':
+                    elif ff == "avg":
                         op = func.avg(c).label(k)
                         fields.append(op)
                         group_bys_map[k] = op
-                    elif ff == 'min':
+                    elif ff == "min":
                         op = func.min(c).label(k)
                         fields.append(op)
                         group_bys_map[k] = op
-                    elif ff == 'max':
+                    elif ff == "max":
                         op = func.max(c).label(k)
                         fields.append(op)
                         group_bys_map[k] = op
-                    elif ff == 'year':
-                        op = func.date_part('YEAR', c).label(k)
+                    elif ff == "year":
+                        op = func.date_part("YEAR", c).label(k)
                         fields.append(op)
                         group_bys.append(op)
                         group_bys_map[k] = op
-                    elif ff == 'month':
-                        op = func.date_part('MONTH', c).label(k)
+                    elif ff == "month":
+                        op = func.date_part("MONTH", c).label(k)
                         fields.append(op)
                         group_bys.append(op)
                         group_bys_map[k] = op
-                    elif ff == 'day':
-                        op = func.date_part('DAY', c).label(k)
+                    elif ff == "day":
+                        op = func.date_part("DAY", c).label(k)
                         fields.append(op)
                         group_bys.append(op)
                         group_bys_map[k] = op
-                    elif ff == 'date':
-                        op = func.to_char(c, 'YYYY-MM-DD').label(k)
+                    elif ff == "date":
+                        op = func.to_char(c, "YYYY-MM-DD").label(k)
                         fields.append(op)
                         group_bys.append(op)
                         group_bys_map[k] = op
                     else:
-                        raise ValueError('Unknown function %s' % ff)
+                        raise ValueError("Unknown function %s" % ff)
         else:
             fields = [self.orm_model]
 
         if query:
-            f = compile_condition('sqlalchemy', query)
+            f = compile_condition("sqlalchemy", query)
             filterquery = f(self.orm_model)
-            filterquery = sa.and_(
-                self.orm_model.deleted.is_(None), filterquery)
+            filterquery = sa.and_(self.orm_model.deleted.is_(None), filterquery)
             q = self.session.query(*fields).filter(filterquery)
         else:
-            q = self.session.query(
-                *fields).filter(self.orm_model.deleted.is_(None))
+            q = self.session.query(*fields).filter(self.orm_model.deleted.is_(None))
 
         if order_by is not None:
             col = order_by[0]
             d = order_by[1]
-            if d not in ['asc', 'desc']:
+            if d not in ["asc", "desc"]:
                 raise KeyError(d)
             if col in group_bys_map:
                 colattr = group_bys_map[col]
             else:
                 colattr = getattr(self.orm_model, col)
-            if d == 'desc':
+            if d == "desc":
                 q = q.order_by(colattr.desc())
             else:
                 q = q.order_by(colattr)
@@ -141,23 +139,25 @@ class SQLStorage(BaseStorage):
             results.append(d)
         return results
 
-    def search(self, query=None, offset=None, limit=None, order_by=None):
+    def search(self, collection, query=None, offset=None, limit=None, order_by=None):
         if query:
-            f = compile_condition('sqlalchemy', query)
+            f = compile_condition("sqlalchemy", query)
             filterquery = f(self.orm_model)
-            q = self.session.query(self.orm_model).filter(sa.and_(
-                self.orm_model.deleted.is_(None), filterquery))
+            q = self.session.query(self.orm_model).filter(
+                sa.and_(self.orm_model.deleted.is_(None), filterquery)
+            )
         else:
             q = self.session.query(self.orm_model).filter(
-                self.orm_model.deleted.is_(None))
+                self.orm_model.deleted.is_(None)
+            )
 
         if order_by is not None:
             col = order_by[0]
             d = order_by[1]
-            if d not in ['asc', 'desc']:
+            if d not in ["asc", "desc"]:
                 raise KeyError(d)
             colattr = getattr(self.orm_model, col)
-            if d == 'desc':
+            if d == "desc":
                 q = q.order_by(colattr.desc())
             else:
                 q = q.order_by(colattr)
@@ -166,42 +166,46 @@ class SQLStorage(BaseStorage):
         if limit is not None:
             q = q.limit(limit)
 
-        return [self.model(self.request, self, o) for o in q.all()]
+        return [self.model(self.request, collection, o) for o in q.all()]
 
-    def get(self, identifier):
+    def get(self, collection, identifier):
         qs = []
         idfield = self.app.get_identifierfield(self.model.schema)
         q = self.session.query(self.orm_model).filter(
-            sa.and_(self.orm_model.deleted.is_(None),
-                    getattr(self.orm_model, idfield) == identifier))
+            sa.and_(
+                self.orm_model.deleted.is_(None),
+                getattr(self.orm_model, idfield) == identifier,
+            )
+        )
         try:
             r = q.first()
         except StatementError:
             return None
         if not r:
             return None
-        return self.model(self.request, self, r)
+        return self.model(self.request, collection, r)
 
-    def get_by_id(self, id):
+    def get_by_id(self, collection, id):
         q = self.session.query(self.orm_model).filter(self.orm_model.id == id)
         r = q.first()
         if not r:
             return None
-        return self.model(self.request, self, r)
+        return self.model(self.request, collection, r)
 
-    def get_by_uuid(self, uuid):
+    def get_by_uuid(self, collection, uuid):
         uuid_field = self.app.get_uuidfield(self.model.schema)
         if getattr(self.orm_model, uuid_field, None) is None:
-            raise AttributeError('%s does not have %s field' %
-                                 (self.orm_model, uuid_field))
+            raise AttributeError(
+                "%s does not have %s field" % (self.orm_model, uuid_field)
+            )
         qs = getattr(self.orm_model, uuid_field) == uuid
         q = self.session.query(self.orm_model).filter(qs)
         r = q.first()
         if not r:
             return None
-        return self.model(self.request, self, r)
+        return self.model(self.request, collection, r)
 
-    def update(self, identifier, data):
+    def update(self, collection, identifier, data):
         qs = []
 
         idfield = self.app.get_identifierfield(self.model.schema)
@@ -218,10 +222,10 @@ class SQLStorage(BaseStorage):
             if d.get(k, None) != v:
                 d[k] = v
 
-        return self.model(self.request, self, r)
+        return self.model(self.request, collection, r)
 
     def delete(self, identifier, model):
-        model['deleted'] = datetime.utcnow()
+        model["deleted"] = datetime.utcnow()
 
 
 class GUID(TypeDecorator):
@@ -231,10 +235,11 @@ class GUID(TypeDecorator):
     CHAR(32), storing as stringified hex values.
 
     """
+
     impl = CHAR
 
     def load_dialect_impl(self, dialect):
-        if dialect.name == 'postgresql':
+        if dialect.name == "postgresql":
             return dialect.type_descriptor(UUID())
         else:
             return dialect.type_descriptor(CHAR(32))
@@ -242,7 +247,7 @@ class GUID(TypeDecorator):
     def process_bind_param(self, value, dialect):
         if value is None:
             return value
-        elif dialect.name == 'postgresql':
+        elif dialect.name == "postgresql":
             return str(value)
         else:
             if not isinstance(value, uuid.UUID):

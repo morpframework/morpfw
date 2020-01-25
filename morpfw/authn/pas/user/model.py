@@ -11,6 +11,7 @@ from morpfw.crud import errors as cruderrors
 from morpfw.crud.schema import Schema
 from morpfw.crud.validator import regex_validator
 from ..group.model import GroupCollection, GroupSchema, GroupModel
+from ..group.path import get_group_collection
 from uuid import uuid4
 import re
 from .schema import RegistrationSchema, UserSchema, LoginSchema
@@ -26,9 +27,9 @@ class UserCollection(Collection):
 
     def authenticate(self, username, password):
         if re.match(EMAIL_PATTERN, username):
-            user = self.storage.get_by_email(username)
+            user = self.storage.get_by_email(self, username)
         else:
-            user = self.storage.get(username)
+            user = self.storage.get(self, username)
 
         if user is None:
             return None
@@ -37,10 +38,10 @@ class UserCollection(Collection):
         return user
 
     def get_by_userid(self, userid):
-        return self.storage.get_by_userid(userid)
+        return self.storage.get_by_userid(self, userid)
 
     def get_by_email(self, email):
-        return self.storage.get_by_email(email)
+        return self.storage.get_by_email(self, email)
 
     def _create(self, data):
         return super(UserCollection, self)._create(data)
@@ -50,9 +51,9 @@ class UserModel(Model):
 
     schema = UserSchema
 
-    blob_fields = ['profile-photo']
-    protected_fields = Model.protected_fields + ['username', 'password']
-    hidden_fields = Model.hidden_fields + ['password']
+    blob_fields = ["profile-photo"]
+    protected_fields = Model.protected_fields + ["username", "password"]
+    hidden_fields = Model.hidden_fields + ["password"]
 
     @property
     def userid(self):
@@ -65,7 +66,7 @@ class UserModel(Model):
     def change_password(self, password: str, new_password: str):
         rules = self.rulesprovider()
         result = rules.change_password(password, new_password)
-        self['nonce'] = secrets.token_hex(8)
+        self["nonce"] = secrets.token_hex(8)
         return result
 
     def validate(self, password: str, check_state: bool = True):
@@ -73,36 +74,30 @@ class UserModel(Model):
         return rules.validate(password, check_state)
 
     def groups(self):
-        return self.storage.get_user_groups(self.userid)
+        return self.storage.get_user_groups(self.collection, self.userid)
 
     def group_roles(self):
         group_roles = {}
         for g in self.groups():
-            group_roles[g.data['groupname']] = g.get_member_roles(
-                self.userid)
+            group_roles[g.data["groupname"]] = g.get_member_roles(self.userid)
         return group_roles
 
     def _links(self):
         links = super()._links()
-        links.append({
-            'rel': 'userid',
-            'value': self.userid
-        })
+        links.append({"rel": "userid", "value": self.userid})
         for g in self.groups():
-            links.append({
-                'rel': 'group',
-                'name': g.identifier,
-                'href': self.request.link(g),
-            })
+            links.append(
+                {"rel": "group", "name": g.identifier, "href": self.request.link(g)}
+            )
         return links
 
 
 class UserStateMachine(StateMachine):
 
-    states = ['active', 'inactive', 'deleted']
+    states = ["active", "inactive", "deleted"]
     transitions = [
-        {'trigger': 'activate', 'source': 'inactive', 'dest': 'active'},
-        {'trigger': 'deactivate', 'source': 'active', 'dest': 'inactive'},
+        {"trigger": "activate", "source": "inactive", "dest": "active"},
+        {"trigger": "deactivate", "source": "active", "dest": "inactive"},
     ]
 
 
@@ -114,11 +109,10 @@ def userstatemachine(context):
 @App.subscribe(signal=crudsignal.OBJECT_CREATED, model=UserModel)
 def add_user_to_default_group(app, request, obj, signal):
     request = obj.request
-    storage = app.get_storage(GroupModel, request)
-    g = storage.get('__default__')
+    gcol = get_group_collection(request)
+    g = gcol.get("__default__")
     if g is None:
-        gcol = GroupCollection(request, storage)
-        g = gcol.create({'groupname': '__default__'})
+        g = gcol.create({"groupname": "__default__"})
     g.add_members([obj.userid])
 
 

@@ -4,6 +4,8 @@ import morepath
 from .app import SQLApp, Session, BaseApp
 from .authn.pas.user.model import UserCollection, UserSchema, UserModel
 from .authn.pas.group.model import GroupSchema, GroupModel
+from .authn.pas.group.path import get_group_collection
+from .authn.pas.user.path import get_user_collection
 from .sql import Base
 import os
 from zope.sqlalchemy import register as register_session
@@ -18,15 +20,16 @@ import tempfile
 import multiprocessing
 import subprocess
 
-default_settings = open(os.path.join(
-    os.path.dirname(__file__), 'default_settings.yml')).read()
-default_settings = default_settings.replace(r'%(here)s', os.getcwd())
+default_settings = open(
+    os.path.join(os.path.dirname(__file__), "default_settings.yml")
+).read()
+default_settings = default_settings.replace(r"%(here)s", os.getcwd())
 default_settings = yaml.load(default_settings)
 
 
 def create_app(settings, scan=True, **kwargs):
-    assert 'class' in settings['application']
-    app_mod, app_clsname = settings['application']['class'].split(':')
+    assert "class" in settings["application"]
+    app_mod, app_clsname = settings["application"]["class"].split(":")
     app = getattr(importlib.import_module(app_mod), app_clsname)
 
     s = copy.deepcopy(default_settings)
@@ -40,20 +43,20 @@ def create_app(settings, scan=True, **kwargs):
     settings = s
 
     # initialize app
-    config = settings['configuration']
+    config = settings["configuration"]
 
     if scan:
         morepath.autoscan()
-        for scanmodpath in (config['morpfw.scan'] or []):
+        for scanmodpath in config["morpfw.scan"] or []:
             scanmod = importlib.import_module(scanmodpath)
             morepath.scan(package=scanmod)
 
-    authnpolicy_settings = config['morpfw.authn.policy.settings']
-    authnpol_mod, authnpol_clsname = (
-        config['morpfw.authn.policy'].strip().split(':'))
+    authnpolicy_settings = config["morpfw.authn.policy.settings"]
+    authnpol_mod, authnpol_clsname = config["morpfw.authn.policy"].strip().split(":")
 
-    authnpolicy = getattr(importlib.import_module(
-        authnpol_mod), authnpol_clsname)(authnpolicy_settings)
+    authnpolicy = getattr(importlib.import_module(authnpol_mod), authnpol_clsname)(
+        authnpolicy_settings
+    )
 
     get_identity_policy = authnpolicy.get_identity_policy
     verify_identity = authnpolicy.verify_identity
@@ -63,47 +66,48 @@ def create_app(settings, scan=True, **kwargs):
     app.init_settings(settings)
     app._raw_settings = settings
 
-    if config['app.development_mode']:
-        os.environ['MOREPATH_TEMPLATE_AUTO_RELOAD'] = "1"
+    if config["app.development_mode"]:
+        os.environ["MOREPATH_TEMPLATE_AUTO_RELOAD"] = "1"
 
     app.commit()
 
-    celery_settings = config['morpfw.celery']
+    celery_settings = config["morpfw.celery"]
     app.celery.conf.update(**celery_settings)
     application = app()
     return application
 
 
-def create_admin(app: morepath.App, username: str, password: str, email: str, session=Session):
-    request = app.request_class(app=app, environ={'PATH_INFO': '/'})
+def create_admin(
+    app: morepath.App, username: str, password: str, email: str, session=Session
+):
+    request = app.request_class(app=app, environ={"PATH_INFO": "/"})
 
     transaction.manager.begin()
-    usercol = UserCollection(request, app.get_storage(UserModel, request))
-    userobj = usercol.create({'username': username,
-                              'password': password,
-                              'email': email,
-                              'state': 'active'})
-    gstorage = app.get_storage(GroupModel, request)
-    group = gstorage.get('__default__')
+    usercol = get_user_collection(request)
+    userobj = usercol.create(
+        {"username": username, "password": password, "email": email, "state": "active"}
+    )
+    gcol = get_group_collection(request)
+    group = gcol.get("__default__")
     group.add_members([userobj.userid])
-    group.grant_member_role(userobj.userid, 'administrator')
+    group.grant_member_role(userobj.userid, "administrator")
     transaction.manager.commit()
     return userobj
 
 
-def run(app, settings, host='127.0.0.1', port=5000, ignore_cli=True):
+def run(app, settings, host="127.0.0.1", port=5000, ignore_cli=True):
     morepath.run(app, host=host, port=port, ignore_cli=ignore_cli)
 
 
-def runprod(app, settings, host='127.0.0.1', port=5000, ignore_cli=True):
-    service = 'gunicorn'
-    server = {'listen_address': host, 'listen_port': port}
+def runprod(app, settings, host="127.0.0.1", port=5000, ignore_cli=True):
+    service = "gunicorn"
+    server = {"listen_address": host, "listen_port": port}
     opts = {}
-    opts['loglevel'] = server.get('log_level', 'INFO')
-    opts['log_directory'] = settings.get(
-        'logging', {}).get('log_directory', '/tmp')
-    os.environ['MORP_APP_FACTORY'] = settings['application']['factory']
-    logconfig = '''
+    opts["loglevel"] = server.get("log_level", "INFO")
+    opts["log_directory"] = settings.get("logging", {}).get("log_directory", "/tmp")
+    os.environ["MORP_APP_FACTORY"] = settings["application"]["factory"]
+    logconfig = (
+        """
 [loggers]
 keys=root, gunicorn.error, gunicorn.access
 
@@ -158,18 +162,32 @@ class=logging.Formatter
 [formatter_access]
 format=%%(message)s
 class=logging.Formatter
-    ''' % opts
+    """
+        % opts
+    )
     workers = (multiprocessing.cpu_count() * 2) + 1
     logconf = tempfile.mktemp()
-    with open(logconf, 'w') as f:
+    with open(logconf, "w") as f:
         f.write(logconfig)
-    subprocess.call([
-        service,
-        '--log-config', logconf,
-        '-b', '%(listen_address)s:%(listen_port)s' % server,
-        '-k', 'eventlet',
-        '--workers', str(server.get('workers', workers)),
-        '--max-requests', str(server.get('max_requests', 1000)),
-        '--max-requests-jitter', str(server.get('max_requests_jitter', 1000)),
-        '--worker-connections', str(server.get('worker_connections', 1000)),
-        '--timeout', str(server.get('worker_timeout', 30)), 'morpfw.wsgi:app'])
+    subprocess.call(
+        [
+            service,
+            "--log-config",
+            logconf,
+            "-b",
+            "%(listen_address)s:%(listen_port)s" % server,
+            "-k",
+            "eventlet",
+            "--workers",
+            str(server.get("workers", workers)),
+            "--max-requests",
+            str(server.get("max_requests", 1000)),
+            "--max-requests-jitter",
+            str(server.get("max_requests_jitter", 1000)),
+            "--worker-connections",
+            str(server.get("worker_connections", 1000)),
+            "--timeout",
+            str(server.get("worker_timeout", 30)),
+            "morpfw.wsgi:app",
+        ]
+    )

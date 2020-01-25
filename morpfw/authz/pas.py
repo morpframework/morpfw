@@ -15,7 +15,7 @@ class DefaultAuthzPolicy(morepath.App):
 
 
 def _has_admin_role(context):
-    return has_role(context.request, 'administrator')
+    return has_role(context.request, "administrator")
 
 
 @DefaultAuthzPolicy.permission_rule(model=Model, permission=crudperm.All)
@@ -28,24 +28,21 @@ def reject_all_collection_access(identity, context, permission):
     return False
 
 
-@DefaultAuthzPolicy.permission_rule(model=UserCollection,
-                                    permission=authperm.Register)
+@DefaultAuthzPolicy.permission_rule(model=UserCollection, permission=authperm.Register)
 def allow_register(identity, context, permission):
     if _has_admin_role(context):
         return True
     return False
 
 
-@DefaultAuthzPolicy.permission_rule(model=UserCollection,
-                                    permission=crudperm.All)
+@DefaultAuthzPolicy.permission_rule(model=UserCollection, permission=crudperm.All)
 def allow_users_management(identity, context, permission):
     if _has_admin_role(context):
         return True
     return False
 
 
-@DefaultAuthzPolicy.permission_rule(model=GroupCollection,
-                                    permission=crudperm.All)
+@DefaultAuthzPolicy.permission_rule(model=GroupCollection, permission=crudperm.All)
 def allow_groups_management(identity, context, permission):
     if _has_admin_role(context):
         return True
@@ -63,23 +60,23 @@ def allow_group_management(identity, context, permission):
 def allow_user_management(identity, context, permission):
     if _has_admin_role(context):
         return True
-    if context['uuid'] == identity.userid:
+    if context["uuid"] == identity.userid:
         return True
     return False
 
 
-@DefaultAuthzPolicy.permission_rule(model=UserModel,
-                                    permission=authperm.ChangePassword)
+@DefaultAuthzPolicy.permission_rule(model=UserModel, permission=authperm.ChangePassword)
 def allow_change_password(identity, context, permission):
     if _has_admin_role(context):
         return True
     return False
 
 
-@DefaultAuthzPolicy.permission_rule(model=CurrentUserModel,
-                                    permission=authperm.ChangePassword)
+@DefaultAuthzPolicy.permission_rule(
+    model=CurrentUserModel, permission=authperm.ChangePassword
+)
 def allow_self_change_password(identity, context, permission):
-    if context['uuid'] == identity.userid:
+    if context["uuid"] == identity.userid:
         return True
     return False
 
@@ -93,6 +90,6 @@ def allow_apikeys_management(identity, context, permission):
 def allow_apikey_management(identity, context, permission):
     if _has_admin_role(context):
         return True
-    if context['userid'] == identity.userid:
+    if context["userid"] == identity.userid:
         return True
     return False

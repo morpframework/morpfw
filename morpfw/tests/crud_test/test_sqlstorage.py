@@ -30,12 +30,12 @@ class App(BaseApp, SQLApp):
 
 class Page(Base):
 
-    __tablename__ = 'jslcrud_test_page'
+    __tablename__ = "jslcrud_test_page"
 
-    title = sa.Column(sa.String(length=1024), default='')
-    body = sa.Column(sa.Text(), default='')
+    title = sa.Column(sa.String(length=1024), default="")
+    body = sa.Column(sa.Text(), default="")
     value = sa.Column(sa.Integer)
-    footer = sa.Column(sa.String(length=1024), default='')
+    footer = sa.Column(sa.String(length=1024), default="")
 
 
 class PageStorage(SQLStorage):
@@ -43,36 +43,36 @@ class PageStorage(SQLStorage):
     orm_model = Page
 
 
-@App.path(model=PageCollection, path='pages')
+@App.path(model=PageCollection, path="pages")
 def collection_factory(request):
     storage = PageStorage(request)
     return PageCollection(request, storage)
 
 
-@App.path(model=PageModel, path='pages/{identifier}')
+@App.path(model=PageModel, path="pages/{identifier}")
 def model_factory(request, identifier):
-    storage = PageStorage(request)
-    return storage.get(identifier)
+    col = collection_factory(request)
+    return col.get(identifier)
 
 
-@App.typeinfo(name='tests.page')
+@App.typeinfo(name="tests.page")
 def get_page_typeinfo(request):
     return {
-        'title': 'Page',
-        'description': 'Page type',
-        'schema': PageSchema,
-        'collection': PageCollection,
-        'collection_factory': collection_factory,
-        'model': PageModel,
-        'model_factory': model_factory,
+        "title": "Page",
+        "description": "Page type",
+        "schema": PageSchema,
+        "collection": PageCollection,
+        "collection_factory": collection_factory,
+        "model": PageModel,
+        "model_factory": model_factory,
     }
 
 
 class Object(Base):
 
-    __tablename__ = 'jslcrud_test_object'
+    __tablename__ = "jslcrud_test_object"
 
-    body = sa.Column(sa.String(length=1024), default='')
+    body = sa.Column(sa.String(length=1024), default="")
     created_flag = sa.Column(sa.Boolean, default=False)
     updated_flag = sa.Column(sa.Boolean, default=False)
     attrs = sa.Column(sajson.JSONField)
@@ -83,24 +83,24 @@ class ObjectStorage(SQLStorage):
     orm_model = Object
 
 
-@App.path(model=ObjectCollection, path='objects')
+@App.path(model=ObjectCollection, path="objects")
 def object_collection_factory(request):
     storage = ObjectStorage(request)
     return ObjectCollection(request, storage)
 
 
-@App.path(model=ObjectModel, path='objects/{identifier}')
+@App.path(model=ObjectModel, path="objects/{identifier}")
 def object_model_factory(request, identifier):
-    storage = ObjectStorage(request)
-    return storage.get(identifier)
+    col = object_collection_factory(request)
+    return col.get(identifier)
 
 
 class NamedObject(Base):
 
-    __tablename__ = 'jslcrud_test_namedobject'
+    __tablename__ = "jslcrud_test_namedobject"
 
-    name = sa.Column(sa.String(length=1024), default='')
-    body = sa.Column(sa.String(length=1024), default='')
+    name = sa.Column(sa.String(length=1024), default="")
+    body = sa.Column(sa.String(length=1024), default="")
     created_flag = sa.Column(sa.Boolean, default=False)
     updated_flag = sa.Column(sa.Boolean, default=False)
 
@@ -110,21 +110,21 @@ class NamedObjectStorage(SQLStorage):
     orm_model = NamedObject
 
 
-@App.path(model=NamedObjectCollection, path='named_objects')
+@App.path(model=NamedObjectCollection, path="named_objects")
 def namedobject_collection_factory(request):
     storage = NamedObjectStorage(request)
     return NamedObjectCollection(request, storage)
 
 
-@App.path(model=NamedObjectModel, path='named_objects/{identifier}')
+@App.path(model=NamedObjectModel, path="named_objects/{identifier}")
 def namedobject_model_factory(request, identifier):
-    storage = NamedObjectStorage(request)
-    return storage.get(identifier)
+    col = namedobject_collection_factory(request)
+    return col.get(identifier)
 
 
 class BlobObject(Base):
 
-    __tablename__ = 'jslcrud_test_blobobject'
+    __tablename__ = "jslcrud_test_blobobject"
 
     blobs = sa.Column(sajson.JSONField())
 
@@ -144,20 +144,19 @@ def get_blobobject_blobstorage(model, request):
     return FSBlobStorage(request, FSBLOB_DIR)
 
 
-@App.path(model=BlobObjectCollection, path='blob_objects')
+@App.path(model=BlobObjectCollection, path="blob_objects")
 def blobobject_collection_factory(request):
     storage = request.app.get_storage(BlobObjectModel, request)
     return BlobObjectCollection(request, storage)
 
 
-@App.path(model=BlobObjectModel, path='blob_objects/{identifier}')
+@App.path(model=BlobObjectModel, path="blob_objects/{identifier}")
 def blobobject_model_factory(request, identifier):
-    storage = request.app.get_storage(BlobObjectModel, request)
-    return storage.get(identifier)
+    col = blobobject_collection_factory(request)
+    return col.get(identifier)
 
 
 def test_sqlstorage(pgsql_db):
-    config = os.path.join(os.path.dirname(__file__),
-                          'test_sqlstorage-settings.yml')
+    config = os.path.join(os.path.dirname(__file__), "test_sqlstorage-settings.yml")
     c = get_client(config)
     run_jslcrud_test(c)

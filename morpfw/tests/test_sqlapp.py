@@ -27,7 +27,7 @@ def allow_all_collection_access(identity, context, permission):
 
 
 class Page(morpsql.Base):
-    __tablename__ = 'test_page'
+    __tablename__ = "test_page"
 
     title = sa.Column(sa.String(length=1024))
     body = sa.Column(sa.Text)
@@ -41,7 +41,7 @@ class PageSchema(Schema):
 
 @App.identifierfield(schema=PageSchema)
 def page_schema_identifier(schema):
-    return 'uuid'
+    return "uuid"
 
 
 class PageCollection(morpfw.Collection):
@@ -57,42 +57,40 @@ class PageStorage(morpfw.SQLStorage):
     orm_model = Page
 
 
-@App.path(model=PageCollection, path='/')
+@App.path(model=PageCollection, path="/")
 def get_pagecollection(request):
     storage = PageStorage(request)
     return PageCollection(request, storage)
 
 
-@App.path(model=PageModel, path='/{identifier}')
+@App.path(model=PageModel, path="/{identifier}")
 def get_page(request, identifier):
-    storage = PageStorage(request)
-    return storage.get(identifier)
+    col = get_pagecollection(request)
+    return col.get(identifier)
 
 
 def test_morp_framework(pgsql_db):
-    c = get_client(os.path.join(os.path.dirname(
-        __file__), 'test_sqlapp-settings.yml'))
+    c = get_client(os.path.join(os.path.dirname(__file__), "test_sqlapp-settings.yml"))
 
-    r = c.get('/')
+    r = c.get("/")
 
-    assert len(r.json['schema']['properties']) == 11
+    assert len(r.json["schema"]["properties"]) == 11
 
-    r = c.post_json(
-        '/', {'title': 'Hello world', 'body': 'Lorem ipsum'})
+    r = c.post_json("/", {"title": "Hello world", "body": "Lorem ipsum"})
 
-    assert r.json['links'][0]['href'].startswith('http://localhost/')
-    assert r.json['data']['title'] == 'Hello world'
-    assert r.json['data']['body'] == 'Lorem ipsum'
+    assert r.json["links"][0]["href"].startswith("http://localhost/")
+    assert r.json["data"]["title"] == "Hello world"
+    assert r.json["data"]["body"] == "Lorem ipsum"
 
-    page_url = r.json['links'][0]['href']
+    page_url = r.json["links"][0]["href"]
     r = c.get(page_url)
 
-    assert r.json['data']['title'] == 'Hello world'
+    assert r.json["data"]["title"] == "Hello world"
 
-    delete_link = r.json['links'][2]
-    assert delete_link['method'] == 'DELETE'
+    delete_link = r.json["links"][2]
+    assert delete_link["method"] == "DELETE"
 
-    r = c.delete(delete_link['href'])
+    r = c.delete(delete_link["href"])
 
     r = c.get(page_url, expect_errors=True)
 

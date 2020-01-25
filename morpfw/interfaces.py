@@ -20,9 +20,9 @@ class IDataProvider(abc.ABC):
     (eg: SQLAlchemy model object) and provide a bridge for getting and setting
     data from model.
     """
+
     @abc.abstractmethod
-    def __init__(self, schema: Type[ISchema], data: dict,
-                 storage: 'IStorageBase'):
+    def __init__(self, schema: Type[ISchema], data: dict, storage: "IStorageBase"):
         super().__init__()
 
     @abc.abstractmethod
@@ -73,20 +73,25 @@ class IDataProvider(abc.ABC):
         """Check if a value is JSON-safe"""
         if value is None:
             return True
-        return (isinstance(value, str) or
-                isinstance(value, list) or
-                isinstance(value, dict) or
-                isinstance(value, float) or
-                isinstance(value, int))
+        return (
+            isinstance(value, str)
+            or isinstance(value, list)
+            or isinstance(value, dict)
+            or isinstance(value, float)
+            or isinstance(value, int)
+        )
 
 
 class IBlob(abc.ABC):
-
     @abc.abstractmethod
-    def __init__(self, uuid, filename: str,
-                 mimetype: Optional[str] = None,
-                 size: Optional[int] = None,
-                 encoding: Optional[str] = None):
+    def __init__(
+        self,
+        uuid,
+        filename: str,
+        mimetype: Optional[str] = None,
+        size: Optional[int] = None,
+        encoding: Optional[str] = None,
+    ):
         super().__init__()
 
     @abc.abstractmethod
@@ -103,14 +108,17 @@ class IBlob(abc.ABC):
 
 
 class IBlobStorage(abc.ABC):
-
     @abc.abstractmethod
-    def put(self, field: str, fileobj: BinaryIO,
-            filename: str,
-            mimetype: Optional[str] = None,
-            size: Optional[int] = None,
-            encoding: Optional[str] = None,
-            uuid: Optional[str] = None) -> IBlob:
+    def put(
+        self,
+        field: str,
+        fileobj: BinaryIO,
+        filename: str,
+        mimetype: Optional[str] = None,
+        size: Optional[int] = None,
+        encoding: Optional[str] = None,
+        uuid: Optional[str] = None,
+    ) -> IBlob:
         """Receive and store blob data"""
         raise NotImplementedError
 
@@ -129,34 +137,39 @@ class IStorageBase(abc.ABC):
     """Basic storage backend"""
 
     @abc.abstractmethod
-    def __init__(self, request: morepath.Request,
-                 blobstorage: Optional[IBlobStorage] = None):
+    def __init__(
+        self, request: morepath.Request, blobstorage: Optional[IBlobStorage] = None
+    ):
         super().__init__()
 
     @abc.abstractmethod
-    def create(self, data: dict) -> 'IModel':
+    def create(self, data: dict) -> "IModel":
         """Create a model from submitted data"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get(self, identifier) -> Optional['IModel']:
+    def get(self, identifier) -> Optional["IModel"]:
         """return model from identifier"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def search(self, query: Optional[dict] = None, offset: Optional[int] = None,
-               limit: Optional[int] = None,
-               order_by: Union[None, list, tuple] = None) -> Sequence['IModel']:
+    def search(
+        self,
+        query: Optional[dict] = None,
+        offset: Optional[int] = None,
+        limit: Optional[int] = None,
+        order_by: Union[None, list, tuple] = None,
+    ) -> Sequence["IModel"]:
         """return search result based on specified rulez query"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_by_id(self, id) -> Optional['IModel']:
+    def get_by_id(self, id) -> Optional["IModel"]:
         """return model from internal ID"""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_by_uuid(self, uuid) -> Optional['IModel']:
+    def get_by_uuid(self, uuid) -> Optional["IModel"]:
         """return model from uuid"""
         raise NotImplementedError
 
@@ -175,9 +188,12 @@ class IStorage(IStorageBase):
     """Aggregateable storage"""
 
     @abc.abstractmethod
-    def aggregate(self, query: Optional[dict] = None,
-                  group: Optional[dict] = None,
-                  order_by: Union[None, list, tuple] = None) -> list:
+    def aggregate(
+        self,
+        query: Optional[dict] = None,
+        group: Optional[dict] = None,
+        order_by: Union[None, list, tuple] = None,
+    ) -> list:
         """return aggregation result based on specified rulez query and group"""
         raise NotImplementedError
 
@@ -234,8 +250,9 @@ class IModel(abc.ABC):
     hidden_fields: list
 
     @abc.abstractmethod
-    def __init__(self, request: morepath.Request,
-                 storage: IStorage, data: dict):
+    def __init__(
+        self, request: morepath.Request, collection: "ICollection", data: dict,
+    ):
         super().__init__()
 
     @abc.abstractmethod
@@ -296,11 +313,15 @@ class IModel(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def put_blob(self, field: str, fileobj: BinaryIO,
-                 filename: str,
-                 mimetype: Optional[str] = None,
-                 size: Optional[int] = None,
-                 encoding: Optional[str] = None) -> IBlob:
+    def put_blob(
+        self,
+        field: str,
+        fileobj: BinaryIO,
+        filename: str,
+        mimetype: Optional[str] = None,
+        size: Optional[int] = None,
+        encoding: Optional[str] = None,
+    ) -> IBlob:
         """Receive and store blob object"""
         raise NotImplementedError
 
@@ -328,11 +349,15 @@ class IModel(abc.ABC):
     def before_delete(self) -> None:
         """Triggered before deleting resource"""
 
-    def before_blobput(self, field: str, fileobj: BinaryIO,
-                       filename: str,
-                       mimetype: Optional[str] = None,
-                       size: Optional[int] = None,
-                       encoding: Optional[str] = None) -> None:
+    def before_blobput(
+        self,
+        field: str,
+        fileobj: BinaryIO,
+        filename: str,
+        mimetype: Optional[str] = None,
+        size: Optional[int] = None,
+        encoding: Optional[str] = None,
+    ) -> None:
         """Triggered before BLOB is stored"""
 
     def after_blobput(self, field: str, blob: IBlob) -> None:
@@ -346,11 +371,14 @@ class ICollection(abc.ABC):
     """Collection provide an API for querying group of model from its storage"""
 
     @abc.abstractmethod
-    def search(self, query: Optional[dict] = None,
-               offset: int = 0,
-               limit: Optional[int] = None,
-               order_by: Optional[tuple] = None,
-               secure: bool = False) -> List[IModel]:
+    def search(
+        self,
+        query: Optional[dict] = None,
+        offset: int = 0,
+        limit: Optional[int] = None,
+        order_by: Optional[tuple] = None,
+        secure: bool = False,
+    ) -> List[IModel]:
         """Search for models
 
         Filtering is done through ``rulez`` based JSON/dict query, which
@@ -369,9 +397,12 @@ class ICollection(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def aggregate(self, query: Optional[dict] = None,
-                  group: Optional[dict] = None,
-                  order_by: Optional[tuple] = None) -> List[IModel]:
+    def aggregate(
+        self,
+        query: Optional[dict] = None,
+        group: Optional[dict] = None,
+        order_by: Optional[tuple] = None,
+    ) -> List[IModel]:
         """Get aggregated results
 
         : param query: Rulez based query
@@ -414,7 +445,6 @@ class ICollection(abc.ABC):
 
 
 class IStateMachine(abc.ABC):
-
     @abc.abstractproperty
     def states(self) -> List:
         """List of ``pytransitions`` states"""
@@ -444,7 +474,6 @@ class IStateMachine(abc.ABC):
 
 
 class IXattrProvider(abc.ABC):
-
     @abc.abstractproperty
     def schema(self) -> Type[Any]:
         """Schema to use for data validation"""
@@ -499,7 +528,6 @@ class IXattrProvider(abc.ABC):
 
 
 class ISearchProvider(abc.ABC):
-
     @abc.abstractmethod
     def parse_query(self, qs: str) -> dict:
         """Parse query string from search query and convert it into rulez query
@@ -509,15 +537,18 @@ class ISearchProvider(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def search(self, query: Optional[dict] = None,
-               offset: int = 0, limit: Optional[int] = None,
-               order_by: Union[None, list, tuple] = None) -> List[IModel]:
+    def search(
+        self,
+        query: Optional[dict] = None,
+        offset: int = 0,
+        limit: Optional[int] = None,
+        order_by: Union[None, list, tuple] = None,
+    ) -> List[IModel]:
         """Execute search and return list of model objects"""
         raise NotImplementedError
 
 
 class IAggregateProvider(abc.ABC):
-
     @abc.abstractmethod
     def parse_query(self, qs: str) -> dict:
         """Parse query string from search query and convert it into rulez query
@@ -535,8 +566,11 @@ class IAggregateProvider(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def aggregate(self, query: Optional[dict] = None,
-                  group: Optional[dict] = None,
-                  order_by: Union[None, list, tuple] = None) -> list:
+    def aggregate(
+        self,
+        query: Optional[dict] = None,
+        group: Optional[dict] = None,
+        order_by: Union[None, list, tuple] = None,
+    ) -> list:
         """return aggregation result based on specified rulez query and group"""
         raise NotImplementedError

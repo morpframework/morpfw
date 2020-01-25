@@ -11,17 +11,16 @@ class UserRulesProvider(RulesProvider):
 
     def change_password(self, password: str, new_password: str):
         context = self.context
-        if not has_role(self.request, 'administrator'):
+        if not has_role(self.request, "administrator"):
             if not context.validate(password, check_state=False):
                 raise exc.InvalidPasswordError(context.userid)
-        context.storage.change_password(
-            context.identity.userid, new_password)
+        context.storage.change_password(context, context.identity.userid, new_password)
 
     def validate(self, password: str, check_state=True) -> bool:
         context = self.context
-        if check_state and context.data['state'] != 'active':
+        if check_state and context.data["state"] != "active":
             return False
-        return context.storage.validate(context.userid, password)
+        return context.storage.validate(context, context.userid, password)
 
 
 @App.rulesprovider(model=UserModel)

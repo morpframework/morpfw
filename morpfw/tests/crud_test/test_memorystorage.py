@@ -23,64 +23,63 @@ class PageStorage(MemoryStorage):
     model = PageModel
 
 
-@App.path(model=PageCollection, path='pages')
+@App.path(model=PageCollection, path="pages")
 def collection_factory(request):
     storage = PageStorage(request)
     return PageCollection(request, storage)
 
 
-@App.path(model=PageModel, path='pages/{identifier}')
+@App.path(model=PageModel, path="pages/{identifier}")
 def model_factory(request, identifier):
-    storage = PageStorage(request)
-    return storage.get(identifier)
+    col = collection_factory(request)
+    return col.get(identifier)
 
 
-@App.typeinfo(name='tests.page')
+@App.typeinfo(name="tests.page")
 def get_page_typeinfo(request):
     return {
-        'title': 'Page',
-        'description': 'Page type',
-        'schema': PageSchema,
-        'collection': PageCollection,
-        'collection_factory': collection_factory,
-        'model': PageModel,
-        'model_factory': model_factory,
+        "title": "Page",
+        "description": "Page type",
+        "schema": PageSchema,
+        "collection": PageCollection,
+        "collection_factory": collection_factory,
+        "model": PageModel,
+        "model_factory": model_factory,
     }
 
 
 class ObjectStorage(MemoryStorage):
     incremental_id = True
-    incremental_column = 'id'
+    incremental_column = "id"
     model = ObjectModel
 
 
-@App.path(model=ObjectCollection, path='objects')
+@App.path(model=ObjectCollection, path="objects")
 def object_collection_factory(request):
     storage = ObjectStorage(request)
     return ObjectCollection(request, storage)
 
 
-@App.path(model=ObjectModel, path='objects/{identifier}')
+@App.path(model=ObjectModel, path="objects/{identifier}")
 def object_model_factory(request, identifier):
-    storage = ObjectStorage(request)
-    return storage.get(identifier)
+    col = object_collection_factory(request)
+    return col.get(identifier)
 
 
 class NamedObjectStorage(MemoryStorage):
     model = NamedObjectModel
 
 
-@App.path(model=NamedObjectCollection, path='named_objects')
+@App.path(model=NamedObjectCollection, path="named_objects")
 def namedobject_collection_factory(request):
     storage = NamedObjectStorage(request)
     return NamedObjectCollection(request, storage)
 
 
-@App.path(model=NamedObjectModel, path='named_objects/{identifier}')
+@App.path(model=NamedObjectModel, path="named_objects/{identifier}")
 def namedobject_model_factory(request, identifier):
-    storage = NamedObjectStorage(request)
-    o = storage.get(identifier)
-    return o
+    col = namedobject_collection_factory(request)
+    return col.get(identifier)
 
 
 class BlobObjectStorage(MemoryStorage):
@@ -97,20 +96,19 @@ def get_blobobject_blobstorage(model, request):
     return FSBlobStorage(request, FSBLOB_DIR)
 
 
-@App.path(model=BlobObjectCollection, path='blob_objects')
+@App.path(model=BlobObjectCollection, path="blob_objects")
 def blobobject_collection_factory(request):
     storage = request.app.get_storage(BlobObjectModel, request)
     return BlobObjectCollection(request, storage)
 
 
-@App.path(model=BlobObjectModel, path='blob_objects/{identifier}')
+@App.path(model=BlobObjectModel, path="blob_objects/{identifier}")
 def blobobject_model_factory(request, identifier):
-    storage = request.app.get_storage(BlobObjectModel, request)
-    return storage.get(identifier)
+    col = blobobject_collection_factory(request)
+    return col.get(identifier)
 
 
 def test_memorystorage():
-    config = os.path.join(os.path.dirname(__file__),
-                          'test_memorystorage-settings.yml')
+    config = os.path.join(os.path.dirname(__file__), "test_memorystorage-settings.yml")
     client = get_client(config)
     run_jslcrud_test(client, skip_aggregate=True)

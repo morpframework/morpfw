@@ -53,8 +53,8 @@ def collection_factory(request):
 
 @App.path(model=PageModel, path="pages/{identifier}")
 def model_factory(request, identifier):
-    storage = PageStorage(request)
-    return storage.get(identifier)
+    col = collection_factory(request)
+    return col.get(identifier)
 
 
 @App.typeinfo(name="tests.page")
@@ -130,8 +130,8 @@ def object_collection_factory(request):
 
 @App.path(model=ObjectModel, path="objects/{identifier}")
 def object_model_factory(request, identifier):
-    storage = ObjectStorage(request)
-    return storage.get(identifier)
+    col = object_collection_factory(request)
+    return col.get(identifier)
 
 
 class NamedObjectStorage(ElasticSearchStorage):
@@ -148,8 +148,8 @@ def namedobject_collection_factory(request):
 
 @App.path(model=NamedObjectModel, path="named_objects/{identifier}")
 def namedobject_model_factory(request, identifier):
-    storage = NamedObjectStorage(request)
-    return storage.get(identifier)
+    col = namedobject_collection_factory(request)
+    return col.get(identifier)
 
 
 class BlobObjectStorage(ElasticSearchStorage):
@@ -176,14 +176,13 @@ def blobobject_collection_factory(request):
 
 @App.path(model=BlobObjectModel, path="blob_objects/{identifier}")
 def blobobject_model_factory(request, identifier):
-    storage = request.app.get_storage(BlobObjectModel, request)
-    return storage.get(identifier)
+    col = blobobject_collection_factory(request)
+    return col.get(identifier)
 
 
 def test_elasticsearchstorage(es_client):
     es_client.indices.create(
-        "test-page",
-        body={"settings": {"number_of_shards": 1, "number_of_replicas": 0}},
+        "test-page", body={"settings": {"number_of_shards": 1, "number_of_replicas": 0}}
     )
 
     es_client.transport.perform_request(
