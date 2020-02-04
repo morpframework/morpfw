@@ -1,6 +1,8 @@
 import morepath
 from jsonschema.validators import Draft4Validator
-from jsonschema import validate, ValidationError
+from jsonschema import validate
+from jsonschema import ValidationError as JSLValidationError
+from .errors import ValidationError
 from .util import jsl_nullable
 from .util import dataclass_to_jsl
 from .const import SEPARATOR
@@ -308,10 +310,7 @@ class Model(IModel):
         try:
             self.schema.validate(self.request, jsondata)
         except ValidationError as e:
-            logger.warn(
-                "%s(%s) : %s"
-                % (self.schema.__name__, "/".join(list(e.path)), e.message)
-            )
+            logger.warn("Validation error on %s" % json.dumps(jsondata))
         return jsondata
 
     def _json(self):

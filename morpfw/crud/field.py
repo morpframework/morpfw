@@ -5,10 +5,10 @@ MISSING = object()
 
 
 class Field(object):
-
     def __init__(self, metadata=None):
         self.metadata = metadata or {}
-        self._required = False
+        self.metadata.setdefault("required", False)
+        self.metadata.setdefault("editable", True)
         self._default = MISSING
         self._default_factory = MISSING
 
@@ -20,8 +20,12 @@ class Field(object):
         self._default_factory = value
         return self
 
-    def required(self):
-        self._required = True
+    def required(self, required=True):
+        self.metadata["required"] = required
+        return self
+
+    def editable(self, editable=True):
+        self.metadata["editable"] = editable
         return self
 
     def init(self):
@@ -32,10 +36,10 @@ class Field(object):
         return field(metadata=self.metadata)
 
     def widget(self, widget):
-        self.metadata.setdefault('deform', {})
-        self.metadata['deform']['widget'] = widget
+        self.metadata.setdefault("deform", {})
+        self.metadata["deform"]["widget"] = widget
         return self
 
     def unique(self):
-        self.metadata['unique'] = True
+        self.metadata["unique"] = True
         return self

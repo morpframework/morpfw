@@ -12,13 +12,15 @@ from pprint import pprint
 
 @dataclass
 class BaseSchema(ISchema):
-
     @classmethod
     def validate(cls, request, data, additional_properties=False, update_mode=False):
         validator = Draft4Validator
-        jslschema = dataclass_to_jsl(cls, nullable=True,
-                                     additional_properties=additional_properties,
-                                     update_mode=update_mode)
+        jslschema = dataclass_to_jsl(
+            cls,
+            nullable=True,
+            additional_properties=additional_properties,
+            update_mode=update_mode,
+        )
         schema = jslschema.get_schema(ordered=True)
         form_validators = request.app.get_formvalidators(cls)
         params = {}
@@ -27,7 +29,7 @@ class BaseSchema(ISchema):
         v = validator(schema)
         field_errors = sorted(v.iter_errors(data), key=lambda e: e.path)
         if field_errors:
-            params['field_errors'] = field_errors
+            params["field_errors"] = field_errors
         form_errors = []
         for form_validator in form_validators:
             e = form_validator(request, data)
@@ -35,7 +37,7 @@ class BaseSchema(ISchema):
                 form_errors.append(FormValidationError(e))
 
         if form_errors:
-            params['form_errors'] = form_errors
+            params["form_errors"] = form_errors
 
         if params:
             raise ValidationError(**params)
@@ -43,7 +45,7 @@ class BaseSchema(ISchema):
         # field errors
         for k, f in cls.__dataclass_fields__.items():
             t = dataclass_get_type(f)
-            for validate in t['metadata']['validators']:
+            for validate in t["metadata"]["validators"]:
                 if update_mode:
                     val = data.get(k, None)
                     if val:
@@ -64,23 +66,21 @@ class Schema(BaseSchema):
     state: typing.Optional[str] = None
     deleted: typing.Optional[datetime] = None
     blobs: typing.Optional[dict] = field(
-        default_factory=dict, metadata={'morpfw': {
-            'exclude_if_empty': True
-        }})
+        default_factory=dict, metadata={"morpfw": {"exclude_if_empty": True}}
+    )
     xattrs: typing.Optional[dict] = field(
-        default_factory=dict, metadata={'morpfw': {
-            'exclude_if_empty': True
-        }})
+        default_factory=dict, metadata={"morpfw": {"exclude_if_empty": True}}
+    )
 
 
 @App.identifierfield(schema=Schema)
 def identifierfield(schema):
-    return 'uuid'
+    return "uuid"
 
 
 @App.default_identifier(schema=Schema)
 def default_identifier(schema, obj, request):
     idfield = request.app.get_identifierfield(schema)
-    if idfield == 'uuid':
+    if idfield == "uuid":
         return uuid4().hex
     return obj[idfield]
