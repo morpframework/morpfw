@@ -4,7 +4,8 @@ from .app import App
 from dataclasses import dataclass, field
 from datetime import datetime
 import typing
-from .util import dataclass_to_jsl, dataclass_get_type
+from .schemaconverter.common import dataclass_get_type
+from .schemaconverter.dataclass2jsl import dataclass_to_jsl
 from jsonschema import Draft4Validator
 from .errors import ValidationError, FormValidationError, FieldValidationError
 from pprint import pprint

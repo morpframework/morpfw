@@ -33,7 +33,18 @@ class MemoryStorage(BaseStorage):
         return obj
 
     def aggregate(self, query=None, group=None, order_by=None):
-        raise NotImplementedError
+        items = self.search(query)
+
+        result = []
+        if group:
+            row = {}
+            for k, v in group.items():
+                if v["function"] == "count":
+                    row[k] = len(DATA[self.typekey].values())
+                else:
+                    raise NotImplementedError
+            result.append(row)
+        return result
 
     def search(self, collection, query=None, offset=None, limit=None, order_by=None):
         res = []

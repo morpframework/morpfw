@@ -1,14 +1,16 @@
 from functools import partial
 from .errors import ValidationError, FormValidationError, FieldValidationError
 from jsonschema import Draft4Validator
-from .util import jsl_to_jsonobject, dataclass_to_jsl, dataclass_get_type
+from .schemaconverter.common import dataclass_get_type
+from .schemaconverter.dataclass2jsl import dataclass_to_jsl
+from .schemaconverter.jsl2jsonobject import jsl_to_jsonobject
 import reg
 from morepath.publish import resolve_model
 import urllib
 import re
 
 
-@reg.dispatch(reg.match_instance('model'), reg.match_instance('request'))
+@reg.dispatch(reg.match_instance("model"), reg.match_instance("request"))
 def get_data(model, request):
     raise NotImplementedError
 
@@ -18,16 +20,17 @@ def regex_validator(pattern, name):
 
     def _regex_validator(value):
         if not p.match(value):
-            raise FieldValidationError(
-                '%s does not match %s pattern' % (value, name))
+            raise FieldValidationError("%s does not match %s pattern" % (value, name))
 
     return _regex_validator
 
 
 def load(validator, schema, request):
     newreq = request.app.request_class(
-        request.environ.copy(), request.app.root,
-        path_info=urllib.parse.unquote(request.path))
+        request.environ.copy(),
+        request.app.root,
+        path_info=urllib.parse.unquote(request.path),
+    )
     context = resolve_model(newreq)
     context.request = request
     if schema is None:

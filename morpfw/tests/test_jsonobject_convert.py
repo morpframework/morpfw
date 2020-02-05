@@ -1,5 +1,5 @@
-from morpfw.crud.util import jsonobject_to_jsl
-from morpfw.crud.util import jsl_to_jsonobject
+from morpfw.crud.schemaconverter.jsonobject2jsl import jsonobject_to_jsl
+from morpfw.crud.schemaconverter.jsl2jsonobject import jsl_to_jsonobject
 import jsonobject
 import jsl
 
@@ -22,35 +22,35 @@ class SampleSchema(jsonobject.JsonObject):
 
 def test_jsonobject_convert():
     schema = jsonobject_to_jsl(SampleSchema)
-    field = getattr(schema, 'stringfield')
+    field = getattr(schema, "stringfield")
     assert isinstance(field, jsl.StringField)
-    assert field.name == 'stringfield'
+    assert field.name == "stringfield"
 
-    field = getattr(schema, 'intfield')
+    field = getattr(schema, "intfield")
     assert isinstance(field, jsl.IntField)
-    assert field.name == 'intfield'
+    assert field.name == "intfield"
 
-    field = getattr(schema, 'dictfield')
+    field = getattr(schema, "dictfield")
     assert isinstance(field, jsl.DictField)
-    assert field.name == 'dictfield'
+    assert field.name == "dictfield"
 
-    field = getattr(schema, 'arrayfield')
+    field = getattr(schema, "arrayfield")
     assert isinstance(field, jsl.ArrayField)
-    assert field.name == 'arrayfield'
+    assert field.name == "arrayfield"
 
-    field = getattr(schema, 'documentarrayfield')
+    field = getattr(schema, "documentarrayfield")
     assert isinstance(field, jsl.ArrayField)
     assert isinstance(field.items, jsl.DocumentField)
     assert isinstance(field.items.document_cls.stringfield, jsl.StringField)
 
-    field = getattr(schema, 'documentfield')
+    field = getattr(schema, "documentfield")
     assert isinstance(field, jsl.DocumentField)
     assert isinstance(field.document_cls.stringfield, jsl.StringField)
 
-    field = getattr(schema, 'datetimefield')
+    field = getattr(schema, "datetimefield")
     assert isinstance(field, jsl.DateTimeField)
 
-    field = getattr(schema, 'datefield')
+    field = getattr(schema, "datefield")
     assert isinstance(field, jsl.DateTimeField)
 
     assert schema.get_schema()

@@ -68,7 +68,11 @@ setup(name='morpfw',
           'eventlet',
           'wsgigzip',
           'hydra-core',
-          'psycopg2'
+          'psycopg2',
+          'colander',
+          'deform',
+          'more.chameleon',
+          'more.static'
       ],
       extras_require={
           'test': [

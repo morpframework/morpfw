@@ -3,8 +3,7 @@ from jsonschema.validators import Draft4Validator
 from jsonschema import validate
 from jsonschema import ValidationError as JSLValidationError
 from .errors import ValidationError
-from .util import jsl_nullable
-from .util import dataclass_to_jsl
+from .schemaconverter.dataclass2jsl import dataclass_to_jsl
 from .const import SEPARATOR
 from . import permission
 from . import signals

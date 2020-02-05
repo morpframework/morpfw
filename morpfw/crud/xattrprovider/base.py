@@ -1,5 +1,5 @@
 import typing
-from ..util import dataclass_to_jsl
+from ..schemaconverter.dataclass2jsl import dataclass_to_jsl
 from ...interfaces import IXattrProvider
 from jsonschema import validate, ValidationError
 
@@ -18,12 +18,9 @@ class XattrProvider(IXattrProvider):
 
     def jsonschema(self):
         schema = dataclass_to_jsl(
-            self.schema, nullable=True,
-            additional_properties=self.additional_properties
+            self.schema, nullable=True, additional_properties=self.additional_properties
         ).get_schema(ordered=True)
-        return {
-            'schema': schema
-        }
+        return {"schema": schema}
 
     def process_update(self, newdata: dict):
         data = self.as_json()

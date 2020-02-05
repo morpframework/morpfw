@@ -10,7 +10,7 @@ import pytz
 import copy
 import datetime
 from ...interfaces import ISchema, IDataProvider
-from ..util import dataclass_get_type
+from ..schemaconverter.common import dataclass_get_type
 from dataclasses import _MISSING_TYPE
 
 _MARKER: list = []
@@ -25,7 +25,6 @@ def parse_date(datestr):
 
 
 class SQLAlchemyModelProvider(IDataProvider):
-
     def __init__(self, schema, data, storage):
         self.schema = schema
         self.data = data
@@ -121,7 +120,7 @@ class SQLAlchemyModelProvider(IDataProvider):
         for n, f in fields:
             v = self.get(n)
             t = dataclass_get_type(f)
-            if not v and t['metadata']['exclude_if_empty']:
+            if not v and t["metadata"]["exclude_if_empty"]:
                 continue
             result[n] = v
         return result
@@ -132,7 +131,7 @@ class SQLAlchemyModelProvider(IDataProvider):
         for n, f in fields:
             t = dataclass_get_type(f)
             v = self.get(n)
-            if v is None and t['metadata']['exclude_if_empty']:
+            if v is None and t["metadata"]["exclude_if_empty"]:
                 continue
             if isinstance(v, datetime.datetime):
                 result[n] = datestr(v.isoformat())
