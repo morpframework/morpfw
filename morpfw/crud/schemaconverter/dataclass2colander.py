@@ -1,13 +1,17 @@
-import colander
-from .common import dataclass_get_type, dataclass_check_type
-import dataclasses
-from datetime import datetime, date
-from dataclasses import field
-from ...interfaces import ISchema
-from pkg_resources import resource_filename
-from importlib import import_module
-from deform.widget import HiddenWidget
 import copy
+import dataclasses
+import typing
+from dataclasses import field
+from datetime import date, datetime
+from importlib import import_module
+
+from pkg_resources import resource_filename
+
+import colander
+from deform.widget import HiddenWidget
+
+from ...interfaces import ISchema
+from .common import dataclass_check_type, dataclass_get_type
 
 
 def colander_params(prop, oid_prefix, **kwargs):
@@ -66,12 +70,12 @@ def dataclass_field_to_colander_schemanode(
 
 def dataclass_to_colander(
     schema,
-    include_fields=None,
-    exclude_fields=None,
-    hidden_fields=None,
-    colander_schema_type=colander.MappingSchema,
-    oid_prefix="deformField",
-):
+    include_fields: typing.List[str] = None,
+    exclude_fields: typing.List[str] = None,
+    hidden_fields: typing.List[str] = None,
+    colander_schema_type: typing.Type[colander.Schema] = colander.MappingSchema,
+    oid_prefix: str = "deformField",
+) -> typing.Type[colander.MappingSchema]:
     # output colander schema from dataclass schema
     attrs = {}
 

@@ -1,27 +1,28 @@
+import json
 import os
+import shutil
+import tempfile
+import typing
+from dataclasses import dataclass, field
+from datetime import datetime
+from uuid import uuid4
+
+import jsl
 import morepath
+import morpfw.crud.signals as signals
 import yaml
-from webtest import TestApp as Client
-from morpfw.crud.model import Collection, Model
-from morpfw.crud.schema import Schema, BaseSchema
-from morpfw.crud import permission as crudperm
-from morpfw.crud.statemachine.base import StateMachine
-from morpfw.crud.xattrprovider.base import XattrProvider
-from morpfw.crud.xattrprovider import FieldXattrProvider
+from more.basicauth import BasicAuthIdentityPolicy
 from morpfw.app import BaseApp
 from morpfw.authn.base import AuthnPolicy as BaseAuthnPolicy
+from morpfw.crud import permission as crudperm
+from morpfw.crud.model import Collection, Model
+from morpfw.crud.schema import BaseSchema, Schema
+from morpfw.crud.statemachine.base import StateMachine
+from morpfw.crud.xattrprovider import FieldXattrProvider
+from morpfw.crud.xattrprovider.base import XattrProvider
 from morpfw.interfaces import ISchema
-import morpfw.crud.signals as signals
-import jsl
-import json
-from uuid import uuid4
-from datetime import datetime
 from morpfw.main import create_app
-from more.basicauth import BasicAuthIdentityPolicy
-import tempfile
-import shutil
-from dataclasses import dataclass, field
-import typing
+from webtest import TestApp as Client
 
 FSBLOB_DIR = tempfile.mkdtemp()
 
@@ -382,15 +383,11 @@ def run_jslcrud_test(c, skip_aggregate=False):
     r = c.get(obj_link)
     assert r.json["data"]["xattrs"] == {"message": "hello world"}
 
-    r = c.patch_json(
-        obj_xattr_link,
-        {"message": "hello world", "anotherkey": "boo"},
-        expect_errors=True,
-    )
+    r = c.patch_json(obj_xattr_link, {"message": "hello world", "anotherkey": "boo"},)
 
-    assert r.status_code == 422
+    assert r.status_code == 200
 
-    r = c.patch_json(obj_link, {"xattr": {"message": "invalid"}}, expect_errors=True)
+    r = c.patch_json(obj_link, {"xattrs": {"message": "invalid"}}, expect_errors=True)
 
     assert r.status_code == 422
 

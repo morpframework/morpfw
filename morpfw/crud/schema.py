@@ -1,41 +1,42 @@
-from uuid import uuid4
-from ..interfaces import ISchema
-from .app import App
+import typing
 from dataclasses import dataclass, field
 from datetime import datetime
-import typing
-from .schemaconverter.common import dataclass_get_type
-from .schemaconverter.dataclass2jsl import dataclass_to_jsl
-from jsonschema import Draft4Validator
-from .errors import ValidationError, FormValidationError, FieldValidationError
 from pprint import pprint
+from uuid import uuid4
+
+import colander
+
+from ..interfaces import ISchema
+from .app import App
+from .errors import FieldValidationError, FormValidationError, ValidationError
+from .schemaconverter.common import dataclass_get_type
+from .schemaconverter.dataclass2colander import dataclass_to_colander
 
 
 @dataclass
 class BaseSchema(ISchema):
     @classmethod
-    def validate(cls, request, data, additional_properties=False, update_mode=False):
-        validator = Draft4Validator
-        jslschema = dataclass_to_jsl(
-            cls,
-            nullable=True,
-            additional_properties=additional_properties,
-            update_mode=update_mode,
-        )
-        schema = jslschema.get_schema(ordered=True)
-        form_validators = request.app.get_formvalidators(cls)
+    def validate(cls, request, data, deserialize=True, update_mode=False):
         params = {}
+        if deserialize:
+            if not update_mode:
+                cschema = dataclass_to_colander(cls)
+            else:
+                cschema = dataclass_to_colander(cls, include_fields=data.keys())
+            try:
+                data = cschema().deserialize(data)
+            except colander.Invalid as e:
+                errors = e.asdict()
+                params["field_errors"] = [
+                    FieldValidationError(path=k, message=m) for k, m in errors.items()
+                ]
 
-        validator.check_schema(schema)
-        v = validator(schema)
-        field_errors = sorted(v.iter_errors(data), key=lambda e: e.path)
-        if field_errors:
-            params["field_errors"] = field_errors
+        form_validators = request.app.get_formvalidators(cls)
         form_errors = []
         for form_validator in form_validators:
-            e = form_validator(request, data)
-            if e:
-                form_errors.append(FormValidationError(e))
+            fe = form_validator(request, data)
+            if fe:
+                form_errors.append(FormValidationError(fe))
 
         if form_errors:
             params["form_errors"] = form_errors
@@ -50,9 +51,9 @@ class BaseSchema(ISchema):
                 if update_mode:
                     val = data.get(k, None)
                     if val:
-                        validate(val)
+                        validate(k, val)
                 else:
-                    validate(data[k])
+                    validate(k, data[k])
         return data
 
 

@@ -1,13 +1,15 @@
+import re
+import urllib
 from functools import partial
-from .errors import ValidationError, FormValidationError, FieldValidationError
+
+import reg
 from jsonschema import Draft4Validator
+from morepath.publish import resolve_model
+
+from .errors import FieldValidationError, FormValidationError, ValidationError
 from .schemaconverter.common import dataclass_get_type
 from .schemaconverter.dataclass2jsl import dataclass_to_jsl
 from .schemaconverter.jsl2jsonobject import jsl_to_jsonobject
-import reg
-from morepath.publish import resolve_model
-import urllib
-import re
 
 
 @reg.dispatch(reg.match_instance("model"), reg.match_instance("request"))
@@ -18,9 +20,11 @@ def get_data(model, request):
 def regex_validator(pattern, name):
     p = re.compile(pattern)
 
-    def _regex_validator(value):
+    def _regex_validator(field, value):
         if not p.match(value):
-            raise FieldValidationError("%s does not match %s pattern" % (value, name))
+            raise FieldValidationError(
+                field, "%s does not match %s pattern" % (value, name)
+            )
 
     return _regex_validator
 
@@ -39,8 +43,7 @@ def load(validator, schema, request):
         dc = schema
 
     data = get_data(context, request)
-    dc.validate(request, data)
-    return request.json
+    return dc.validate(request, data)
 
 
 def validate_schema(validator=Draft4Validator, schema=None):

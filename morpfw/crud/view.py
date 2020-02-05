@@ -1,20 +1,22 @@
-from .app import App
-from .model import Model, Collection
-from .validator import validate_schema, get_data
-from .errors import ValidationError, StateUpdateProhibitedError
-from .errors import AlreadyExistsError, UnprocessableError
-from .errors import FieldValidationError
-from . import permission
 import json
-from webob.exc import HTTPNotFound, HTTPForbidden, HTTPInternalServerError
-from morepath.request import Request
-from transitions import MachineError
-from jsonpath_ng import parse as jsonpath_parse
-from urllib.parse import urlencode
-import traceback
+import logging
 import os
 import sys
-import logging
+import traceback
+from urllib.parse import urlencode
+
+from jsonpath_ng import parse as jsonpath_parse
+from morepath.request import Request
+from transitions import MachineError
+from webob.exc import HTTPForbidden, HTTPInternalServerError, HTTPNotFound
+
+from . import permission
+from .app import App
+from .errors import (AlreadyExistsError, FieldValidationError,
+                     StateUpdateProhibitedError, UnprocessableError,
+                     ValidationError)
+from .model import Collection, Model
+from .validator import get_data, validate_schema
 
 logger = logging.getLogger("morp")
 
@@ -320,8 +322,7 @@ def validation_error(context, request):
     field_errors = []
     form_errors = []
     for e in context.field_errors:
-        path = [str(p) for p in e.path]
-        field_errors.append({"field": ".".join(path), "message": e.message})
+        field_errors.append({"field": e.path, "message": e.message})
 
     for e in context.form_errors:
         form_errors.append(e.message)
@@ -379,4 +380,3 @@ def unprocessable_error(context, request):
         response.status = 422
 
     return {"status": "error", "message": "%s" % (context.message)}
-

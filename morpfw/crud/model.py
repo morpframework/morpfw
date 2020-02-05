@@ -1,31 +1,32 @@
-import morepath
-from jsonschema.validators import Draft4Validator
-from jsonschema import validate
-from jsonschema import ValidationError as JSLValidationError
-from .errors import ValidationError
-from .schemaconverter.dataclass2jsl import dataclass_to_jsl
-from .const import SEPARATOR
-from . import permission
-from . import signals
-from .log import logger
-from rulez import validate_condition, parse_dsl, OperatorNotAllowedError
-from rulez import field as rfield
-import rulez
-from morepath import reify
-from DateTime import DateTime
-from uuid import uuid4
-from transitions import Machine
 import copy
-from .errors import (
-    StateUpdateProhibitedError,
-    AlreadyExistsError,
-    BlobStorageNotImplementedError,
-)
-from .errors import UnprocessableError
-from ..interfaces import IModel, ICollection, IStorage
 import json
 import re
+from uuid import uuid4
 
+import morepath
+import rulez
+from DateTime import DateTime
+from jsonschema import ValidationError as JSLValidationError
+from jsonschema import validate
+from jsonschema.validators import Draft4Validator
+from morepath import reify
+from rulez import OperatorNotAllowedError
+from rulez import field as rfield
+from rulez import parse_dsl, validate_condition
+from transitions import Machine
+
+from ..interfaces import ICollection, IModel, IStorage
+from . import permission, signals
+from .const import SEPARATOR
+from .errors import (
+    AlreadyExistsError,
+    BlobStorageNotImplementedError,
+    StateUpdateProhibitedError,
+    UnprocessableError,
+    ValidationError,
+)
+from .log import logger
+from .schemaconverter.dataclass2jsl import dataclass_to_jsl
 
 ALLOWED_SEARCH_OPERATORS = ["and", "or", "==", "in", "~", "!=", ">", "<", ">=", "<="]
 
@@ -116,7 +117,7 @@ class Collection(ICollection):
         return None
 
     def create(self, data):
-        self.schema.validate(self.request, data, additional_properties=True)
+        self.schema.validate(self.request, data)
         self.before_create(data)
         identifier = self.app.get_default_identifier(self.schema, data, self.request)
         if identifier and self.get(identifier):

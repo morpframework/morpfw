@@ -1,11 +1,13 @@
-from ..app import App
-from ..types import datestr
-from ..storage.memorystorage import MemoryStorage
-from ...interfaces import ISchema, IDataProvider
-from dateutil.parser import parse as parse_date
-from ..schemaconverter.common import dataclass_check_type, dataclass_get_type
 import datetime
 from dataclasses import _MISSING_TYPE
+
+from dateutil.parser import parse as parse_date
+
+from ...interfaces import IDataProvider, ISchema
+from ..app import App
+from ..schemaconverter.common import dataclass_check_type, dataclass_get_type
+from ..storage.memorystorage import MemoryStorage
+from ..types import datestr
 
 _MARKER: list = []
 
@@ -39,7 +41,7 @@ class DictProvider(IDataProvider):
         field = self.schema.__dataclass_fields__[key]
         t = dataclass_get_type(field)
         for v in t["metadata"]["validators"]:
-            v(value)
+            v(key, value)
         if t["type"] == datetime.datetime:
             if value and not isinstance(value, datetime.datetime):
                 value = parse_date(value)
