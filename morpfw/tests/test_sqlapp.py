@@ -1,15 +1,15 @@
-import morpfw
 import os
+import typing
+from dataclasses import dataclass
+
+import morpfw
+import sqlalchemy as sa
 from morpfw import sql as morpsql
-from morpfw.crud.schema import Schema
 from morpfw.crud import Collection, Model
 from morpfw.crud import permission as crudperm
-import sqlalchemy as sa
-import jsl
+from morpfw.crud.schema import Schema
+
 from .common import get_client
-from pprint import pprint
-from dataclasses import dataclass
-import typing
 
 
 class App(morpfw.SQLApp):
