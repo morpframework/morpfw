@@ -5,24 +5,33 @@ from pprint import pprint
 from uuid import uuid4
 
 import colander
+import pytz
 
 from ..interfaces import ISchema
 from .app import App
 from .errors import FieldValidationError, FormValidationError, ValidationError
 from .schemaconverter.common import dataclass_get_type
 from .schemaconverter.dataclass2colander import dataclass_to_colander
+from .schemaconverter.dataclass2colanderjson import dataclass_to_colanderjson
 
 
 @dataclass
 class BaseSchema(ISchema):
     @classmethod
-    def validate(cls, request, data, deserialize=True, update_mode=False):
+    def validate(cls, request, data, deserialize=True, json=True, update_mode=False):
         params = {}
         if deserialize:
             if not update_mode:
-                cschema = dataclass_to_colander(cls)
+                if json:
+                    cschema = dataclass_to_colanderjson(cls)
+                else:
+                    cschema = dataclass_to_colander(cls)
+
             else:
-                cschema = dataclass_to_colander(cls, include_fields=data.keys())
+                if json:
+                    cschema = dataclass_to_colanderjson(cls, include_fields=data.keys())
+                else:
+                    cschema = dataclass_to_colander(cls, include_fields=data.keys())
             try:
                 data = cschema().deserialize(data)
             except colander.Invalid as e:
@@ -63,8 +72,12 @@ class Schema(BaseSchema):
     id: typing.Optional[int] = None
     uuid: typing.Optional[str] = field(default_factory=lambda: uuid4().hex)
     creator: typing.Optional[str] = None
-    created: typing.Optional[datetime] = None
-    modified: typing.Optional[datetime] = None
+    created: typing.Optional[datetime] = field(
+        default_factory=lambda: datetime.now(tz=pytz.UTC)
+    )
+    modified: typing.Optional[datetime] = field(
+        default_factory=lambda: datetime.now(tz=pytz.UTC)
+    )
     state: typing.Optional[str] = None
     deleted: typing.Optional[datetime] = None
     blobs: typing.Optional[dict] = field(

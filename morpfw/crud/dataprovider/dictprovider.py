@@ -6,6 +6,7 @@ from dateutil.parser import parse as parse_date
 from ...interfaces import IDataProvider, ISchema
 from ..app import App
 from ..schemaconverter.common import dataclass_check_type, dataclass_get_type
+from ..schemaconverter.dataclass2colanderjson import dataclass_to_colanderjson
 from ..storage.memorystorage import MemoryStorage
 from ..types import datestr
 
@@ -87,21 +88,8 @@ class DictProvider(IDataProvider):
         return result
 
     def as_json(self):
-        result = {}
-        for k, v in self.data.items():
-            field = self.schema.__dataclass_fields__[k]
-            exclude_if_empty = field.metadata.get("morpfw", {}).get(
-                "exclude_if_empty", False
-            )
-            if exclude_if_empty and not v:
-                continue
-            if isinstance(v, datetime.datetime):
-                result[k] = datestr(v.isoformat())
-            else:
-                if not self._is_json_type(v):
-                    raise TypeError("Invalid type '%s'" % type(v))
-                result[k] = v
-        return result
+        cschema = dataclass_to_colanderjson(self.schema)
+        return cschema().serialize(self.as_dict())
 
 
 @App.dataprovider(schema=ISchema, obj=dict, storage=MemoryStorage)

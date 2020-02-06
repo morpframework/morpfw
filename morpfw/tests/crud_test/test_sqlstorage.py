@@ -1,27 +1,27 @@
-import jsl
 import os
-from .crud_common import App as BaseApp
-from morpfw.crud.model import Collection, Model
-from morpfw.crud.storage.sqlstorage import SQLStorage, Base, GUID
-from morpfw.crud.blobstorage.fsblobstorage import FSBlobStorage
-from ..common import get_client
-from .crud_common import run_jslcrud_test
-from .crud_common import PageCollection, PageModel, PageSchema
-from .crud_common import ObjectCollection, ObjectModel
-from .crud_common import NamedObjectCollection, NamedObjectModel
-from .crud_common import BlobObjectCollection, BlobObjectModel
-from .crud_common import FSBLOB_DIR
 import pprint
-from more.transaction import TransactionApp
-from morepath.reify import reify
-from morepath.request import Request
 
-from sqlalchemy.orm import sessionmaker
-from zope.sqlalchemy import register as register_session
+import jsl
 import morpfw.crud.signals as signals
 import sqlalchemy as sa
 import sqlalchemy_jsonfield as sajson
+from more.transaction import TransactionApp
+from morepath.reify import reify
+from morepath.request import Request
 from morpfw.app import SQLApp
+from morpfw.crud.blobstorage.fsblobstorage import FSBlobStorage
+from morpfw.crud.model import Collection, Model
+from morpfw.crud.storage.sqlstorage import GUID, Base, SQLStorage
+from sqlalchemy.orm import sessionmaker
+from zope.sqlalchemy import register as register_session
+
+from ..common import get_client
+from .crud_common import FSBLOB_DIR
+from .crud_common import App as BaseApp
+from .crud_common import (BlobObjectCollection, BlobObjectModel,
+                          NamedObjectCollection, NamedObjectModel,
+                          ObjectCollection, ObjectModel, PageCollection,
+                          PageModel, PageSchema, run_jslcrud_test)
 
 
 class App(BaseApp, SQLApp):
@@ -34,6 +34,8 @@ class Page(Base):
 
     title = sa.Column(sa.String(length=1024), default="")
     body = sa.Column(sa.Text(), default="")
+    publish_date = sa.Column(sa.Date())
+    publish_datetime = sa.Column(sa.DateTime(timezone=True))
     value = sa.Column(sa.Integer)
     footer = sa.Column(sa.String(length=1024), default="")
 

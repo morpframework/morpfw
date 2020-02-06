@@ -1,15 +1,16 @@
-from dataclasses import dataclass
-from .base import XattrProvider
-from ..model import Model
-from ...app import App
 import typing
+from dataclasses import dataclass
+
+from ...app import App
+from ..model import Model
+from .base import XattrProvider
 
 _marker = object()
 
 
 class FieldXattrProvider(XattrProvider):
 
-    field = 'xattrs'
+    field = "xattrs"
 
     def __getitem__(self, key):
         return self.context[self.field][key]

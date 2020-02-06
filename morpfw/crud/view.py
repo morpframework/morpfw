@@ -12,9 +12,13 @@ from webob.exc import HTTPForbidden, HTTPInternalServerError, HTTPNotFound
 
 from . import permission
 from .app import App
-from .errors import (AlreadyExistsError, FieldValidationError,
-                     StateUpdateProhibitedError, UnprocessableError,
-                     ValidationError)
+from .errors import (
+    AlreadyExistsError,
+    FieldValidationError,
+    StateUpdateProhibitedError,
+    UnprocessableError,
+    ValidationError,
+)
 from .model import Collection, Model
 from .validator import get_data, validate_schema
 

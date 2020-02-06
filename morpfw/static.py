@@ -1,23 +1,26 @@
-from .app import BaseApp as App
-from webob import static
-from webob.exc import HTTPNotFound, HTTPUnauthorized, HTTPNotModified
-from pkg_resources import resource_filename
-import os
 import hashlib
+import os
 from datetime import datetime, timedelta
-import morepath
 
-ETAG = hashlib.md5(datetime.now().strftime(
-    r'%Y%d%d%H').encode('ascii')).hexdigest()
+from pkg_resources import resource_filename
+
+import morepath
+import pytz
+from webob import static
+from webob.exc import HTTPNotFound, HTTPNotModified, HTTPUnauthorized
+
+from .app import BaseApp as App
+
+ETAG = hashlib.md5(datetime.now().strftime(r"%Y%d%d%H").encode("ascii")).hexdigest()
 
 
 class StaticRoot(object):
 
-    module = 'morpfw'
-    directory = 'static_files'
+    module = "morpfw"
+    directory = "static_files"
 
     def __init__(self, path):
-        self.path = path or ''
+        self.path = path or ""
 
     def resource_path(self):
         if not self.path.strip():
@@ -33,19 +36,22 @@ def serve_static(context, request):
         raise HTTPNotFound()
 
     settings = request.app.settings.__dict__
-    max_age = int(settings.get(
-        'caching', {}).get('max-age', (60*60)))
+    max_age = int(settings.get("caching", {}).get("max-age", (60 * 60)))
 
-    etag = request.headers.get('If-None-Match', '')
+    etag = request.headers.get("If-None-Match", "")
 
     def add_headers(response):
-        response.headers.add('Cache-Control', 'public, max-age=%s' % max_age)
-        response.headers.add('Expires', (
-            datetime.utcnow() +
-            timedelta(seconds=max_age)).strftime(r'%a, %d %b %Y %H:%M:%S GMT'))
-        response.headers.add('ETag', ETAG)
+        response.headers.add("Cache-Control", "public, max-age=%s" % max_age)
+        response.headers.add(
+            "Expires",
+            (datetime.now(tz=pytz.UTC) + timedelta(seconds=max_age)).strftime(
+                r"%a, %d %b %Y %H:%M:%S GMT"
+            ),
+        )
+        response.headers.add("ETag", ETAG)
 
     if etag and etag == ETAG:
+
         @request.after
         def add_notmodified_headers(response):
             add_headers(response)
@@ -61,4 +67,5 @@ def serve_static(context, request):
     @request.after
     def add_caching_headers(response):
         add_headers(response)
+
     return resp

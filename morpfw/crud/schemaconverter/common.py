@@ -63,4 +63,3 @@ def dataclass_check_type(field, basetype):
         return t
 
     return None
-

@@ -1,18 +1,20 @@
-import sqlalchemy as sa
 import uuid
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.exc import StatementError
-from rulez import compile_condition
-from sqlalchemy.types import TypeDecorator, CHAR
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import func
 from datetime import datetime
 from decimal import Decimal
-import sqlalchemy_jsonfield as sajson
-from .base import BaseStorage
-from ..app import App
+
 import jsl
-import uuid
+import pytz
+import sqlalchemy as sa
+import sqlalchemy_jsonfield as sajson
+from rulez import compile_condition
+from sqlalchemy import func
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.exc import StatementError
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.types import CHAR, TypeDecorator
+
+from ..app import App
+from .base import BaseStorage
 
 
 class SQLStorage(BaseStorage):
@@ -225,7 +227,7 @@ class SQLStorage(BaseStorage):
         return self.model(self.request, collection, r)
 
     def delete(self, identifier, model):
-        model["deleted"] = datetime.utcnow()
+        model["deleted"] = datetime.now(tz=pytz.UTC)
 
 
 class GUID(TypeDecorator):
@@ -267,11 +269,15 @@ class BaseMixin(object):
 
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     uuid = sa.Column(GUID, default=uuid.uuid4, index=True, unique=True)
-    created = sa.Column(sa.DateTime, default=datetime.utcnow)
+    created = sa.Column(
+        sa.DateTime(timezone=True), default=lambda: datetime.now(tz=pytz.UTC)
+    )
     creator = sa.Column(sa.String(length=1024))
-    modified = sa.Column(sa.DateTime, default=datetime.utcnow)
+    modified = sa.Column(
+        sa.DateTime(timezone=True), default=lambda: datetime.now(tz=pytz.UTC)
+    )
     state = sa.Column(sa.String(length=1024))
-    deleted = sa.Column(sa.DateTime)
+    deleted = sa.Column(sa.DateTime(timezone=True))
     blobs = sa.Column(sajson.JSONField)
     xattrs = sa.Column(sajson.JSONField)
 

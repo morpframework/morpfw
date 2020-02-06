@@ -1,17 +1,20 @@
-from ..storage.sqlstorage import Base, GUID, SQLStorage
-from .dictprovider import DictProvider
-from ..app import App
+import copy
+import datetime
+import uuid
+from dataclasses import _MISSING_TYPE
+
+import pytz
 import sqlalchemy as sa
 import sqlalchemy_jsonfield as sajson
 from dateutil.parser import parse as _parse_date
-import uuid
-from ..types import datestr
-import pytz
-import copy
-import datetime
-from ...interfaces import ISchema, IDataProvider
+
+from ...crud.schemaconverter.dataclass2colanderjson import dataclass_to_colanderjson
+from ...interfaces import IDataProvider, ISchema
+from ..app import App
 from ..schemaconverter.common import dataclass_get_type
-from dataclasses import _MISSING_TYPE
+from ..storage.sqlstorage import GUID, Base, SQLStorage
+from ..types import datestr
+from .dictprovider import DictProvider
 
 _MARKER: list = []
 
@@ -133,12 +136,9 @@ class SQLAlchemyModelProvider(IDataProvider):
             v = self.get(n)
             if v is None and t["metadata"]["exclude_if_empty"]:
                 continue
-            if isinstance(v, datetime.datetime):
-                result[n] = datestr(v.isoformat())
-            else:
-                if not self._is_json_type(v):
-                    raise TypeError("Invalid type '%s'" % type(v))
-                result[n] = v
+            result[n] = v
+        cschema = dataclass_to_colanderjson(self.schema)
+        result = cschema().serialize(result)
         return result
 
 

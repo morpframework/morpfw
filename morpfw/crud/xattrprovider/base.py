@@ -1,7 +1,9 @@
 import typing
-from ..schemaconverter.dataclass2jsl import dataclass_to_jsl
+
+from jsonschema import ValidationError, validate
+
 from ...interfaces import IXattrProvider
-from jsonschema import validate, ValidationError
+from ..schemaconverter.dataclass2jsl import dataclass_to_jsl
 
 _marker = object()
 

@@ -1,7 +1,8 @@
+import jsl
 from morepath.request import Request
 from rulez import compile_condition
+
 from .base import BaseStorage
-import jsl
 
 DATA = {}
 

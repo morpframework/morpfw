@@ -26,6 +26,7 @@ from .errors import (
     ValidationError,
 )
 from .log import logger
+from .schemaconverter.dataclass2colanderjson import dataclass_to_colanderjson
 from .schemaconverter.dataclass2jsl import dataclass_to_jsl
 
 ALLOWED_SEARCH_OPERATORS = ["and", "or", "==", "in", "~", "!=", ">", "<", ">=", "<="]
@@ -117,7 +118,7 @@ class Collection(ICollection):
         return None
 
     def create(self, data):
-        self.schema.validate(self.request, data)
+        data = self.schema.validate(self.request, data)
         self.before_create(data)
         identifier = self.app.get_default_identifier(self.schema, data, self.request)
         if identifier and self.get(identifier):
@@ -259,7 +260,7 @@ class Model(IModel):
         super().__init__(request, collection, data)
 
     def update(self, newdata: dict, secure: bool = False):
-        self.schema.validate(self.request, newdata, update_mode=True)
+        newdata = self.schema.validate(self.request, newdata, update_mode=True)
         if secure:
             if "state" in newdata:
                 raise StateUpdateProhibitedError()
@@ -269,10 +270,10 @@ class Model(IModel):
                         "%s is not allowed to be updated in this context" % protected
                     )
 
-        data = self._raw_json()
+        data = self.data.as_dict()
         self.before_update(newdata)
         data.update(newdata)
-        self.schema.validate(self.request, data)
+        self.schema.validate(self.request, data, deserialize=False)
         unique_constraint = getattr(self.schema, "__unique_constraint__", None)
         if unique_constraint:
             unique_search = []
@@ -298,20 +299,15 @@ class Model(IModel):
 
     def save(self):
         if self.data.changed:
-            data = self._raw_json()
-            self.schema.validate(self.request, data)
+            data = self.as_dict()
+            data = self.schema.validate(self.request, data, deserialize=False)
             self.storage.update(self.collection, self.identifier, data)
 
     def _raw_json(self):
-        jsondata = self.app.get_jsonprovider(self.data)
-        for k in self.hidden_fields:
-            if k in jsondata:
-                del jsondata[k]
-        try:
-            self.schema.validate(self.request, jsondata)
-        except ValidationError as e:
-            logger.warn("Validation error on %s" % json.dumps(jsondata))
-        return jsondata
+        cschema = dataclass_to_colanderjson(
+            self.schema, exclude_fields=self.hidden_fields
+        )
+        return cschema().serialize(self.data.as_dict())
 
     def _json(self):
         return self._raw_json()

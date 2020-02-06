@@ -1,18 +1,27 @@
-import jsl
 import os
-from morpfw.crud.storage.memorystorage import MemoryStorage
-from morpfw.crud.blobstorage.fsblobstorage import FSBlobStorage
+
+import jsl
 import morpfw.crud.signals as signals
-from ..common import get_client
-from .crud_common import run_jslcrud_test
-from .crud_common import PageCollection, PageModel, PageSchema
-from .crud_common import ObjectCollection, ObjectModel
-from .crud_common import NamedObjectCollection, NamedObjectModel
-from .crud_common import App as BaseApp
-from .crud_common import BlobObjectCollection, BlobObjectModel
-from .crud_common import FSBLOB_DIR
-from more.transaction import TransactionApp
 from more.basicauth import BasicAuthIdentityPolicy
+from more.transaction import TransactionApp
+from morpfw.crud.blobstorage.fsblobstorage import FSBlobStorage
+from morpfw.crud.storage.memorystorage import MemoryStorage
+
+from ..common import get_client
+from .crud_common import FSBLOB_DIR
+from .crud_common import App as BaseApp
+from .crud_common import (
+    BlobObjectCollection,
+    BlobObjectModel,
+    NamedObjectCollection,
+    NamedObjectModel,
+    ObjectCollection,
+    ObjectModel,
+    PageCollection,
+    PageModel,
+    PageSchema,
+    run_jslcrud_test,
+)
 
 
 class App(BaseApp):

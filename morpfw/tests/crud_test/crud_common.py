@@ -4,7 +4,7 @@ import shutil
 import tempfile
 import typing
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import date, datetime
 from uuid import uuid4
 
 import jsl
@@ -54,6 +54,8 @@ class PageSchema(Schema):
 
     title: str = ""
     body: str = ""
+    publish_date: typing.Optional[date] = None
+    publish_datetime: typing.Optional[datetime] = None
     value: typing.Optional[int] = None
     footer: typing.Optional[str] = ""
 
@@ -102,6 +104,7 @@ def object_updated(app, request, obj, signal):
 class ObjectXattrSchema(BaseSchema):
 
     message: typing.Optional[str] = None
+    message_date: typing.Optional[date] = None
 
 
 class ObjectXattrProvider(FieldXattrProvider):
@@ -195,9 +198,19 @@ def run_jslcrud_test(c, skip_aggregate=False):
     assert r.json["schema"]["type"] == "object"
 
     # lets try creating an entry
-    r = c.post_json("/pages/", {"title": "Hello", "body": "World"})
+    r = c.post_json(
+        "/pages/",
+        {
+            "title": "Hello",
+            "body": "World",
+            "publish_date": "2019-01-01",
+            "publish_datetime": "2019-01-01T01:01+00:00",
+        },
+    )
 
     assert r.json["data"]["title"] == "Hello"
+    assert r.json["data"]["publish_date"] == "2019-01-01"
+    assert r.json["data"]["publish_datetime"] == "2019-01-01T01:01:00+00:00"
 
     uuid = r.json["data"]["uuid"]
     assert uuid
@@ -374,14 +387,29 @@ def run_jslcrud_test(c, skip_aggregate=False):
 
     assert r.json["schema"]["$schema"]
 
-    r = c.patch_json(obj_xattr_link, {"message": "hello world"})
+    r = c.patch_json(
+        obj_xattr_link,
+        {"message": "hello world", "message_date": "201"},
+        expect_errors=True,
+    )
+
+    assert r.status_code == 422
+
+    r = c.patch_json(
+        obj_xattr_link, {"message": "hello world", "message_date": "2019-01-01"}
+    )
+
+    assert r.status_code == 200
 
     r = c.get(obj_xattr_link)
 
-    assert r.json == {"message": "hello world"}
+    assert r.json == {"message": "hello world", "message_date": "2019-01-01"}
 
     r = c.get(obj_link)
-    assert r.json["data"]["xattrs"] == {"message": "hello world"}
+    assert r.json["data"]["xattrs"] == {
+        "message": "hello world",
+        "message_date": "2019-01-01",
+    }
 
     r = c.patch_json(obj_xattr_link, {"message": "hello world", "anotherkey": "boo"},)
 

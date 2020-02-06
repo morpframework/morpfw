@@ -16,9 +16,17 @@ from .common import dataclass_check_type, dataclass_get_type
 
 def colander_params(prop, oid_prefix, **kwargs):
     t = dataclass_get_type(prop)
+    default = colander.drop
+    if (
+        not isinstance(prop.default, dataclasses._MISSING_TYPE)
+        and prop.default is not None
+    ):
+        default = prop.default
+
     params = {
         "name": prop.name,
         "oid": "%s-%s" % (oid_prefix, prop.name),
+        "default": default,
         "missing": colander.required if t["required"] else colander.drop,
     }
     deform_field_config = prop.metadata.get("deform", {})
@@ -59,7 +67,9 @@ def dataclass_field_to_colander_schemanode(
 
         return subtype()
     if t["type"] == dict:
-        params = colander_params(prop, oid_prefix, typ=colander.Mapping())
+        params = colander_params(
+            prop, oid_prefix, typ=colander.Mapping(unknown="preserve")
+        )
         return colander.SchemaNode(**params)
     if t["type"] == list:
         params = colander_params(prop, oid_prefix, typ=colander.List())
@@ -75,6 +85,7 @@ def dataclass_to_colander(
     hidden_fields: typing.List[str] = None,
     colander_schema_type: typing.Type[colander.Schema] = colander.MappingSchema,
     oid_prefix: str = "deformField",
+    dataclass_field_to_colander_schemanode=dataclass_field_to_colander_schemanode,
 ) -> typing.Type[colander.MappingSchema]:
     # output colander schema from dataclass schema
     attrs = {}

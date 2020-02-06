@@ -1,10 +1,13 @@
-from .base import BaseStorage
-from rulez import compile_condition
-import elasticsearch.exceptions as es_exc
-from ..app import App
-from pprint import pprint as print
 import copy
+from pprint import pprint
 from typing import Optional
+
+import elasticsearch.exceptions as es_exc
+from rulez import compile_condition
+
+from ..app import App
+from ..schemaconverter.dataclass2colanderjson import dataclass_to_colanderjson
+from .base import BaseStorage
 
 
 class AggGroup(object):
@@ -155,6 +158,8 @@ class ElasticSearchStorage(BaseStorage):
                 raise e
 
     def create(self, collection, data):
+        cschema = dataclass_to_colanderjson(collection.schema)
+        data = cschema().serialize(data)
         m = self.model(self.request, collection, data)
         self.create_index()
         try:
@@ -321,6 +326,10 @@ class ElasticSearchStorage(BaseStorage):
         return self.model(self.request, collection, res["_source"])
 
     def update(self, collection, identifier, data):
+        cschema = dataclass_to_colanderjson(
+            collection.schema, include_fields=data.keys()
+        )
+        data = cschema().serialize(data)
         self.create_index()
         self.client.update(
             index=self.index_name,
@@ -335,4 +344,3 @@ class ElasticSearchStorage(BaseStorage):
         self.client.delete(
             index=self.index_name, doc_type=self.doc_type, id=identifier, refresh=True
         )
-

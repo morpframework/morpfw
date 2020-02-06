@@ -1,28 +1,30 @@
 import os
-from .crud_common import App as BaseApp
-from morpfw.crud.model import Collection, Model
-from morpfw.crud.schema import Schema
-from morpfw.crud.storage.elasticsearchstorage import ElasticSearchStorage
-from morpfw.crud.blobstorage.fsblobstorage import FSBlobStorage
-from ..common import get_client
-from .crud_common import run_jslcrud_test
-from .crud_common import PageCollection, PageModel, PageSchema
-from .crud_common import NamedObjectCollection, NamedObjectModel
-from .crud_common import BlobObjectCollection, BlobObjectModel
-from .crud_common import ObjectXattrProvider, ObjectXattrSchema
-from .crud_common import FSBLOB_DIR
-from .crud_common import ObjectSchema as BaseObjectSchema
 import pprint
+import typing
+from dataclasses import dataclass, field
+
+import morpfw.crud.signals as signals
+from elasticsearch import Elasticsearch
+from more.basicauth import BasicAuthIdentityPolicy
 from more.transaction import TransactionApp
 from morepath.reify import reify
 from morepath.request import Request
-from more.basicauth import BasicAuthIdentityPolicy
+from morpfw.crud.blobstorage.fsblobstorage import FSBlobStorage
+from morpfw.crud.model import Collection, Model
+from morpfw.crud.schema import Schema
+from morpfw.crud.storage.elasticsearchstorage import ElasticSearchStorage
 from sqlalchemy.orm import sessionmaker
 from zope.sqlalchemy import register as register_session
-import morpfw.crud.signals as signals
-from elasticsearch import Elasticsearch
-from dataclasses import dataclass, field
-import typing
+
+from ..common import get_client
+from .crud_common import FSBLOB_DIR
+from .crud_common import App as BaseApp
+from .crud_common import (BlobObjectCollection, BlobObjectModel,
+                          NamedObjectCollection, NamedObjectModel)
+from .crud_common import ObjectSchema as BaseObjectSchema
+from .crud_common import (ObjectXattrProvider, ObjectXattrSchema,
+                          PageCollection, PageModel, PageSchema,
+                          run_jslcrud_test)
 
 Session = sessionmaker()
 register_session(Session)
