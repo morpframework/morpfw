@@ -117,8 +117,8 @@ class Collection(ICollection):
             return self.app.get_aggregateprovider(self)
         return None
 
-    def create(self, data):
-        data = self.schema.validate(self.request, data)
+    def create(self, data, deserialize=True):
+        data = self.schema.validate(self.request, data, deserialize=deserialize)
         self.before_create(data)
         identifier = self.app.get_default_identifier(self.schema, data, self.request)
         if identifier and self.get(identifier):
@@ -259,8 +259,10 @@ class Model(IModel):
         self._cached_identifier = None
         super().__init__(request, collection, data)
 
-    def update(self, newdata: dict, secure: bool = False):
-        newdata = self.schema.validate(self.request, newdata, update_mode=True)
+    def update(self, newdata: dict, secure: bool = False, deserialize: bool = True):
+        newdata = self.schema.validate(
+            self.request, newdata, deserialize=deserialize, update_mode=True
+        )
         if secure:
             if "state" in newdata:
                 raise StateUpdateProhibitedError()

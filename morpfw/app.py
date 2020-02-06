@@ -110,7 +110,8 @@ class SQLApp(TransactionApp, BaseApp):
         cwd = os.environ.get('MORP_WORKDIR', os.getcwd())
         os.chdir(cwd)
         dburi = config['morpfw.storage.sqlstorage.dburi']
-        engine = sqlalchemy.create_engine(dburi, poolclass=NullPool)
+        engine = sqlalchemy.create_engine(dburi, poolclass=NullPool,
+                connect_args={"options": "-c timezone=utc"})
         session.configure(bind=engine)
 
         self.engine = engine
