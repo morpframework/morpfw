@@ -7,7 +7,7 @@ import pytz
 
 from ...interfaces import ISchema
 from .common import dataclass_check_type, dataclass_get_type
-from .dataclass2colander import colander_params
+from .dataclass2colander import SchemaNode, colander_params
 from .dataclass2colander import (
     dataclass_field_to_colander_schemanode as orig_dc2colander_node,
 )
@@ -103,22 +103,22 @@ def dataclass_field_to_colander_schemanode(
     t = dataclass_get_type(prop)
     if t["type"] == date:
         params = colander_params(prop, oid_prefix, typ=Date())
-        return colander.SchemaNode(**params)
+        return SchemaNode(**params)
     if t["type"] == datetime:
         params = colander_params(prop, oid_prefix, typ=DateTime())
-        return colander.SchemaNode(**params)
+        return SchemaNode(**params)
     if t["type"] == str:
         params = colander_params(prop, oid_prefix, typ=Str())
-        return colander.SchemaNode(**params)
+        return SchemaNode(**params)
     if t["type"] == int:
         params = colander_params(prop, oid_prefix, typ=Int())
-        return colander.SchemaNode(**params)
+        return SchemaNode(**params)
     if t["type"] == float:
         params = colander_params(prop, oid_prefix, typ=Float())
-        return colander.SchemaNode(**params)
+        return SchemaNode(**params)
     if t["type"] == bool:
         params = colander_params(prop, oid_prefix, typ=Boolean())
-        return colander.SchemaNode(**params)
+        return SchemaNode(**params)
 
     if dataclass_check_type(prop, ISchema):
         subtype = dataclass_to_colanderjson(
@@ -130,7 +130,7 @@ def dataclass_field_to_colander_schemanode(
         params = colander_params(
             prop, oid_prefix, typ=colander.Mapping(unknown="preserve")
         )
-        return colander.SchemaNode(**params)
+        return SchemaNode(**params)
 
     return orig_dc2colander_node(prop, oid_prefix)
 

@@ -14,6 +14,20 @@ from ...interfaces import ISchema
 from .common import dataclass_check_type, dataclass_get_type
 
 
+class SchemaNode(colander.SchemaNode):
+    def serialize(self, appstruct=colander.null):
+        # workaround with deform serialization issue with colander.drop
+        if appstruct is colander.null:
+            appstruct = self.default
+        if appstruct is colander.drop:
+            appstruct = colander.null
+        if isinstance(appstruct, colander.deferred):
+            appstruct = colander.null
+
+        cstruct = self.typ.serialize(self, appstruct)
+        return cstruct
+
+
 def colander_params(prop, oid_prefix, **kwargs):
     t = dataclass_get_type(prop)
 
@@ -47,22 +61,22 @@ def dataclass_field_to_colander_schemanode(
     t = dataclass_get_type(prop)
     if t["type"] == date:
         params = colander_params(prop, oid_prefix, typ=colander.Date())
-        return colander.SchemaNode(**params)
+        return SchemaNode(**params)
     if t["type"] == datetime:
         params = colander_params(prop, oid_prefix, typ=colander.DateTime())
-        return colander.SchemaNode(**params)
+        return SchemaNode(**params)
     if t["type"] == str:
         params = colander_params(prop, oid_prefix, typ=colander.String())
-        return colander.SchemaNode(**params)
+        return SchemaNode(**params)
     if t["type"] == int:
         params = colander_params(prop, oid_prefix, typ=colander.Integer())
-        return colander.SchemaNode(**params)
+        return SchemaNode(**params)
     if t["type"] == float:
         params = colander_params(prop, oid_prefix, typ=colander.Float())
-        return colander.SchemaNode(**params)
+        return SchemaNode(**params)
     if t["type"] == bool:
         params = colander_params(prop, oid_prefix, typ=colander.Boolean())
-        return colander.SchemaNode(**params)
+        return SchemaNode(**params)
 
     if dataclass_check_type(prop, ISchema):
         subtype = dataclass_to_colander(
@@ -74,10 +88,10 @@ def dataclass_field_to_colander_schemanode(
         params = colander_params(
             prop, oid_prefix, typ=colander.Mapping(unknown="preserve")
         )
-        return colander.SchemaNode(**params)
+        return SchemaNode(**params)
     if t["type"] == list:
         params = colander_params(prop, oid_prefix, typ=colander.List())
-        return colander.SchemaNode(**params)
+        return SchemaNode(**params)
 
     raise KeyError(prop)
 
