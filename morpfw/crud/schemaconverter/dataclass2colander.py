@@ -16,22 +16,25 @@ from .common import dataclass_check_type, dataclass_get_type
 
 def colander_params(prop, oid_prefix, **kwargs):
     t = dataclass_get_type(prop)
-    default = colander.drop
-    if (
-        not isinstance(prop.default, dataclasses._MISSING_TYPE)
-        and prop.default is not None
-    ):
-        default = prop.default
 
     params = {
         "name": prop.name,
         "oid": "%s-%s" % (oid_prefix, prop.name),
-        "default": default,
         "missing": colander.required if t["required"] else colander.drop,
     }
 
-    if 'deform.widget' in prop.metadata.keys():
-        params['widget'] = copy.copy(prop.metadata['deform.widget'])
+    if (
+        not isinstance(prop.default, dataclasses._MISSING_TYPE)
+        and prop.default is not None
+    ):
+        params["default"] = prop.default
+    elif isinstance(prop.default, dataclasses._MISSING_TYPE) and t["required"]:
+        pass
+    else:
+        params["default"] = colander.drop
+
+    if "deform.widget" in prop.metadata.keys():
+        params["widget"] = copy.copy(prop.metadata["deform.widget"])
 
     params.update(kwargs)
     return params

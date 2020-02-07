@@ -19,12 +19,21 @@ from zope.sqlalchemy import register as register_session
 from ..common import get_client
 from .crud_common import FSBLOB_DIR
 from .crud_common import App as BaseApp
-from .crud_common import (BlobObjectCollection, BlobObjectModel,
-                          NamedObjectCollection, NamedObjectModel)
+from .crud_common import (
+    BlobObjectCollection,
+    BlobObjectModel,
+    NamedObjectCollection,
+    NamedObjectModel,
+)
 from .crud_common import ObjectSchema as BaseObjectSchema
-from .crud_common import (ObjectXattrProvider, ObjectXattrSchema,
-                          PageCollection, PageModel, PageSchema,
-                          run_jslcrud_test)
+from .crud_common import (
+    ObjectXattrProvider,
+    ObjectXattrSchema,
+    PageCollection,
+    PageModel,
+    PageSchema,
+    run_jslcrud_test,
+)
 
 Session = sessionmaker()
 register_session(Session)
