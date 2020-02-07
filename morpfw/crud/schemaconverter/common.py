@@ -1,6 +1,17 @@
+import copy
 import typing
 
 _marker = object()
+
+
+def drop_empty(schema, data):
+    result = {}
+    for attr, prop in sorted(schema.__dataclass_fields__.items(), key=lambda x: x[0]):
+        if data.get(attr, None) is None:
+            if prop.metadata.get("exclude_if_empty", None) is True:
+                continue
+        result[attr] = copy.deepcopy(data[attr])
+    return result
 
 
 def dataclass_get_type(field):

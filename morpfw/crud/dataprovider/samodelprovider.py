@@ -12,7 +12,7 @@ from ...crud.schemaconverter.dataclass2colanderjson import dataclass_to_colander
 from ...interfaces import IDataProvider, ISchema
 from ..app import App
 from ..schemaconverter.common import dataclass_get_type
-from ..storage.sqlstorage import GUID, Base, SQLStorage
+from ..storage.sqlstorage import GUID, Base, MappedTable, SQLStorage
 from ..types import datestr
 from .dictprovider import DictProvider
 
@@ -140,6 +140,11 @@ class SQLAlchemyModelProvider(IDataProvider):
         cschema = dataclass_to_colanderjson(self.schema)
         result = cschema().serialize(result)
         return result
+
+
+@App.dataprovider(schema=ISchema, obj=MappedTable, storage=SQLStorage)
+def get_provider(schema, obj, storage):
+    return SQLAlchemyModelProvider(schema, obj, storage)
 
 
 @App.dataprovider(schema=ISchema, obj=Base, storage=SQLStorage)

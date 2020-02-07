@@ -265,7 +265,11 @@ class GUID(TypeDecorator):
             return uuid.UUID(value)
 
 
-class BaseMixin(object):
+class MappedTable(object):
+    pass
+
+
+class BaseMixin(MappedTable):
 
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     uuid = sa.Column(GUID, default=uuid.uuid4, index=True, unique=True)

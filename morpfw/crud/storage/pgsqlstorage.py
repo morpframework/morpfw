@@ -1,0 +1,54 @@
+import uuid
+from datetime import datetime
+from decimal import Decimal
+
+import jsl
+import sqlalchemy as sa
+import sqlalchemy.orm as saorm
+import sqlalchemy_jsonfield as sajson
+from rulez import compile_condition
+from sqlalchemy import Column, MetaData, Table, func
+from sqlalchemy import types as satypes
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.exc import StatementError
+from sqlalchemy.types import CHAR, TypeDecorator
+
+from ..app import App
+from ..schemaconverter.dataclass2pgsqla import dataclass_to_pgsqla
+from .base import BaseStorage
+from .sqlstorage import MappedTable, SQLStorage
+
+db_meta = MetaData()
+
+_mapped_models = {}
+
+
+class PgSQLStorage(SQLStorage):
+
+    _temp: dict = {}
+
+    def __init__(self, request, metadata=None, blobstorage=None):
+        self.metadata = metadata or db_meta
+        self.engine = request.db_session.get_bind()
+        self.metadata.bind = self.engine
+        super().__init__(request, blobstorage=blobstorage)
+
+    @property
+    def orm_model(self):
+        existing = _mapped_models.get(self.model.schema, None)
+        if existing:
+            return existing
+
+        table = dataclass_to_pgsqla(self.model.schema, self.metadata)
+
+        if not self.engine.has_table(table.name):
+            self.metadata.create_all(tables=[table])
+
+        class Table(MappedTable):
+
+            __table__ = table
+
+        saorm.mapper(Table, table)
+
+        _mapped_models[self.model.schema] = Table
+        return Table

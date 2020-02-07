@@ -69,10 +69,12 @@ class BaseSchema(ISchema):
 @dataclass
 class Schema(BaseSchema):
 
-    id: typing.Optional[int] = None
+    id: typing.Optional[int] = field(
+        default=None, metadata={"primary_key": True, "autoincrement": True}
+    )
     uuid: typing.Optional[str] = field(
         default_factory=lambda: uuid4().hex,
-        metadata={"format": "uuid", "primary_key": True},
+        metadata={"format": "uuid", "index": True, "unique": True},
     )
     creator: typing.Optional[str] = None
     created: typing.Optional[datetime] = field(
