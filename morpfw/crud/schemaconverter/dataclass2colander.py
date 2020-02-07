@@ -29,9 +29,10 @@ def colander_params(prop, oid_prefix, **kwargs):
         "default": default,
         "missing": colander.required if t["required"] else colander.drop,
     }
-    deform_field_config = prop.metadata.get("deform", {})
-    if "widget" in deform_field_config.keys():
-        params["widget"] = copy.copy(deform_field_config["widget"])
+
+    if 'deform.widget' in prop.metadata.keys():
+        params['widget'] = copy.copy(prop.metadata['deform.widget'])
+
     params.update(kwargs)
     return params
 

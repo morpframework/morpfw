@@ -70,7 +70,10 @@ class BaseSchema(ISchema):
 class Schema(BaseSchema):
 
     id: typing.Optional[int] = None
-    uuid: typing.Optional[str] = field(default_factory=lambda: uuid4().hex)
+    uuid: typing.Optional[str] = field(
+        default_factory=lambda: uuid4().hex,
+        metadata={"format": "uuid", "primary_key": True},
+    )
     creator: typing.Optional[str] = None
     created: typing.Optional[datetime] = field(
         default_factory=lambda: datetime.now(tz=pytz.UTC)
@@ -81,10 +84,10 @@ class Schema(BaseSchema):
     state: typing.Optional[str] = None
     deleted: typing.Optional[datetime] = None
     blobs: typing.Optional[dict] = field(
-        default_factory=dict, metadata={"morpfw": {"exclude_if_empty": True}}
+        default_factory=dict, metadata={"exclude_if_empty": True}
     )
     xattrs: typing.Optional[dict] = field(
-        default_factory=dict, metadata={"morpfw": {"exclude_if_empty": True}}
+        default_factory=dict, metadata={"exclude_if_empty": True}
     )
 
 

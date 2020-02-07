@@ -6,7 +6,7 @@ _marker = object()
 def dataclass_get_type(field):
     metadata = {"required": _marker, "exclude_if_empty": True, "validators": []}
 
-    metadata.update(field.metadata.get("morpfw", {}))
+    metadata.update(field.metadata)
 
     origin = getattr(field.type, "__origin__", None)
     required = True

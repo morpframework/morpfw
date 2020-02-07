@@ -7,8 +7,7 @@ import typing
 @dataclass
 class GroupSchema(Schema):
     parent: typing.Optional[str] = None
-    groupname: typing.Optional[str] = field(default=None, metadata={
-        'morpfw': {'required': True}})
+    groupname: typing.Optional[str] = field(default=None, metadata={'required': True})
 
 
 @App.identifierfield(schema=GroupSchema)
@@ -18,5 +17,5 @@ def group_identifierfield(schema):
 
 @dataclass
 class MemberSchema(Schema):
-    users: typing.List[str] = field(default_factory=list, metadata={
-                                    'morpfw': {'required': True}})
+    users: typing.List[str] = field(default_factory=list, 
+            metadata={'required': True})

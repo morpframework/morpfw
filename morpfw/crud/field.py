@@ -1,5 +1,5 @@
+from copy import copy, deepcopy
 from dataclasses import field
-from copy import deepcopy, copy
 
 MISSING = object()
 
@@ -36,8 +36,7 @@ class Field(object):
         return field(metadata=self.metadata)
 
     def widget(self, widget):
-        self.metadata.setdefault("deform", {})
-        self.metadata["deform"]["widget"] = widget
+        self.metadata["deform.widget"] = widget
         return self
 
     def unique(self):
