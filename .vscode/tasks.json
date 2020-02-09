@@ -11,12 +11,6 @@
             "problemMatcher": []
         },
         {
-            "label": "Destroy Pipenv",
-            "type": "shell",
-            "command": "pipenv --rm",
-            "group": "build"
-        },
-        {
             "label": "Test Project",
             "type": "shell",
             "command": "./bin/pytest --cov-report html --cov=morpfw --annotate-output=annotations.json --html=report.html --self-contained-html -s morpfw",

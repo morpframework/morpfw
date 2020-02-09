@@ -9,7 +9,7 @@ from morpfw.crud import Collection, Model
 from morpfw.crud import permission as crudperm
 from morpfw.crud.schema import Schema
 
-from .common import get_client
+from .common import get_client, make_request
 
 
 class App(morpfw.SQLApp):
@@ -71,7 +71,8 @@ def get_page(request, identifier):
 
 def test_morp_framework(pgsql_db):
     c = get_client(os.path.join(os.path.dirname(__file__), "test_sqlapp-settings.yml"))
-
+    req = make_request(c.app)
+    morpsql.Base.metadata.create_all(bind=req.db_session.bind)
     r = c.get("/")
 
     assert len(r.json["schema"]["properties"]) == 11

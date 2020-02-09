@@ -23,6 +23,7 @@ setup(name='morpfw',
       install_requires=[
           # -*- Extra requirements: -*-
           'morepath>=0.18,<0.19',
+          'alembic',
           'rulez>=0.1.2,<0.2.0',
           'more.cors',
           'celery',

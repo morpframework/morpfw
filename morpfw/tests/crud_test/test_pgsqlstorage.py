@@ -8,7 +8,7 @@ from morpfw.app import SQLApp
 from morpfw.crud.blobstorage.fsblobstorage import FSBlobStorage
 from morpfw.crud.storage.pgsqlstorage import PgSQLStorage
 
-from ..common import get_client
+from ..common import get_client, make_request
 from .crud_common import FSBLOB_DIR
 from .crud_common import App as BaseApp
 from .crud_common import (
@@ -118,5 +118,6 @@ def blobobject_model_factory(request, identifier):
 
 def test_pgsqlstorage(pgsql_db):
     config = os.path.join(os.path.dirname(__file__), "test_pgsqlstorage-settings.yml")
-    client = get_client(config)
-    run_jslcrud_test(client)
+    c = get_client(config)
+    request = make_request(c.app)
+    run_jslcrud_test(c)

@@ -1,25 +1,38 @@
-import os
-import morepath
-import yaml
 import json
+import os
 import socket
 import time
 from multiprocessing import Process
-from webtest import TestApp as Client
-from more.jwtauth import JWTIdentityPolicy
+
+import morepath
+import transaction
+import yaml
 from more.basicauth import BasicAuthIdentityPolicy
-from morpfw.main import create_app
-from morpfw.main import create_admin as morpfw_create_admin
+from more.jwtauth import JWTIdentityPolicy
 from morpfw import cli
 from morpfw.authn.pas.exc import UserExistsError
-import transaction
+from morpfw.main import create_admin as morpfw_create_admin
+from morpfw.main import create_app
+from webtest import TestApp as Client
 
 
-def get_client(config='settings.yml', **kwargs):
+def make_request(appobj):
+    request = appobj.request_class(
+        environ={
+            "PATH_INFO": "/",
+            "wsgi.url_scheme": "http",
+            "SERVER_NAME": "localhost",
+            "SERVER_PORT": "80",
+            "SERVER_PROTOCOL": "HTTP/1.1",
+        },
+        app=appobj,
+    )
+    return request
+
+
+def get_client(config="settings.yml", **kwargs):
     param = cli.load(config)
-    appobj = param['factory'](param['settings'], **kwargs)
-    if hasattr(appobj, 'initdb'):
-        appobj.initdb()
+    appobj = param["factory"](param["settings"], **kwargs)
     c = Client(appobj)
     return c
 
@@ -33,9 +46,8 @@ def create_admin(client: Client, user: str, password: str, email: str):
 def start_scheduler(app):
     settings = app._raw_settings
     hostname = socket.gethostname()
-    ss = settings['configuration']['morpfw.celery']
-    sched = app.celery.Beat(
-        hostname='testscheduler.%s' % hostname, **ss)
+    ss = settings["configuration"]["morpfw.celery"]
+    sched = app.celery.Beat(hostname="testscheduler.%s" % hostname, **ss)
     proc = Process(target=sched.run)
     proc.daemon = True
     proc.start()
@@ -46,9 +58,8 @@ def start_scheduler(app):
 def start_worker(app):
     settings = app._raw_settings
     hostname = socket.gethostname()
-    ss = settings['configuration']['morpfw.celery']
-    worker = app.celery.Worker(
-        hostname='testworker.%s' % hostname, **ss)
+    ss = settings["configuration"]["morpfw.celery"]
+    worker = app.celery.Worker(hostname="testworker.%s" % hostname, **ss)
     proc = Process(target=worker.start)
     proc.daemon = True
     proc.start()

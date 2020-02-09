@@ -15,13 +15,21 @@ from morpfw.crud.storage.sqlstorage import GUID, Base, SQLStorage
 from sqlalchemy.orm import sessionmaker
 from zope.sqlalchemy import register as register_session
 
-from ..common import get_client
+from ..common import get_client, make_request
 from .crud_common import FSBLOB_DIR
 from .crud_common import App as BaseApp
-from .crud_common import (BlobObjectCollection, BlobObjectModel,
-                          NamedObjectCollection, NamedObjectModel,
-                          ObjectCollection, ObjectModel, PageCollection,
-                          PageModel, PageSchema, run_jslcrud_test)
+from .crud_common import (
+    BlobObjectCollection,
+    BlobObjectModel,
+    NamedObjectCollection,
+    NamedObjectModel,
+    ObjectCollection,
+    ObjectModel,
+    PageCollection,
+    PageModel,
+    PageSchema,
+    run_jslcrud_test,
+)
 
 
 class App(BaseApp, SQLApp):
@@ -161,4 +169,6 @@ def blobobject_model_factory(request, identifier):
 def test_sqlstorage(pgsql_db):
     config = os.path.join(os.path.dirname(__file__), "test_sqlstorage-settings.yml")
     c = get_client(config)
+    request = make_request(c.app)
+    Base.metadata.create_all(bind=request.db_session.bind)
     run_jslcrud_test(c)
