@@ -1,9 +1,9 @@
 import os
-
-from sqlalchemy import MetaData, create_engine
+import sys
 
 from alembic import command
 from alembic.config import Config
+from sqlalchemy import MetaData, create_engine
 
 
 def _load_engines(config):
@@ -20,20 +20,6 @@ def _load_engines(config):
 
             engines[name] = {"dburi": v}
     return engines
-
-
-def migrate(request):
-    config = request.app.settings.configuration.__dict__
-    engines = _load_engines(config)
-
-    for path in request.app.__class__.all_migration_scripts():
-        cfg = Config(os.path.join(path, "alembic.ini"))
-        cfg.set_main_option("databases", ", ".join(engines.keys()))
-        cfg.set_main_option("script_location", path)
-        for e, es in engines.items():
-            cfg.set_section_option(e, "sqlalchemy.url", es["dburi"])
-
-        command.upgrade(cfg, "head")
 
 
 def drop_all(request):

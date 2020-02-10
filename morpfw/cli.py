@@ -18,9 +18,8 @@ import hydra
 import morepath
 import morpfw
 import yaml
-from .alembic import migrate as migratedb
-from .alembic import drop_all
 
+from .alembic import drop_all
 from .main import create_admin, create_app, default_settings
 from .util import mock_request
 
@@ -220,26 +219,6 @@ def _shell(vars):
     shell.interact()
 
 
-@cli.command(help="Initialize/Migrate Database")
-@click.pass_context
-def migrate(ctx):
-    param = load(ctx.obj["settings"])
-    app = param["factory"](param["settings"])
-
-    while not isinstance(app, morepath.App):
-        wrapped = getattr(app, "app", None)
-        if wrapped:
-            app = wrapped
-        else:
-            raise ValueError("Unable to locate app object from middleware")
-
-    settings = param["settings"]
-
-    request = mock_request(app, settings)
-
-    migratedb(request)
-
-
 @cli.command(help="Reset database")
 @click.pass_context
 def resetdb(ctx):
@@ -258,7 +237,6 @@ def resetdb(ctx):
     request = mock_request(app, settings)
 
     drop_all(request)
-    migratedb(request)
 
 
 if __name__ == "__main__":
