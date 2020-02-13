@@ -3,12 +3,13 @@ import json
 import re
 from uuid import uuid4
 
-import morepath
-import rulez
-from DateTime import DateTime
 from jsonschema import ValidationError as JSLValidationError
 from jsonschema import validate
 from jsonschema.validators import Draft4Validator
+
+import morepath
+import rulez
+from DateTime import DateTime
 from morepath import reify
 from rulez import OperatorNotAllowedError
 from rulez import field as rfield
@@ -283,8 +284,10 @@ class Model(IModel):
             for c in unique_constraint:
                 unique_search.append(rulez.field[c] == data[c])
                 msg.append(f"{c}=({data[c]})")
-            if self.search(rulez.and_(*unique_search)):
-                raise self.exist_exc(" ".join(msg))
+            res = self.collection.search(rulez.and_(*unique_search))
+            if res:
+                if res[0].identifier != self.identifier:
+                    raise self.collection.exist_exc(" ".join(msg))
         validators = getattr(self.schema, "__validators__", [])
         for validator in validators:
             validate(self, self.request, data)

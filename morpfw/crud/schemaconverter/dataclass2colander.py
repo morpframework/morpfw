@@ -8,7 +8,8 @@ from importlib import import_module
 from pkg_resources import resource_filename
 
 import colander
-from deform.widget import HiddenWidget
+from deform.schema import default_widget_makers
+from deform.widget import HiddenWidget, TextAreaWidget, TextInputWidget
 
 from ...interfaces import ISchema
 from .common import dataclass_check_type, dataclass_get_type
@@ -42,9 +43,7 @@ def colander_params(prop, oid_prefix, **kwargs):
         and prop.default is not None
     ):
         params["default"] = prop.default
-    elif isinstance(prop.default, dataclasses._MISSING_TYPE) and t["required"]:
-        pass
-    else:
+    elif not t["required"]:
         params["default"] = colander.drop
 
     if "deform.widget" in prop.metadata.keys():
@@ -98,9 +97,11 @@ def dataclass_field_to_colander_schemanode(
 
 def dataclass_to_colander(
     schema,
+    mode="default",
     include_fields: typing.List[str] = None,
     exclude_fields: typing.List[str] = None,
     hidden_fields: typing.List[str] = None,
+    readonly_fields: typing.List[str] = None,
     colander_schema_type: typing.Type[colander.Schema] = colander.MappingSchema,
     oid_prefix: str = "deformField",
     dataclass_field_to_colander_schemanode=dataclass_field_to_colander_schemanode,
@@ -111,6 +112,32 @@ def dataclass_to_colander(
     include_fields = include_fields or []
     exclude_fields = exclude_fields or []
     hidden_fields = hidden_fields or []
+    readonly_fields = readonly_fields or []
+
+    if mode == "edit":
+        readonly_fields += [
+            attr
+            for attr, prop in schema.__dataclass_fields__.items()
+            if (
+                not prop.metadata.get("editable", True)
+                or prop.metadata.get("readonly", False)
+            )
+        ]
+    elif mode == "edit-process":
+        exclude_fields += [
+            attr
+            for attr, prop in schema.__dataclass_fields__.items()
+            if (
+                not prop.metadata.get("editable", True)
+                or prop.metadata.get("readonly", False)
+            )
+        ]
+    else:
+        readonly_fields += [
+            attr
+            for attr, prop in schema.__dataclass_fields__.items()
+            if (prop.metadata.get("readonly", False))
+        ]
 
     if include_fields:
         for attr, prop in schema.__dataclass_fields__.items():
@@ -128,11 +155,28 @@ def dataclass_to_colander(
                 attrs[attr] = prop
 
     for attr, prop in attrs.items():
+        dcprop = schema.__dataclass_fields__[attr]
+
+        t = dataclass_get_type(dcprop)
         if attr in hidden_fields:
             if prop.widget is None:
                 prop.widget = HiddenWidget()
             else:
                 prop.widget.hidden = True
+
+        if attr in readonly_fields:
+            if prop.widget is None:
+                prop_widget = default_widget_makers.get(prop.typ.__class__, None)
+                if prop_widget is None:
+                    prop_widget = TextInputWidget
+                prop.widget = prop_widget()
+
+            prop.widget.readonly = True
+
+        if t["type"] == str:
+            if dcprop.metadata.get("format", None) == "text":
+                if prop.widget is None:
+                    prop.widget = TextAreaWidget()
 
     Schema = type("Schema", (colander_schema_type,), attrs)
 

@@ -74,7 +74,8 @@ setup(name='morpfw',
           'colander',
           'deform',
           'more.chameleon',
-          'more.static'
+          'more.static',
+          'RestrictedPython'
       ],
       extras_require={
           'test': [

@@ -28,10 +28,9 @@ class PgSQLStorage(SQLStorage):
     _temp: dict = {}
 
     def __init__(self, request, metadata=None, blobstorage=None):
-        self.metadata = metadata or db_meta
-        self.engine = request.db_session.get_bind()
-        self.metadata.bind = self.engine
         super().__init__(request, blobstorage=blobstorage)
+        self.metadata = metadata or db_meta
+        self.metadata.bind = self.session.get_bind()
 
     @property
     def orm_model(self):
@@ -40,9 +39,6 @@ class PgSQLStorage(SQLStorage):
             return existing
 
         table = dataclass_to_pgsqla(self.model.schema, self.metadata)
-
-        if not self.engine.has_table(table.name):
-            self.metadata.create_all(tables=[table])
 
         class Table(MappedTable):
 
