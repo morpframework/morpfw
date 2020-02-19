@@ -110,5 +110,5 @@ class MemoryStorage(BaseStorage):
             obj.data[k] = v
         return obj
 
-    def delete(self, identifier, model):
+    def delete(self, identifier, model, **kwargs):
         del DATA[self.typekey][identifier]

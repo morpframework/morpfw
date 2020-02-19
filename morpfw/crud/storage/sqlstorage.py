@@ -226,8 +226,12 @@ class SQLStorage(BaseStorage):
 
         return self.model(self.request, collection, r)
 
-    def delete(self, identifier, model):
-        model["deleted"] = datetime.now(tz=pytz.UTC)
+    def delete(self, identifier, model, **kwargs):
+        permanent = kwargs.get('permanent', False)
+        if permanent:
+            model.delete()
+        else:
+            model["deleted"] = datetime.now(tz=pytz.UTC)
 
 
 class GUID(TypeDecorator):

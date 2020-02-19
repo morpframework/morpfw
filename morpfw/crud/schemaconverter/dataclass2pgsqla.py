@@ -5,12 +5,13 @@ from dataclasses import field
 from datetime import date, datetime
 from importlib import import_module
 
+import sqlalchemy
 from pkg_resources import resource_filename
 
 import colander
 import morpfw.sql
-import sqlalchemy
 import sqlalchemy_jsonfield as sajson
+import sqlalchemy_utils as sautils
 from deform.widget import HiddenWidget
 
 from ...interfaces import ISchema
@@ -20,10 +21,7 @@ from .common import dataclass_check_type, dataclass_get_type
 def sqlalchemy_params(prop, typ, **kwargs):
     t = dataclass_get_type(prop)
 
-    params = {
-        "name": prop.name,
-        "type_": typ,
-    }
+    params = {"name": prop.name, "type_": typ}
 
     if not isinstance(prop.default, dataclasses._MISSING_TYPE):
         params["default"] = prop.default
@@ -61,6 +59,8 @@ def dataclass_field_to_sqla_col(prop: dataclasses.Field) -> sqlalchemy.Column:
             params = sqlalchemy_params(prop, typ=sqlalchemy.Text())
         elif str_format == "uuid":
             params = sqlalchemy_params(prop, typ=morpfw.sql.GUID())
+        elif str_format == "fulltextindex":
+            params = sqlalchemy_params(prop, typ=sautils.TSVectorType)
         else:
             params = sqlalchemy_params(prop, typ=sqlalchemy.String(1024))
         return sqlalchemy.Column(**params)

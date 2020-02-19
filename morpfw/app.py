@@ -65,7 +65,10 @@ class DBSessionRequest(Request):
         return self.get_db_session("default")
 
     def get_db_engine(self, name="default"):
-
+        # FIXME: Allow safe pooling, especially on the 
+        # worker side. Currently NullPool is used
+        # to force worker to clean up connections
+        # upon completion of tasks
         existing = self._db_engines.get(name, None)
         if existing:
             return existing
@@ -77,13 +80,16 @@ class DBSessionRequest(Request):
         os.chdir(cwd)
 
         key = "morpfw.storage.sqlstorage.dburi"
-        if name != "default":
-            key = "morpfw.storage.sqlstorage.dburi.{}".format(name)
+        if '://' in name:
+            dburi = name
+        else:
+            if name != "default":
+                key = "morpfw.storage.sqlstorage.dburi.{}".format(name)
 
-        if not config.get(key, None):
-            raise ConfigurationError("{} not found".format(key))
+            if not config.get(key, None):
+                raise ConfigurationError("{} not found".format(key))
 
-        dburi = config[key]
+            dburi = config[key]
         engine = sqlalchemy.create_engine(
             dburi, poolclass=NullPool, connect_args={"options": "-c timezone=utc"}
         )

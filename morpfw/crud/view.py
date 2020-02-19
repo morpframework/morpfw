@@ -331,6 +331,9 @@ def validation_error(context, request):
     for e in context.form_errors:
         form_errors.append(e.message)
 
+    #   FIXME: should log this when a config for DEBUG_SECURITY is enabled
+    #   logger.error(traceback.format_exc())
+
     return {"status": "error", "field_errors": field_errors, "form_errors": form_errors}
 
 

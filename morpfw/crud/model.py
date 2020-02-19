@@ -19,18 +19,26 @@ from transitions import Machine
 from ..interfaces import ICollection, IModel, IStorage
 from . import permission, signals
 from .const import SEPARATOR
-from .errors import (
-    AlreadyExistsError,
-    BlobStorageNotImplementedError,
-    StateUpdateProhibitedError,
-    UnprocessableError,
-    ValidationError,
-)
+from .errors import (AlreadyExistsError, BlobStorageNotImplementedError,
+                     StateUpdateProhibitedError, UnprocessableError,
+                     ValidationError)
 from .log import logger
 from .schemaconverter.dataclass2colanderjson import dataclass_to_colanderjson
 from .schemaconverter.dataclass2jsl import dataclass_to_jsl
 
-ALLOWED_SEARCH_OPERATORS = ["and", "or", "==", "in", "~", "!=", ">", "<", ">=", "<="]
+ALLOWED_SEARCH_OPERATORS = [
+    "and",
+    "or",
+    "==",
+    "in",
+    "~",
+    "!=",
+    ">",
+    "<",
+    ">=",
+    "<=",
+    "match",
+]
 
 _marker = object()
 
@@ -87,9 +95,9 @@ class Collection(ICollection):
         if query:
             validate_condition(query, ALLOWED_SEARCH_OPERATORS)
 
-        prov = self.searchprovider()
-
-        objs = prov.search(query, offset=offset, limit=limit, order_by=order_by)
+        objs = self.storage.search(
+            self, query, offset=offset, limit=limit, order_by=order_by
+        )
 
         if secure:
             objs = list(
@@ -296,11 +304,11 @@ class Model(IModel):
         dispatch.dispatch(self.request, self)
         self.after_updated()
 
-    def delete(self):
+    def delete(self, **kwargs):
         dispatch = self.request.app.dispatcher(signals.OBJECT_TOBEDELETED)
         dispatch.dispatch(self.request, self)
         self.before_delete()
-        self.storage.delete(self.identifier, model=self)
+        self.storage.delete(self.identifier, model=self, **kwargs)
 
     def save(self):
         if self.data.changed:

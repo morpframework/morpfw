@@ -339,7 +339,7 @@ class ElasticSearchStorage(BaseStorage):
             refresh=self.refresh,
         )
 
-    def delete(self, identifier, model):
+    def delete(self, identifier, model, **kwargs):
         self.create_index()
         self.client.delete(
             index=self.index_name, doc_type=self.doc_type, id=identifier, refresh=True
