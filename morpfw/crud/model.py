@@ -3,13 +3,12 @@ import json
 import re
 from uuid import uuid4
 
-from jsonschema import ValidationError as JSLValidationError
-from jsonschema import validate
-from jsonschema.validators import Draft4Validator
-
 import morepath
 import rulez
 from DateTime import DateTime
+from jsonschema import ValidationError as JSLValidationError
+from jsonschema import validate
+from jsonschema.validators import Draft4Validator
 from morepath import reify
 from rulez import OperatorNotAllowedError
 from rulez import field as rfield
@@ -20,8 +19,8 @@ from ..interfaces import ICollection, IModel, IStorage
 from . import permission, signals
 from .const import SEPARATOR
 from .errors import (AlreadyExistsError, BlobStorageNotImplementedError,
-                     StateUpdateProhibitedError, UnprocessableError,
-                     ValidationError)
+                     FormValidationError, StateUpdateProhibitedError,
+                     UnprocessableError, ValidationError)
 from .log import logger
 from .schemaconverter.dataclass2colanderjson import dataclass_to_colanderjson
 from .schemaconverter.dataclass2jsl import dataclass_to_jsl
@@ -143,7 +142,9 @@ class Collection(ICollection):
                 raise self.exist_exc(" ".join(msg))
         validators = getattr(self.schema, "__validators__", [])
         for validator in validators:
-            validator(self, self.request, data, mode='create')
+            errormsg = validator(self, self.request, data, mode="create")
+            if errormsg:
+                raise ValidationError(form_errors=[FormValidationError(errormsg)])
         obj = self._create(data)
         obj.set_initial_state()
         dispatch = self.request.app.dispatcher(signals.OBJECT_CREATED)
@@ -284,8 +285,7 @@ class Model(IModel):
         data = self.data.as_dict()
         self.before_update(newdata)
         data.update(newdata)
-        self.schema.validate(self.request, data, deserialize=False,
-                update_mode=True)
+        self.schema.validate(self.request, data, deserialize=False, update_mode=True)
         unique_constraint = getattr(self.schema, "__unique_constraint__", None)
         if unique_constraint:
             unique_search = []
@@ -299,7 +299,9 @@ class Model(IModel):
                     raise self.collection.exist_exc(" ".join(msg))
         validators = getattr(self.schema, "__validators__", [])
         for validator in validators:
-            validate(self, self.request, data, mode='update')
+            errormsg = validator(self, self.request, data, mode="update")
+            if errormsg:
+                raise ValidationError(form_errors=[FormValidationError(errormsg)])
         self.storage.update(self.collection, self.identifier, data)
         dispatch = self.request.app.dispatcher(signals.OBJECT_UPDATED)
         dispatch.dispatch(self.request, self)
