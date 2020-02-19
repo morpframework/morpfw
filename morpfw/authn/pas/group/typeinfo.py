@@ -4,7 +4,7 @@ from .path import get_group, get_group_collection
 from ..app import App
 
 
-@App.typeinfo(name='morpfw.pas.group')
+@App.typeinfo(name='morpfw.pas.group', schema=GroupSchema)
 def get_typeinfo(request):
     return {
         'title': 'Group',

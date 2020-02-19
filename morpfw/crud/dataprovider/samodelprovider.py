@@ -137,7 +137,7 @@ class SQLAlchemyModelProvider(IDataProvider):
             if v is None and t["metadata"]["exclude_if_empty"]:
                 continue
             result[n] = v
-        cschema = dataclass_to_colanderjson(self.schema)
+        cschema = dataclass_to_colanderjson(self.schema, request=self.storage.request)
         result = cschema().serialize(result)
         return result
 

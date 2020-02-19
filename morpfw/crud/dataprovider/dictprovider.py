@@ -88,7 +88,7 @@ class DictProvider(IDataProvider):
         return result
 
     def as_json(self):
-        cschema = dataclass_to_colanderjson(self.schema)
+        cschema = dataclass_to_colanderjson(self.schema, self.storage.request)
         return cschema().serialize(self.as_dict())
 
 

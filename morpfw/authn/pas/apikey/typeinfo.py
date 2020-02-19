@@ -4,7 +4,7 @@ from .path import get_apikey, get_apikey_collection
 from ..app import App
 
 
-@App.typeinfo(name='morpfw.pas.apikey')
+@App.typeinfo(name='morpfw.pas.apikey', schema=APIKeySchema)
 def get_typeinfo(request):
     return {
         'title': 'API Key',

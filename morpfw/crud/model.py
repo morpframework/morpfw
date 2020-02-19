@@ -143,7 +143,7 @@ class Collection(ICollection):
                 raise self.exist_exc(" ".join(msg))
         validators = getattr(self.schema, "__validators__", [])
         for validator in validators:
-            validator(self, self.request, data)
+            validator(self, self.request, data, mode='create')
         obj = self._create(data)
         obj.set_initial_state()
         dispatch = self.request.app.dispatcher(signals.OBJECT_CREATED)
@@ -284,7 +284,8 @@ class Model(IModel):
         data = self.data.as_dict()
         self.before_update(newdata)
         data.update(newdata)
-        self.schema.validate(self.request, data, deserialize=False)
+        self.schema.validate(self.request, data, deserialize=False,
+                update_mode=True)
         unique_constraint = getattr(self.schema, "__unique_constraint__", None)
         if unique_constraint:
             unique_search = []
@@ -298,7 +299,7 @@ class Model(IModel):
                     raise self.collection.exist_exc(" ".join(msg))
         validators = getattr(self.schema, "__validators__", [])
         for validator in validators:
-            validate(self, self.request, data)
+            validate(self, self.request, data, mode='update')
         self.storage.update(self.collection, self.identifier, data)
         dispatch = self.request.app.dispatcher(signals.OBJECT_UPDATED)
         dispatch.dispatch(self.request, self)
@@ -318,7 +319,7 @@ class Model(IModel):
 
     def _raw_json(self):
         cschema = dataclass_to_colanderjson(
-            self.schema, exclude_fields=self.hidden_fields
+            self.schema, exclude_fields=self.hidden_fields, request=self.request
         )
         return cschema().serialize(self.data.as_dict())
 

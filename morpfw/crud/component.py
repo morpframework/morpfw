@@ -1,11 +1,13 @@
-import dectate
-import reg
-import morepath
-from .blobstorage.base import BlobStorage
-from . import signals
-from .typeregistry import TypeRegistry
-from morepath.directive import SettingAction
 import typing
+
+import dectate
+import morepath
+import reg
+from morepath.directive import SettingAction
+
+from . import signals
+from .blobstorage.base import BlobStorage
+from .typeregistry import TypeRegistry
 
 
 class StorageAction(dectate.Action):
@@ -20,8 +22,11 @@ class StorageAction(dectate.Action):
 
     def perform(self, obj, app_class):
         app_class._get_storage.register(
-            reg.methodify(obj), model=self.model,
-            request=morepath.Request, blobstorage=BlobStorage)
+            reg.methodify(obj),
+            model=self.model,
+            request=morepath.Request,
+            blobstorage=BlobStorage,
+        )
 
 
 class BlobStorageAction(dectate.Action):
@@ -36,7 +41,8 @@ class BlobStorageAction(dectate.Action):
 
     def perform(self, obj, app_class):
         app_class._get_blobstorage.register(
-            reg.methodify(obj), model=self.model, request=morepath.Request)
+            reg.methodify(obj), model=self.model, request=morepath.Request
+        )
 
 
 class DataProviderAction(dectate.Action):
@@ -52,10 +58,9 @@ class DataProviderAction(dectate.Action):
         return (self.schema, self.obj, self.storage)
 
     def perform(self, obj, app_class):
-        app_class.get_dataprovider.register(reg.methodify(obj),
-                                            schema=self.schema,
-                                            obj=self.obj,
-                                            storage=self.storage)
+        app_class.get_dataprovider.register(
+            reg.methodify(obj), schema=self.schema, obj=self.obj, storage=self.storage
+        )
 
 
 class JSONProviderAction(dectate.Action):
@@ -69,8 +74,7 @@ class JSONProviderAction(dectate.Action):
         return (self.obj,)
 
     def perform(self, obj, app_class):
-        app_class.get_jsonprovider.register(
-            reg.methodify(obj), obj=self.obj)
+        app_class.get_jsonprovider.register(reg.methodify(obj), obj=self.obj)
 
 
 class IdentifierFieldAction(dectate.Action):
@@ -84,8 +88,7 @@ class IdentifierFieldAction(dectate.Action):
         return (self.schema,)
 
     def perform(self, obj, app_class):
-        app_class.get_identifierfield.register(
-            reg.methodify(obj), schema=self.schema)
+        app_class.get_identifierfield.register(reg.methodify(obj), schema=self.schema)
 
 
 class UUIDFieldAction(dectate.Action):
@@ -99,8 +102,7 @@ class UUIDFieldAction(dectate.Action):
         return (self.schema,)
 
     def perform(self, obj, app_class):
-        app_class.get_uuidfield.register(
-            reg.methodify(obj), schema=self.schema)
+        app_class.get_uuidfield.register(reg.methodify(obj), schema=self.schema)
 
 
 class DefaultIdentifierAction(dectate.Action):
@@ -115,7 +117,8 @@ class DefaultIdentifierAction(dectate.Action):
 
     def perform(self, obj, app_class):
         app_class.get_default_identifier.register(
-            reg.methodify(obj), schema=self.schema)
+            reg.methodify(obj), schema=self.schema
+        )
 
 
 class FormValidatorAction(dectate.Action):
@@ -129,8 +132,7 @@ class FormValidatorAction(dectate.Action):
         return (self.schema,)
 
     def perform(self, obj, app_class):
-        app_class.get_formvalidators.register(
-            reg.methodify(obj), schema=self.schema)
+        app_class.get_formvalidators.register(reg.methodify(obj), schema=self.schema)
 
 
 class RulesProviderAction(dectate.Action):
@@ -144,8 +146,7 @@ class RulesProviderAction(dectate.Action):
         return (self.model,)
 
     def perform(self, obj, app_class):
-        app_class.get_rulesprovider.register(
-            reg.methodify(obj), model=self.model)
+        app_class.get_rulesprovider.register(reg.methodify(obj), model=self.model)
 
 
 class StateMachineAction(dectate.Action):
@@ -159,8 +160,7 @@ class StateMachineAction(dectate.Action):
         return (self.model,)
 
     def perform(self, obj, app_class):
-        app_class.get_statemachine.register(
-            reg.methodify(obj), model=self.model)
+        app_class.get_statemachine.register(reg.methodify(obj), model=self.model)
 
 
 class SearchProviderAction(dectate.Action):
@@ -174,8 +174,7 @@ class SearchProviderAction(dectate.Action):
         return (self.model,)
 
     def perform(self, obj, app_class):
-        app_class.get_searchprovider.register(
-            reg.methodify(obj), model=self.model)
+        app_class.get_searchprovider.register(reg.methodify(obj), model=self.model)
 
 
 class AggregateProviderAction(dectate.Action):
@@ -189,8 +188,7 @@ class AggregateProviderAction(dectate.Action):
         return (self.model,)
 
     def perform(self, obj, app_class):
-        app_class.get_aggregateprovider.register(
-            reg.methodify(obj), model=self.model)
+        app_class.get_aggregateprovider.register(reg.methodify(obj), model=self.model)
 
 
 class XattrProviderAction(dectate.Action):
@@ -204,22 +202,20 @@ class XattrProviderAction(dectate.Action):
         return (self.model,)
 
     def perform(self, obj, app_class):
-        app_class.get_xattrprovider.register(
-            reg.methodify(obj), model=self.model)
+        app_class.get_xattrprovider.register(reg.methodify(obj), model=self.model)
 
 
 class TypeInfoFactoryAction(dectate.Action):
 
-    config = {
-        'type_registry': TypeRegistry
-    }
+    config = {"type_registry": TypeRegistry}
 
     app_class_arg = True
 
     depends = [SettingAction]
 
-    def __init__(self, name):
+    def __init__(self, name, schema):
         self.name = name
+        self.schema = schema
 
     def identifier(self, app_class, type_registry: TypeRegistry):
         return self.name
@@ -227,6 +223,7 @@ class TypeInfoFactoryAction(dectate.Action):
     def perform(self, obj, app_class, type_registry: TypeRegistry):
         def factory(name):
             return obj
-        app_class.get_typeinfo_factory.register(
-            reg.methodify(factory), name=self.name)
-        type_registry.register_type(name=self.name)
+
+        app_class.get_typeinfo_factory.register(reg.methodify(factory), name=self.name)
+        type_registry.register_type(name=self.name, schema=self.schema)
+

@@ -4,7 +4,7 @@ from .path import get_user, get_user_collection
 from ..app import App
 
 
-@App.typeinfo(name='morpfw.pas.user')
+@App.typeinfo(name='morpfw.pas.user',schema=UserSchema)
 def get_typeinfo(request):
     return {
         'title': 'User',

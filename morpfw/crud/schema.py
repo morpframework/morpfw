@@ -18,20 +18,26 @@ from .schemaconverter.dataclass2colanderjson import dataclass_to_colanderjson
 @dataclass
 class BaseSchema(ISchema):
     @classmethod
-    def validate(cls, request, data, deserialize=True, json=True, update_mode=False):
+    def validate(
+        cls, request, data, deserialize=True, json=True, update_mode=False
+    ):
         params = {}
         if deserialize:
             if not update_mode:
                 if json:
-                    cschema = dataclass_to_colanderjson(cls)
+                    cschema = dataclass_to_colanderjson(cls, request=request)
                 else:
-                    cschema = dataclass_to_colander(cls)
+                    cschema = dataclass_to_colander(cls, request=request)
 
             else:
                 if json:
-                    cschema = dataclass_to_colanderjson(cls, include_fields=data.keys())
+                    cschema = dataclass_to_colanderjson(cls,
+                            include_fields=data.keys(), request=request,
+                            mode='update')
                 else:
-                    cschema = dataclass_to_colander(cls, include_fields=data.keys())
+                    cschema = dataclass_to_colander(cls,
+                            include_fields=data.keys(), request=request,
+                            mode='update')
             try:
                 data = cschema().deserialize(data)
             except colander.Invalid as e:
@@ -47,22 +53,38 @@ class BaseSchema(ISchema):
             if fe:
                 form_errors.append(FormValidationError(fe))
 
+        # field errors
+        for k, f in cls.__dataclass_fields__.items():
+            t = dataclass_get_type(f)
+            error = None
+            for validate in t["metadata"]["validators"]:
+                if update_mode:
+                    val = data.get(k, None)
+                    if val:
+                        error = validate(
+                            request=request,
+                            schema=cls,
+                            field=k,
+                            value=val,
+                            mode="update",
+                        )
+                else:
+                    error = validate(
+                        request=request, schema=cls, field=k, value=data[k]
+                    )
+                if error:
+                    params.setdefault("field_errors", [])
+                    params["field_errors"].append(
+                        FieldValidationError(path=k, message=error)
+                    )
+                    break
+
         if form_errors:
             params["form_errors"] = form_errors
 
         if params:
             raise ValidationError(**params)
 
-        # field errors
-        for k, f in cls.__dataclass_fields__.items():
-            t = dataclass_get_type(f)
-            for validate in t["metadata"]["validators"]:
-                if update_mode:
-                    val = data.get(k, None)
-                    if val:
-                        validate(k, val)
-                else:
-                    validate(k, data[k])
         return data
 
 

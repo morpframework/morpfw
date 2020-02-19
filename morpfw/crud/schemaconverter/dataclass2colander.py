@@ -14,6 +14,21 @@ from deform.widget import HiddenWidget, TextAreaWidget, TextInputWidget
 from ...interfaces import ISchema
 from .common import dataclass_check_type, dataclass_get_type
 
+class ValidatorsWrapper(object):
+
+    def __init__(self, validators, request, schema, mode=None):
+        self.request = request
+        self.schema = schema 
+        self.mode = mode
+        self.validators = validators
+
+    def __call__(self, node, value):
+        for validator in self.validators:
+            error = validator(request=self.request, schema=self.schema,
+                field=node.name, value=value, mode=self.mode)
+            if error:
+                raise colander.Invalid(node, error)
+
 
 class SchemaNode(colander.SchemaNode):
     def serialize(self, appstruct=colander.null):
@@ -29,7 +44,7 @@ class SchemaNode(colander.SchemaNode):
         return cstruct
 
 
-def colander_params(prop, oid_prefix, **kwargs):
+def colander_params(prop, oid_prefix, schema, request, mode=None, **kwargs):
     t = dataclass_get_type(prop)
 
     params = {
@@ -49,47 +64,62 @@ def colander_params(prop, oid_prefix, **kwargs):
     if "deform.widget" in prop.metadata.keys():
         params["widget"] = copy.copy(prop.metadata["deform.widget"])
 
+    validators = prop.metadata.get('validators', None)
+    if validators:
+        params['validator'] = ValidatorsWrapper(validators, schema=schema,
+                request=request, mode=mode)
+
     params.update(kwargs)
     return params
 
 
 def dataclass_field_to_colander_schemanode(
-    prop: dataclasses.Field, oid_prefix="deformField"
-) -> colander.SchemaNode:
+    prop: dataclasses.Field, schema, request, 
+    oid_prefix="deformField", mode=None) -> colander.SchemaNode:
 
     t = dataclass_get_type(prop)
     if t["type"] == date:
-        params = colander_params(prop, oid_prefix, typ=colander.Date())
+        params = colander_params(prop, oid_prefix, typ=colander.Date(),
+            schema=schema, request=request, mode=mode)
         return SchemaNode(**params)
     if t["type"] == datetime:
-        params = colander_params(prop, oid_prefix, typ=colander.DateTime())
+        params = colander_params(prop, oid_prefix, typ=colander.DateTime(),
+            schema=schema, request=request, mode=mode)
+
         return SchemaNode(**params)
     if t["type"] == str:
-        params = colander_params(prop, oid_prefix, typ=colander.String())
+        params = colander_params(prop, oid_prefix, typ=colander.String(),
+            schema=schema, request=request, mode=mode)
         return SchemaNode(**params)
     if t["type"] == int:
-        params = colander_params(prop, oid_prefix, typ=colander.Integer())
+        params = colander_params(prop, oid_prefix, typ=colander.Integer(),
+            schema=schema, request=request, mode=mode)
         return SchemaNode(**params)
     if t["type"] == float:
-        params = colander_params(prop, oid_prefix, typ=colander.Float())
+        params = colander_params(prop, oid_prefix, typ=colander.Float(),
+            schema=schema, request=request, mode=mode)
         return SchemaNode(**params)
     if t["type"] == bool:
-        params = colander_params(prop, oid_prefix, typ=colander.Boolean())
+        params = colander_params(prop, oid_prefix, typ=colander.Boolean(),
+            schema=schema, request=request, mode=mode)
         return SchemaNode(**params)
 
     if dataclass_check_type(prop, ISchema):
         subtype = dataclass_to_colander(
-            t["type"], colander_schema_type=colander.MappingSchema
+            t["type"], colander_schema_type=colander.MappingSchema,
+                schema=schema, request=request, mode=mode
         )
 
         return subtype()
     if t["type"] == dict:
         params = colander_params(
-            prop, oid_prefix, typ=colander.Mapping(unknown="preserve")
+            prop, oid_prefix, typ=colander.Mapping(unknown="preserve"),
+            schema=schema, request=request, mode=mode
         )
         return SchemaNode(**params)
     if t["type"] == list:
-        params = colander_params(prop, oid_prefix, typ=colander.List())
+        params = colander_params(prop, oid_prefix, typ=colander.List(),
+                schema=schema, request=request, mode=mode)
         return SchemaNode(**params)
 
     raise KeyError(prop)
@@ -105,6 +135,7 @@ def dataclass_to_colander(
     colander_schema_type: typing.Type[colander.Schema] = colander.MappingSchema,
     oid_prefix: str = "deformField",
     dataclass_field_to_colander_schemanode=dataclass_field_to_colander_schemanode,
+    request=None,
 ) -> typing.Type[colander.MappingSchema]:
     # output colander schema from dataclass schema
     attrs = {}
@@ -143,14 +174,16 @@ def dataclass_to_colander(
         for attr, prop in schema.__dataclass_fields__.items():
             if prop.name in include_fields and prop.name not in exclude_fields:
                 prop = dataclass_field_to_colander_schemanode(
-                    prop, oid_prefix=oid_prefix
+                    prop, oid_prefix=oid_prefix, schema=schema, request=request,
+                    mode=mode
                 )
                 attrs[attr] = prop
     else:
         for attr, prop in schema.__dataclass_fields__.items():
             if prop.name not in exclude_fields:
                 prop = dataclass_field_to_colander_schemanode(
-                    prop, oid_prefix=oid_prefix
+                    prop, oid_prefix=oid_prefix, schema=schema,
+                    request=request, mode=mode
                 )
                 attrs[attr] = prop
 
