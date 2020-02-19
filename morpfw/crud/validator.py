@@ -20,7 +20,7 @@ def get_data(model, request):
 def regex_validator(pattern, name):
     p = re.compile(pattern)
 
-    def _regex_validator(field, value):
+    def _regex_validator(request, schema, field, value, mode=None):
         if not p.match(value):
             raise FieldValidationError(
                 field, "%s does not match %s pattern" % (value, name)

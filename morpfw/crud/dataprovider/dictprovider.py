@@ -42,7 +42,7 @@ class DictProvider(IDataProvider):
         field = self.schema.__dataclass_fields__[key]
         t = dataclass_get_type(field)
         for v in t["metadata"]["validators"]:
-            v(key, value)
+            v(schema=self.schema, request=self.storage.request, field=key, value=value)
         if t["type"] == datetime.datetime:
             if value and not isinstance(value, datetime.datetime):
                 value = parse_date(value)
@@ -88,7 +88,7 @@ class DictProvider(IDataProvider):
         return result
 
     def as_json(self):
-        cschema = dataclass_to_colanderjson(self.schema, self.storage.request)
+        cschema = dataclass_to_colanderjson(self.schema, request=self.storage.request)
         return cschema().serialize(self.as_dict())
 
 

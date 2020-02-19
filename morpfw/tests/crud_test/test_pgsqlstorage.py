@@ -6,7 +6,8 @@ from more.basicauth import BasicAuthIdentityPolicy
 from more.transaction import TransactionApp
 from morpfw.app import SQLApp
 from morpfw.crud.blobstorage.fsblobstorage import FSBlobStorage
-from morpfw.crud.storage.pgsqlstorage import PgSQLStorage
+from morpfw.crud.schemaconverter.dataclass2pgsqla import dataclass_to_pgsqla
+from morpfw.crud.storage.pgsqlstorage import PgSQLStorage, db_meta
 
 from ..common import get_client, make_request
 from .crud_common import FSBLOB_DIR
@@ -45,7 +46,7 @@ def model_factory(request, identifier):
     return col.get(identifier)
 
 
-@App.typeinfo(name="tests.page")
+@App.typeinfo(name="tests.page", schema=PageSchema)
 def get_page_typeinfo(request):
     return {
         "title": "Page",
@@ -120,4 +121,12 @@ def test_pgsqlstorage(pgsql_db):
     config = os.path.join(os.path.dirname(__file__), "test_pgsqlstorage-settings.yml")
     c = get_client(config)
     request = make_request(c.app)
+
+    # create tables
+
+    db_meta.bind = request.db_session.get_bind()
+    for model in [PageModel, ObjectModel, NamedObjectModel, BlobObjectModel]:
+        dataclass_to_pgsqla(model.schema, db_meta)
+    db_meta.create_all()
+
     run_jslcrud_test(c)

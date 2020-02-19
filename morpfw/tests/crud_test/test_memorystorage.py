@@ -44,7 +44,7 @@ def model_factory(request, identifier):
     return col.get(identifier)
 
 
-@App.typeinfo(name="tests.page")
+@App.typeinfo(name="tests.page", schema=PageSchema)
 def get_page_typeinfo(request):
     return {
         "title": "Page",
