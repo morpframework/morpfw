@@ -4,6 +4,8 @@ import sys
 from alembic import command
 from alembic.config import Config
 from sqlalchemy import MetaData, create_engine
+from sqlalchemy import inspect as Inspector
+from sqlalchemy.schema import DropSchema
 
 
 def _load_engines(config):
@@ -30,6 +32,18 @@ def drop_all(request):
     for n, conf in engines.items():
         param = dict([(k, v) for k, v in conf.items() if k != "dburi"])
         engine = create_engine(conf["dburi"], **param)
-        meta = MetaData(engine)
-        meta.reflect()
-        meta.drop_all()
+        inspect = Inspector(engine)
+        for schema in inspect.get_schema_names():
+            if schema in ['information_schema']:
+                continue
+            if schema.startswith('pg_'):
+                continue
+            meta = MetaData(engine, schema=schema)
+            print("Clearing tables from schema {}".format(schema))
+            meta.reflect()
+            meta.drop_all()
+            if schema in ['public', 'dbo']:
+                continue
+
+            print("Dropping schema {}".format(schema))
+            engine.execute(DropSchema(schema))

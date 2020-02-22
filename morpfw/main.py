@@ -1,24 +1,26 @@
-import importlib
-import reg
-import morepath
-from .app import SQLApp, Session, BaseApp
-from .authn.pas.user.model import UserCollection, UserSchema, UserModel
-from .authn.pas.group.model import GroupSchema, GroupModel
-from .authn.pas.group.path import get_group_collection
-from .authn.pas.user.path import get_user_collection
-from .sql import Base
-import os
-from zope.sqlalchemy import register as register_session
-from more.basicauth import BasicAuthIdentityPolicy
-from .exc import ConfigurationError
-import transaction
-import sqlalchemy
-from celery import Celery
-import yaml
 import copy
-import tempfile
+import importlib
 import multiprocessing
+import os
 import subprocess
+import tempfile
+
+import morepath
+import reg
+import sqlalchemy
+import transaction
+import yaml
+from celery import Celery
+from more.basicauth import BasicAuthIdentityPolicy
+from zope.sqlalchemy import register as register_session
+
+from .app import BaseApp, Session, SQLApp
+from .authn.pas.group.model import GroupModel, GroupSchema
+from .authn.pas.group.path import get_group_collection
+from .authn.pas.user.model import UserCollection, UserModel, UserSchema
+from .authn.pas.user.path import get_user_collection
+from .exc import ConfigurationError
+from .sql import Base
 
 default_settings = open(
     os.path.join(os.path.dirname(__file__), "default_settings.yml")
@@ -80,6 +82,11 @@ def create_app(settings, scan=True, **kwargs):
 def create_admin(
     app: morepath.App, username: str, password: str, email: str, session=Session
 ):
+    while not isinstance(app, morepath.App):
+        if getattr(app, "app", None) is None:
+            break
+        app = app.app
+
     request = app.request_class(app=app, environ={"PATH_INFO": "/"})
 
     transaction.manager.begin()
