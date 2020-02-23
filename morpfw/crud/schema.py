@@ -18,9 +18,7 @@ from .schemaconverter.dataclass2colanderjson import dataclass_to_colanderjson
 @dataclass
 class BaseSchema(ISchema):
     @classmethod
-    def validate(
-        cls, request, data, deserialize=True, json=True, update_mode=False
-    ):
+    def validate(cls, request, data, deserialize=True, json=True, update_mode=False):
         params = {}
         if deserialize:
             if not update_mode:
@@ -31,13 +29,13 @@ class BaseSchema(ISchema):
 
             else:
                 if json:
-                    cschema = dataclass_to_colanderjson(cls,
-                            include_fields=data.keys(), request=request,
-                            mode='update')
+                    cschema = dataclass_to_colanderjson(
+                        cls, include_fields=data.keys(), request=request, mode="update"
+                    )
                 else:
-                    cschema = dataclass_to_colander(cls,
-                            include_fields=data.keys(), request=request,
-                            mode='update')
+                    cschema = dataclass_to_colander(
+                        cls, include_fields=data.keys(), request=request, mode="update"
+                    )
             try:
                 data = cschema().deserialize(data)
             except colander.Invalid as e:
@@ -69,9 +67,11 @@ class BaseSchema(ISchema):
                             mode="update",
                         )
                 else:
-                    error = validate(
-                        request=request, schema=cls, field=k, value=data[k]
-                    )
+                    val = data.get(k, None)
+                    if val:
+                        error = validate(
+                            request=request, schema=cls, field=k, value=val
+                        )
                 if error:
                     params.setdefault("field_errors", [])
                     params["field_errors"].append(
