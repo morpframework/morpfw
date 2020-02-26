@@ -94,7 +94,7 @@ setup(name='morpfw',
       entry_points={
           'morepath': ['scan=morpfw'],
           'console_scripts': [
-              'morpfw=morpfw.cli:cli',
+              'morpfw=morpfw.cli:main',
           ]
       }
       )

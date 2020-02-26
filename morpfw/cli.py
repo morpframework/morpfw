@@ -243,10 +243,16 @@ def resetdb(ctx):
 
 @cli.command(help="manage alembic migration")
 @click.pass_context
-def migration(ctx):
-    argv = sys.argv[sys.argv.index('migration') + 1:]
-    sys.exit(alembic_main(argv, prog='morpfw migration'))
+def migration(ctx, options):
+    pass
 
+
+def main():
+    if 'migration' in sys.argv:
+        argv = sys.argv[sys.argv.index('migration') + 1:]
+        sys.exit(alembic_main(argv, 'morpfw migration'))
+    else:
+        cli()
 
 if __name__ == "__main__":
-    cli()
+    main()
