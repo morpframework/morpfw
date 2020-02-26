@@ -4,6 +4,7 @@ import getpass
 import importlib
 import json
 import os
+import errno
 import readline
 import rlcompleter
 import socket
@@ -29,7 +30,8 @@ def load_settings(settings_file, default=default_settings):
     if settings_file is None:
         settings = default_settings
     elif not os.path.exists(settings_file):
-        settings = default_settings
+        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
+                settings_file)
     else:
         raw_file = open(settings_file).read()
         raw_file = raw_file.replace(r"%(here)s", os.getcwd())
