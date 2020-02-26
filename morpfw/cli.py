@@ -13,6 +13,7 @@ import threading
 from datetime import datetime
 from urllib.parse import urlparse
 
+from alembic.config import main as alembic_main
 import click
 
 import hydra
@@ -239,6 +240,12 @@ def resetdb(ctx):
     request = mock_request(app, settings)
 
     drop_all(request)
+
+@cli.command(help="manage alembic migration")
+@click.pass_context
+def migration(ctx):
+    argv = sys.argv[sys.argv.index('migration') + 1:]
+    sys.exit(alembic_main(argv, prog='morpfw migration'))
 
 
 if __name__ == "__main__":
