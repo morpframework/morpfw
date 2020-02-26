@@ -5,11 +5,11 @@ from dataclasses import field
 from datetime import date, datetime
 from importlib import import_module
 
-import sqlalchemy
 from pkg_resources import resource_filename
 
 import colander
 import morpfw.sql
+import sqlalchemy
 import sqlalchemy_jsonfield as sajson
 import sqlalchemy_utils as sautils
 from deform.widget import HiddenWidget
@@ -55,6 +55,10 @@ def dataclass_field_to_sqla_col(prop: dataclasses.Field) -> sqlalchemy.Column:
         return sqlalchemy.Column(**params)
     if t["type"] == str:
         str_format = t["metadata"].get("format", None)
+
+        if str_format and "/" in str_format:
+            str_format = str_format.split("/")[0]
+
         if str_format == "text":
             params = sqlalchemy_params(prop, typ=sqlalchemy.Text())
         elif str_format == "uuid":
