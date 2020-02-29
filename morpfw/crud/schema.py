@@ -43,6 +43,36 @@ class BaseSchema(ISchema):
                 params["field_errors"] = [
                     FieldValidationError(path=k, message=m) for k, m in errors.items()
                 ]
+        else:
+            # field errors
+            for k, f in cls.__dataclass_fields__.items():
+                t = dataclass_get_type(f)
+                error = None
+                for validate in t["metadata"]["validators"]:
+                    if update_mode:
+                        val = data.get(k, None)
+                        if val:
+                            error = validate(
+                                request=request,
+                                schema=cls,
+                                field=k,
+                                value=val,
+                                mode="update",
+                            )
+                    else:
+                        val = data.get(k, None)
+                        if val:
+                            error = validate(
+                                request=request, schema=cls, field=k, value=val
+                            )
+                    if error:
+                        params.setdefault("field_errors", [])
+                        params["field_errors"].append(
+                            FieldValidationError(path=k, message=error)
+                        )
+                        break
+    
+
 
         form_validators = request.app.get_formvalidators(cls)
         form_errors = []
@@ -50,34 +80,6 @@ class BaseSchema(ISchema):
             fe = form_validator(request, data)
             if fe:
                 form_errors.append(FormValidationError(fe))
-
-        # field errors
-        for k, f in cls.__dataclass_fields__.items():
-            t = dataclass_get_type(f)
-            error = None
-            for validate in t["metadata"]["validators"]:
-                if update_mode:
-                    val = data.get(k, None)
-                    if val:
-                        error = validate(
-                            request=request,
-                            schema=cls,
-                            field=k,
-                            value=val,
-                            mode="update",
-                        )
-                else:
-                    val = data.get(k, None)
-                    if val:
-                        error = validate(
-                            request=request, schema=cls, field=k, value=val
-                        )
-                if error:
-                    params.setdefault("field_errors", [])
-                    params["field_errors"].append(
-                        FieldValidationError(path=k, message=error)
-                    )
-                    break
 
         if form_errors:
             params["form_errors"] = form_errors
