@@ -175,8 +175,9 @@ def register_admin(ctx, username, email, password):
 
 
 @cli.command(help="Start MorpFW shell")
+@click.option("-f", "--script", required=False, help="Script to run")
 @click.pass_context
-def shell(ctx):
+def shell(ctx, script):
     from morepath.authentication import Identity
 
     param = load(ctx.obj["settings"])
@@ -201,15 +202,18 @@ def shell(ctx):
     }
     request = app.request_class(app=app, environ=environ)
     session = request.db_session
-    _shell(
-        {
+    localvars = {
             "session": session,
             "request": request,
             "app": app,
             "settings": settings,
             "Identity": Identity,
         }
-    )
+    if script:
+        with open(script) as f:
+            code = f.read()
+            exec(code, globals(), localvars)
+    _shell(localvars)
 
 
 def _shell(vars):
