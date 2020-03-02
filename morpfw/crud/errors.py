@@ -1,5 +1,5 @@
 import typing
-
+import json
 
 class UnprocessableError(Exception):
     def __init__(self, message=None):
@@ -23,9 +23,16 @@ class ValidationError(Exception):
         field_errors: typing.Optional[typing.List[FieldValidationError]] = None,
         form_errors: typing.Optional[typing.List[FormValidationError]] = None,
     ):
-        super(ValidationError, self).__init__("Schema validation error")
         self.field_errors = field_errors or []
         self.form_errors = form_errors or []
+
+        errobj = {
+                'field_errors': [{'path': e.path, 'message': e.message} for e in self.field_errors],
+                'form_errors': [e.message for e in self.form_errors]
+        }
+        message = "Schema validation error: {}".format(json.dumps(errobj, indent=4))
+        super().__init__(message)
+        
 
 
 class AlreadyExistsError(Exception):

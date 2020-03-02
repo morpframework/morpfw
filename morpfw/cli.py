@@ -212,7 +212,11 @@ def shell(ctx, script):
     if script:
         with open(script) as f:
             code = f.read()
-            exec(code, globals(), localvars)
+            glob = globals().copy()
+            filepath = os.path.abspath(script)
+            glob['__file__'] = filepath
+            bytecode = compile(code, filepath, 'exec')
+            exec(bytecode, glob, localvars)
     _shell(localvars)
 
 

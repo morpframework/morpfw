@@ -13,12 +13,12 @@ class APIKeyModel(Model):
 class APIKeyCollection(Collection):
     schema = APIKeySchema
 
-    def create(self, data):
+    def create(self, data, deserialize=True):
         if not data.get('userid', None):
             data['userid'] = self.request.identity.userid
         data['api_identity'] = uuid4().hex
         data['api_secret'] = uuid4().hex
-        return super().create(data)
+        return super().create(data, deserialize=deserialize)
 
     def search(self, query=None, *args, **kwargs):
         if kwargs.get('secure', True):
