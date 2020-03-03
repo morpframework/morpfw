@@ -106,7 +106,8 @@ def run(app, settings, host="127.0.0.1", port=5000, ignore_cli=True):
     morepath.run(app, host=host, port=port, ignore_cli=ignore_cli)
 
 
-def runprod(app, settings, host="127.0.0.1", port=5000, ignore_cli=True):
+def runprod(app, settings, host="127.0.0.1", port=5000, ignore_cli=True,
+        workers=None):
     service = "gunicorn"
     server = {"listen_address": host, "listen_port": port}
     opts = {}
@@ -172,13 +173,14 @@ class=logging.Formatter
     """
         % opts
     )
-    workers = (multiprocessing.cpu_count() * 2) + 1
+    if workers is None:
+        workers = (multiprocessing.cpu_count() * 2) + 1
+
     logconf = tempfile.mktemp()
     with open(logconf, "w") as f:
         f.write(logconfig)
-    subprocess.call(
-        [
-            service,
+
+    opts = [
             "--log-config",
             logconf,
             "-b",
@@ -195,6 +197,8 @@ class=logging.Formatter
             str(server.get("worker_connections", 1000)),
             "--timeout",
             str(server.get("worker_timeout", 30)),
-            "morpfw.wsgi:app",
-        ]
+    ]
+
+    subprocess.call(
+        [service] + opts + [ "morpfw.wsgi:app"]
     )

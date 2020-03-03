@@ -101,8 +101,10 @@ def cli(ctx, settings):
 @click.option("-h", "--host", default=None, help="Host")
 @click.option("-p", "--port", default=None, type=int, help="Port")
 @click.option("--prod", default=False, type=bool, is_flag=True, help="Production mode")
+@click.option("--workers", default=None, type=int, 
+    help="Number of workers to run in  prod mode")
 @click.pass_context
-def start(ctx, host, port, prod):
+def start(ctx, host, port, prod, workers):
     param = load(ctx.obj["settings"], host, port)
     if prod:
         morpfw.runprod(
@@ -111,6 +113,7 @@ def start(ctx, host, port, prod):
             host=param["host"],
             port=param["port"],
             ignore_cli=True,
+            workers=workers
         )
     else:
         morpfw.run(
