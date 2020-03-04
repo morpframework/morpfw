@@ -18,9 +18,14 @@ from transitions import Machine
 from ..interfaces import ICollection, IModel, IStorage
 from . import permission, signals
 from .const import SEPARATOR
-from .errors import (AlreadyExistsError, BlobStorageNotImplementedError,
-                     FormValidationError, StateUpdateProhibitedError,
-                     UnprocessableError, ValidationError)
+from .errors import (
+    AlreadyExistsError,
+    BlobStorageNotImplementedError,
+    FormValidationError,
+    StateUpdateProhibitedError,
+    UnprocessableError,
+    ValidationError,
+)
 from .log import logger
 from .schemaconverter.dataclass2colanderjson import dataclass_to_colanderjson
 from .schemaconverter.dataclass2jsl import dataclass_to_jsl
@@ -155,6 +160,13 @@ class Collection(ICollection):
 
     def _create(self, data):
         data = self.storage.set_schema_defaults(data)
+        for fname, field in self.schema.__dataclass_fields__.items():
+            default_factory = field.metadata.get("default_factory", None)
+            if default_factory:
+                if data[fname]:
+                    continue
+                data[fname] = default_factory(self, self.request)
+
         return self.storage.create(self, data)
 
     def get(self, identifier):
