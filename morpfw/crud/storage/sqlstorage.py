@@ -278,14 +278,16 @@ class BaseMixin(MappedTable):
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     uuid = sa.Column(GUID, default=uuid.uuid4, index=True, unique=True)
     created = sa.Column(
-        sa.DateTime(timezone=True), default=lambda: datetime.now(tz=pytz.UTC)
+        sa.DateTime(timezone=True), default=lambda: datetime.now(tz=pytz.UTC),
+        index=True
     )
     creator = sa.Column(sa.String(length=1024))
     modified = sa.Column(
-        sa.DateTime(timezone=True), default=lambda: datetime.now(tz=pytz.UTC)
+        sa.DateTime(timezone=True), default=lambda: datetime.now(tz=pytz.UTC),
+        index=True
     )
-    state = sa.Column(sa.String(length=1024))
-    deleted = sa.Column(sa.DateTime(timezone=True))
+    state = sa.Column(sa.String(length=1024), index=True)
+    deleted = sa.Column(sa.DateTime(timezone=True), index=True)
     blobs = sa.Column(sajson.JSONField)
     xattrs = sa.Column(sajson.JSONField)
 
