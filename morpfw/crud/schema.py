@@ -71,8 +71,6 @@ class BaseSchema(ISchema):
                             FieldValidationError(path=k, message=error)
                         )
                         break
-    
-
 
         form_validators = request.app.get_formvalidators(cls)
         form_errors = []
@@ -102,13 +100,14 @@ class Schema(BaseSchema):
     )
     creator: typing.Optional[str] = None
     created: typing.Optional[datetime] = field(
-        default_factory=lambda: datetime.now(tz=pytz.UTC)
+        default_factory=lambda: datetime.now(tz=pytz.UTC), metadata={"index": True}
     )
     modified: typing.Optional[datetime] = field(
-        default_factory=lambda: datetime.now(tz=pytz.UTC)
+        default_factory=lambda: datetime.now(tz=pytz.UTC), metadata={"index": True}
     )
-    state: typing.Optional[str] = None
-    deleted: typing.Optional[datetime] = None
+    state: typing.Optional[str] = field(default=None, metadata={"index": True})
+    deleted: typing.Optional[datetime] = field(default=None, metadata={"index": True})
+
     blobs: typing.Optional[dict] = field(
         default_factory=dict, metadata={"exclude_if_empty": True}
     )
