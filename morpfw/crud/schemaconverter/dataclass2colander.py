@@ -15,6 +15,18 @@ from ...interfaces import ISchema
 from .common import dataclass_check_type, dataclass_get_type
 
 
+def replace_colander_null(appstruct, value=None):
+    out = {}
+    for k, v in appstruct.items():
+        if isinstance(v, dict):
+            out[k] = replace_colander_null(v)
+        elif isinstance(v, list):
+            out[k] = list(map(lambda x: x if x != colander.null else value, v))
+        else:
+            out[k] = v if v != colander.null else value
+    return out
+
+
 class ValidatorsWrapper(object):
     def __init__(self, validators, request, schema, mode=None):
         self.request = request
@@ -179,9 +191,8 @@ def dataclass_field_to_colander_schemanode(
     if dataclass_check_type(prop, ISchema):
         subtype = dataclass_to_colander(
             t["type"],
-            colander_schema_type=colander.MappingSchema,
-            schema=schema,
             request=request,
+            colander_schema_type=colander.MappingSchema,
             mode=mode,
         )
 
@@ -212,6 +223,7 @@ def dataclass_field_to_colander_schemanode(
 
 def dataclass_to_colander(
     schema,
+    request,
     mode="default",
     include_fields: typing.List[str] = None,
     exclude_fields: typing.List[str] = None,
@@ -220,7 +232,6 @@ def dataclass_to_colander(
     colander_schema_type: typing.Type[colander.Schema] = colander.MappingSchema,
     oid_prefix: str = "deformField",
     dataclass_field_to_colander_schemanode=dataclass_field_to_colander_schemanode,
-    request=None,
 ) -> typing.Type[colander.MappingSchema]:
     # output colander schema from dataclass schema
     attrs = {}
@@ -302,6 +313,18 @@ def dataclass_to_colander(
                 if prop.widget is None:
                     prop.widget = TextAreaWidget()
 
+    def validator(self, node, appstruct):
+        vdata = replace_colander_null(appstruct)
+        for form_validator in getattr(schema, "__validators__", []):
+            fe = form_validator(request, vdata)
+            if fe:
+                raise colander.Invalid(node[fe["field"]], fe["message"])
+        for form_validator in request.app.get_formvalidators(schema):
+            fe = form_validator(request, vdata)
+            if fe:
+                raise colander.Invalid(node[fe["field"]], fe["message"])
+
+    attrs["validator"] = validator
     Schema = type("Schema", (colander_schema_type,), attrs)
 
     return Schema

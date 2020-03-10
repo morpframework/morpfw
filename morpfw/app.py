@@ -65,7 +65,7 @@ class DBSessionRequest(Request):
         return self.get_db_session("default")
 
     def get_db_engine(self, name="default"):
-        # FIXME: Allow safe pooling, especially on the 
+        # FIXME: Allow safe pooling, especially on the
         # worker side. Currently NullPool is used
         # to force worker to clean up connections
         # upon completion of tasks
@@ -80,7 +80,7 @@ class DBSessionRequest(Request):
         os.chdir(cwd)
 
         key = "morpfw.storage.sqlstorage.dburi"
-        if '://' in name:
+        if "://" in name:
             dburi = name
         else:
             if name != "default":
@@ -103,6 +103,13 @@ class DBSessionRequest(Request):
             engine = self.get_db_engine(name)
             self._db_session[name] = Session(bind=engine)
         return self._db_session[name]
+
+    def get_collection(self, type_name):
+        typeinfo = self.app.config.type_registry.get_typeinfo(
+            name=type_name, request=self
+        )
+        col = typeinfo["collection_factory"](self)
+        return col
 
 
 class BaseApp(CRUDApp, cors.CORSApp, SignalApp):

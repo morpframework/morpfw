@@ -46,7 +46,7 @@ def validate_body(request, json):
         return
 
     if json["body"].lower() == "invalid":
-        return "Body must not be 'invalid'"
+        return {'field':'body', 'message':"Body must not be 'invalid'"}
 
 
 @dataclass
@@ -306,13 +306,21 @@ def run_jslcrud_test(c, skip_aggregate=False):
 
     r = c.post_json(
         "/pages/",
-        {"title": "page2", "body": "invalid", "footer": 123},
+        {"title": "page2", "body": "valid", "footer": 123},
         expect_errors=True,
     )
 
     assert r.json["status"] == "error"
     assert len(r.json["field_errors"]) == 1
-    assert len(r.json["form_errors"]) == 1
+
+    r = c.post_json(
+        "/pages/",
+        {"title": "page2", "body": "invalid", "footer": "footer"},
+        expect_errors=True,
+    )
+
+    assert r.json["status"] == "error"
+    assert len(r.json["field_errors"]) == 1
 
     # lets update the entry
     r = c.patch_json("/pages/%s" % uuid, {"body": "newbody"})
