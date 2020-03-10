@@ -41,12 +41,12 @@ def allow_all_collection_access(identity, context, permission):
     return True
 
 
-def validate_body(request, json):
-    if not isinstance(json["body"], str):
+def validate_body(request, data, mode):
+    if not isinstance(data["body"], str):
         return
 
-    if json["body"].lower() == "invalid":
-        return {'field':'body', 'message':"Body must not be 'invalid'"}
+    if data["body"].lower() == "invalid":
+        return {"field": "body", "message": "Body must not be 'invalid'"}
 
 
 @dataclass

@@ -375,9 +375,14 @@ def internalserver_error(context, request):
     def adjust_status(response):
         response.status = 500
 
-    logger.error(traceback.format_exc())
+    tb = traceback.format_exc()
+    logger.error(tb)
 
-    return {"status": "error", "message": "Internal server error"}
+    return {
+        "status": "error",
+        "message": "Internal server error",
+        "traceback": tb.split("\n"),
+    }
 
 
 @App.json(model=UnprocessableError)
