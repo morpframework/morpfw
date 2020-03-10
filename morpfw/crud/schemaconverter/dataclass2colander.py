@@ -229,6 +229,7 @@ def dataclass_to_colander(
     exclude_fields: typing.List[str] = None,
     hidden_fields: typing.List[str] = None,
     readonly_fields: typing.List[str] = None,
+    include_schema_validators: bool = True,
     colander_schema_type: typing.Type[colander.Schema] = colander.MappingSchema,
     oid_prefix: str = "deformField",
     dataclass_field_to_colander_schemanode=dataclass_field_to_colander_schemanode,
@@ -313,18 +314,21 @@ def dataclass_to_colander(
                 if prop.widget is None:
                     prop.widget = TextAreaWidget()
 
-    def validator(self, node, appstruct):
-        vdata = replace_colander_null(appstruct)
-        for form_validator in getattr(schema, "__validators__", []):
-            fe = form_validator(request=request, data=vdata, mode=mode)
-            if fe:
-                raise colander.Invalid(node[fe["field"]], fe["message"])
-        for form_validator in request.app.get_formvalidators(schema):
-            fe = form_validator(request=request, data=vdata, mode=mode)
-            if fe:
-                raise colander.Invalid(node[fe["field"]], fe["message"])
+    if include_schema_validators:
 
-    attrs["validator"] = validator
+        def validator(self, node, appstruct):
+            vdata = replace_colander_null(appstruct)
+            for form_validator in getattr(schema, "__validators__", []):
+                fe = form_validator(request=request, data=vdata, mode=mode)
+                if fe:
+                    raise colander.Invalid(node[fe["field"]], fe["message"])
+            for form_validator in request.app.get_formvalidators(schema):
+                fe = form_validator(request=request, data=vdata, mode=mode)
+                if fe:
+                    raise colander.Invalid(node[fe["field"]], fe["message"])
+
+        attrs["validator"] = validator
+
     Schema = type("Schema", (colander_schema_type,), attrs)
 
     return Schema
