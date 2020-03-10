@@ -145,11 +145,6 @@ class Collection(ICollection):
                 msg.append(f"{c}=({data[c]})")
             if self.search(rulez.and_(*unique_search)):
                 raise self.exist_exc(" ".join(msg))
-        validators = getattr(self.schema, "__validators__", [])
-        for validator in validators:
-            errormsg = validator(self, self.request, data, mode="create")
-            if errormsg:
-                raise ValidationError(form_errors=[FormValidationError(errormsg)])
         obj = self._create(data)
         obj.set_initial_state()
         dispatch = self.request.app.dispatcher(signals.OBJECT_CREATED)
