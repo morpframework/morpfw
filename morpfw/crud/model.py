@@ -277,9 +277,6 @@ class Model(IModel):
         super().__init__(request, collection, data)
 
     def update(self, newdata: dict, secure: bool = False, deserialize: bool = True):
-        newdata = self.schema.validate(
-            self.request, newdata, deserialize=deserialize, update_mode=True
-        )
         if secure:
             if "state" in newdata:
                 raise StateUpdateProhibitedError()
@@ -304,11 +301,7 @@ class Model(IModel):
             if res:
                 if res[0].identifier != self.identifier:
                     raise self.collection.exist_exc(" ".join(msg))
-        validators = getattr(self.schema, "__validators__", [])
-        for validator in validators:
-            errormsg = validator(self, self.request, data, mode="update")
-            if errormsg:
-                raise ValidationError(form_errors=[FormValidationError(errormsg)])
+
         self.storage.update(self.collection, self.identifier, data)
         dispatch = self.request.app.dispatcher(signals.OBJECT_UPDATED)
         dispatch.dispatch(self.request, self)

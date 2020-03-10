@@ -71,6 +71,18 @@ class BaseSchema(ISchema):
                             FieldValidationError(path=k, message=error)
                         )
                         break
+            validators = getattr(cls, "__validators__", [])
+            validators += request.app.get_formvalidators(cls) or []
+            for validator in validators:
+                if not update_mode:
+                    fe = validator(request=request, data=data)
+                else:
+                    fe = validator(request=request, data=data, mode="update")
+                if fe:
+                    params.setdefault("field_errors", [])
+                    params["field_errors"].append(
+                        FieldValidationError(path=fe["field"], message=fe["message"])
+                    )
 
         if params:
             raise ValidationError(**params)
