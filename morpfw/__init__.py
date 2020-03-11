@@ -18,3 +18,4 @@ from .crud.field import Field
 from .util import get_group, get_user, get_user_by_userid
 from .authn.pas.user.path import get_current_user
 from morepath import redirect
+from .memoizer import memoize
