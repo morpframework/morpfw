@@ -41,7 +41,7 @@ def allow_all_collection_access(identity, context, permission):
     return True
 
 
-def validate_body(request, data, mode=None):
+def validate_body(request, schema, data, mode=None):
     if not isinstance(data["body"], str):
         return
 

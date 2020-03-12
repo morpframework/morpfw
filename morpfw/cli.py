@@ -1,10 +1,10 @@
 import code
 import copy
+import errno
 import getpass
 import importlib
 import json
 import os
-import errno
 import readline
 import rlcompleter
 import socket
@@ -13,13 +13,12 @@ import threading
 from datetime import datetime
 from urllib.parse import urlparse
 
-from alembic.config import main as alembic_main
 import click
-
 import hydra
 import morepath
 import morpfw
 import yaml
+from alembic.config import main as alembic_main
 
 from .alembic import drop_all
 from .main import create_admin, create_app, default_settings
@@ -31,8 +30,7 @@ def load_settings(settings_file, default=default_settings):
     if settings_file is None:
         settings = default_settings
     elif not os.path.exists(settings_file):
-        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
-                settings_file)
+        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), settings_file)
     else:
         raw_file = open(settings_file).read()
         raw_file = raw_file.replace(r"%(here)s", os.getcwd())
@@ -101,8 +99,9 @@ def cli(ctx, settings):
 @click.option("-h", "--host", default=None, help="Host")
 @click.option("-p", "--port", default=None, type=int, help="Port")
 @click.option("--prod", default=False, type=bool, is_flag=True, help="Production mode")
-@click.option("--workers", default=None, type=int, 
-    help="Number of workers to run in  prod mode")
+@click.option(
+    "--workers", default=None, type=int, help="Number of workers to run in  prod mode"
+)
 @click.pass_context
 def start(ctx, host, port, prod, workers):
     param = load(ctx.obj["settings"], host, port)
@@ -113,7 +112,7 @@ def start(ctx, host, port, prod, workers):
             host=param["host"],
             port=param["port"],
             ignore_cli=True,
-            workers=workers
+            workers=workers,
         )
     else:
         morpfw.run(
@@ -178,9 +177,22 @@ def register_admin(ctx, username, email, password):
 
 
 @cli.command(help="Start MorpFW shell")
-@click.option("-f", "--script", required=False, help="Script to run")
+@click.option(
+    "-e", "--script", required=False, help="Script to run before spawning shell"
+)
 @click.pass_context
 def shell(ctx, script):
+    return _start_shell(ctx, script)
+
+
+@cli.command(help="Execute script")
+@click.option("-e", "--script", required=False, help="Script to run")
+@click.pass_context
+def execute(ctx, script):
+    return _start_shell(ctx, script, spawn_shell=False)
+
+
+def _start_shell(ctx, script, spawn_shell=True):
     from morepath.authentication import Identity
 
     param = load(ctx.obj["settings"])
@@ -206,21 +218,23 @@ def shell(ctx, script):
     request = app.request_class(app=app, environ=environ)
     session = request.db_session
     localvars = {
-            "session": session,
-            "request": request,
-            "app": app,
-            "settings": settings,
-            "Identity": Identity,
-        }
+        "session": session,
+        "request": request,
+        "app": app,
+        "settings": settings,
+        "Identity": Identity,
+    }
     if script:
         with open(script) as f:
             code = f.read()
             glob = globals().copy()
             filepath = os.path.abspath(script)
-            glob['__file__'] = filepath
-            bytecode = compile(code, filepath, 'exec')
+            sys.path.append(os.path.dirname(filepath))
+            glob["__file__"] = filepath
+            bytecode = compile(code, filepath, "exec")
             exec(bytecode, glob, localvars)
-    _shell(localvars)
+    if spawn_shell:
+        _shell(localvars)
 
 
 def _shell(vars):
@@ -252,6 +266,7 @@ def resetdb(ctx):
 
     drop_all(request)
 
+
 @cli.command(help="manage alembic migration")
 @click.pass_context
 def migration(ctx, options):
@@ -259,11 +274,12 @@ def migration(ctx, options):
 
 
 def main():
-    if 'migration' in sys.argv:
-        argv = sys.argv[sys.argv.index('migration') + 1:]
-        sys.exit(alembic_main(argv, 'morpfw migration'))
+    if "migration" in sys.argv:
+        argv = sys.argv[sys.argv.index("migration") + 1 :]
+        sys.exit(alembic_main(argv, "morpfw migration"))
     else:
         cli()
+
 
 if __name__ == "__main__":
     main()

@@ -20,70 +20,34 @@ class BaseSchema(ISchema):
     @classmethod
     def validate(cls, request, data, deserialize=True, json=True, update_mode=False):
         params = {}
-        if deserialize:
-            if not update_mode:
-                if json:
-                    cschema = dataclass_to_colanderjson(cls, request=request)
-                else:
-                    cschema = dataclass_to_colander(cls, request=request)
 
+        if not update_mode:
+            if json:
+                cschema = dataclass_to_colanderjson(cls, request=request)
             else:
-                if json:
-                    cschema = dataclass_to_colanderjson(
-                        cls, request=request, include_fields=data.keys(), mode="update"
-                    )
-                else:
-                    cschema = dataclass_to_colander(
-                        cls, request=request, include_fields=data.keys(), mode="update"
-                    )
-            try:
-                data = cschema().deserialize(data)
-            except colander.Invalid as e:
-                errors = e.asdict()
-                params["field_errors"] = [
-                    FieldValidationError(path=k, message=m) for k, m in errors.items()
-                ]
-        else:
-            # field errors
-            for k, f in cls.__dataclass_fields__.items():
-                t = dataclass_get_type(f)
-                error = None
-                for validate in t["metadata"]["validators"]:
-                    if update_mode:
-                        val = data.get(k, None)
-                        if val:
-                            error = validate(
-                                request=request,
-                                schema=cls,
-                                field=k,
-                                value=val,
-                                mode="update",
-                            )
-                    else:
-                        val = data.get(k, None)
-                        if val:
-                            error = validate(
-                                request=request, schema=cls, field=k, value=val
-                            )
-                    if error:
-                        params.setdefault("field_errors", [])
-                        params["field_errors"].append(
-                            FieldValidationError(path=k, message=error)
-                        )
-                        break
-            validators = getattr(cls, "__validators__", [])
-            validators += request.app.get_formvalidators(cls) or []
-            for validator in validators:
-                if not update_mode:
-                    fe = validator(request=request, data=data)
-                else:
-                    fe = validator(request=request, data=data, mode="update")
-                if fe:
-                    params.setdefault("field_errors", [])
-                    params["field_errors"].append(
-                        FieldValidationError(path=fe["field"], message=fe["message"])
-                    )
+                cschema = dataclass_to_colander(cls, request=request)
 
+        else:
+            if json:
+                cschema = dataclass_to_colanderjson(
+                    cls, request=request, include_fields=data.keys(), mode="update"
+                )
+            else:
+                cschema = dataclass_to_colander(
+                    cls, request=request, include_fields=data.keys(), mode="update"
+                )
+
+        if not deserialize:
+            # FIXME: can we skip this and immediately validate?
+            data = cschema().serialize(data)
+
+        try:
+            data = cschema().deserialize(data)
+        except colander.Invalid as e:
+            errors = e.asdict()
+            params["field_errors"] = [
+                FieldValidationError(path=k, message=m) for k, m in errors.items()
+            ]
         if params:
             raise ValidationError(**params)
 

@@ -1,14 +1,16 @@
-import morepath
-from more.jsonschema import JsonSchemaApp
-from . import signals as signals
-from sqlalchemy.orm import sessionmaker
-import dectate
-import reg
-from more.signals import SignalApp
-from . import component as actions
 import warnings
-from .model import Model
+
+import dectate
+import morepath
+import reg
+from more.jsonschema import JsonSchemaApp
+from more.signals import SignalApp
+from sqlalchemy.orm import sessionmaker
+
+from . import component as actions
+from . import signals as signals
 from .blobstorage.base import NullBlobStorage
+from .model import Model
 
 Session = sessionmaker()
 
@@ -39,87 +41,81 @@ class App(JsonSchemaApp, signals.SignalApp):
     def get_blobstorage(self, model, request):
         return self._get_blobstorage(model, request)
 
-    @reg.dispatch_method(reg.match_class('model'),
-                         reg.match_instance('request'),
-                         reg.match_instance('blobstorage'))
+    @reg.dispatch_method(
+        reg.match_class("model"),
+        reg.match_instance("request"),
+        reg.match_instance("blobstorage"),
+    )
     def _get_storage(self, model, request, blobstorage):
         raise NotImplementedError
 
-    @reg.dispatch_method(reg.match_class('model'), reg.match_instance('request'))
+    @reg.dispatch_method(reg.match_class("model"), reg.match_instance("request"))
     def _get_blobstorage(self, model, request):
         return NullBlobStorage()
 
     @reg.dispatch_method(
-        reg.match_class('schema',
-                        lambda self, schema, obj, storage: schema),
-        reg.match_instance('obj'),
-        reg.match_instance('storage'))
+        reg.match_class("schema", lambda self, schema, obj, storage: schema),
+        reg.match_instance("obj"),
+        reg.match_instance("storage"),
+    )
     def get_dataprovider(self, schema, obj, storage):
-        raise NotImplementedError('Dataprovider for %s/%s' % (
-            storage.__class__, obj.__class__))
+        raise NotImplementedError(
+            "Dataprovider for %s/%s" % (storage.__class__, obj.__class__)
+        )
 
-    @reg.dispatch_method(reg.match_instance('obj'))
+    @reg.dispatch_method(reg.match_instance("obj"))
     def get_jsonprovider(self, obj):
-        raise NotImplementedError('JSONProvider for %s' % obj.__class__)
+        raise NotImplementedError("JSONProvider for %s" % obj.__class__)
 
-    @reg.dispatch_method(reg.match_class('schema',
-                                         lambda self, schema: schema))
+    @reg.dispatch_method(reg.match_class("schema", lambda self, schema: schema))
     def get_formvalidators(self, schema):
         return []
 
-    @reg.dispatch_method(reg.match_class('schema',
-                                         lambda self, schema: schema))
+    @reg.dispatch_method(reg.match_class("schema", lambda self, schema: schema))
     def get_identifierfield(self, schema):
-        raise NotImplementedError('IdentifierField for %s' % schema)
+        raise NotImplementedError("IdentifierField for %s" % schema)
 
-    @reg.dispatch_method(reg.match_class('schema',
-                                         lambda self, schema: schema))
+    @reg.dispatch_method(reg.match_class("schema", lambda self, schema: schema))
     def get_uuidfield(self, schema):
-        return 'uuid'
+        return "uuid"
 
     @reg.dispatch_method(
-        reg.match_class('schema',
-                        lambda self, schema, obj, request: schema))
+        reg.match_class("schema", lambda self, schema, obj, request: schema)
+    )
     def get_default_identifier(self, schema, obj, request):
         return None
 
-    @reg.dispatch_method(reg.match_instance('model',
-                                            lambda self, context: context))
+    @reg.dispatch_method(reg.match_instance("model", lambda self, context: context))
     def get_rulesprovider(self, context):
         raise NotImplementedError
 
-    @reg.dispatch_method(reg.match_instance('model',
-                                            lambda self, context: context))
+    @reg.dispatch_method(reg.match_instance("model", lambda self, context: context))
     def get_statemachine(self, context):
         raise NotImplementedError
 
-    @reg.dispatch_method(reg.match_instance('model',
-                                            lambda self, context: context))
+    @reg.dispatch_method(reg.match_instance("model", lambda self, context: context))
     def get_searchprovider(self, context):
         raise NotImplementedError
 
-    @reg.dispatch_method(reg.match_instance('model',
-                                            lambda self, context: context))
+    @reg.dispatch_method(reg.match_instance("model", lambda self, context: context))
     def get_aggregateprovider(self, context):
         raise NotImplementedError
 
-    @reg.dispatch_method(reg.match_instance('model',
-                                            lambda self, context: context))
+    @reg.dispatch_method(reg.match_instance("model", lambda self, context: context))
     def get_xattrprovider(self, context):
         raise NotImplementedError
 
-    @reg.dispatch_method(reg.match_key('name'))
+    @reg.dispatch_method(reg.match_key("name"))
     def get_typeinfo_factory(self, name):
         raise NotImplementedError
 
     def get_compositekey_separator(self):
-        raise Exception('BOOO')
+        raise Exception("BOOO")
 
     def join_identifier(self, *args):
-        raise Exception('BOOO')
+        raise Exception("BOOO")
 
-    def permits(self, request: morepath.Request,
-                context: Model, permission: str):
+    def permits(self, request: morepath.Request, context: Model, permission: str):
         identity = request.identity
         return self._permits(identity, context, permission)
 
@@ -128,3 +124,9 @@ class App(JsonSchemaApp, signals.SignalApp):
         if default is MARKER:
             return registry.get(key)
         return registry.get(key, default)
+
+    def get_template(self, template):
+        render = lambda content, request: content
+        return self.config.template_engine_registry.get_template_render(
+            template, render
+        )

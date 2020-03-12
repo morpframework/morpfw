@@ -319,11 +319,15 @@ def dataclass_to_colander(
         def validator(self, node, appstruct):
             vdata = replace_colander_null(appstruct)
             for form_validator in getattr(schema, "__validators__", []):
-                fe = form_validator(request=request, data=vdata, mode=mode)
+                fe = form_validator(
+                    request=request, schema=schema, data=vdata, mode=mode
+                )
                 if fe:
                     raise colander.Invalid(node[fe["field"]], fe["message"])
             for form_validator in request.app.get_formvalidators(schema):
-                fe = form_validator(request=request, data=vdata, mode=mode)
+                fe = form_validator(
+                    request=request, schema=schema, data=vdata, mode=mode
+                )
                 if fe:
                     raise colander.Invalid(node[fe["field"]], fe["message"])
 
