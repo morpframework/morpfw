@@ -28,7 +28,10 @@ class Boolean(colander.Boolean):
         if result is colander.null:
             return None
         if result is not colander.null:
-            result = bool(result)
+            if result.lower() == "true":
+                result = True
+            else:
+                result = False
         return result
 
 

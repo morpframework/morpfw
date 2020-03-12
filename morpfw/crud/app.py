@@ -126,7 +126,9 @@ class App(JsonSchemaApp, signals.SignalApp):
         return registry.get(key, default)
 
     def get_template(self, template):
-        render = lambda content, request: content
+        def render(content, request):
+            return content
+
         return self.config.template_engine_registry.get_template_render(
             template, render
         )

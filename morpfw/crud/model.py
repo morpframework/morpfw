@@ -136,15 +136,7 @@ class Collection(ICollection):
         identifier = self.app.get_default_identifier(self.schema, data, self.request)
         if identifier and self.get(identifier):
             raise self.exist_exc(identifier)
-        unique_constraint = getattr(self.schema, "__unique_constraint__", None)
-        if unique_constraint:
-            unique_search = []
-            msg = []
-            for c in unique_constraint:
-                unique_search.append(rulez.field[c] == data[c])
-                msg.append(f"{c}=({data[c]})")
-            if self.search(rulez.and_(*unique_search)):
-                raise self.exist_exc(" ".join(msg))
+
         obj = self._create(data)
         obj.set_initial_state()
         dispatch = self.request.app.dispatcher(signals.OBJECT_CREATED)
@@ -161,6 +153,16 @@ class Collection(ICollection):
                 if data[fname]:
                     continue
                 data[fname] = default_factory(self, self.request)
+
+        unique_constraint = getattr(self.schema, "__unique_constraint__", None)
+        if unique_constraint:
+            unique_search = []
+            msg = []
+            for c in unique_constraint:
+                unique_search.append(rulez.field[c] == data[c])
+                msg.append(f"{c}=({data[c]})")
+            if self.search(rulez.and_(*unique_search)):
+                raise self.exist_exc(" ".join(msg))
 
         return self.storage.create(self, data)
 
@@ -286,10 +288,15 @@ class Model(IModel):
                         "%s is not allowed to be updated in this context" % protected
                     )
 
-        data = self.data.as_dict()
+        if deserialize:
+            data = self.data.as_json()
+        else:
+            data = self.data.as_dict()
         self.before_update(newdata)
         data.update(newdata)
-        self.schema.validate(self.request, data, deserialize=False, update_mode=True)
+        self.schema.validate(
+            self.request, data, deserialize=deserialize, update_mode=True
+        )
         unique_constraint = getattr(self.schema, "__unique_constraint__", None)
         if unique_constraint:
             unique_search = []

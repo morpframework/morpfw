@@ -1,5 +1,6 @@
 import code
 import copy
+import cProfile
 import errno
 import getpass
 import importlib
@@ -17,6 +18,7 @@ import click
 import hydra
 import morepath
 import morpfw
+import transaction
 import yaml
 from alembic.config import main as alembic_main
 
@@ -185,27 +187,45 @@ def shell(ctx, script):
     return _start_shell(ctx, script)
 
 
+@cli.command(help="Profile script")
+@click.option("-e", "--script", required=False, help="Script to profile")
+@click.pass_context
+def profile(ctx, script):
+    prof = cProfile.Profile()
+    prof.enable()
+    _start_shell(ctx, script, spawn_shell=False)
+    prof.disable()
+    prof.dump_stats(script + ".pstats")
+
+
 @cli.command(help="Execute script")
 @click.option("-e", "--script", required=False, help="Script to run")
+@click.option(
+    "--commit",
+    default=False,
+    required=False,
+    type=bool,
+    is_flag=True,
+    help="Commit transaction",
+)
 @click.pass_context
-def execute(ctx, script):
-    return _start_shell(ctx, script, spawn_shell=False)
+def execute(ctx, script, commit):
+    _start_shell(ctx, script, spawn_shell=False)
+    if commit:
+        transaction.commit()
 
 
 def _start_shell(ctx, script, spawn_shell=True):
     from morepath.authentication import Identity
 
     param = load(ctx.obj["settings"])
-    app = param["factory"](param["settings"])
-
-    while not isinstance(app, morepath.App):
-        wrapped = getattr(app, "app", None)
-        if wrapped:
-            app = wrapped
-        else:
-            raise ValueError("Unable to locate app object from middleware")
-
     settings = param["settings"]
+
+    def fake_write(chunk):
+        pass
+
+    def start_response(*args):
+        return fake_write
 
     server_url = settings.get("server", {}).get("server_url", "http://localhost")
     parsed = urlparse(server_url)
@@ -214,7 +234,19 @@ def _start_shell(ctx, script, spawn_shell=True):
         "wsgi.url_scheme": parsed.scheme,
         "SERVER_PROTOCOL": "HTTP/1.1",
         "HTTP_HOST": parsed.netloc,
+        "REQUEST_METHOD": "GET",
     }
+
+    app = param["factory"](param["settings"])
+
+    app(environ, start_response)
+    while not isinstance(app, morepath.App):
+        wrapped = getattr(app, "app", None)
+        if wrapped:
+            app = wrapped
+        else:
+            raise ValueError("Unable to locate app object from middleware")
+
     request = app.request_class(app=app, environ=environ)
     session = request.db_session
     localvars = {
@@ -226,12 +258,12 @@ def _start_shell(ctx, script, spawn_shell=True):
     }
     if script:
         with open(script) as f:
-            code = f.read()
+            src = f.read()
             glob = globals().copy()
             filepath = os.path.abspath(script)
-            sys.path.append(os.path.dirname(filepath))
+            sys.path.insert(0, os.path.dirname(filepath))
             glob["__file__"] = filepath
-            bytecode = compile(code, filepath, "exec")
+            bytecode = compile(src, filepath, "exec")
             exec(bytecode, glob, localvars)
     if spawn_shell:
         _shell(localvars)
