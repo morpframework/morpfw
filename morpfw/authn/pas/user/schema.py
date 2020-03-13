@@ -2,7 +2,7 @@ import secrets
 import typing
 from dataclasses import dataclass, field
 
-from morpfw import BaseSchema, Schema
+from morpfw.crud.schema import BaseSchema, Schema
 from morpfw.crud.validator import regex_validator
 
 from ..app import App

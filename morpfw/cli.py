@@ -195,6 +195,9 @@ def profile(ctx, script):
     prof.enable()
     _start_shell(ctx, script, spawn_shell=False)
     prof.disable()
+    outfile = script + ".pstats"
+    if os.path.exists(outfile):
+        os.unlink(outfile)
     prof.dump_stats(script + ".pstats")
 
 

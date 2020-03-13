@@ -1,3 +1,4 @@
+import inspect
 from datetime import datetime, timedelta
 
 import pytz
@@ -8,6 +9,8 @@ class ModelMemoizer(object):
         self.seconds = seconds
 
     def __call__(self, method):
+        seconds = self.seconds
+
         def MemoizeWrapper(self, *args):
             klass = self.__class__
             if getattr(klass, "__memoize__", None) is None:
@@ -20,7 +23,7 @@ class ModelMemoizer(object):
                     return cache["result"]
                 if timedelta:
                     if cache["modified"] >= (
-                        datetime.now(tz=pytz.UTC) + timedelta(seconds=self.seconds)
+                        datetime.now(tz=pytz.UTC) + timedelta(seconds=seconds)
                     ):
                         return cache["result"]
             result = method(self, *args)
@@ -31,4 +34,35 @@ class ModelMemoizer(object):
         return MemoizeWrapper
 
 
+class ModelRequestMemoizer(object):
+    def __init__(self, seconds: int = None, environ_key="morpfw.memoize"):
+        self.seconds = seconds
+        self.environ_key = environ_key
+
+    def __call__(self, method):
+        environ_key = self.environ_key
+        seconds = self.seconds
+
+        def RequestMemoizeWrapper(self, *args):
+            self.request.environ.setdefault(environ_key, {})
+            cachemgr = self.request.environ[environ_key]
+            key = hash((self.uuid, method, args))
+            cache = cachemgr.get(key, None)
+            if cache:
+                if cache["modified"] >= self["modified"]:
+                    return cache["result"]
+                if timedelta:
+                    if cache["modified"] >= (
+                        datetime.now(tz=pytz.UTC) + timedelta(seconds=seconds)
+                    ):
+                        return cache["result"]
+            result = method(self, *args)
+            cachemgr[key] = {"result": result, "modified": datetime.now(tz=pytz.UTC)}
+            return result
+
+        RequestMemoizeWrapper.__wrapped__ = method
+        return RequestMemoizeWrapper
+
+
 memoize = ModelMemoizer
+requestmemoize = ModelRequestMemoizer
