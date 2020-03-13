@@ -193,16 +193,17 @@ def shell(ctx, script):
 @click.pass_context
 def profile(ctx, script):
     prof = cProfile.Profile()
+    starttime = time.time()
     prof.enable()
-    start = time.time()
     _start_shell(ctx, script, spawn_shell=False)
-    end = time.time()
     prof.disable()
+    endtime = time.time()
+    print(f"Time taken: {endtime - starttime:.3f} seconds")
     outfile = script + ".pstats"
     if os.path.exists(outfile):
         os.unlink(outfile)
-    print("Execution time: {} seconds".format(end - start))
-    prof.dump_stats(script + ".pstats")
+    prof.dump_stats(outfile)
+    print(f"Profiler result stored as {outfile}")
 
 
 @cli.command(help="Execute script")
@@ -217,9 +218,12 @@ def profile(ctx, script):
 )
 @click.pass_context
 def execute(ctx, script, commit):
+    starttime = time.time()
     _start_shell(ctx, script, spawn_shell=False)
     if commit:
         transaction.commit()
+    endtime = time.time()
+    print(f"Time taken: {endtime - starttime:.3f} seconds")
 
 
 def _start_shell(ctx, script, spawn_shell=True):

@@ -26,7 +26,7 @@ default_settings = open(
     os.path.join(os.path.dirname(__file__), "default_settings.yml")
 ).read()
 default_settings = default_settings.replace(r"%(here)s", os.getcwd())
-default_settings = yaml.load(default_settings)
+default_settings = yaml.load(default_settings, Loader=yaml.Loader)
 
 
 def create_app(settings, scan=True, **kwargs):
@@ -106,8 +106,7 @@ def run(app, settings, host="127.0.0.1", port=5000, ignore_cli=True):
     morepath.run(app, host=host, port=port, ignore_cli=ignore_cli)
 
 
-def runprod(app, settings, host="127.0.0.1", port=5000, ignore_cli=True,
-        workers=None):
+def runprod(app, settings, host="127.0.0.1", port=5000, ignore_cli=True, workers=None):
     service = "gunicorn"
     server = {"listen_address": host, "listen_port": port}
     opts = {}
@@ -181,24 +180,23 @@ class=logging.Formatter
         f.write(logconfig)
 
     opts = [
-            "--log-config",
-            logconf,
-            "-b",
-            "%(listen_address)s:%(listen_port)s" % server,
-            "-k",
-            "eventlet",
-            "--workers",
-            str(server.get("workers", workers)),
-            "--max-requests",
-            str(server.get("max_requests", 1000)),
-            "--max-requests-jitter",
-            str(server.get("max_requests_jitter", 1000)),
-            "--worker-connections",
-            str(server.get("worker_connections", 1000)),
-            "--timeout",
-            str(server.get("worker_timeout", 30)),
+        "--log-config",
+        logconf,
+        "-b",
+        "%(listen_address)s:%(listen_port)s" % server,
+        "-k",
+        "eventlet",
+        "--workers",
+        str(server.get("workers", workers)),
+        "--max-requests",
+        str(server.get("max_requests", 1000)),
+        "--max-requests-jitter",
+        str(server.get("max_requests_jitter", 1000)),
+        "--worker-connections",
+        str(server.get("worker_connections", 1000)),
+        "--timeout",
+        str(server.get("worker_timeout", 30)),
     ]
 
-    subprocess.call(
-        [service] + opts + [ "morpfw.wsgi:app"]
-    )
+    subprocess.call([service] + opts + ["morpfw.wsgi:app"])
+
