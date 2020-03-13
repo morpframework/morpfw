@@ -16,7 +16,7 @@ class ModelMemoizer(object):
             if getattr(klass, "__memoize__", None) is None:
                 klass.__memoize__ = {}
             cachemgr = klass.__memoize__
-            key = hash((self.uuid, method, args))
+            key = hash((self.__class__, method, self.uuid, args))
             cache = cachemgr.get(key, None)
             if cache:
                 if cache["modified"] >= self["modified"]:
@@ -44,9 +44,15 @@ class ModelRequestMemoizer(object):
         seconds = self.seconds
 
         def RequestMemoizeWrapper(self, *args):
+            nomemoize = self.request.environ.get("morpfw.nomemoize", False)
+            if nomemoize is not None:
+                return method(*args)
+            nomemoize = self.request.headers.get("X-MORP-NOMEMOIZE", None)
+            if nomemoize is not None:
+                return method(*args)
             self.request.environ.setdefault(environ_key, {})
             cachemgr = self.request.environ[environ_key]
-            key = hash((self.uuid, method, args))
+            key = hash((self.__class__, method, self.uuid, args))
             cache = cachemgr.get(key, None)
             if cache:
                 if cache["modified"] >= self["modified"]:
