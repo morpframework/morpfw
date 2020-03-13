@@ -11,6 +11,7 @@ import rlcompleter
 import socket
 import sys
 import threading
+import time
 from datetime import datetime
 from urllib.parse import urlparse
 
@@ -36,7 +37,7 @@ def load_settings(settings_file, default=default_settings):
     else:
         raw_file = open(settings_file).read()
         raw_file = raw_file.replace(r"%(here)s", os.getcwd())
-        settings = yaml.load(raw_file)
+        settings = yaml.load(raw_file, Loader=yaml.Loader)
 
     s = copy.deepcopy(default)
     for k in settings.keys():
@@ -193,11 +194,14 @@ def shell(ctx, script):
 def profile(ctx, script):
     prof = cProfile.Profile()
     prof.enable()
+    start = time.time()
     _start_shell(ctx, script, spawn_shell=False)
+    end = time.time()
     prof.disable()
     outfile = script + ".pstats"
     if os.path.exists(outfile):
         os.unlink(outfile)
+    print("Execution time: {} seconds".format(end - start))
     prof.dump_stats(script + ".pstats")
 
 

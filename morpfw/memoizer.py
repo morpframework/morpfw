@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 
 import pytz
 
+from .interfaces import ICollection, IModel
+
 
 class ModelMemoizer(object):
     def __init__(self, seconds: int = None):
@@ -16,16 +18,25 @@ class ModelMemoizer(object):
             if getattr(klass, "__memoize__", None) is None:
                 klass.__memoize__ = {}
             cachemgr = klass.__memoize__
-            key = hash((self.__class__, method, self.uuid, args))
+            if isinstance(self, IModel):
+                key = hash((self.__class__, method, self.uuid, args))
+            elif isinstance(self, ICollection):
+                key = hash((self.__class__, method, args))
+            else:
+                raise AssertionError(
+                    "Memoization is only supported on IModel and ICollection instances"
+                )
             cache = cachemgr.get(key, None)
             if cache:
-                if cache["modified"] >= self["modified"]:
+                if isinstance(self, IModel) and cache["modified"] >= self["modified"]:
                     return cache["result"]
-                if timedelta:
+
+                if seconds:
                     if cache["modified"] >= (
                         datetime.now(tz=pytz.UTC) + timedelta(seconds=seconds)
                     ):
                         return cache["result"]
+                return cache["result"]
             result = method(self, *args)
             cachemgr[key] = {"result": result, "modified": datetime.now(tz=pytz.UTC)}
             return result
@@ -45,23 +56,32 @@ class ModelRequestMemoizer(object):
 
         def RequestMemoizeWrapper(self, *args):
             nomemoize = self.request.environ.get("morpfw.nomemoize", False)
-            if nomemoize is not None:
-                return method(*args)
+            if nomemoize:
+                return method(self, *args)
             nomemoize = self.request.headers.get("X-MORP-NOMEMOIZE", None)
             if nomemoize is not None:
-                return method(*args)
+                return method(self, *args)
             self.request.environ.setdefault(environ_key, {})
             cachemgr = self.request.environ[environ_key]
-            key = hash((self.__class__, method, self.uuid, args))
+            if isinstance(self, IModel):
+                key = hash((self.__class__, method, self.uuid, args))
+            elif isinstance(self, ICollection):
+                key = hash((self.__class__, method, args))
+            else:
+                raise AssertionError(
+                    "Memoization is only supported on IModel and ICollection instances"
+                )
             cache = cachemgr.get(key, None)
             if cache:
-                if cache["modified"] >= self["modified"]:
+                if isinstance(self, IModel) and cache["modified"] >= self["modified"]:
                     return cache["result"]
-                if timedelta:
+
+                if seconds:
                     if cache["modified"] >= (
                         datetime.now(tz=pytz.UTC) + timedelta(seconds=seconds)
                     ):
                         return cache["result"]
+                return cache["result"]
             result = method(self, *args)
             cachemgr[key] = {"result": result, "modified": datetime.now(tz=pytz.UTC)}
             return result

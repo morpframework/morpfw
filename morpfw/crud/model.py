@@ -16,6 +16,7 @@ from rulez import parse_dsl, validate_condition
 from transitions import Machine
 
 from ..interfaces import ICollection, IModel, IStorage
+from ..memoizer import requestmemoize
 from . import permission, signals
 from .const import SEPARATOR
 from .errors import (
@@ -166,11 +167,13 @@ class Collection(ICollection):
 
         return self.storage.create(self, data)
 
+    @requestmemoize()
     def get(self, identifier):
         if isinstance(identifier, list) or isinstance(identifier, tuple):
             identifier = self.request.app.join_identifier(*identifier)
         return self.storage.get(self, identifier)
 
+    @requestmemoize()
     def get_by_uuid(self, uuid):
         return self.storage.get_by_uuid(self, uuid)
 
@@ -346,6 +349,7 @@ class Model(IModel):
     def as_dict(self):
         return self.data.as_dict()
 
+    @requestmemoize()
     def links(self):
         links = []
         links.append({"rel": "self", "href": self.request.link(self)})
@@ -371,14 +375,17 @@ class Model(IModel):
     def _links(self):
         return []
 
+    @requestmemoize()
     def rulesprovider(self):
         return self.app.get_rulesprovider(self)
 
+    @requestmemoize()
     def statemachine(self):
         if self.app.get_statemachine.by_args(self).all_matches:
             return self.app.get_statemachine(self)
         return None
 
+    @requestmemoize()
     def xattrprovider(self):
         if self.app.get_xattrprovider.by_args(self).all_matches:
             return self.app.get_xattrprovider(self)
