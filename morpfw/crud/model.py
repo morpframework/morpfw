@@ -329,14 +329,28 @@ class Model(IModel):
             data = self.schema.validate(self.request, data, deserialize=False)
             self.storage.update(self.collection, self.identifier, data)
 
-    def _raw_json(self):
+    def _base_json(self, exclude_metadata=False):
+
+        exclude_fields = self.hidden_fields
+        if exclude_metadata:
+            from .schema import Schema
+
+            exclude_fields += list(Schema.__dataclass_fields__.keys())
         cschema = dataclass_to_colanderjson(
-            self.schema, exclude_fields=self.hidden_fields, request=self.request
+            self.schema, exclude_fields=exclude_fields, request=self.request
         )
         return cschema().serialize(self.data.as_dict())
 
+    @requestmemoize()
+    def base_json(self):
+        return self._base_json()
+
+    @requestmemoize()
+    def data_json(self):
+        return self._base_json(exclude_metadata=True)
+
     def _json(self):
-        return self._raw_json()
+        return self.base_json()
 
     def json(self):
         if self.linkable:
