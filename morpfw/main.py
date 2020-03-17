@@ -87,7 +87,9 @@ def create_admin(
             break
         app = app.app
 
-    request = app.request_class(app=app, environ={"PATH_INFO": "/"})
+    request = app.request_class(
+        app=app, environ={"PATH_INFO": "/", "morpfw.nomemoize": True}
+    )
 
     transaction.manager.begin()
     usercol = get_user_collection(request)
@@ -199,4 +201,3 @@ class=logging.Formatter
     ]
 
     subprocess.call([service] + opts + ["morpfw.wsgi:app"])
-
