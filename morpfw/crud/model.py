@@ -96,6 +96,16 @@ class Collection(ICollection):
                 objs = objs + nextobjs
         return objs
 
+    @requestmemoize()
+    def all(self):
+        return self.search()
+
+    @requestmemoize()
+    def count(self):
+        return self.aggregate(group={"count": {"function": "count", "field": "uuid"}})[
+            0
+        ]["count"]
+
     def _search(self, query=None, offset=0, limit=None, order_by=None, secure=False):
         if query:
             validate_condition(query, ALLOWED_SEARCH_OPERATORS)
