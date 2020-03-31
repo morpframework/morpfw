@@ -36,7 +36,7 @@ class ModelMemoizer(object):
                         datetime.now(tz=pytz.UTC) + timedelta(seconds=seconds)
                     ):
                         return cache["result"]
-                return cache["result"]
+
             result = method(self, *args)
             cachemgr[key] = {"result": result, "modified": datetime.now(tz=pytz.UTC)}
             return result
@@ -81,7 +81,7 @@ class ModelRequestMemoizer(object):
                         datetime.now(tz=pytz.UTC) + timedelta(seconds=seconds)
                     ):
                         return cache["result"]
-                return cache["result"]
+
             result = method(self, *args)
             cachemgr[key] = {"result": result, "modified": datetime.now(tz=pytz.UTC)}
             return result
