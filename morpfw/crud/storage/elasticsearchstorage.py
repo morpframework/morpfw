@@ -158,8 +158,9 @@ class ElasticSearchStorage(BaseStorage):
                 raise e
 
     def create(self, collection, data):
-        cschema = dataclass_to_colanderjson(collection.schema,
-                request=collection.request)
+        cschema = dataclass_to_colanderjson(
+            collection.schema, request=collection.request
+        )
         data = cschema().serialize(data)
         m = self.model(self.request, collection, data)
         self.create_index()
@@ -328,8 +329,7 @@ class ElasticSearchStorage(BaseStorage):
 
     def update(self, collection, identifier, data):
         cschema = dataclass_to_colanderjson(
-            collection.schema, include_fields=data.keys(),
-            request=collection.request
+            collection.schema, include_fields=data.keys(), request=collection.request
         )
         data = cschema().serialize(data)
         self.create_index()

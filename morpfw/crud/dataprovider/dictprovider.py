@@ -46,6 +46,9 @@ class DictProvider(IDataProvider):
         if t["type"] == datetime.datetime:
             if value and not isinstance(value, datetime.datetime):
                 value = parse_date(value)
+        if t["type"] == datetime.date:
+            if value and not isinstance(value, datetime.date):
+                value = parse_date(value).date()
         self.data[key] = value
         self.changed = True
 

@@ -322,6 +322,11 @@ class Model(IModel):
                 if res[0].identifier != self.identifier:
                     raise self.collection.exist_exc(" ".join(msg))
 
+        if deserialize:
+            cschema = dataclass_to_colanderjson(self.schema, request=self.request)
+            cs = cschema()
+            cs.bind(context=self, request=self.request)
+            data = cs.deserialize(data)
         self.storage.update(self.collection, self.identifier, data)
         dispatch = self.request.app.dispatcher(signals.OBJECT_UPDATED)
         dispatch.dispatch(self.request, self)
@@ -349,7 +354,9 @@ class Model(IModel):
         cschema = dataclass_to_colanderjson(
             self.schema, exclude_fields=exclude_fields, request=self.request
         )
-        return cschema().serialize(self.data.as_dict())
+        cs = cschema()
+        cs.bind(context=self, request=self.request)
+        return cs.serialize(self.data.as_dict())
 
     @requestmemoize()
     def base_json(self):
