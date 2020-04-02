@@ -29,13 +29,19 @@ class ElasticSearchProvider(DictProvider):
 
     def __getitem__(self, key):
         cschema = dataclass_to_colanderjson(
-            self.schema, include_fields=[key], request=self.storage.request
+            self.schema,
+            include_fields=[key],
+            request=self.storage.request,
+            include_schema_validators=False,
         )
         return _deserialize(cschema(), key, self.data[key])
 
     def __setitem__(self, key, value):
         cschema = dataclass_to_colanderjson(
-            self.schema, include_fields=[key], request=self.storage.request
+            self.schema,
+            include_fields=[key],
+            request=self.storage.request,
+            include_schema_validators=False,
         )
         value = cschema()[key].serialize(value)
         self.data[key] = value
@@ -43,7 +49,10 @@ class ElasticSearchProvider(DictProvider):
 
     def setdefault(self, key, value):
         cschema = dataclass_to_colanderjson(
-            self.schema, include_fields=[key], request=self.storage.request
+            self.schema,
+            include_fields=[key],
+            request=self.storage.request,
+            include_schema_validators=False,
         )
         value = cschema()[key].serialize(value)
         self.changed = True
@@ -53,7 +62,10 @@ class ElasticSearchProvider(DictProvider):
             return self.data.get(key)
 
         cschema = dataclass_to_colanderjson(
-            self.schema, include_fields=[key], request=self.storage.request
+            self.schema,
+            include_fields=[key],
+            request=self.storage.request,
+            include_schema_validators=False,
         )
 
         if default is _MARKER:
@@ -67,18 +79,25 @@ class ElasticSearchProvider(DictProvider):
 
     def set(self, key, value):
         cschema = dataclass_to_colanderjson(
-            self.schema, include_fields=[key], request=self.storage.request
+            self.schema,
+            include_fields=[key],
+            request=self.storage.request,
+            include_schema_validators=False,
         )
         value = cschema()[key].serialize(value)
         self.data[key] = value
         self.changed = True
 
     def items(self):
-        cschema = dataclass_to_colanderjson(self.schema, request=self.storage.request)
+        cschema = dataclass_to_colanderjson(
+            self.schema, request=self.storage.request, include_schema_validators=False
+        )
         return cschema().deserialize(self.data).items()
 
     def as_dict(self):
-        cschema = dataclass_to_colanderjson(self.schema, request=self.storage.request)
+        cschema = dataclass_to_colanderjson(
+            self.schema, request=self.storage.request, include_schema_validators=False
+        )
         return cschema().deserialize(self.data)
 
     def as_json(self):

@@ -18,7 +18,9 @@ from .schemaconverter.dataclass2colanderjson import dataclass_to_colanderjson
 @dataclass
 class BaseSchema(ISchema):
     @classmethod
-    def validate(cls, request, data, deserialize=True, json=True, update_mode=False):
+    def validate(
+        cls, request, data, deserialize=True, json=True, update_mode=False, **kwargs
+    ):
         params = {}
 
         if not update_mode:
@@ -36,13 +38,16 @@ class BaseSchema(ISchema):
                 cschema = dataclass_to_colander(
                     cls, request=request, include_fields=data.keys(), mode="update"
                 )
-
+        cs = cschema()
+        # FIXME: need to pass context here
+        cs.bind(request=request, **kwargs)
         if not deserialize:
             # FIXME: can we skip this and immediately validate?
-            data = cschema().serialize(data)
+
+            data = cs.serialize(data)
 
         try:
-            data = cschema().deserialize(data)
+            data = cs.deserialize(data)
         except colander.Invalid as e:
             errors = e.asdict()
             params["field_errors"] = [

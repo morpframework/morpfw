@@ -15,6 +15,14 @@ from ...interfaces import ISchema
 from .common import dataclass_check_type, dataclass_get_type
 
 
+class BindableMappingSchema(colander.MappingSchema):
+    def bind(self, **kwargs):
+        self._bind_data = kwargs
+
+    def get_binds(self):
+        return getattr(self, "_bind_data", {}).copy()
+
+
 def replace_colander_null(appstruct, value=None):
     out = {}
     for k, v in appstruct.items():
@@ -230,7 +238,7 @@ def dataclass_to_colander(
     hidden_fields: typing.List[str] = None,
     readonly_fields: typing.List[str] = None,
     include_schema_validators: bool = True,
-    colander_schema_type: typing.Type[colander.Schema] = colander.MappingSchema,
+    colander_schema_type: typing.Type[colander.Schema] = BindableMappingSchema,
     oid_prefix: str = "deformField",
     dataclass_field_to_colander_schemanode=dataclass_field_to_colander_schemanode,
 ) -> typing.Type[colander.MappingSchema]:
@@ -318,18 +326,25 @@ def dataclass_to_colander(
 
         def validator(self, node, appstruct):
             vdata = replace_colander_null(appstruct)
-            for form_validator in getattr(schema, "__validators__", []):
+            binds = self.get_binds()
+            form_validators = getattr(schema, '__validators__', [])
+            form_validators +=  request.app.get_formvalidators(schema)
+            # check for required binds
+            if form_validators:
+                for k in ["context", "request"]:
+                    if k not in binds.keys():
+                        raise AssertionError(
+                            "Required bind variable '{}' is not set".format(k)
+                        )
+
+            for form_validator in form_validators:
                 fe = form_validator(
                     request=request, schema=schema, data=vdata, mode=mode
                 )
                 if fe:
-                    raise colander.Invalid(node[fe["field"]], fe["message"])
-            for form_validator in request.app.get_formvalidators(schema):
-                fe = form_validator(
-                    request=request, schema=schema, data=vdata, mode=mode
-                )
-                if fe:
-                    raise colander.Invalid(node[fe["field"]], fe["message"])
+                    if fe.get("field", None):
+                        raise colander.Invalid(node[fe["field"]], fe["message"])
+                    raise colander.Invalid(node, fe["message"])
 
         attrs["validator"] = validator
 

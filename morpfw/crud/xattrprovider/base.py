@@ -27,5 +27,5 @@ class XattrProvider(IXattrProvider):
     def process_update(self, newdata: dict):
         data = self.as_json()
         data.update(newdata)
-        self.schema.validate(self.request, data)
+        self.schema.validate(self.request, data, context=self.context)
         self.update(data)

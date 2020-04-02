@@ -1,20 +1,26 @@
-from ..app import App
-from .model import UserCollection, UserModel, CurrentUserModel
-from ..path import get_user_collection
-from .model import UserSchema, LoginSchema
-from .model import RegistrationSchema
-from ..exc import UserExistsError
 import morepath
-from ..validator import validate
-from ..utils import rellink, has_role
-from .. import permission
-from ....crud import permission as crudperm
-from ..policy import verify_refresh_request
-from webob.exc import HTTPNotFound
-from more.jwtauth import InvalidTokenError, ExpiredSignatureError
+from more.jwtauth import ExpiredSignatureError, InvalidTokenError
+from morpfw.crud.errors import AlreadyExistsError
 from morpfw.crud.schemaconverter.dataclass2jsl import dataclass_to_jsl
 from morpfw.crud.validator import validate_schema
-from morpfw.crud.errors import AlreadyExistsError
+from webob.exc import HTTPNotFound
+
+from ....crud import permission as crudperm
+from .. import permission
+from ..app import App
+from ..exc import UserExistsError
+from ..path import get_user_collection
+from ..policy import verify_refresh_request
+from ..utils import has_role, rellink
+from ..validator import validate
+from .model import (
+    CurrentUserModel,
+    LoginSchema,
+    RegistrationSchema,
+    UserCollection,
+    UserModel,
+    UserSchema,
+)
 
 
 @App.json(
@@ -186,4 +192,3 @@ def user_change_password(context, request):
         return {"status": "error", "message": error}
     context.change_password(current_password, data["new_password"])
     return {"status": "success"}
-

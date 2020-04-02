@@ -43,7 +43,7 @@ def load(validator, schema, request):
         dc = schema
 
     data = get_data(context, request)
-    return dc.validate(request, data)
+    return dc.validate(request, data, context=context)
 
 
 def validate_schema(validator=Draft4Validator, schema=None):

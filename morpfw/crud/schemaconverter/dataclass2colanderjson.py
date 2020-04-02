@@ -7,7 +7,7 @@ import pytz
 
 from ...interfaces import ISchema
 from .common import dataclass_check_type, dataclass_get_type
-from .dataclass2colander import SchemaNode, colander_params
+from .dataclass2colander import BindableMappingSchema, SchemaNode, colander_params
 from .dataclass2colander import (
     dataclass_field_to_colander_schemanode as orig_dc2colander_node,
 )
@@ -156,7 +156,7 @@ def dataclass_field_to_colander_schemanode(
         )
         return SchemaNode(**params)
 
-    return orig_dc2colander_node(prop, oid_prefix)
+    return orig_dc2colander_node(prop, oid_prefix, request)
 
 
 def dataclass_to_colanderjson(
@@ -164,7 +164,9 @@ def dataclass_to_colanderjson(
     include_fields: typing.List[str] = None,
     exclude_fields: typing.List[str] = None,
     hidden_fields: typing.List[str] = None,
-    colander_schema_type: typing.Type[colander.Schema] = colander.MappingSchema,
+    readonly_fields: typing.List[str] = None,
+    include_schema_validators: bool = True,
+    colander_schema_type: typing.Type[colander.Schema] = BindableMappingSchema,
     oid_prefix: str = "deformField",
     request=None,
     mode="default",
@@ -175,6 +177,8 @@ def dataclass_to_colanderjson(
         include_fields=include_fields,
         exclude_fields=exclude_fields,
         hidden_fields=hidden_fields,
+        readonly_fields=readonly_fields,
+        include_schema_validators=include_schema_validators,
         colander_schema_type=colander_schema_type,
         oid_prefix=oid_prefix,
         dataclass_field_to_colander_schemanode=dataclass_field_to_colander_schemanode,

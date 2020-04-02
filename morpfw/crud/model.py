@@ -142,7 +142,9 @@ class Collection(ICollection):
         return None
 
     def create(self, data, deserialize=True):
-        data = self.schema.validate(self.request, data, deserialize=deserialize)
+        data = self.schema.validate(
+            self.request, data, deserialize=deserialize, context=None
+        )
         self.before_create(data)
         identifier = self.app.get_default_identifier(self.schema, data, self.request)
         if identifier and self.get(identifier):
@@ -308,7 +310,7 @@ class Model(IModel):
         self.before_update(newdata)
         data.update(newdata)
         self.schema.validate(
-            self.request, data, deserialize=deserialize, update_mode=True
+            self.request, data, deserialize=deserialize, update_mode=True, context=self
         )
         unique_constraint = getattr(self.schema, "__unique_constraint__", None)
         if unique_constraint:
@@ -341,7 +343,9 @@ class Model(IModel):
     def save(self):
         if self.data.changed:
             data = self.as_dict()
-            data = self.schema.validate(self.request, data, deserialize=False)
+            data = self.schema.validate(
+                self.request, data, deserialize=False, context=self
+            )
             self.storage.update(self.collection, self.identifier, data)
 
     def _base_json(self, exclude_metadata=False):
