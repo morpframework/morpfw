@@ -327,19 +327,22 @@ def dataclass_to_colander(
         def validator(self, node, appstruct):
             vdata = replace_colander_null(appstruct)
             binds = self.get_binds()
-            form_validators = getattr(schema, '__validators__', [])
-            form_validators +=  request.app.get_formvalidators(schema)
-            # check for required binds
-            if form_validators:
-                for k in ["context", "request"]:
-                    if k not in binds.keys():
+            form_validators = getattr(schema, "__validators__", [])
+            form_validators += request.app.get_formvalidators(schema)
+
+            for form_validator in form_validators:
+                required_binds = getattr(form_validator, "__required_binds__", [])
+                kwargs = {}
+                for k in required_binds:
+                    if k not in binds:
                         raise AssertionError(
                             "Required bind variable '{}' is not set".format(k)
                         )
+                    else:
+                        kwargs[k] = binds[k]
 
-            for form_validator in form_validators:
                 fe = form_validator(
-                    request=request, schema=schema, data=vdata, mode=mode
+                    request=request, schema=schema, data=vdata, mode=mode, **kwargs
                 )
                 if fe:
                     if fe.get("field", None):
