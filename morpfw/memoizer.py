@@ -46,9 +46,11 @@ class ModelMemoizer(object):
 
 
 class ModelRequestMemoizer(object):
-    def __init__(self, seconds: int = None, environ_key="morpfw.memoize"):
+
+    environ_key = "morpfw.memoize"
+
+    def __init__(self, seconds: int = None):
         self.seconds = seconds
-        self.environ_key = environ_key
 
     def __call__(self, method):
         environ_key = self.environ_key

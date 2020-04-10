@@ -54,6 +54,9 @@ class Request(BaseRequest):
         new_req.identity = self.identity
         return new_req
 
+    def async_dispatch(self, signal, obj=None):
+        return self.app.async_dispatcher(signal).dispatch(self, obj=obj)
+
 
 class DBSessionRequest(Request):
 
@@ -103,6 +106,15 @@ class DBSessionRequest(Request):
             engine = self.get_db_engine(name)
             self._db_session[name] = Session(bind=engine)
         return self._db_session[name]
+
+    def clear_db_session(self, name=None):
+        if name:
+            if name in self._db_session.keys():
+                self._db_session[name] = None
+        else:
+            for k in self._db_session.keys():
+                self._db_session[k] = None
+        self.environ["morpfw.memoize"] = {}
 
     def get_collection(self, type_name):
         typeinfo = self.app.config.type_registry.get_typeinfo(

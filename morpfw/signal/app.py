@@ -1,44 +1,57 @@
-import re
-import morepath
-import dectate
+import importlib
 import json
 import os
-import importlib
+import re
+import threading
+from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
-from celery import Celery, Task
-from celery import shared_task
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
+from uuid import uuid4
+
+import dectate
+import morepath
+import transaction
+from billiard.einfo import ExceptionInfo
+from celery import Celery, Task, shared_task
+from celery.contrib import rdb
+
 # from typing import Union
 from celery.local import Proxy
 from celery.result import AsyncResult
 from celery.schedules import crontab
-from celery.contrib import rdb
-from billiard.einfo import ExceptionInfo
-import transaction
+
 from . import directive
-from uuid import uuid4
-import threading
+from . import signal as event_signal
+
+ALLOWED_ENVIRONMENT_KEYS = [
+    "USER",
+    "SCRIPT_NAME",
+    "PATH_INFO",
+    "QUERY_STRING",
+    "SERVER_NAME",
+    "SERVER_PORT",
+    "REMOTE_HOST",
+    "HTTP_HOST",
+    "SERVER_PROTOCOL",
+    "wsgi.url_scheme",
+]
 
 
 class MorpTask(Task):
     abstract = True
 
-    def after_return(self,
-                     status: str,
-                     retval: Any,
-                     task_id: str,
-                     args: List,
-                     kwargs: Dict,
-                     einfo: Optional[ExceptionInfo],
-                     ):
+    def after_return(
+        self,
+        status: str,
+        retval: Any,
+        task_id: str,
+        args: List,
+        kwargs: Dict,
+        einfo: Optional[ExceptionInfo],
+    ):
         pass
 
 
 class AsyncDispatcher(object):
-
     def __init__(self, app: morepath.App, signal: str, **kwargs):
         self.app = app
         self.signal = signal
@@ -51,77 +64,85 @@ class AsyncDispatcher(object):
     def dispatch(self, request: morepath.Request, **kwargs) -> List[AsyncResult]:
         tasks = []
         envs = {}
-        allcaps = re.compile(r'^[A-Z_]+$')
         for k, v in request.environ.items():
-            if allcaps.match(k):
-                envs[k] = v
-            elif k in ['wsgi.url_scheme']:
+            if k in ALLOWED_ENVIRONMENT_KEYS:
                 envs[k] = v
 
         req_json = {
-            'headers': dict(request.headers),
-            'environ': envs,
-            'text': request.text,
+            "headers": dict(request.headers),
+            "environ": envs,
+            # "text": request.text,
         }
 
         subs = self.subscribers()
         for s in subs:
-            task = s.apply_async(kwargs=dict(request=req_json, **kwargs),
-                                 **self.signal_opts)
+            task = s.apply_async(
+                kwargs=dict(request=req_json, **kwargs), **self.signal_opts
+            )
+            task.__signal__ = self.signal
+            task.__params__ = kwargs
+            self.app.dispatcher(event_signal.TASK_SUBMITTED).dispatch(request, task)
             tasks.append(task)
         return tasks
 
 
 def periodic_transaction_handler(func):
     def transaction_wrapper():
-        settings = json.loads(os.environ['MORP_SETTINGS'])
-        mod, clsname = settings['application']['class'].split(':')
+        settings = json.loads(os.environ["MORP_SETTINGS"])
+        mod, clsname = settings["application"]["class"].split(":")
         app_class = getattr(importlib.import_module(mod), clsname)
         app_class.commit()
         app = app_class()
-        server_url = settings.get('server', {}).get(
-            'server_url', 'http://localhost')
+        server_url = settings.get("server", {}).get("server_url", "http://localhost")
         parsed = urlparse(server_url)
         environ = {
-            'PATH_INFO': '/',
-            'wsgi.url_scheme': parsed.scheme,
-            'SERVER_PROTOCOL': 'HTTP/1.1',
-            'HTTP_HOST': parsed.netloc,
+            "PATH_INFO": "/",
+            "wsgi.url_scheme": parsed.scheme,
+            "SERVER_PROTOCOL": "HTTP/1.1",
+            "HTTP_HOST": parsed.netloc,
         }
         req = app.request_class(app=app, environ=environ)
         transaction.begin()
         savepoint = transaction.savepoint()
         try:
             res = func(req)
-        except:
+        except Exception:
             savepoint.rollback()
             raise
         finally:
             transaction.commit()
 
         return res
+
     return transaction_wrapper
 
 
 def transaction_handler(func):
-
-    def transaction_wrapper(request, obj):
-        settings = json.loads(os.environ['MORP_SETTINGS'])
-        mod, clsname = settings['application']['class'].split(':')
+    def transaction_wrapper(task, request, obj):
+        settings = json.loads(os.environ["MORP_SETTINGS"])
+        mod, clsname = settings["application"]["class"].split(":")
         app_class = getattr(importlib.import_module(mod), clsname)
         app = app_class()
         req = app.request_class(app=app, **request)
         transaction.begin()
+        req.app.dispatcher(event_signal.TASK_STARTING).dispatch(req, task.request)
         savepoint = transaction.savepoint()
+        failed = False
         try:
             res = func(req, obj)
-        except:
+            req.app.dispatcher(event_signal.TASK_COMPLETED).dispatch(req, task.request)
+        except Exception:
             savepoint.rollback()
+            failed = True
             raise
         finally:
+            if failed:
+                req.app.dispatcher(event_signal.TASK_FAILED).dispatch(req, task.request)
+            req.app.dispatcher(event_signal.TASK_FINALIZED).dispatch(req, task.request)
             transaction.commit()
 
         return res
+
     return transaction_wrapper
 
 
@@ -137,41 +158,54 @@ class SignalApp(morepath.App):
     def async_subscribe(klass, signal: str, task_name: Optional[str] = None):
         def wrapper(wrapped):
             if task_name is None:
-                name = '.'.join([wrapped.__module__, wrapped.__name__])
+                name = ".".join([wrapped.__module__, wrapped.__name__])
             else:
                 name = task_name
             func = transaction_handler(wrapped)
-            task = shared_task(name=name,  base=MorpTask)(func)
+            task = shared_task(name=name, base=MorpTask, bind=True)(func)
             klass._celery_subscribe(signal)(task)
             return task
+
         return wrapper
 
     @classmethod
-    def cron(klass, name: str, minute: str = '*', hour: str = '*', day_of_week: str = '*',
-             day_of_month: str = '*', month_of_year: str = '*'):
+    def cron(
+        klass,
+        name: str,
+        minute: str = "*",
+        hour: str = "*",
+        day_of_week: str = "*",
+        day_of_month: str = "*",
+        month_of_year: str = "*",
+    ):
         def wrapper(wrapped):
             func = periodic_transaction_handler(wrapped)
-            task_name = '.'.join([wrapped.__module__, wrapped.__name__])
+            task_name = ".".join([wrapped.__module__, wrapped.__name__])
             task = shared_task(name=task_name, base=MorpTask)(func)
             klass.celery.conf.beat_schedule[name] = {
-                'task': task_name,
-                'schedule': crontab(minute=minute, hour=hour,
-                                    day_of_week=day_of_week,
-                                    day_of_month=day_of_month,
-                                    month_of_year=month_of_year)
+                "task": task_name,
+                "schedule": crontab(
+                    minute=minute,
+                    hour=hour,
+                    day_of_week=day_of_week,
+                    day_of_month=day_of_month,
+                    month_of_year=month_of_year,
+                ),
             }
             return task
+
         return wrapper
 
     @classmethod
     def periodic(klass, name: str, seconds: int = 1):
         def wrapper(wrapped):
             func = periodic_transaction_handler(wrapped)
-            task_name = '.'.join([wrapped.__module__, wrapped.__name__])
+            task_name = ".".join([wrapped.__module__, wrapped.__name__])
             task = shared_task(name=task_name, base=MorpTask)(func)
             klass.celery.conf.beat_schedule[name] = {
-                'task': task_name,
-                'schedule': seconds
+                "task": task_name,
+                "schedule": seconds,
             }
             return task
+
         return wrapper

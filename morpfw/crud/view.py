@@ -12,13 +12,9 @@ from webob.exc import HTTPForbidden, HTTPInternalServerError, HTTPNotFound
 
 from . import permission
 from .app import App
-from .errors import (
-    AlreadyExistsError,
-    FieldValidationError,
-    StateUpdateProhibitedError,
-    UnprocessableError,
-    ValidationError,
-)
+from .errors import (AlreadyExistsError, FieldValidationError,
+                     StateUpdateProhibitedError, UnprocessableError,
+                     ValidationError)
 from .model import Collection, Model
 from .validator import get_data, validate_schema
 
@@ -175,6 +171,17 @@ def statemachine(context, request):
 
     sm = context.statemachine()
     transition = request.json["transition"]
+    if transition in getattr(sm, "protected_transitions", []):
+
+        @request.after
+        def adjust_status(response):
+            response.status = 422
+
+        return {
+            "status": "error",
+            "message": "Transition %s is not allowed" % transition,
+        }
+
     attr = getattr(sm, transition, None)
     if attr is None:
 

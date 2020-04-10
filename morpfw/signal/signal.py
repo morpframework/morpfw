@@ -1,0 +1,5 @@
+TASK_SUBMITTED: str = "morpfw.task_submitted"
+TASK_STARTING: str = "morpfw.task_starting"
+TASK_COMPLETED: str = "morpfw.task_completed"
+TASK_FAILED: str = "morpfw.task_failed"
+TASK_FINALIZED: str = "morpfw.task_finalized"
