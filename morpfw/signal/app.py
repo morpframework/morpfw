@@ -223,7 +223,6 @@ class SignalApp(morepath.App):
                 "task": task_name,
                 "schedule": seconds,
             }
-            print("Beat Registered")
             return task
 
         return wrapper
