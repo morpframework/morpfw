@@ -86,8 +86,9 @@ class AsyncDispatcher(object):
         return tasks
 
 
-def periodic_transaction_handler(func):
-    def transaction_wrapper():
+def periodic_transaction_handler(name, func):
+    def transaction_wrapper(task):
+        task.request.__job_name__ = name
         settings = json.loads(os.environ["MORP_SETTINGS"])
         mod, clsname = settings["application"]["class"].split(":")
         app_class = getattr(importlib.import_module(mod), clsname)
@@ -103,13 +104,29 @@ def periodic_transaction_handler(func):
         }
         req = app.request_class(app=app, environ=environ)
         transaction.begin()
+
+        req.app.dispatcher(event_signal.SCHEDULEDTASK_STARTING).dispatch(
+            req, task.request
+        )
         savepoint = transaction.savepoint()
+        failed = False
         try:
             res = func(req)
+            req.app.dispatcher(event_signal.SCHEDULEDTASK_COMPLETED).dispatch(
+                req, task.request
+            )
         except Exception:
             savepoint.rollback()
+            failed = True
             raise
         finally:
+            if failed:
+                req.app.dispatcher(event_signal.SCHEDULEDTASK_FAILED).dispatch(
+                    req, task.request
+                )
+            req.app.dispatcher(event_signal.SCHEDULEDTASK_FINALIZED).dispatch(
+                req, task.request
+            )
             transaction.commit()
 
         return res
@@ -179,9 +196,9 @@ class SignalApp(morepath.App):
         month_of_year: str = "*",
     ):
         def wrapper(wrapped):
-            func = periodic_transaction_handler(wrapped)
+            func = periodic_transaction_handler(name, wrapped)
             task_name = ".".join([wrapped.__module__, wrapped.__name__])
-            task = shared_task(name=task_name, base=MorpTask)(func)
+            task = shared_task(name=task_name, base=MorpTask, bind=True)(func)
             klass.celery.conf.beat_schedule[name] = {
                 "task": task_name,
                 "schedule": crontab(
@@ -199,13 +216,14 @@ class SignalApp(morepath.App):
     @classmethod
     def periodic(klass, name: str, seconds: int = 1):
         def wrapper(wrapped):
-            func = periodic_transaction_handler(wrapped)
+            func = periodic_transaction_handler(name, wrapped)
             task_name = ".".join([wrapped.__module__, wrapped.__name__])
-            task = shared_task(name=task_name, base=MorpTask)(func)
+            task = shared_task(name=task_name, base=MorpTask, bind=True)(func)
             klass.celery.conf.beat_schedule[name] = {
                 "task": task_name,
                 "schedule": seconds,
             }
+            print("Beat Registered")
             return task
 
         return wrapper

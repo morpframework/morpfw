@@ -135,6 +135,7 @@ def solo_worker(ctx):
     hostname = socket.gethostname()
     ws = param["settings"]["configuration"]["morpfw.celery"]
     now = datetime.utcnow().strftime(r"%Y%m%d%H%M")
+    # scan
     param["factory"](param["settings"], instantiate=False)
     worker = param["class"].celery.Worker(
         hostname="worker%s.%s" % (now, hostname), **ws
@@ -148,6 +149,8 @@ def scheduler(ctx):
     param = load(ctx.obj["settings"])
     hostname = socket.gethostname()
     ss = param["settings"]["configuration"]["morpfw.celery"]
+    # scan
+    param["factory"](param["settings"], instantiate=False)
     sched = param["class"].celery.Beat(hostname="scheduler.%s" % hostname, **ss)
     sched.run()
 
