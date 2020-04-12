@@ -1,4 +1,5 @@
 import warnings
+from urllib.parse import urlparse
 
 import dectate
 import morepath
@@ -31,7 +32,9 @@ class App(JsonSchemaApp, signals.SignalApp):
     aggregateprovider = dectate.directive(actions.AggregateProviderAction)
     xattrprovider = dectate.directive(actions.XattrProviderAction)
     storage = dectate.directive(actions.StorageAction)
+    storage_factory = dectate.directive(actions.StorageFactoryAction)
     blobstorage = dectate.directive(actions.BlobStorageAction)
+    blobstorage_factory = dectate.directive(actions.BlobStorageFactoryAction)
     typeinfo = dectate.directive(actions.TypeInfoFactoryAction)
 
     def get_storage(self, model, request):
@@ -41,6 +44,26 @@ class App(JsonSchemaApp, signals.SignalApp):
     def get_blobstorage(self, model, request):
         return self._get_blobstorage(model, request)
 
+    def get_config_blobstorage(self, request: morepath.Request, name: str = None):
+        config = self.settings.configuration.__dict__
+        if name is None:
+            uri = config["morpfw.blobstorage.uri"]
+        else:
+            uri = config["morpfw.blobstorage.uri.{}".format(name)]
+
+        scheme = uri.split(":")[0]
+        return self._get_blobstorage_factory(scheme)(request=request, uri=uri)
+
+    def get_config_storage(self, request: morepath.Request, name: str = None):
+        config = self.settings.configuration.__dict__
+        if name is None:
+            uri = config["morpfw.storage.uri"]
+        else:
+            uri = config["morpfw.storage.uri.{}".format(name)]
+
+        parsed = urlparse(uri)
+        return self._get_storage_factory(parsed.scheme)(request, uri)
+
     @reg.dispatch_method(
         reg.match_class("model"),
         reg.match_instance("request"),
@@ -49,9 +72,17 @@ class App(JsonSchemaApp, signals.SignalApp):
     def _get_storage(self, model, request, blobstorage):
         raise NotImplementedError
 
+    @reg.dispatch_method(reg.match_key("name"))
+    def _get_storage_factory(self, name):
+        raise NotImplementedError
+
     @reg.dispatch_method(reg.match_class("model"), reg.match_instance("request"))
     def _get_blobstorage(self, model, request):
         return NullBlobStorage()
+
+    @reg.dispatch_method(reg.match_key("name"))
+    def _get_blobstorage_factory(self, name):
+        raise NotImplementedError
 
     @reg.dispatch_method(
         reg.match_class("schema", lambda self, schema, obj, storage: schema),

@@ -227,3 +227,39 @@ class TypeInfoFactoryAction(dectate.Action):
         app_class.get_typeinfo_factory.register(reg.methodify(factory), name=self.name)
         type_registry.register_type(name=self.name, schema=self.schema)
 
+
+class StorageFactoryAction(dectate.Action):
+
+    app_class_arg = True
+
+    def __init__(self, name):
+        self.name = name
+
+    def identifier(self, app_class):
+        return self.name
+
+    def perform(self, obj, app_class):
+        def factory(name):
+            return obj
+
+        app_class._get_storage_factory.register(reg.methodify(factory), name=self.name)
+
+
+class BlobStorageFactoryAction(dectate.Action):
+
+    app_class_arg = True
+
+    def __init__(self, name):
+        self.name = name
+
+    def identifier(self, app_class):
+        return self.name
+
+    def perform(self, obj, app_class):
+        def factory(name):
+            return obj
+
+        app_class._get_blobstorage_factory.register(
+            reg.methodify(factory), name=self.name
+        )
+
