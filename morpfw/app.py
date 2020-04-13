@@ -54,8 +54,8 @@ class Request(BaseRequest):
         new_req.identity = self.identity
         return new_req
 
-    def async_dispatch(self, signal, obj=None):
-        return self.app.async_dispatcher(signal).dispatch(self, obj=obj)
+    def async_dispatch(self, signal, **kwargs):
+        return self.app.async_dispatcher(signal).dispatch(self, **kwargs)
 
 
 class DBSessionRequest(Request):

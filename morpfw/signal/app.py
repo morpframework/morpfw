@@ -135,7 +135,7 @@ def periodic_transaction_handler(name, func):
 
 
 def transaction_handler(func):
-    def transaction_wrapper(task, request, obj):
+    def transaction_wrapper(task, request, **kwargs):
         settings = json.loads(os.environ["MORP_SETTINGS"])
         mod, clsname = settings["application"]["class"].split(":")
         app_class = getattr(importlib.import_module(mod), clsname)
@@ -146,7 +146,7 @@ def transaction_handler(func):
         savepoint = transaction.savepoint()
         failed = False
         try:
-            res = func(req, obj)
+            res = func(req, **kwargs)
             req.app.dispatcher(event_signal.TASK_COMPLETED).dispatch(req, task.request)
         except Exception:
             savepoint.rollback()
