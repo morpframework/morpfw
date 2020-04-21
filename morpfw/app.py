@@ -57,6 +57,26 @@ class Request(BaseRequest):
     def async_dispatch(self, signal, **kwargs):
         return self.app.async_dispatcher(signal).dispatch(self, **kwargs)
 
+    @property
+    def host_url(self):
+        """
+        The URL through the host (no path)
+        """
+        e = self.environ
+        scheme = e.get('X-FORWARDED-PROTO', None)
+        host = e.get('X-FORWARDED-HOST', None)
+        port = e.get('X-FORWARDED-PORT', None)
+        if scheme and host:
+            return '{}://{}'.format(scheme, host)
+        if scheme and host and port:
+            if ((scheme == 'https' and port == '443') or 
+                    (scheme == 'http' and port == '80')):
+                return '{}://{}'.format(scheme, host)
+            return '{}://{}:{}'.format(scheme, host, port)
+        return super().host_url
+
+
+
 
 class DBSessionRequest(Request):
 
