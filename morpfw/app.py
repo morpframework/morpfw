@@ -62,11 +62,11 @@ class Request(BaseRequest):
         """
         The URL through the host (no path)
         """
-        e = self.environ
+        e = self.headers
         scheme = e.get('X-FORWARDED-PROTO', None)
         host = e.get('X-FORWARDED-HOST', None)
         port = e.get('X-FORWARDED-PORT', None)
-        if scheme and host:
+        if scheme and host and not port:
             return '{}://{}'.format(scheme, host)
         if scheme and host and port:
             if ((scheme == 'https' and port == '443') or 
