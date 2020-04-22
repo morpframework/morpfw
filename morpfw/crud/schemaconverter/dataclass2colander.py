@@ -8,6 +8,7 @@ from importlib import import_module
 from pkg_resources import resource_filename
 
 import colander
+import deform
 from deform.schema import default_widget_makers
 from deform.widget import HiddenWidget, TextAreaWidget, TextInputWidget
 
@@ -225,7 +226,16 @@ def dataclass_field_to_colander_schemanode(
             mode=mode,
         )
         return SchemaNode(**params)
-
+    if t["type"] == deform.FileData:
+        params = colander_params(
+            prop,
+            oid_prefix,
+            typ=deform.FileData(),
+            schema=schema,
+            request=request,
+            mode=mode,
+        )
+        return SchemaNode(**params)
     raise KeyError(prop)
 
 

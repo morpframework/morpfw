@@ -149,16 +149,6 @@ class Collection(ICollection):
         identifier = self.app.get_default_identifier(self.schema, data, self.request)
         if identifier and self.get(identifier):
             raise self.exist_exc(identifier)
-
-        obj = self._create(data)
-        obj.set_initial_state()
-        dispatch = self.request.app.dispatcher(signals.OBJECT_CREATED)
-        dispatch.dispatch(self.request, obj)
-        obj.after_created()
-        obj.save()
-        return obj
-
-    def _create(self, data):
         data = self.storage.set_schema_defaults(data)
         for fname, field in self.schema.__dataclass_fields__.items():
             default_factory = field.metadata.get("default_factory", None)
@@ -177,6 +167,15 @@ class Collection(ICollection):
             if self.search(rulez.and_(*unique_search)):
                 raise self.exist_exc(" ".join(msg))
 
+        obj = self._create(data)
+        obj.set_initial_state()
+        dispatch = self.request.app.dispatcher(signals.OBJECT_CREATED)
+        dispatch.dispatch(self.request, obj)
+        obj.after_created()
+        obj.save()
+        return obj
+
+    def _create(self, data):
         return self.storage.create(self, data)
 
     @requestmemoize()

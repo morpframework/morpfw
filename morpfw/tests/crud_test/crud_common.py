@@ -533,4 +533,5 @@ def run_jslcrud_test(c, skip_aggregate=False):
 
     assert r.headers.get("Content-Type") == "text/plain; charset=UTF-8"
 
-    shutil.rmtree(FSBLOB_DIR)
+    if os.path.exists(FSBLOB_DIR):
+        shutil.rmtree(FSBLOB_DIR)

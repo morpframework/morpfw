@@ -1,0 +1,6 @@
+application:
+  class: morpfw.tests.crud_test.test_sqlstorage_typeblobstorage:App
+
+configuration:
+  morpfw.authn.policy: morpfw.tests.crud_test.crud_common:AuthnPolicy
+  morpfw.storage.sqlstorage.dburi: 'postgresql://postgres@localhost:45678/morp_tests'
