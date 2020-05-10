@@ -14,12 +14,13 @@ from celery import Celery
 from more.basicauth import BasicAuthIdentityPolicy
 from zope.sqlalchemy import register as register_session
 
-from .app import BaseApp, Session, SQLApp
+from .app import BaseApp, SQLApp
 from .authn.pas.group.model import GroupModel, GroupSchema
 from .authn.pas.group.path import get_group_collection
 from .authn.pas.user.model import UserCollection, UserModel, UserSchema
 from .authn.pas.user.path import get_user_collection
 from .exc import ConfigurationError
+from .request import Session
 from .sql import Base
 
 default_settings = open(
@@ -46,6 +47,10 @@ def create_app(settings, scan=True, **kwargs):
 
     # initialize app
     config = settings["configuration"]
+    environment = settings.get("environment", {}) or {}
+    for k, v in environment.keys():
+        if k not in os.environ.keys():
+            os.environ[k] = v
 
     if scan:
         morepath.autoscan()
