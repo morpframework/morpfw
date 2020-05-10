@@ -25,6 +25,7 @@ from alembic.config import main as alembic_main
 
 from .alembic import drop_all
 from .main import create_admin, create_app, default_settings
+from .request import request_factory
 from .util import mock_request
 
 
@@ -234,39 +235,12 @@ def _start_shell(ctx, script, spawn_shell=True):
 
     param = load(ctx.obj["settings"])
     settings = param["settings"]
-
-    def fake_write(chunk):
-        pass
-
-    def start_response(*args):
-        return fake_write
-
-    server_url = settings.get("server", {}).get("server_url", "http://localhost")
-    parsed = urlparse(server_url)
-    environ = {
-        "PATH_INFO": "/",
-        "wsgi.url_scheme": parsed.scheme,
-        "SERVER_PROTOCOL": "HTTP/1.1",
-        "HTTP_HOST": parsed.netloc,
-        "REQUEST_METHOD": "GET",
-    }
-
-    app = param["factory"](param["settings"])
-
-    app(environ, start_response)
-    while not isinstance(app, morepath.App):
-        wrapped = getattr(app, "app", None)
-        if wrapped:
-            app = wrapped
-        else:
-            raise ValueError("Unable to locate app object from middleware")
-
-    request = app.request_class(app=app, environ=environ)
+    request = request_factory(settings)
     session = request.db_session
     localvars = {
         "session": session,
         "request": request,
-        "app": app,
+        "app": request.app,
         "settings": settings,
         "Identity": Identity,
     }

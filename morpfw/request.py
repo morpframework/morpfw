@@ -1,6 +1,9 @@
 
+import importlib
 import os
+from urllib.parse import urlparse
 
+import morepath
 import sqlalchemy.orm
 from morepath.request import Request as BaseRequest
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -116,3 +119,48 @@ class DBSessionRequest(Request):
         )
         col = typeinfo["collection_factory"](self)
         return col
+
+
+def request_factory(settings, extra_environ=None, scan=True):
+    extra_environ = extra_environ or {}
+
+    if "application" not in settings:
+        raise KeyError("'application' section is required in settings")
+    if "factory" not in settings["application"]:
+        raise KeyError("Missing application:factory entry in settings")
+    if "class" not in settings["application"]:
+        raise KeyError("Missing application:class entry in settings")
+
+    factory_path = settings["application"]["factory"]
+    mod, fname = factory_path.split(":")
+    factory = getattr(importlib.import_module(mod), fname)
+
+    app_path = settings["application"]["class"]
+    mod, clsname = app_path.split(":")
+    app_cls = getattr(importlib.import_module(mod), clsname)
+
+    server_url = settings.get("server", {}).get("server_url", "http://localhost")
+    parsed = urlparse(server_url)
+    environ = {
+        "PATH_INFO": "/",
+        "wsgi.url_scheme": parsed.scheme,
+        "SERVER_PROTOCOL": "HTTP/1.1",
+        "HTTP_HOST": parsed.netloc,
+        "REQUEST_METHOD": "GET",
+    }
+    environ.update(extra_environ)
+
+    if scan: 
+        app = factory(settings)
+        app(environ, lambda *args: (lambda chunk: None))
+    else:
+        app = app_cls()
+ 
+    while not isinstance(app, morepath.App):
+        wrapped = getattr(app, "app", None)
+        if wrapped:
+            app = wrapped
+        else:
+            raise ValueError("Unable to locate app object from middleware")
+
+    return app.request_class(app=app, environ=environ)

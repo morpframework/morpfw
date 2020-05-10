@@ -19,6 +19,7 @@ from celery.local import Proxy
 from celery.result import AsyncResult
 from celery.schedules import crontab
 
+from ..request import request_factory
 from . import directive
 from . import signal as event_signal
 
@@ -90,19 +91,7 @@ def periodic_transaction_handler(name, func):
     def transaction_wrapper(task):
         task.request.__job_name__ = name
         settings = json.loads(os.environ["MORP_SETTINGS"])
-        mod, clsname = settings["application"]["class"].split(":")
-        app_class = getattr(importlib.import_module(mod), clsname)
-        app_class.commit()
-        app = app_class()
-        server_url = settings.get("server", {}).get("server_url", "http://localhost")
-        parsed = urlparse(server_url)
-        environ = {
-            "PATH_INFO": "/",
-            "wsgi.url_scheme": parsed.scheme,
-            "SERVER_PROTOCOL": "HTTP/1.1",
-            "HTTP_HOST": parsed.netloc,
-        }
-        req = app.request_class(app=app, environ=environ)
+        req = request_factory(settings, scan=False)
         transaction.begin()
 
         req.app.dispatcher(event_signal.SCHEDULEDTASK_STARTING).dispatch(
@@ -137,10 +126,7 @@ def periodic_transaction_handler(name, func):
 def transaction_handler(func):
     def transaction_wrapper(task, request, **kwargs):
         settings = json.loads(os.environ["MORP_SETTINGS"])
-        mod, clsname = settings["application"]["class"].split(":")
-        app_class = getattr(importlib.import_module(mod), clsname)
-        app = app_class()
-        req = app.request_class(app=app, **request)
+        req = request_factory(settings, extra_environ=request, scan=False)
         transaction.begin()
         req.app.dispatcher(event_signal.TASK_STARTING).dispatch(req, task.request)
         savepoint = transaction.savepoint()
