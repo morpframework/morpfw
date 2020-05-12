@@ -1,4 +1,5 @@
 import dataclasses
+import json
 import typing
 from datetime import date, datetime, timedelta
 
@@ -7,10 +8,10 @@ import pytz
 
 from ...interfaces import ISchema
 from .common import dataclass_check_type, dataclass_get_type
-from .dataclass2colander import BindableMappingSchema, SchemaNode, colander_params
-from .dataclass2colander import (
-    dataclass_field_to_colander_schemanode as orig_dc2colander_node,
-)
+from .dataclass2colander import (BindableMappingSchema, SchemaNode,
+                                 colander_params)
+from .dataclass2colander import \
+    dataclass_field_to_colander_schemanode as orig_dc2colander_node
 from .dataclass2colander import dataclass_to_colander
 from .dataclass2colanderjson import Boolean, Float, Int, Str
 
@@ -31,7 +32,6 @@ class Date(colander.Date):
         return super().deserialize(node, cstruct)
 
 
-
 class DateTime(colander.DateTime):
     def serialize(self, node, appstruct):
         if appstruct:
@@ -45,6 +45,18 @@ class DateTime(colander.DateTime):
     def deserialize(self, node, cstruct):
         if cstruct:
             cstruct = datetime.fromtimestamp(int(cstruct) / 1000).isoformat()
+        return super().deserialize(node, cstruct)
+
+
+class JSON(Str):
+    def serialize(self, node, appstruct):
+        if appstruct:
+            appstruct = json.dumps(appstruct, indent=2)
+        return super().serialize(node, appstruct)
+
+    def deserialize(self, node, cstruct):
+        if cstruct and cstruct.strip():
+            cstruct = json.loads(cstruct)
         return super().deserialize(node, cstruct)
 
 
@@ -97,7 +109,7 @@ def dataclass_field_to_colander_schemanode(
         params = colander_params(
             prop,
             oid_prefix,
-            typ=colander.Mapping(unknown="preserve"),
+            typ=JSON,
             schema=schema,
             request=request,
             mode=mode,
