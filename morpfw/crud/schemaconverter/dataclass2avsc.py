@@ -30,11 +30,11 @@ def dataclass_field_to_avsc_field(prop, schema, request):
         return field
 
     if t["type"] == datetime.datetime:
-        field["type"] = ["null", {"type": "long", "logicalType": "timestamp-millis",}]
+        field["type"] = [{"type": "long", "logicalType": "timestamp-millis",}, "null"]
         return field
 
     if t["type"] == datetime.date:
-        field["type"] = ["null", {"type": "int", "logicalType": "date",}]
+        field["type"] = [{"type": "int", "logicalType": "date",}, "null"]
         return field
 
     if dataclass_check_type(prop, ISchema):
