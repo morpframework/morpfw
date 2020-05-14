@@ -47,10 +47,6 @@ def create_app(settings, scan=True, **kwargs):
 
     # initialize app
     config = settings["configuration"]
-    environment = settings.get("environment", {}) or {}
-    for k, v in environment.items():
-        if k not in os.environ.keys():
-            os.environ[k] = v
 
     if scan:
         morepath.autoscan()

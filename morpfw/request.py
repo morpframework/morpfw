@@ -120,6 +120,7 @@ class DBSessionRequest(Request):
         col = typeinfo["collection_factory"](self)
         return col
 
+COMMITTED_APPS=[]
 
 def request_factory(settings, extra_environ=None, scan=True):
     extra_environ = extra_environ or {}
@@ -150,9 +151,15 @@ def request_factory(settings, extra_environ=None, scan=True):
     }
     environ.update(extra_environ)
 
-    if scan: 
+    sys_environ = settings.get("environment", {}) or {}
+    for k, v in sys_environ.items():
+        if k not in os.environ.keys():
+            os.environ[k] = v
+
+    if scan and app_cls not in COMMITTED_APPS: 
         app = factory(settings)
         app(environ, lambda *args: (lambda chunk: None))
+        COMMITTED_APPS.append(app_cls)
     else:
         app = app_cls()
  
