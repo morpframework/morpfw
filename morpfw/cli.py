@@ -8,6 +8,7 @@ import json
 import os
 import readline
 import rlcompleter
+import runpy
 import socket
 import sys
 import threading
@@ -299,6 +300,12 @@ def main():
         sys.exit(alembic_main(argv, "morpfw migration"))
     else:
         cli()
+
+
+def run_module():
+    mod = sys.argv[1]
+    sys.argv = sys.argv[0:1] + sys.argv[2:]
+    runpy.run_module(mod, run_name="__main__", alter_sys=True)
 
 
 if __name__ == "__main__":
