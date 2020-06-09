@@ -187,8 +187,6 @@ class=logging.Formatter
         logconf,
         "-b",
         "%(listen_address)s:%(listen_port)s" % server,
-        "-k",
-        "eventlet",
         "--workers",
         str(server.get("workers", workers)),
         "--max-requests",
