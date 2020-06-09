@@ -15,7 +15,7 @@ def drop_empty(schema, data):
 
 
 def dataclass_get_type(field):
-    metadata = {"required": _marker, "exclude_if_empty": True, "validators": []}
+    metadata = {"required": _marker, "exclude_if_empty": False, "validators": []}
 
     metadata.update(field.metadata)
 
