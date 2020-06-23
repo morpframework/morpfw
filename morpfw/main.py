@@ -20,7 +20,7 @@ from .authn.pas.group.path import get_group_collection
 from .authn.pas.user.model import UserCollection, UserModel, UserSchema
 from .authn.pas.user.path import get_user_collection
 from .exc import ConfigurationError
-from .request import Session
+from .request import Request, request_factory
 from .sql import Base
 
 default_settings = open(
@@ -80,18 +80,7 @@ def create_app(settings, scan=True, **kwargs):
     return application
 
 
-def create_admin(
-    app: morepath.App, username: str, password: str, email: str, session=Session
-):
-    while not isinstance(app, morepath.App):
-        if getattr(app, "app", None) is None:
-            break
-        app = app.app
-
-    request = app.request_class(
-        app=app, environ={"PATH_INFO": "/", "morpfw.nomemoize": True}
-    )
-
+def create_admin(request: Request, username: str, password: str, email: str):
     transaction.manager.begin()
     usercol = get_user_collection(request)
     userobj = usercol.create(

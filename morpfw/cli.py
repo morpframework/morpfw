@@ -25,7 +25,7 @@ import yaml
 from alembic.config import main as alembic_main
 
 from .alembic import drop_all
-from .main import create_admin, create_app, default_settings
+from .main import create_admin, default_settings
 from .request import request_factory
 from .util import mock_request
 
@@ -172,14 +172,9 @@ def scheduler(ctx):
 @click.pass_context
 def register_admin(ctx, username, email, password):
     param = load(ctx.obj["settings"])
-    app = param["factory"](param["settings"])
-    while not isinstance(app, morepath.App):
-        wrapped = getattr(app, "app", None)
-        if wrapped:
-            app = wrapped
-        else:
-            raise ValueError("Unable to locate app object from middleware")
-    user = create_admin(app=app, username=username, password=password, email=email)
+    settings = param["settings"]
+    request = request_factory(settings, extra_environ={"morpfw.nomemoize": True})
+    user = create_admin(request, username=username, password=password, email=email)
     if user is None:
         print("Application is not using Pluggable Auth Service")
 
@@ -302,10 +297,27 @@ def main():
         cli()
 
 
-def run_module():
-    mod = sys.argv[1]
-    sys.argv = sys.argv[0:1] + sys.argv[2:]
+def run_module(argv=sys.argv):
+    mod = argv[1]
+    sys.argv = argv[0:1] + argv[2:]
     runpy.run_module(mod, run_name="__main__", alter_sys=True)
+
+
+def run_module_profile(argv=sys.argv):
+    mod = argv[1]
+    sys.argv = argv[0:1] + argv[2:]
+    prof = cProfile.Profile()
+    starttime = time.time()
+    prof.enable()
+    runpy.run_module(mod, run_name="__main__", alter_sys=True)
+    prof.disable()
+    endtime = time.time()
+    print(f"Time taken: {endtime - starttime:.3f} seconds")
+    outfile = mod + ".pstats"
+    if os.path.exists(outfile):
+        os.unlink(outfile)
+    prof.dump_stats(outfile)
+    print(f"Profiler result stored as {outfile}")
 
 
 if __name__ == "__main__":
