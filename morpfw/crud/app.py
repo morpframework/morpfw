@@ -13,8 +13,6 @@ from . import signals as signals
 from .blobstorage.base import NullBlobStorage
 from .model import Model
 
-Session = sessionmaker()
-
 MARKER = object()
 
 
