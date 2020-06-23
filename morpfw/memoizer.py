@@ -1,9 +1,12 @@
 import inspect
+import threading
 from datetime import datetime, timedelta
 
 import pytz
 
 from .interfaces import ICollection, IModel
+
+threadlocal = threading.local()
 
 
 class ModelMemoizer(object):
@@ -15,8 +18,19 @@ class ModelMemoizer(object):
 
         def MemoizeWrapper(self, *args):
             klass = self.__class__
+            nomemoize = self.request.environ.get("morpfw.nomemoize", False)
+            if nomemoize:
+                return method(self, *args)
+            nomemoize = self.request.headers.get("X-MORP-NOMEMOIZE", None)
+            if nomemoize is not None:
+                return method(self, *args)
             if getattr(klass, "__memoize__", None) is None:
-                klass.__memoize__ = {}
+
+                memoizer = getattr(threadlocal, "mfw_classmemoize", None)
+                if memoizer is None:
+                    memoizer = {}
+                    threadlocal.mfw_classmemoize = memoizer
+                klass.__memoize__ = memoizer
             cachemgr = klass.__memoize__
             if isinstance(self, IModel):
                 key = hash((self.__class__, method, self.uuid, args))
