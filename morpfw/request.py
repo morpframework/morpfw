@@ -1,10 +1,12 @@
-
 import importlib
 import os
+import threading
+import typing
 from urllib.parse import urlparse
 
 import morepath
 import sqlalchemy.orm
+import transaction
 from morepath.request import Request as BaseRequest
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.pool import NullPool, QueuePool
@@ -13,8 +15,7 @@ from zope.sqlalchemy import register as register_session
 
 from .exc import ConfigurationError
 
-Session = sessionmaker()
-register_session(Session)
+threadlocal = threading.local()
 
 
 class Request(BaseRequest):
@@ -40,25 +41,49 @@ class Request(BaseRequest):
         The URL through the host (no path)
         """
         e = self.headers
-        scheme = e.get('X-FORWARDED-PROTO', None)
-        host = e.get('X-FORWARDED-HOST', None)
-        port = e.get('X-FORWARDED-PORT', None)
+        scheme = e.get("X-FORWARDED-PROTO", None)
+        host = e.get("X-FORWARDED-HOST", None)
+        port = e.get("X-FORWARDED-PORT", None)
         if scheme and host and not port:
-            return '{}://{}'.format(scheme, host)
+            return "{}://{}".format(scheme, host)
         if scheme and host and port:
-            if ((scheme == 'https' and port == '443') or 
-                    (scheme == 'http' and port == '80')):
-                return '{}://{}'.format(scheme, host)
-            return '{}://{}:{}'.format(scheme, host, port)
+            if (scheme == "https" and port == "443") or (
+                scheme == "http" and port == "80"
+            ):
+                return "{}://{}".format(scheme, host)
+            return "{}://{}:{}".format(scheme, host, port)
         return super().host_url
 
+    def __enter__(self):
+        transaction.begin()
+        self.savepoint = transaction.savepoint()
+        return self
 
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        if exc_type is not None:
+            self.savepoint.rollback()
+        transaction.commit()
+        self.dispose_db_engines()
 
 
 class DBSessionRequest(Request):
+    @property
+    def _db_session(self):
+        sessions = getattr(threadlocal, "mfw_db_sessions", None)
+        if sessions is None:
+            sessions = {}
+            threadlocal.mfw_db_sessions = sessions
 
-    _db_session: dict = {}
-    _db_engines: dict = {}
+        return threadlocal.mfw_db_sessions
+
+    @property
+    def _db_engines(self):
+        engines = getattr(threadlocal, "mfw_db_engines", None)
+        if engines is None:
+            engines = {}
+            threadlocal.mfw_db_engines = engines
+
+        return threadlocal.mfw_db_engines
 
     @property
     def db_session(self) -> sqlalchemy.orm.Session:
@@ -101,17 +126,40 @@ class DBSessionRequest(Request):
 
         if self._db_session.get(name, None) is None:
             engine = self.get_db_engine(name)
-            self._db_session[name] = Session(bind=engine)
+            Session = sessionmaker(bind=engine)
+            register_session(Session)
+            self._db_session[name] = scoped_session(Session)
         return self._db_session[name]
 
     def clear_db_session(self, name=None):
         if name:
             if name in self._db_session.keys():
-                self._db_session[name] = None
+                self._db_session[name].close()
+                del self._db_session[name]
         else:
-            for k in self._db_session.keys():
+            for k in list(self._db_session.keys()):
+                self._db_session[k].expunge_all()
+                self._db_session[k].close()
                 self._db_session[k] = None
-        self.environ["morpfw.memoize"] = {} # noqa
+                del self._db_session[k]
+        self.environ["morpfw.memoize"] = {}  # noqa
+
+    def dispose_db_engines(self, name=None):
+        if name:
+            if name in self._db_engines.keys():
+                self._db_session[name].expunge_all()
+                self._db_session[name].close()
+                self._db_engines[name].dispose()
+                del self._db_session[name]
+                del self._db_engines[name]
+        else:
+            for k in self._db_engines.keys():
+                self._db_session[k].expunge_all()
+                self._db_session[k].close()
+                self._db_engines[k].dispose()
+                del self._db_session[k]
+                del self._db_engines[k]
+        self.environ["morpfw.memoize"] = {}  # noqa
 
     def get_collection(self, type_name):
         typeinfo = self.app.config.type_registry.get_typeinfo(
@@ -120,9 +168,17 @@ class DBSessionRequest(Request):
         col = typeinfo["collection_factory"](self)
         return col
 
-COMMITTED_APPS=[]
 
-def request_factory(settings, extra_environ=None, scan=True):
+COMMITTED_APPS = []
+
+
+def request_factory(
+    settings: dict,
+    extra_environ: typing.Optional[dict] = None,
+    scan: bool = True,
+    app_factory_opts: typing.Optional[dict] = None,
+):
+    app_factory_opts = app_factory_opts or {}
     extra_environ = extra_environ or {}
 
     if "application" not in settings:
@@ -156,13 +212,13 @@ def request_factory(settings, extra_environ=None, scan=True):
         if k not in os.environ.keys():
             os.environ[k] = v
 
-    if scan and app_cls not in COMMITTED_APPS: 
-        app = factory(settings)
+    if scan and app_cls not in COMMITTED_APPS:
+        app = factory(settings, **app_factory_opts)
         app(environ, lambda *args: (lambda chunk: None))
         COMMITTED_APPS.append(app_cls)
     else:
         app = app_cls()
- 
+
     while not isinstance(app, morepath.App):
         wrapped = getattr(app, "app", None)
         if wrapped:
