@@ -95,7 +95,8 @@ setup(name='morpfw',
           'morepath': ['scan=morpfw'],
           'console_scripts': [
               'morpfw=morpfw.cli:main',
-              'mfw-runmodule=morpfw.cli:run_module'
+              'mfw-runmodule=morpfw.cli:run_module',
+              'mfw-profilemodule=morpfw.cli:run_module_profile'
           ]
       }
       )
