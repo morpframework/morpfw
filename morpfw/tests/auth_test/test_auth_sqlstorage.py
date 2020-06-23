@@ -13,7 +13,7 @@ from morpfw.authn.pas.policy import SQLStorageAuthnPolicy
 from morpfw.authz.pas import DefaultAuthzPolicy
 from morpfw.sql import Base
 
-from ..common import create_admin, get_client, make_request
+from ..common import create_admin, get_client
 from .test_auth import _test_authentication
 
 
@@ -32,7 +32,7 @@ def test_authentication_sqlstorage(pgsql_db):
     config = os.path.join(os.path.dirname(__file__), "settings-sqlalchemy.yml")
 
     c = get_client(config)
-    req = make_request(c.app)
+    req = c.mfw_request
     Base.metadata.create_all(bind=req.db_session.bind)
-    create_admin(c, "admin", "password", "admin@localhost.localdomain")
+    create_admin(c.mfw_request, "admin", "password", "admin@localhost.localdomain")
     _test_authentication(c)

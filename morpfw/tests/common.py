@@ -13,6 +13,7 @@ from morpfw import cli
 from morpfw.authn.pas.exc import UserExistsError
 from morpfw.main import create_admin as morpfw_create_admin
 from morpfw.main import create_app
+from morpfw.request import request_factory
 from webtest import TestApp as Client
 
 
@@ -32,14 +33,15 @@ def make_request(appobj):
 
 def get_client(config="settings.yml", **kwargs):
     param = cli.load(config)
-    appobj = param["factory"](param["settings"], **kwargs)
-    c = Client(appobj)
+    request = request_factory(param["settings"], app_factory_opts=kwargs)
+    c = Client(request.app)
+    c.mfw_request = request
     return c
 
 
 def create_admin(client: Client, user: str, password: str, email: str):
     appobj = client.app
-    morpfw_create_admin(appobj, user, password, email)
+    morpfw_create_admin(client, user, password, email)
     transaction.commit()
 
 
