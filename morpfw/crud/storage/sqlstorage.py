@@ -168,7 +168,13 @@ class SQLStorage(BaseStorage):
         if limit is not None:
             q = q.limit(limit)
 
-        return [self.model(self.request, collection, o) for o in q.all()]
+        yield_per = self.request.environ.get("morpfw.sqlstorage.yield_per", None)
+        if yield_per is None:
+            return [self.model(self.request, collection, o) for o in q.all()]
+        else:
+            return [
+                self.model(self.request, collection, o) for o in q.yield_per(yield_per)
+            ]
 
     def get(self, collection, identifier):
         qs = []
@@ -227,7 +233,7 @@ class SQLStorage(BaseStorage):
         return self.model(self.request, collection, r)
 
     def delete(self, identifier, model, **kwargs):
-        permanent = kwargs.get('permanent', False)
+        permanent = kwargs.get("permanent", False)
         if permanent:
             model.delete()
         else:
@@ -278,13 +284,15 @@ class BaseMixin(MappedTable):
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
     uuid = sa.Column(GUID, default=uuid.uuid4, index=True, unique=True)
     created = sa.Column(
-        sa.DateTime(timezone=True), default=lambda: datetime.now(tz=pytz.UTC),
-        index=True
+        sa.DateTime(timezone=True),
+        default=lambda: datetime.now(tz=pytz.UTC),
+        index=True,
     )
     creator = sa.Column(sa.String(length=1024))
     modified = sa.Column(
-        sa.DateTime(timezone=True), default=lambda: datetime.now(tz=pytz.UTC),
-        index=True
+        sa.DateTime(timezone=True),
+        default=lambda: datetime.now(tz=pytz.UTC),
+        index=True,
     )
     state = sa.Column(sa.String(length=1024), index=True)
     deleted = sa.Column(sa.DateTime(timezone=True), index=True)
