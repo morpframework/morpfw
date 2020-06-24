@@ -106,9 +106,24 @@ class Collection(ICollection):
             0
         ]["count"]
 
+    @requestmemoize()
+    def max_id(self):
+        return self.aggregate(group={"max_id": {"function": "max", "field": "id"}})[
+            0
+        ]["max_id"]
+
+    @requestmemoize()
+    def min_id(self):
+        return self.aggregate(group={"min_id": {"function": "min", "field": "id"}})[
+            0
+        ]["min_id"]
+
     def _search(self, query=None, offset=0, limit=None, order_by=None, secure=False):
         if query:
             validate_condition(query, ALLOWED_SEARCH_OPERATORS)
+
+        if order_by is None:
+            order_by = ("created", "desc")
 
         objs = self.storage.search(
             self, query, offset=offset, limit=limit, order_by=order_by
