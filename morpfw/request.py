@@ -134,6 +134,7 @@ class DBSessionRequest(Request):
     def clear_db_session(self, name=None):
         if name:
             if name in self._db_session.keys():
+                self._db_session[name].expunge_all()
                 self._db_session[name].close()
                 del self._db_session[name]
         else:
@@ -142,6 +143,15 @@ class DBSessionRequest(Request):
                 self._db_session[k].close()
                 self._db_session[k] = None
                 del self._db_session[k]
+        self.environ["morpfw.memoize"] = {}  # noqa
+
+    def expunge_all(self, name=None):
+        if name:
+            if name in self._db_session.keys():
+                self._db_session[name].expunge_all()
+        else:
+            for k in list(self._db_session.keys()):
+                self._db_session[k].expunge_all()
         self.environ["morpfw.memoize"] = {}  # noqa
 
     def dispose_db_engines(self, name=None):
@@ -153,7 +163,7 @@ class DBSessionRequest(Request):
                 del self._db_session[name]
                 del self._db_engines[name]
         else:
-            for k in self._db_engines.keys():
+            for k in list(self._db_engines.keys()):
                 self._db_session[k].expunge_all()
                 self._db_session[k].close()
                 self._db_engines[k].dispose()
