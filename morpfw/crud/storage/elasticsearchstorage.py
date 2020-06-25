@@ -6,6 +6,7 @@ import elasticsearch.exceptions as es_exc
 from rulez import compile_condition
 
 from ..app import App
+from ..schemaconverter.dataclass2colanderESjson import dataclass_to_colanderESjson
 from ..schemaconverter.dataclass2colanderjson import dataclass_to_colanderjson
 from .base import BaseStorage
 
@@ -158,18 +159,18 @@ class ElasticSearchStorage(BaseStorage):
                 raise e
 
     def create(self, collection, data):
-        cschema = dataclass_to_colanderjson(
+        m = self.model(self.request, collection, data)
+        cschema = dataclass_to_colanderESjson(
             collection.schema, request=collection.request
         )
-        data = cschema().serialize(data)
-        m = self.model(self.request, collection, data)
+        esdata = cschema().serialize(data)
         self.create_index()
         try:
             r = self.client.index(
                 index=self.index_name,
                 doc_type=self.doc_type,
                 id=m.identifier,
-                body=data,
+                body=esdata,
                 refresh=self.refresh,
             )
         except es_exc.TransportError as e:
@@ -205,12 +206,18 @@ class ElasticSearchStorage(BaseStorage):
             index=self.index_name, doc_type=self.doc_type, body=q, **params
         )
 
-        data = [
-            self.model(self.request, collection, o["_source"])
-            for o in res["hits"]["hits"]
-        ]
+        models = []
+        for o in res["hits"]["hits"]:
+            data = o["_source"]
+            cschema = dataclass_to_colanderESjson(
+                collection.schema,
+                include_fields=data.keys(),
+                request=collection.request,
+            )
+            data = cschema().deserialize(data)
+            models.append(self.model(self.request, collection, data))
 
-        return list(data)
+        return list(models)
 
     def aggregate(self, query=None, group=None, order_by=None):
         if query:
@@ -313,22 +320,34 @@ class ElasticSearchStorage(BaseStorage):
             )
         except es_exc.NotFoundError as e:
             return None
-        return self.model(self.request, collection, res["_source"])
+
+        data = res["_source"]
+        cschema = dataclass_to_colanderESjson(
+            collection.schema, include_fields=data.keys(), request=collection.request,
+        )
+        data = cschema().deserialize(data)
+        return self.model(self.request, collection, data)
 
     def get_by_uuid(self, collection, uuid):
         res = self.search(
             collection, {"field": "uuid", "operator": "==", "value": uuid}
         )
         if res:
-            return self.model(self.request, collection, res[0].json()["data"])
+            data = res[0].as_dict()
+            return self.model(self.request, collection, data)
         return None
 
     def get_by_id(self, collection, id):
         res = self.client.get(index=self.index_name, doc_type=self.doc_type, id=id)
-        return self.model(self.request, collection, res["_source"])
+        data = res["_source"]
+        cschema = dataclass_to_colanderESjson(
+            collection.schema, include_fields=data.keys(), request=collection.request,
+        )
+        data = cschema().deserialize(data)
+        return self.model(self.request, collection, data)
 
     def update(self, collection, identifier, data):
-        cschema = dataclass_to_colanderjson(
+        cschema = dataclass_to_colanderESjson(
             collection.schema, include_fields=data.keys(), request=collection.request
         )
         data = cschema().serialize(data)

@@ -10,6 +10,7 @@ from uuid import uuid4
 import jsl
 import morepath
 import morpfw.crud.signals as signals
+import pytz
 import yaml
 from more.basicauth import BasicAuthIdentityPolicy
 from morpfw.app import BaseApp
@@ -25,6 +26,8 @@ from morpfw.main import create_app
 from webtest import TestApp as Client
 
 FSBLOB_DIR = tempfile.mkdtemp()
+
+epoch = date(1970, 1, 1)
 
 
 class App(BaseApp):
@@ -198,19 +201,23 @@ def run_jslcrud_test(c, skip_aggregate=False):
     assert r.json["schema"]["type"] == "object"
 
     # lets try creating an entry
+    publish_date = (date(2019, 1, 1) - epoch).days
+    publish_datetime = int(
+        datetime(2019, 1, 1, 1, 1, tzinfo=pytz.UTC).timestamp() * 1000
+    )
     r = c.post_json(
         "/pages/",
         {
             "title": "Hello",
             "body": "World",
-            "publish_date": "2019-01-01",
-            "publish_datetime": "2019-01-01T01:01+00:00",
+            "publish_date": publish_date,
+            "publish_datetime": publish_datetime,
         },
     )
 
     assert r.json["data"]["title"] == "Hello"
-    assert r.json["data"]["publish_date"] == "2019-01-01"
-    assert r.json["data"]["publish_datetime"] == "2019-01-01T01:01:00+00:00"
+    assert r.json["data"]["publish_date"] == publish_date
+    assert r.json["data"]["publish_datetime"] == publish_datetime
 
     uuid = r.json["data"]["uuid"]
     assert uuid
@@ -403,20 +410,21 @@ def run_jslcrud_test(c, skip_aggregate=False):
 
     assert r.status_code == 422
 
+    message_date = (date(2019, 1, 1) - epoch).days
     r = c.patch_json(
-        obj_xattr_link, {"message": "hello world", "message_date": "2019-01-01"}
+        obj_xattr_link, {"message": "hello world", "message_date": message_date},
     )
 
     assert r.status_code == 200
 
     r = c.get(obj_xattr_link)
 
-    assert r.json == {"message": "hello world", "message_date": "2019-01-01"}
+    assert r.json == {"message": "hello world", "message_date": message_date}
 
     r = c.get(obj_link)
     assert r.json["data"]["xattrs"] == {
         "message": "hello world",
-        "message_date": "2019-01-01",
+        "message_date": message_date,
     }
 
     r = c.patch_json(obj_xattr_link, {"message": "hello world", "anotherkey": "boo"},)

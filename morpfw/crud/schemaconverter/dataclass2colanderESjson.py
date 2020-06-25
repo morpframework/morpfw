@@ -13,19 +13,29 @@ from .dataclass2colander import (
     dataclass_field_to_colander_schemanode as orig_dc2colander_node,
 )
 from .dataclass2colander import dataclass_to_colander
-from .dataclass2colanderjson import Boolean, Date, DateTime, Float, Int, Str
+from .dataclass2colanderjson import Boolean, Float, Int, Str
 
 
-class JSON(Str):
+class Date(colander.Date):
     def serialize(self, node, appstruct):
-        if appstruct:
-            appstruct = json.dumps(appstruct, indent=2)
-        return super().serialize(node, appstruct)
+        result = super(Date, self).serialize(node, appstruct)
+        if result is colander.null:
+            return None
+        return result
 
     def deserialize(self, node, cstruct):
-        if cstruct and cstruct.strip():
-            cstruct = json.loads(cstruct)
+        print(cstruct)
         return super().deserialize(node, cstruct)
+
+
+class DateTime(colander.DateTime):
+    def serialize(self, node, appstruct):
+        if appstruct:
+            appstruct = appstruct.astimezone(pytz.UTC)
+        result = super(DateTime, self).serialize(node, appstruct)
+        if result is colander.null:
+            return None
+        return result
 
 
 def dataclass_field_to_colander_schemanode(
@@ -65,7 +75,7 @@ def dataclass_field_to_colander_schemanode(
         return SchemaNode(**params)
 
     if dataclass_check_type(prop, ISchema):
-        subtype = dataclass_to_colanderavro(
+        subtype = dataclass_to_colanderESjson(
             prop,
             colander_schema_type=colander.MappingSchema,
             request=request,
@@ -75,14 +85,19 @@ def dataclass_field_to_colander_schemanode(
 
     if t["type"] == dict:
         params = colander_params(
-            prop, oid_prefix, typ=JSON, schema=schema, request=request, mode=mode,
+            prop,
+            oid_prefix,
+            typ=colander.Mapping(unknown="preserve"),
+            schema=schema,
+            request=request,
+            mode=mode,
         )
         return SchemaNode(**params)
 
     return orig_dc2colander_node(prop, oid_prefix, request)
 
 
-def dataclass_to_colanderavro(
+def dataclass_to_colanderESjson(
     schema,
     include_fields: typing.List[str] = None,
     exclude_fields: typing.List[str] = None,

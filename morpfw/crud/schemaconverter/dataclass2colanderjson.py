@@ -1,6 +1,6 @@
 import dataclasses
 import typing
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 import colander
 import pytz
@@ -12,6 +12,8 @@ from .dataclass2colander import (
     dataclass_field_to_colander_schemanode as orig_dc2colander_node,
 )
 from .dataclass2colander import dataclass_to_colander
+
+epoch_date = date(1970, 1, 1)
 
 
 class Boolean(colander.Boolean):
@@ -86,7 +88,18 @@ class Date(colander.Date):
         result = super(Date, self).serialize(node, appstruct)
         if result is colander.null:
             return None
-        return result
+
+        return (appstruct - epoch_date).days
+
+    def deserialize(self, node, cstruct):
+        if cstruct and not isinstance(cstruct, int):
+            raise colander.Invalid(
+                node, "Date is expected to be number of days after 1970-01-01"
+            )
+
+        if cstruct:
+            cstruct = (epoch_date + timedelta(days=cstruct)).strftime(r"%Y-%m-%d")
+        return super().deserialize(node, cstruct)
 
 
 class DateTime(colander.DateTime):
@@ -96,7 +109,19 @@ class DateTime(colander.DateTime):
         result = super(DateTime, self).serialize(node, appstruct)
         if result is colander.null:
             return None
-        return result
+
+        return int(appstruct.timestamp() * 1000)
+
+    def deserialize(self, node, cstruct):
+        if cstruct and not isinstance(cstruct, int):
+            raise colander.Invalid(
+                node, "DateTime is expected to in Unix timestamp in miliseconds in UTC"
+            )
+        if cstruct:
+            cstruct = datetime.fromtimestamp(
+                int(cstruct) / 1000, tz=pytz.UTC
+            ).isoformat()
+        return super().deserialize(node, cstruct)
 
 
 def dataclass_field_to_colander_schemanode(
