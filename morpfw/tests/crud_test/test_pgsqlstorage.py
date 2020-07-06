@@ -2,11 +2,11 @@ import os
 
 import jsl
 import morpfw.crud.signals as signals
+from inverter import dc2pgsqla
 from more.basicauth import BasicAuthIdentityPolicy
 from more.transaction import TransactionApp
 from morpfw.app import SQLApp
 from morpfw.crud.blobstorage.fsblobstorage import FSBlobStorage
-from morpfw.crud.schemaconverter.dataclass2pgsqla import dataclass_to_pgsqla
 from morpfw.crud.storage.pgsqlstorage import PgSQLStorage, db_meta
 
 from ..common import get_client, make_request
@@ -126,7 +126,7 @@ def test_pgsqlstorage(pgsql_db):
 
     db_meta.bind = request.db_session.get_bind()
     for model in [PageModel, ObjectModel, NamedObjectModel, BlobObjectModel]:
-        dataclass_to_pgsqla(model.schema, db_meta)
+        dc2pgsqla.convert(model.schema, db_meta)
     db_meta.create_all()
 
     run_jslcrud_test(c)

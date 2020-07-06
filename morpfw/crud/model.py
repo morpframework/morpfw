@@ -28,8 +28,8 @@ from .errors import (
     ValidationError,
 )
 from .log import logger
-from .schemaconverter.dataclass2colanderjson import dataclass_to_colanderjson
-from .schemaconverter.dataclass2jsl import dataclass_to_jsl
+from inverter import dc2colanderjson
+from inverter import dc2jsl
 
 ALLOWED_SEARCH_OPERATORS = [
     "and",
@@ -205,7 +205,7 @@ class Collection(ICollection):
 
     def json(self):
         return {
-            "schema": dataclass_to_jsl(self.schema).get_schema(ordered=True),
+            "schema": dc2jsl.convert(self.schema).get_schema(ordered=True),
             "links": self.links(),
         }
 
@@ -339,7 +339,7 @@ class Model(IModel):
                     raise self.collection.exist_exc(" ".join(msg))
 
         if deserialize:
-            cschema = dataclass_to_colanderjson(self.schema, request=self.request)
+            cschema = dc2colanderjson.convert(self.schema, request=self.request)
             cs = cschema()
             cs.bind(context=self, request=self.request)
             data = cs.deserialize(data)
@@ -369,7 +369,7 @@ class Model(IModel):
             from .schema import Schema
 
             exclude_fields += list(Schema.__dataclass_fields__.keys())
-        cschema = dataclass_to_colanderjson(
+        cschema = dc2colanderjson.convert(
             self.schema, exclude_fields=exclude_fields, request=self.request
         )
         cs = cschema()

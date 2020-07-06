@@ -2,11 +2,11 @@ import datetime
 from dataclasses import _MISSING_TYPE
 
 from dateutil.parser import parse as parse_date
+from inverter import dc2colanderjson
+from inverter.common import dataclass_check_type, dataclass_get_type
 
 from ...interfaces import IDataProvider, ISchema
 from ..app import App
-from ..schemaconverter.common import dataclass_check_type, dataclass_get_type
-from ..schemaconverter.dataclass2colanderjson import dataclass_to_colanderjson
 from ..storage.memorystorage import MemoryStorage
 from ..types import datestr
 
@@ -91,7 +91,7 @@ class DictProvider(IDataProvider):
         return result
 
     def as_json(self):
-        cschema = dataclass_to_colanderjson(self.schema, request=self.storage.request)
+        cschema = dc2colanderjson.convert(self.schema, request=self.storage.request)
         return cschema().serialize(self.as_dict())
 
 

@@ -3,11 +3,10 @@ from pprint import pprint
 from typing import Optional
 
 import elasticsearch.exceptions as es_exc
+from inverter import dc2colanderESjson
 from rulez import compile_condition
 
 from ..app import App
-from ..schemaconverter.dataclass2colanderESjson import dataclass_to_colanderESjson
-from ..schemaconverter.dataclass2colanderjson import dataclass_to_colanderjson
 from .base import BaseStorage
 
 
@@ -160,7 +159,7 @@ class ElasticSearchStorage(BaseStorage):
 
     def create(self, collection, data):
         m = self.model(self.request, collection, data)
-        cschema = dataclass_to_colanderESjson(
+        cschema = dc2colanderESjson.convert(
             collection.schema, request=collection.request
         )
         esdata = cschema().serialize(data)
@@ -209,7 +208,7 @@ class ElasticSearchStorage(BaseStorage):
         models = []
         for o in res["hits"]["hits"]:
             data = o["_source"]
-            cschema = dataclass_to_colanderESjson(
+            cschema = dc2colanderESjson.convert(
                 collection.schema,
                 include_fields=data.keys(),
                 request=collection.request,
@@ -322,7 +321,7 @@ class ElasticSearchStorage(BaseStorage):
             return None
 
         data = res["_source"]
-        cschema = dataclass_to_colanderESjson(
+        cschema = dc2colanderESjson.convert(
             collection.schema, include_fields=data.keys(), request=collection.request,
         )
         data = cschema().deserialize(data)
@@ -340,14 +339,14 @@ class ElasticSearchStorage(BaseStorage):
     def get_by_id(self, collection, id):
         res = self.client.get(index=self.index_name, doc_type=self.doc_type, id=id)
         data = res["_source"]
-        cschema = dataclass_to_colanderESjson(
+        cschema = dc2colanderESjson.convert(
             collection.schema, include_fields=data.keys(), request=collection.request,
         )
         data = cschema().deserialize(data)
         return self.model(self.request, collection, data)
 
     def update(self, collection, identifier, data):
-        cschema = dataclass_to_colanderESjson(
+        cschema = dc2colanderESjson.convert(
             collection.schema, include_fields=data.keys(), request=collection.request
         )
         data = cschema().serialize(data)

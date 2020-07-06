@@ -1,7 +1,6 @@
-from morpfw.crud.schemaconverter.jsonobject2jsl import jsonobject_to_jsl
-from morpfw.crud.schemaconverter.jsl2jsonobject import jsl_to_jsonobject
-import jsonobject
 import jsl
+import jsonobject
+from inverter import jsl2jsonobject, jsonobject2jsl
 
 
 class SubSchema(jsonobject.JsonObject):
@@ -21,7 +20,7 @@ class SampleSchema(jsonobject.JsonObject):
 
 
 def test_jsonobject_convert():
-    schema = jsonobject_to_jsl(SampleSchema)
+    schema = jsonobject2jsl.convert(SampleSchema)
     field = getattr(schema, "stringfield")
     assert isinstance(field, jsl.StringField)
     assert field.name == "stringfield"
@@ -55,4 +54,4 @@ def test_jsonobject_convert():
 
     assert schema.get_schema()
 
-    schema = jsl_to_jsonobject(schema)
+    schema = jsl2jsonobject.convert(schema)

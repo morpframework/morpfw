@@ -1,9 +1,9 @@
 import typing
 
+from inverter import dc2jsl
 from jsonschema import ValidationError, validate
 
 from ...interfaces import IXattrProvider
-from ..schemaconverter.dataclass2jsl import dataclass_to_jsl
 
 _marker = object()
 
@@ -19,7 +19,7 @@ class XattrProvider(IXattrProvider):
         self.app = context.request.app
 
     def jsonschema(self):
-        schema = dataclass_to_jsl(
+        schema = dc2jsl.convert(
             self.schema, nullable=True, additional_properties=self.additional_properties
         ).get_schema(ordered=True)
         return {"schema": schema}

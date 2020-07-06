@@ -4,14 +4,15 @@ import uuid
 from dataclasses import _MISSING_TYPE
 
 import pytz
+
 import sqlalchemy as sa
 import sqlalchemy_jsonfield as sajson
 from dateutil.parser import parse as _parse_date
+from inverter import dc2colanderjson
+from inverter.common import dataclass_get_type
 
-from ...crud.schemaconverter.dataclass2colanderjson import dataclass_to_colanderjson
 from ...interfaces import IDataProvider, ISchema
 from ..app import App
-from ..schemaconverter.common import dataclass_get_type
 from ..storage.sqlstorage import GUID, Base, MappedTable, SQLStorage
 from ..types import datestr
 from .dictprovider import DictProvider
@@ -137,7 +138,7 @@ class SQLAlchemyModelProvider(IDataProvider):
             if v is None and t["metadata"]["exclude_if_empty"]:
                 continue
             result[n] = v
-        cschema = dataclass_to_colanderjson(self.schema, request=self.storage.request)
+        cschema = dc2colanderjson.convert(self.schema, request=self.storage.request)
         result = cschema().serialize(result)
         return result
 

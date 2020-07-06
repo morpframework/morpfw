@@ -7,9 +7,6 @@ from jsonschema import Draft4Validator
 from morepath.publish import resolve_model
 
 from .errors import FieldValidationError, FormValidationError, ValidationError
-from .schemaconverter.common import dataclass_get_type
-from .schemaconverter.dataclass2jsl import dataclass_to_jsl
-from .schemaconverter.jsl2jsonobject import jsl_to_jsonobject
 
 
 @reg.dispatch(reg.match_instance("model"), reg.match_instance("request"))

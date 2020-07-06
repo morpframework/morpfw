@@ -1,7 +1,7 @@
 import morepath
+from inverter import dc2jsl
 from more.jwtauth import ExpiredSignatureError, InvalidTokenError
 from morpfw.crud.errors import AlreadyExistsError
-from morpfw.crud.schemaconverter.dataclass2jsl import dataclass_to_jsl
 from morpfw.crud.validator import validate_schema
 from webob.exc import HTTPNotFound
 
@@ -52,7 +52,7 @@ def register(context, request):
 @App.json(model=UserCollection, name="login")
 def login(context, request):
     return {
-        "schema": dataclass_to_jsl(LoginSchema).get_schema(),
+        "schema": dc2jsl.convert(LoginSchema).get_schema(),
         "links": [rellink(context, request, "login", "POST")],
     }
 

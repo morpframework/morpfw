@@ -10,10 +10,8 @@ import pytz
 from ..interfaces import ISchema
 from .app import App
 from .errors import FieldValidationError, FormValidationError, ValidationError
-from .schemaconverter.common import dataclass_get_type
-from .schemaconverter.dataclass2colander import dataclass_to_colander
-from .schemaconverter.dataclass2colanderjson import dataclass_to_colanderjson
-
+from inverter import dc2colander
+from inverter import dc2colanderjson
 
 @dataclass
 class BaseSchema(ISchema):
@@ -25,17 +23,17 @@ class BaseSchema(ISchema):
 
         if not update_mode:
             if json:
-                cschema = dataclass_to_colanderjson(cls, request=request)
+                cschema = dc2colanderjson.convert(cls, request=request)
             else:
-                cschema = dataclass_to_colander(cls, request=request)
+                cschema = dc2colander.convert(cls, request=request)
 
         else:
             if json:
-                cschema = dataclass_to_colanderjson(
+                cschema = dc2colanderjson.convert(
                     cls, request=request, include_fields=data.keys(), mode="update"
                 )
             else:
-                cschema = dataclass_to_colander(
+                cschema = dc2colander.convert(
                     cls, request=request, include_fields=data.keys(), mode="update"
                 )
         cs = cschema()

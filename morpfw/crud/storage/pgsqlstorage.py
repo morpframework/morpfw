@@ -6,6 +6,7 @@ import jsl
 import sqlalchemy as sa
 import sqlalchemy.orm as saorm
 import sqlalchemy_jsonfield as sajson
+from inverter import dc2pgsqla
 from rulez import compile_condition
 from sqlalchemy import Column, MetaData, Table, func
 from sqlalchemy import types as satypes
@@ -14,7 +15,6 @@ from sqlalchemy.exc import StatementError
 from sqlalchemy.types import CHAR, TypeDecorator
 
 from ..app import App
-from ..schemaconverter.dataclass2pgsqla import dataclass_to_pgsqla
 from .base import BaseStorage
 from .sqlstorage import MappedTable, SQLStorage
 
@@ -38,7 +38,7 @@ class PgSQLStorage(SQLStorage):
         if existing:
             return existing
 
-        table = dataclass_to_pgsqla(self.model.schema, self.metadata)
+        table = dc2pgsqla.convert(self.model.schema, self.metadata)
 
         class Table(MappedTable):
 
