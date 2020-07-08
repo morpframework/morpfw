@@ -7,10 +7,11 @@ from dataclasses import dataclass, field
 from datetime import date, datetime
 from uuid import uuid4
 
+import pytz
+
 import jsl
 import morepath
 import morpfw.crud.signals as signals
-import pytz
 import yaml
 from more.basicauth import BasicAuthIdentityPolicy
 from morpfw.app import BaseApp
@@ -44,7 +45,7 @@ def allow_all_collection_access(identity, context, permission):
     return True
 
 
-def validate_body(request, schema, data, mode=None):
+def validate_body(request, schema, data, mode=None, **kw):
     if not isinstance(data["body"], str):
         return
 

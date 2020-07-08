@@ -2,7 +2,7 @@ import copy
 import json
 import re
 from uuid import uuid4
-
+import dataclasses
 import morepath
 import rulez
 from DateTime import DateTime
@@ -158,7 +158,7 @@ class Collection(ICollection):
 
     def create(self, data, deserialize=True):
         data = self.schema.validate(
-            self.request, data, deserialize=deserialize, context=None
+            self.request, data, deserialize=deserialize, context=self
         )
         self.before_create(data)
         identifier = self.app.get_default_identifier(self.schema, data, self.request)
@@ -166,10 +166,17 @@ class Collection(ICollection):
             raise self.exist_exc(identifier)
         data = self.storage.set_schema_defaults(data)
         for fname, field in self.schema.__dataclass_fields__.items():
+            if data[fname] is not None:
+                continue
+            dc_default_factory = field.default_factory
+            if not isinstance(dc_default_factory, dataclasses._MISSING_TYPE):
+                data[fname] = dc_default_factory()
+
+            if data[fname] is not None:
+                continue
+
             default_factory = field.metadata.get("default_factory", None)
             if default_factory:
-                if data[fname]:
-                    continue
                 data[fname] = default_factory(self, self.request)
 
         unique_constraint = getattr(self.schema, "__unique_constraint__", None)
@@ -341,7 +348,7 @@ class Model(IModel):
         if deserialize:
             cschema = dc2colanderjson.convert(self.schema, request=self.request)
             cs = cschema()
-            cs.bind(context=self, request=self.request)
+            cs = cs.bind(context=self, request=self.request)
             data = cs.deserialize(data)
         self.storage.update(self.collection, self.identifier, data)
         dispatch = self.request.app.dispatcher(signals.OBJECT_UPDATED)
@@ -373,7 +380,7 @@ class Model(IModel):
             self.schema, exclude_fields=exclude_fields, request=self.request
         )
         cs = cschema()
-        cs.bind(context=self, request=self.request)
+        cs = cs.bind(context=self, request=self.request)
         return cs.serialize(self.data.as_dict())
 
     @requestmemoize()

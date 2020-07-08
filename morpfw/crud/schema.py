@@ -38,7 +38,7 @@ class BaseSchema(ISchema):
                 )
         cs = cschema()
         # FIXME: need to pass context here
-        cs.bind(request=request, **kwargs)
+        cs = cs.bind(request=request, **kwargs)
         if not deserialize:
             # FIXME: can we skip this and immediately validate?
 
@@ -94,5 +94,5 @@ def identifierfield(schema):
 def default_identifier(schema, obj, request):
     idfield = request.app.get_identifierfield(schema)
     if idfield == "uuid":
-        return uuid4().hex
+        obj[idfield] = uuid4().hex
     return obj[idfield]

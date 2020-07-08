@@ -2,8 +2,9 @@ import uuid
 from datetime import datetime
 from decimal import Decimal
 
-import jsl
 import pytz
+
+import jsl
 import sqlalchemy as sa
 import sqlalchemy_jsonfield as sajson
 from rulez import compile_condition

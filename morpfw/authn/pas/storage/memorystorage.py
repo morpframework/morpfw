@@ -1,12 +1,13 @@
-from ..app import App
-from morpfw.crud.storage.memorystorage import MemoryStorage
-from ..user.model import UserModel, UserSchema, UserCollection
-from ..group.model import GroupModel, GroupSchema, GroupCollection
-from ..apikey.model import APIKeyModel, APIKeySchema
-from .interfaces import IUserStorage, IGroupStorage
-from morpfw.crud import errors as cruderrors
-from .. import exc
 import rulez
+from morpfw.crud import errors as cruderrors
+from morpfw.crud.storage.memorystorage import MemoryStorage
+
+from .. import exc
+from ..apikey.model import APIKeyModel, APIKeySchema
+from ..app import App
+from ..group.model import GroupCollection, GroupModel, GroupSchema
+from ..user.model import UserCollection, UserModel, UserSchema
+from .interfaces import IGroupStorage, IUserStorage
 
 DB: dict = {"users": {}, "groups": {}, "rolemap": {}}
 
@@ -91,6 +92,7 @@ class GroupMemoryStorage(MemoryStorage, IGroupStorage):
         attrs = group.data["xattrs"]
         attrs.setdefault("members", [])
         for u in userids:
+            assert u is not None
             if u not in attrs["members"]:
                 attrs["members"].append(u)
         group.data["xattrs"] = attrs

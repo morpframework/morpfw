@@ -25,6 +25,7 @@ class MemoryStorage(BaseStorage):
         super(MemoryStorage, self).__init__(request, blobstorage)
 
     def create(self, collection, data):
+        assert data["uuid"] is not None
         data = data.copy()
         obj = self.model(self.request, collection, data)
         if self.incremental_id:
