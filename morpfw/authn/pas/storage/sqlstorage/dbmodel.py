@@ -1,14 +1,13 @@
-from morpfw.crud.storage.sqlstorage import Base
-from morpfw.crud.storage.sqlstorage import GUID
 import sqlalchemy as sa
-from sqlalchemy.orm import relationship
 import sqlalchemy.orm as saorm
 import sqlalchemy_jsonfield as sajson
+from morpfw.crud.storage.sqlstorage import GUID, Base
+from sqlalchemy.orm import relationship
 
 
 class User(Base):
 
-    __tablename__ = 'authmanager_users'
+    __tablename__ = "authmanager_users"
 
     username = sa.Column(sa.String(length=256))
     email = sa.Column(sa.String)
@@ -19,7 +18,7 @@ class User(Base):
 
 class APIKey(Base):
 
-    __tablename__ = 'authmanager_apikey'
+    __tablename__ = "authmanager_apikey"
 
     userid = sa.Column(GUID)
     label = sa.Column(sa.String(length=256))
@@ -29,30 +28,28 @@ class APIKey(Base):
 
 class Group(Base):
 
-    __tablename__ = 'authmanager_groups'
+    __tablename__ = "authmanager_groups"
 
     parent = sa.Column(sa.String(length=256))
     groupname = sa.Column(sa.String(length=256))
-    memberships = relationship('Membership', cascade='all')
+    memberships = relationship("Membership", cascade="all")
 
 
 class Membership(Base):
 
-    __tablename__ = 'authmanager_membership'
+    __tablename__ = "authmanager_membership"
 
-    group_id = sa.Column(sa.ForeignKey(
-        'authmanager_groups.id'))
-    user_id = sa.Column(sa.ForeignKey(
-        'authmanager_users.id'))
-    sa.UniqueConstraint('group_id', 'user_id')
+    group_id = sa.Column(sa.ForeignKey("authmanager_groups.id"))
+    user_id = sa.Column(sa.ForeignKey("authmanager_users.id"))
+    sa.UniqueConstraint("group_id", "user_id", "deleted")
 
-    roles_assignment = relationship('RoleAssignment', cascade='all')
+    roles_assignment = relationship("RoleAssignment", cascade="all")
 
 
 class RoleAssignment(Base):
 
-    __tablename__ = 'authmanager_roleassignment'
+    __tablename__ = "authmanager_roleassignment"
 
-    membership_id = sa.Column(sa.ForeignKey('authmanager_membership.id'))
+    membership_id = sa.Column(sa.ForeignKey("authmanager_membership.id"))
     rolename = sa.Column(sa.String)
-    sa.UniqueConstraint('membership_id', 'role_id')
+    sa.UniqueConstraint("membership_id", "role_id", "deleted")
