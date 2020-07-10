@@ -17,5 +17,6 @@ from .crud.storage.elasticsearchstorage import ElasticSearchStorage
 from .crud.storage.sqlstorage import SQLStorage
 from .main import create_admin, create_app, run, runprod
 from .memoizer import memoize, requestmemoize
+from .request import request_factory
 from .sql import Base as SQLBase
 from .util import get_group, get_user, get_user_by_userid

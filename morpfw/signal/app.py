@@ -91,32 +91,35 @@ def periodic_transaction_handler(name, func):
     def transaction_wrapper(task):
         task.request.__job_name__ = name
         settings = json.loads(os.environ["MORP_SETTINGS"])
-        req = request_factory(settings, scan=False)
-        transaction.begin()
+        request_options = {"settings": settings, "scan": False}
+        with request_factory(**request_options) as req:
 
-        req.app.dispatcher(event_signal.SCHEDULEDTASK_STARTING).dispatch(
-            req, task.request
-        )
-        savepoint = transaction.savepoint()
-        failed = False
-        try:
-            res = func(req)
-            req.app.dispatcher(event_signal.SCHEDULEDTASK_COMPLETED).dispatch(
+            req.app.dispatcher(event_signal.SCHEDULEDTASK_STARTING).dispatch(
                 req, task.request
             )
+
+        failed = False
+        try:
+            res = func(request_options)
+
+            with request_factory(**request_options) as req:
+                req.app.dispatcher(event_signal.SCHEDULEDTASK_COMPLETED).dispatch(
+                    req, task.request
+                )
         except Exception:
-            savepoint.rollback()
             failed = True
             raise
         finally:
             if failed:
-                req.app.dispatcher(event_signal.SCHEDULEDTASK_FAILED).dispatch(
+                with request_factory(**request_options) as req:
+                    req.app.dispatcher(event_signal.SCHEDULEDTASK_FAILED).dispatch(
+                        req, task.request
+                    )
+
+            with request_factory(**request_options) as req:
+                req.app.dispatcher(event_signal.SCHEDULEDTASK_FINALIZED).dispatch(
                     req, task.request
                 )
-            req.app.dispatcher(event_signal.SCHEDULEDTASK_FINALIZED).dispatch(
-                req, task.request
-            )
-            transaction.commit()
 
         return res
 
@@ -126,23 +129,35 @@ def periodic_transaction_handler(name, func):
 def transaction_handler(func):
     def transaction_wrapper(task, request, **kwargs):
         settings = json.loads(os.environ["MORP_SETTINGS"])
-        req = request_factory(settings, extra_environ=request, scan=False)
-        transaction.begin()
-        req.app.dispatcher(event_signal.TASK_STARTING).dispatch(req, task.request)
-        savepoint = transaction.savepoint()
+        request_options = {
+            "settings": settings,
+            "extra_environ": request,
+            "scan": False,
+        }
+        with request_factory(**request_options) as req:
+            req.app.dispatcher(event_signal.TASK_STARTING).dispatch(req, task.request)
+
         failed = False
         try:
-            res = func(req, **kwargs)
-            req.app.dispatcher(event_signal.TASK_COMPLETED).dispatch(req, task.request)
+            res = func(request_options, **kwargs)
+            with request_factory(settings, extra_environ=request, scan=False) as req:
+                req.app.dispatcher(event_signal.TASK_COMPLETED).dispatch(
+                    req, task.request
+                )
         except Exception:
-            savepoint.rollback()
             failed = True
             raise
         finally:
             if failed:
-                req.app.dispatcher(event_signal.TASK_FAILED).dispatch(req, task.request)
-            req.app.dispatcher(event_signal.TASK_FINALIZED).dispatch(req, task.request)
-            transaction.commit()
+                with request_factory(**request_options) as req:
+                    req.app.dispatcher(event_signal.TASK_FAILED).dispatch(
+                        req, task.request
+                    )
+
+            with request_factory(**request_options) as req:
+                req.app.dispatcher(event_signal.TASK_FINALIZED).dispatch(
+                    req, task.request
+                )
 
         return res
 
