@@ -70,9 +70,10 @@ def get_page(request, identifier):
 
 
 @App.periodic(name="test-tick", seconds=1)
-def tick(request):
-    collection = get_pagecollection(request)
-    collection.create({"title": "Hello", "body": "World"})
+def tick(request_options):
+    with morpfw.request_factory(**request_options) as request:
+        collection = get_pagecollection(request)
+        collection.create({"title": "Hello", "body": "World"})
     print("tick")
 
 
