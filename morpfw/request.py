@@ -55,14 +55,17 @@ class Request(BaseRequest):
         return super().host_url
 
     def __enter__(self):
+        self._cm_cwd = os.getcwd()
         transaction.begin()
         self.savepoint = transaction.savepoint()
+
         return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         if exc_type is not None:
             self.savepoint.rollback()
         transaction.commit()
+        os.chdir(self._cm_cwd)
         self.dispose_db_engines()
 
 
@@ -100,7 +103,6 @@ class DBSessionRequest(Request):
 
         settings = self.app._raw_settings
         config = settings["configuration"]
-
         cwd = os.environ.get("MORP_WORKDIR", os.getcwd())
         os.chdir(cwd)
 

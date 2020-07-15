@@ -91,6 +91,11 @@ def periodic_transaction_handler(name, func):
     def transaction_wrapper(task):
         task.request.__job_name__ = name
         settings = json.loads(os.environ["MORP_SETTINGS"])
+        config = settings.get("configuration", {})
+        log_path = config.get("morpfw.worker.task_dir", "/tmp/")
+        task_work_dir = os.path.join(
+            os.path.abspath(log_path), "mfw-%s" % task.request.id
+        )
         request_options = {"settings": settings, "scan": False}
         with request_factory(**request_options) as req:
 
@@ -100,8 +105,10 @@ def periodic_transaction_handler(name, func):
 
         failed = False
         try:
+            cwd = os.getcwd()
+            os.chdir(task_work_dir)
             res = func(request_options)
-
+            os.chdir(cwd)
             with request_factory(**request_options) as req:
                 req.app.dispatcher(event_signal.SCHEDULEDTASK_COMPLETED).dispatch(
                     req, task.request
@@ -129,6 +136,11 @@ def periodic_transaction_handler(name, func):
 def transaction_handler(func):
     def transaction_wrapper(task, request, **kwargs):
         settings = json.loads(os.environ["MORP_SETTINGS"])
+        config = settings.get("configuration", {})
+        log_path = config.get("morpfw.worker.task_dir", "/tmp/")
+        task_work_dir = os.path.join(
+            os.path.abspath(log_path), "mfw-%s" % task.request.id
+        )
         request_options = {
             "settings": settings,
             "extra_environ": request,
@@ -139,7 +151,10 @@ def transaction_handler(func):
 
         failed = False
         try:
+            cwd = os.getcwd()
+            os.chdir(task_work_dir)
             res = func(request_options, **kwargs)
+            os.chdir(cwd)
             with request_factory(settings, extra_environ=request, scan=False) as req:
                 req.app.dispatcher(event_signal.TASK_COMPLETED).dispatch(
                     req, task.request
