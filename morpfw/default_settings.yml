@@ -21,4 +21,5 @@ configuration:
     leeway: 10
     allow_refresh: true
     refresh_nonce_handler: morpfw.authn.pas.user.path.refresh_nonce_handler
+  morpfw.worker.task_dir: /tmp
   morpfw.celery: {}
