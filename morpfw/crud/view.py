@@ -71,7 +71,11 @@ def search(context, request):
         searchprovider = context.searchprovider()
         query = searchprovider.parse_query(qs)
 
-    limit = int(request.GET.get("limit", 0)) or None
+    default_limit = request.app.get_config('morpfw.crud.search.default_limit', 20)
+    max_limit = request.app.get_config('morpfw.crud.search.max_limit', 100)
+    limit = int(request.GET.get("limit", 0)) or default_limit
+    if limit > max_limit:
+        limit = max_limit
     offset = int(request.GET.get("offset", 0))
     order_by = request.GET.get("order_by", None)
     select = request.GET.get("select", None)
@@ -109,7 +113,7 @@ def search(context, request):
         params["order_by"] = request.GET.get("order_by", "")
     params["offset"] = offset + (limit or 0)
     qs = urlencode(params)
-    res = {"results": results, "q": query}
+    res = {"results": results, "q": query, "limit": limit, "order_by": order_by, "offset": offset, "result_count": len(results)}
     if has_next:
         res.setdefault("links", [])
         res["links"].append(
