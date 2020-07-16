@@ -65,7 +65,8 @@ class Request(BaseRequest):
         if exc_type is not None:
             self.savepoint.rollback()
         transaction.commit()
-        os.chdir(self._cm_cwd)
+        if os.path.exists(self._cm_cwd):
+            os.chdir(self._cm_cwd)
         self.dispose_db_engines()
 
 
