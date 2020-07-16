@@ -106,6 +106,8 @@ def periodic_transaction_handler(name, func):
         failed = False
         try:
             cwd = os.getcwd()
+            if not os.path.exists(task_work_dir):
+                os.makedirs(task_work_dir)
             os.chdir(task_work_dir)
             res = func(request_options)
             os.chdir(cwd)
@@ -152,6 +154,8 @@ def transaction_handler(func):
         failed = False
         try:
             cwd = os.getcwd()
+            if not os.path.exists(task_work_dir):
+                os.makedirs(task_work_dir)
             os.chdir(task_work_dir)
             res = func(request_options, **kwargs)
             os.chdir(cwd)
