@@ -178,7 +178,6 @@ class Collection(ICollection):
             default_factory = field.metadata.get("default_factory", None)
             if default_factory:
                 data[fname] = default_factory(self, self.request)
-
         unique_constraint = getattr(self.schema, "__unique_constraint__", None)
         if unique_constraint:
             unique_search = []
@@ -268,6 +267,9 @@ class Model(IModel):
     def __dict__(self):
         return self.data.as_dict()
 
+    def title(self):
+        return self['uuid']
+        
     @property
     def statemachine_view_enabled(self):
         if self.statemachine():
@@ -359,7 +361,13 @@ class Model(IModel):
         dispatch = self.request.app.dispatcher(signals.OBJECT_TOBEDELETED)
         dispatch.dispatch(self.request, self)
         self.before_delete()
+        blob_uuids = []
+        for blobfield in self.blob_fields:
+            uuid = self.data[self.blobstorage_field][blobfield]
+            blob_uuids.append(uuid)
         self.storage.delete(self.identifier, model=self, **kwargs)
+        for blob_uuid in blob_uuids:
+            self.storage.delete_blob(blob_uuid)
 
     def save(self):
         if self.data.changed:
@@ -491,7 +499,13 @@ class Model(IModel):
         return blob
 
     def delete_blob(self, field):
-        self.before_blobdelete(field)
+        if self.blobstorage_field not in self.data.keys():
+            return None
+        if not self.data[self.blobstorage_field]:
+            return None
+        if not field in self.data[self.blobstorage_field]:
+            return None
         uuid = self.data[self.blobstorage_field][field]
+        self.before_blobdelete(field)
         self.storage.delete_blob(uuid)
         self.save()
