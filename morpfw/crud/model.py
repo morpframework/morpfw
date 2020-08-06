@@ -363,8 +363,16 @@ class Model(IModel):
         self.before_delete()
         blob_uuids = []
         for blobfield in self.blob_fields:
-            uuid = self.data[self.blobstorage_field][blobfield]
-            blob_uuids.append(uuid)
+            if self.blobstorage_field not in self.data.keys():
+                uuid = None
+            elif not self.data[self.blobstorage_field]:
+                uuid = None
+            elif not blobfield in self.data[self.blobstorage_field]:
+                uuid = None
+            else:
+                uuid = self.data[self.blobstorage_field][blobfield]
+            if uuid:
+                blob_uuids.append(uuid)
         self.storage.delete(self.identifier, model=self, **kwargs)
         for blob_uuid in blob_uuids:
             self.storage.delete_blob(blob_uuid)
