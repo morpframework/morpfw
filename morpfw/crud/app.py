@@ -138,6 +138,18 @@ class App(JsonSchemaApp, signals.SignalApp):
     def get_typeinfo_factory(self, name):
         raise NotImplementedError
 
+    def get_typeinfo(self, name, request):
+        typeinfo = self.config.type_registry.get_typeinfo(
+            name=name, request=request
+        )
+        return typeinfo
+
+    def get_typeinfo_by_schema(self, schema, request):
+        typeinfo = self.config.type_registry.get_typeinfo_by_schema(
+            schema=schema, request=request
+        )
+        return typeinfo
+
     def get_compositekey_separator(self):
         raise Exception("BOOO")
 
