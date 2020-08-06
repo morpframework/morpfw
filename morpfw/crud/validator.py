@@ -19,9 +19,7 @@ def regex_validator(pattern, name):
 
     def _regex_validator(request, schema, field, value, mode=None):
         if not p.match(value):
-            raise FieldValidationError(
-                field, "%s does not match %s pattern" % (value, name)
-            )
+            return "%s does not match %s pattern" % (value, name)
 
     return _regex_validator
 

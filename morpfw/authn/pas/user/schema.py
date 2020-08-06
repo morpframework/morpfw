@@ -7,6 +7,7 @@ from morpfw.crud.validator import regex_validator
 
 from ..app import App
 from ..model import EMAIL_PATTERN, NAME_PATTERN
+from .validator import valid_source
 
 
 @dataclass
@@ -60,9 +61,11 @@ class UserSchema(Schema):
         },
     )
 
-    password: typing.Optional[str] = field(default=None)
+    password: typing.Optional[str] = field(default=None, metadata={"required": True})
     nonce: typing.Optional[str] = field(default_factory=lambda: secrets.token_hex(8))
-    source: typing.Optional[str] = field(default="local")
+    source: typing.Optional[str] = field(
+        default="local", metadata={"validators": [valid_source]}
+    )
 
 
 @App.identifierfield(schema=UserSchema)

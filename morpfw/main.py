@@ -84,7 +84,13 @@ def create_admin(request: Request, username: str, password: str, email: str):
     transaction.manager.begin()
     usercol = get_user_collection(request)
     userobj = usercol.create(
-        {"username": username, "password": password, "email": email, "state": "active"}
+        {
+            "username": username,
+            "password": password,
+            "email": email,
+            "state": "active",
+            "source": "local",
+        }
     )
     gcol = get_group_collection(request)
     group = gcol.get("__default__")
