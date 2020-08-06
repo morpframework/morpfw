@@ -1,23 +1,24 @@
+import re
+import secrets
+from uuid import uuid4
+
 import morepath
-from morpfw.crud import Collection, Model, StateMachine
-from morpfw.crud import errors as cruderrors
-from ..app import App
-from .. import exc
 import sqlalchemy as sa
 import sqlalchemy_jsonfield as sajson
-from ..model import NAME_PATTERN, EMAIL_PATTERN
-from morpfw.crud import signals as crudsignal
+from morpfw.crud import Collection, Model, StateMachine
 from morpfw.crud import errors as cruderrors
+from morpfw.crud import signals as crudsignal
 from morpfw.crud.schema import Schema
 from morpfw.crud.validator import regex_validator
-from ..group.model import GroupCollection, GroupSchema, GroupModel
-from ..group.path import get_group_collection
-from uuid import uuid4
-import re
-from .schema import RegistrationSchema, UserSchema, LoginSchema
+
+from .. import exc
+from ..app import App
 from ..exc import UserExistsError
+from ..group.model import GroupCollection, GroupModel, GroupSchema
+from ..group.path import get_group_collection
+from ..model import EMAIL_PATTERN, NAME_PATTERN
 from ..utils import has_role
-import secrets
+from .schema import LoginSchema, RegistrationSchema, UserSchema
 
 
 class UserCollection(Collection):
@@ -54,6 +55,9 @@ class UserModel(Model):
     blob_fields = ["profile-photo"]
     protected_fields = Model.protected_fields + ["username", "password"]
     hidden_fields = Model.hidden_fields + ["password"]
+
+    def title(self):
+        return self["username"]
 
     @property
     def userid(self):
