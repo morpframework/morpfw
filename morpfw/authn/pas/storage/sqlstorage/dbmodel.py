@@ -14,6 +14,7 @@ class User(Base):
     password = sa.Column(sa.String(length=1024))
     source = sa.Column(sa.String(length=1024))
     nonce = sa.Column(sa.String(length=24))
+    is_administrator = sa.Column(sa.Boolean())
 
 
 class APIKey(Base):

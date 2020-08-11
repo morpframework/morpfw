@@ -2,6 +2,7 @@ import secrets
 import typing
 from dataclasses import dataclass, field
 
+import deform.widget
 from morpfw.crud.schema import BaseSchema, Schema
 from morpfw.crud.validator import regex_validator
 
@@ -49,6 +50,7 @@ class UserSchema(Schema):
         default=None,
         metadata={
             "required": True,
+            "editable": False,
             "validators": [regex_validator(NAME_PATTERN, "name")],
         },
     )
@@ -61,11 +63,19 @@ class UserSchema(Schema):
         },
     )
 
-    password: typing.Optional[str] = field(default=None, metadata={"required": True})
-    nonce: typing.Optional[str] = field(default_factory=lambda: secrets.token_hex(8))
+    password: typing.Optional[str] = field(
+        default=None,
+        metadata={"required": True, "deform.widget": deform.widget.PasswordWidget()},
+    )
+    nonce: typing.Optional[str] = field(
+        default_factory=lambda: secrets.token_hex(8),
+        metadata={"deform.widget": deform.widget.HiddenWidget()},
+    )
     source: typing.Optional[str] = field(
         default="local", metadata={"validators": [valid_source]}
     )
+
+    is_administrator: typing.Optional[bool] = field(default=False)
 
 
 @App.identifierfield(schema=UserSchema)
