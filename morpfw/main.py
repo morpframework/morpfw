@@ -72,7 +72,8 @@ def create_app(settings, scan=True, **kwargs):
     if config["app.development_mode"]:
         os.environ["MOREPATH_TEMPLATE_AUTO_RELOAD"] = "1"
 
-    app.commit()
+    if not app.is_committed():
+        app.commit()
 
     celery_settings = config["morpfw.celery"]
     app.celery.conf.update(**celery_settings)

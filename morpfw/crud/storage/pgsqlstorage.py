@@ -1,3 +1,4 @@
+import typing
 import uuid
 from datetime import datetime
 from decimal import Decimal
@@ -8,7 +9,7 @@ import sqlalchemy.orm as saorm
 import sqlalchemy_jsonfield as sajson
 from inverter import dc2pgsqla
 from rulez import compile_condition
-from sqlalchemy import Column, MetaData, Table, func
+from sqlalchemy import Column, Index, MetaData, Table, func
 from sqlalchemy import types as satypes
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.exc import StatementError

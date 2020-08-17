@@ -194,6 +194,7 @@ def request_factory(
     app_factory_opts: typing.Optional[dict] = None,
 ):
     app_factory_opts = app_factory_opts or {}
+    app_factory_opts["scan"] = scan
     extra_environ = extra_environ or {}
 
     if "application" not in settings:
@@ -227,12 +228,8 @@ def request_factory(
         if k not in os.environ.keys():
             os.environ[k] = v
 
-    if scan and app_cls not in COMMITTED_APPS:
-        app = factory(settings, **app_factory_opts)
-        app(environ, lambda *args: (lambda chunk: None))
-        COMMITTED_APPS.append(app_cls)
-    else:
-        app = app_cls()
+    app = factory(settings, **app_factory_opts)
+    app(environ, lambda *args: (lambda chunk: None))
 
     while not isinstance(app, morepath.App):
         wrapped = getattr(app, "app", None)
