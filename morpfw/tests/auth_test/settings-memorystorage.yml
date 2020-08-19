@@ -3,3 +3,4 @@ application:
 
 configuration:
   morpfw.authn.policy: morpfw.tests.auth_test.test_auth_memorystorage:AuthnPolicy
+  morpfw.valid_roles: ['member','administrator', 'manager', 'editor']

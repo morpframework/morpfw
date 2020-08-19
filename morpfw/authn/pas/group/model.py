@@ -1,11 +1,14 @@
-from ..model import NAME_PATTERN
-from morpfw.crud import Collection, Model, Schema
-from ..app import App
-from morpfw.crud import errors as cruderrors
-from .. import exc
-from .schema import GroupSchema, MemberSchema
-from ..exc import GroupExistsError
 import rulez
+from morpfw.crud import Collection, Model, Schema
+from morpfw.crud import errors as cruderrors
+
+from .. import exc
+from ..app import App
+from ..exc import GroupExistsError
+from ..model import NAME_PATTERN
+from .schema import GroupSchema, MemberSchema
+
+DEFAULT_VALID_ROLES = ["member", "administrator"]
 
 
 class GroupCollection(Collection):
@@ -36,6 +39,8 @@ class GroupModel(Model):
 
     def add_members(self, userids):
         self.storage.add_group_members(self, self.identifier, userids)
+        for userid in userids:
+            self.grant_member_role(userid, "member")
 
     def remove_members(self, userids):
         self.storage.remove_group_members(self, self.identifier, userids)
@@ -46,9 +51,17 @@ class GroupModel(Model):
     def grant_member_role(self, userid, rolename):
         if userid not in [m.userid for m in self.members()]:
             self.add_members([userid])
+        valid_roles = self.request.app.get_config(
+            "morpfw.valid_roles", DEFAULT_VALID_ROLES
+        )
+        if rolename not in valid_roles:
+            raise exc.InvalidRoleError(rolename)
         self.storage.grant_group_user_role(self, self.identifier, userid, rolename)
 
     def revoke_member_role(self, userid, rolename):
+        if rolename == "member":
+            self.remove_members([userid])
+            return
         self.storage.revoke_group_user_role(self, self.identifier, userid, rolename)
         if not self.get_member_roles(userid) and self.identifier != "__default__":
             self.remove_members([userid])

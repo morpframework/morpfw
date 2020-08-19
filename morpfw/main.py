@@ -91,6 +91,7 @@ def create_admin(request: Request, username: str, password: str, email: str):
             "email": email,
             "state": "active",
             "source": "local",
+            "is_administrator": True,
         }
     )
     gcol = get_group_collection(request)

@@ -26,7 +26,10 @@ class UserDoesNotExistsError(AuthManagerError):
 
 
 class MembershipError(AuthManagerError):
-
     def __init__(self, user, group, *args, **kwargs):
         msg = "User %s not in group %s" % (user, group)
         super(MembershipError, self).__init__(msg, *args, **kwargs)
+
+
+class InvalidRoleError(AuthManagerError):
+    pass

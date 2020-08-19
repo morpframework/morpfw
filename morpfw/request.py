@@ -230,7 +230,6 @@ def request_factory(
 
     app = factory(settings, **app_factory_opts)
     app(environ, lambda *args: (lambda chunk: None))
-
     while not isinstance(app, morepath.App):
         wrapped = getattr(app, "app", None)
         if wrapped:

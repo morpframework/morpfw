@@ -3,14 +3,28 @@ from dataclasses import dataclass, field
 
 from morpfw.crud.schema import Schema
 
+from ....validator.field import valid_identifier
 from ..app import App
+
+
+def valid_group_identifier(request, schema, field, value, mode=None):
+    if value == "__default__":
+        return
+    return valid_identifier(request, schema, field, value, mode)
 
 
 @dataclass
 class GroupSchema(Schema):
-    parent: typing.Optional[str] = None
+    parent: typing.Optional[str] = field(
+        default=None, metadata={"editable": False, "required": False}
+    )
     groupname: typing.Optional[str] = field(
-        default=None, metadata={"editable": False, "required": True}
+        default=None,
+        metadata={
+            "editable": False,
+            "required": True,
+            "validators": [valid_group_identifier],
+        },
     )
 
 
