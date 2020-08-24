@@ -1,4 +1,7 @@
-class All(object):
+from ...permission import All as MFWAll
+
+
+class All(MFWAll):
     pass
 
 
