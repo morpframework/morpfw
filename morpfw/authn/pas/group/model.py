@@ -40,7 +40,7 @@ class GroupModel(Model):
     def add_members(self, userids):
         self.storage.add_group_members(self, self.identifier, userids)
         for userid in userids:
-            self.grant_member_role(userid, "member")
+            self.storage.grant_group_user_role(self, self.identifier, userid, "member")
 
     def remove_members(self, userids):
         self.storage.remove_group_members(self, self.identifier, userids)
