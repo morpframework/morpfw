@@ -62,12 +62,18 @@ class Collection(ICollection):
         raise NotImplementedError
 
     def __setitem__(self, key, value):
+        if key not in self.schema.__dataclass_fields__:
+            raise KeyError(key)
         self.data[key] = value
 
     def __getitem__(self, key):
+        if key not in self.schema.__dataclass_fields__:
+            raise KeyError(key)
         return self.data[key]
 
     def __delitem__(self, key):
+        if key not in self.schema.__dataclass_fields__:
+            raise KeyError(key)
         del self.data[key]
 
     def __init__(self, request: morepath.Request, storage: IStorage, data=None):
