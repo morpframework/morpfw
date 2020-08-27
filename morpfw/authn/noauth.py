@@ -1,4 +1,5 @@
-from morepath import Identity, NO_IDENTITY
+from morepath import NO_IDENTITY
+from ..identity import Identity
 from .base import AuthnPolicy as BaseAuthnPolicy
 
 

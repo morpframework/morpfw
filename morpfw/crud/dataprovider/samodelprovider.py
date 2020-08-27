@@ -45,9 +45,10 @@ class SQLAlchemyModelProvider(IDataProvider):
             except AttributeError:
                 raise KeyError(key)
             if data:
-                user = self.request.current_user()
+                user = self.request.identity
                 tz = user.timezone()
-                return data.astimezone(tz)
+                data = data.astimezone(tz)
+                return data
             return None
         if isinstance(self.columns[key].type, GUID):
             try:

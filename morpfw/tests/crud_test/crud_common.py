@@ -22,6 +22,7 @@ from morpfw.crud.schema import BaseSchema, Schema
 from morpfw.crud.statemachine.base import StateMachine
 from morpfw.crud.xattrprovider import FieldXattrProvider
 from morpfw.crud.xattrprovider.base import XattrProvider
+from morpfw.identity import Identity
 from morpfw.interfaces import ISchema
 from morpfw.main import create_app
 from webtest import TestApp as Client
@@ -182,9 +183,19 @@ class BlobObjectModel(Model):
     blob_fields = ["blobfile"]
 
 
+class IdentityPolicy(BasicAuthIdentityPolicy):
+    def identify(self, request):
+        identity = super().identify(request)
+        if isinstance(identity, morepath.Identity):
+            return Identity(
+                request=request, userid=identity.userid, password=identity.password
+            )
+        return identity
+
+
 class AuthnPolicy(BaseAuthnPolicy):
     def get_identity_policy(self, settings):
-        return BasicAuthIdentityPolicy()
+        return IdentityPolicy()
 
     def verify_identity(self, app, identity):
         if identity.userid == "admin" and identity.password == "admin":

@@ -1,6 +1,7 @@
 import morepath
-from .model import UserCollection, UserModel, UserSchema, CurrentUserModel
+
 from ..app import App
+from .model import CurrentUserModel, UserCollection, UserModel, UserSchema
 
 
 def get_user(request: morepath.Request, identifier) -> UserModel:
@@ -20,4 +21,4 @@ def get_current_user(request: morepath.Request) -> UserModel:
 
 def refresh_nonce_handler(request, userid):
     collection = get_user_collection(request)
-    return collection.get_by_userid(userid)['nonce']
+    return collection.get_by_userid(userid)["nonce"]

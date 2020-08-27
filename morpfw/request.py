@@ -22,14 +22,6 @@ from .exc import ConfigurationError
 threadlocal = threading.local()
 
 
-class _FakeRequest(object):
-    """ Fake request object for resolving model """
-
-    def __init__(self, app, path):
-        self.app = app
-        self.unconsumed = parse_path(path)
-
-
 class Request(BaseRequest):
     def copy(self, *args, **kwargs):
         """
@@ -80,9 +72,6 @@ class Request(BaseRequest):
         if os.path.exists(self._cm_cwd):
             os.chdir(self._cm_cwd)
         self.dispose_db_engines()
-
-    def current_user(self):
-        return morpfw.get_current_user(self)
 
 
 class DBSessionRequest(Request):
