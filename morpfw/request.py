@@ -5,9 +5,13 @@ import typing
 from urllib.parse import urlparse
 
 import morepath
+import morpfw
 import sqlalchemy.orm
 import transaction
+from morepath.publish import resolve_model
+from morepath.request import SAME_APP, LinkError
 from morepath.request import Request as BaseRequest
+from morepath.traject import parse_path
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.pool import NullPool, QueuePool
 from zope.sqlalchemy import ZopeTransactionEvents
@@ -16,6 +20,14 @@ from zope.sqlalchemy import register as register_session
 from .exc import ConfigurationError
 
 threadlocal = threading.local()
+
+
+class _FakeRequest(object):
+    """ Fake request object for resolving model """
+
+    def __init__(self, app, path):
+        self.app = app
+        self.unconsumed = parse_path(path)
 
 
 class Request(BaseRequest):
@@ -68,6 +80,9 @@ class Request(BaseRequest):
         if os.path.exists(self._cm_cwd):
             os.chdir(self._cm_cwd)
         self.dispose_db_engines()
+
+    def current_user(self):
+        return morpfw.get_current_user(self)
 
 
 class DBSessionRequest(Request):
@@ -182,6 +197,18 @@ class DBSessionRequest(Request):
         )
         col = typeinfo["collection_factory"](self)
         return col
+
+    def resolve_path(self, path, app=SAME_APP):
+        if app is None:
+            raise LinkError("Cannot path: app is None")
+
+        if app is SAME_APP:
+            app = self.app
+
+        request = self.__class__(self.environ.copy(), app, path_info=path)
+        # try to resolve imports..
+
+        return resolve_model(request)
 
 
 COMMITTED_APPS = []

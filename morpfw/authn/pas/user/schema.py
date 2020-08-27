@@ -2,13 +2,15 @@ import secrets
 import typing
 from dataclasses import dataclass, field
 
+import pytz
+
 import deform.widget
 from morpfw.crud.schema import BaseSchema, Schema
 from morpfw.crud.validator import regex_validator
 
 from ..app import App
 from ..model import EMAIL_PATTERN, NAME_PATTERN
-from .validator import valid_source
+from .validator import valid_source, valid_tz
 
 
 @dataclass
@@ -74,7 +76,15 @@ class UserSchema(Schema):
     source: typing.Optional[str] = field(
         default="local", metadata={"validators": [valid_source]}
     )
-
+    timezone: typing.Optional[str] = field(
+        default="UTC",
+        metadata={
+            "validators": [valid_tz],
+            "deform.widget": deform.widget.Select2Widget(
+                values=[(x, x) for x in pytz.all_timezones]
+            ),
+        },
+    )
     is_administrator: typing.Optional[bool] = field(default=False)
 
 

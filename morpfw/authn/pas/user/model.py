@@ -2,6 +2,8 @@ import re
 import secrets
 from uuid import uuid4
 
+import pytz
+
 import morepath
 import sqlalchemy as sa
 import sqlalchemy_jsonfield as sajson
@@ -85,6 +87,10 @@ class UserModel(Model):
         for g in self.groups():
             group_roles[g.data["groupname"]] = g.get_member_roles(self.userid)
         return group_roles
+
+    def timezone(self):
+        tz = self["timezone"] or "UTC"
+        return pytz.timezone(tz)
 
     def _links(self):
         links = super()._links()

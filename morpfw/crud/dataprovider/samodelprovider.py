@@ -30,6 +30,7 @@ def parse_date(datestr):
 
 class SQLAlchemyModelProvider(IDataProvider):
     def __init__(self, schema, data, storage):
+        self.request = storage.request
         self.schema = schema
         self.data = data
         self.orm_model = data.__class__
@@ -44,7 +45,9 @@ class SQLAlchemyModelProvider(IDataProvider):
             except AttributeError:
                 raise KeyError(key)
             if data:
-                return data
+                user = self.request.current_user()
+                tz = user.timezone()
+                return data.astimezone(tz)
             return None
         if isinstance(self.columns[key].type, GUID):
             try:
@@ -73,6 +76,7 @@ class SQLAlchemyModelProvider(IDataProvider):
         if value and isinstance(self.columns[key].type, sa.DateTime):
             if not isinstance(value, datetime.datetime):
                 value = parse_date(value)
+            value = value.astimezone(pytz.UTC)
         elif value and isinstance(self.columns[key].type, GUID):
             value = uuid.UUID(value)
 
