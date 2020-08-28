@@ -1,14 +1,16 @@
-from ...app import App
-from ...user.model import UserSchema, UserModel, UserCollection
-from ...group.model import GroupSchema, GroupModel, GroupCollection
-from ...apikey.model import APIKeyModel, APIKeySchema
-from . import dbmodel as db
-from morpfw.crud.storage.sqlstorage import SQLStorage
-from morpfw.crud import errors as cruderrors
-from ..interfaces import IGroupStorage, IUserStorage
 import hashlib
+
 import sqlalchemy as sa
+from morpfw.crud import errors as cruderrors
+from morpfw.crud.storage.sqlstorage import SQLStorage
+
 from ... import exc
+from ...apikey.model import APIKeyModel, APIKeySchema
+from ...app import App
+from ...group.model import GroupCollection, GroupModel, GroupSchema
+from ...user.model import UserCollection, UserModel, UserSchema
+from ..interfaces import IGroupStorage, IUserStorage
+from . import dbmodel as db
 
 
 def hash(data):
@@ -36,7 +38,9 @@ class UserSQLStorage(SQLStorage, IUserStorage):
         return self.model(self.request, collection, u)
 
     def get_by_username(self, collection, username, as_model=True):
-        q = self.session.query(db.User).filter(db.User.username == username)
+        q = self.session.query(db.User).filter(
+            sa.and_(db.User.username == username, db.User.deleted.is_(None))
+        )
         u = q.first()
         if not u:
             raise exc.UserDoesNotExistsError(username)
@@ -45,7 +49,9 @@ class UserSQLStorage(SQLStorage, IUserStorage):
         return self.model(self.request, collection, u)
 
     def get_by_email(self, collection, email):
-        q = self.session.query(db.User).filter(db.User.email == email)
+        q = self.session.query(db.User).filter(
+            sa.and_(db.User.email == email, db.User.deleted.is_(None))
+        )
         u = q.first()
         if not u:
             return None
@@ -57,7 +63,11 @@ class UserSQLStorage(SQLStorage, IUserStorage):
 
     def get_user_groups(self, collection, userid):
         u = self.get_by_userid(collection, userid, as_model=False)
-        q = self.session.query(db.Membership).filter(db.Membership.user_id == u.id)
+        q = (
+            self.session.query(db.Membership)
+            .join(db.Group)
+            .filter(sa.and_(db.Membership.user_id == u.id, db.Group.deleted.is_(None)))
+        )
         membership = q.all()
         groupstorage = self.request.app.get_storage(GroupModel, self.request)
         gcol = GroupCollection(self.request, groupstorage)
@@ -94,7 +104,13 @@ class GroupSQLStorage(SQLStorage, IGroupStorage):
             self.session.query(db.User)
             .join(db.Membership)
             .join(db.Group)
-            .filter(db.Group.groupname == groupname)
+            .filter(
+                sa.and_(
+                    db.Group.groupname == groupname,
+                    db.Group.deleted.is_(None),
+                    db.User.deleted.is_(None),
+                )
+            )
         )
         members = []
         user_storage = self.app.get_storage(UserModel, self.request)
@@ -106,7 +122,13 @@ class GroupSQLStorage(SQLStorage, IGroupStorage):
 
     def add_group_members(self, collection, groupname, userids):
         # FIXME: not using sqlalchemy relations might impact performance
-        g = self.session.query(db.Group).filter(db.Group.groupname == groupname).first()
+        g = (
+            self.session.query(db.Group)
+            .filter(
+                sa.and_(db.Group.groupname == groupname, db.Group.deleted.is_(None))
+            )
+            .first()
+        )
         if not g:
             raise ValueError("Group Does Not Exist %s" % groupname)
         gid = g.id
@@ -115,8 +137,13 @@ class GroupSQLStorage(SQLStorage, IGroupStorage):
             uid = u.id
             e = (
                 self.session.query(db.Membership)
+                .join(db.Group)
                 .filter(
-                    sa.and_(db.Membership.group_id == gid, db.Membership.user_id == uid)
+                    sa.and_(
+                        db.Membership.group_id == gid,
+                        db.Membership.user_id == uid,
+                        db.Group.deleted.is_(None),
+                    )
                 )
                 .first()
             )
@@ -127,7 +154,13 @@ class GroupSQLStorage(SQLStorage, IGroupStorage):
                 self.session.add(m)
 
     def remove_group_members(self, collection, groupname, userids):
-        g = self.session.query(db.Group).filter(db.Group.groupname == groupname).first()
+        g = (
+            self.session.query(db.Group)
+            .filter(
+                sa.and_(db.Group.groupname == groupname, db.Group.deleted.is_(None))
+            )
+            .first()
+        )
         if not g:
             raise exc.GroupDoesNotExistsError(groupname)
         gid = g.id
@@ -136,8 +169,13 @@ class GroupSQLStorage(SQLStorage, IGroupStorage):
             uid = u.id
             members = (
                 self.session.query(db.Membership)
+                .join(db.Group)
                 .filter(
-                    sa.and_(db.Membership.group_id == gid, db.Membership.user_id == uid)
+                    sa.and_(
+                        db.Membership.group_id == gid,
+                        db.Membership.user_id == uid,
+                        db.Group.deleted.is_(None),
+                    )
                 )
                 .all()
             )
@@ -145,7 +183,13 @@ class GroupSQLStorage(SQLStorage, IGroupStorage):
                 self.session.delete(m)
 
     def get_group_user_roles(self, collection, groupname, userid):
-        g = self.session.query(db.Group).filter(db.Group.groupname == groupname).first()
+        g = (
+            self.session.query(db.Group)
+            .filter(
+                sa.and_(db.Group.groupname == groupname, db.Group.deleted.is_(None))
+            )
+            .first()
+        )
         if not g:
             raise exc.GroupDoesNotExistsError(groupname)
         gid = g.id
@@ -154,15 +198,26 @@ class GroupSQLStorage(SQLStorage, IGroupStorage):
         roles = (
             self.session.query(db.RoleAssignment)
             .join(db.Membership)
+            .join(db.Group)
             .filter(
-                sa.and_(db.Membership.group_id == gid, db.Membership.user_id == uid)
+                sa.and_(
+                    db.Membership.group_id == gid,
+                    db.Membership.user_id == uid,
+                    db.Group.deleted.is_(None),
+                )
             )
             .all()
         )
         return [r.rolename for r in roles]
 
     def grant_group_user_role(self, collection, groupname, userid, rolename):
-        g = self.session.query(db.Group).filter(db.Group.groupname == groupname).first()
+        g = (
+            self.session.query(db.Group)
+            .filter(
+                sa.and_(db.Group.groupname == groupname, db.Group.deleted.is_(None))
+            )
+            .first()
+        )
         if not g:
             raise exc.GroupDoesNotExistsError(groupname)
         gid = g.id
@@ -170,8 +225,13 @@ class GroupSQLStorage(SQLStorage, IGroupStorage):
         uid = u.id
         m = (
             self.session.query(db.Membership)
+            .join(db.Group)
             .filter(
-                sa.and_(db.Membership.group_id == gid, db.Membership.user_id == uid)
+                sa.and_(
+                    db.Membership.group_id == gid,
+                    db.Membership.user_id == uid,
+                    db.Group.deleted.is_(None),
+                )
             )
             .first()
         )
@@ -193,7 +253,13 @@ class GroupSQLStorage(SQLStorage, IGroupStorage):
         self.session.add(r)
 
     def revoke_group_user_role(self, collection, groupname, userid, rolename):
-        g = self.session.query(db.Group).filter(db.Group.groupname == groupname).first()
+        g = (
+            self.session.query(db.Group)
+            .filter(
+                sa.and_(db.Group.groupname == groupname, db.Group.deleted.is_(None))
+            )
+            .first()
+        )
         if not g:
             raise exc.GroupDoesNotExistsError(groupname)
         gid = g.id
@@ -201,8 +267,13 @@ class GroupSQLStorage(SQLStorage, IGroupStorage):
         uid = u.id
         m = (
             self.session.query(db.Membership)
+            .join(db.Group)
             .filter(
-                sa.and_(db.Membership.group_id == gid, db.Membership.user_id == uid)
+                sa.and_(
+                    db.Membership.group_id == gid,
+                    db.Membership.user_id == uid,
+                    db.Group.deleted.is_(None),
+                )
             )
             .first()
         )
