@@ -29,7 +29,7 @@ class Identity(BaseIdentity):
     def timezone(self):
         userid = self.userid
         collection = get_user_collection(self.request)
-        user = collection.get(userid)
+        user = collection.get_by_userid(userid)
         if user:
             return user.timezone()
         return pytz.UTC

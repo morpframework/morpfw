@@ -5,11 +5,13 @@ from dataclasses import _MISSING_TYPE
 
 import pytz
 
+import morepath
 import sqlalchemy as sa
 import sqlalchemy_jsonfield as sajson
 from dateutil.parser import parse as _parse_date
 from inverter import dc2colanderjson
 from inverter.common import dataclass_get_type
+from morpfw.authn.pas.policy import Identity
 
 from ...interfaces import IDataProvider, ISchema
 from ..app import App
@@ -46,8 +48,9 @@ class SQLAlchemyModelProvider(IDataProvider):
                 raise KeyError(key)
             if data:
                 user = self.request.identity
-                tz = user.timezone()
-                data = data.astimezone(tz)
+                if isinstance(user, Identity):
+                    tz = user.timezone()
+                    data = data.astimezone(tz)
                 return data
             return None
         if isinstance(self.columns[key].type, GUID):
