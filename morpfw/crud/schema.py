@@ -25,16 +25,17 @@ class BaseSchema(ISchema):
             if json:
                 cschema = dc2colanderjson.convert(cls, request=request)
             else:
-                cschema = dc2colander.convert(cls, request=request)
+                cschema = dc2colander.convert(cls, request=request, default_tzinfo=request.timezone())
 
         else:
             if json:
                 cschema = dc2colanderjson.convert(
-                    cls, request=request, include_fields=data.keys(), mode="update"
+                    cls, request=request, include_fields=data.keys(), mode="update",
                 )
             else:
                 cschema = dc2colander.convert(
-                    cls, request=request, include_fields=data.keys(), mode="update"
+                    cls, request=request, include_fields=data.keys(), mode="update", 
+                    default_tzinfo=request.timezone()
                 )
         cs = cschema()
         # FIXME: need to pass context here

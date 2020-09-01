@@ -1,5 +1,6 @@
 import re
 import secrets
+from datetime import datetime
 from uuid import uuid4
 
 import pytz
@@ -90,7 +91,7 @@ class UserModel(Model):
 
     def timezone(self):
         tz = self["timezone"] or "UTC"
-        return pytz.timezone(tz)
+        return pytz.timezone(tz).localize(datetime.now()).tzinfo
 
     def _links(self):
         links = super()._links()

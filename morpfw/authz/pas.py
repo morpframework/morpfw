@@ -1,13 +1,14 @@
 import morepath
-from ..authn.pas.user.model import UserCollection, UserModel, CurrentUserModel
-from ..authn.pas.group.model import GroupCollection, GroupModel
-from ..authn.pas.group.schema import GroupSchema
-from ..authn.pas.apikey.model import APIKeyCollection, APIKeyModel
-from ..authn.pas.group.path import get_group_collection
-from ..crud.model import Model, Collection
+
 from ..authn.pas import permission as authperm
-from ..crud import permission as crudperm
+from ..authn.pas.apikey.model import APIKeyCollection, APIKeyModel
+from ..authn.pas.group.model import GroupCollection, GroupModel
+from ..authn.pas.group.path import get_group_collection
+from ..authn.pas.group.schema import GroupSchema
+from ..authn.pas.user.model import CurrentUserModel, UserCollection, UserModel
 from ..authn.pas.utils import has_role
+from ..crud import permission as crudperm
+from ..crud.model import Collection, Model
 
 
 class DefaultAuthzPolicy(morepath.App):

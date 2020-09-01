@@ -4,6 +4,8 @@ import threading
 import typing
 from urllib.parse import urlparse
 
+import pytz
+
 import morepath
 import morpfw
 import sqlalchemy.orm
@@ -72,6 +74,12 @@ class Request(BaseRequest):
         if os.path.exists(self._cm_cwd):
             os.chdir(self._cm_cwd)
         self.dispose_db_engines()
+
+    def timezone(self):
+        user_tz = getattr(self.identity, "timezone", None)
+        if user_tz:
+            return user_tz()
+        return pytz.UTC
 
 
 class DBSessionRequest(Request):
