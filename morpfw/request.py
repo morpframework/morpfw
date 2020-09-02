@@ -2,6 +2,7 @@ import importlib
 import os
 import threading
 import typing
+from importlib import import_module
 from urllib.parse import urlparse
 
 import pytz
@@ -80,6 +81,17 @@ class Request(BaseRequest):
         if user_tz:
             return user_tz()
         return pytz.UTC
+
+    def permits(self, model, permission):
+        if isinstance(model, str):
+            model = self.resolve_path(model)
+        if isinstance(permission, str):
+            perm_mod, perm_cls = permission.split(":")
+            mod = import_module(perm_mod)
+            klass = getattr(mod, perm_cls)
+        else:
+            klass = permission
+        return self.app._permits(self.identity, model, klass)
 
 
 class DBSessionRequest(Request):
