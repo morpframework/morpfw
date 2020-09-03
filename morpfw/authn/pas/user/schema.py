@@ -53,6 +53,7 @@ class UserSchema(Schema):
         metadata={
             "required": True,
             "editable": False,
+            "searchable": True,
             "validators": [regex_validator(NAME_PATTERN, "name")],
         },
     )
@@ -61,6 +62,7 @@ class UserSchema(Schema):
         default=None,
         metadata={
             "required": True,
+            "searchable": True,
             "validators": [regex_validator(EMAIL_PATTERN, "email")],
         },
     )
@@ -80,12 +82,15 @@ class UserSchema(Schema):
         default="UTC",
         metadata={
             "validators": [valid_tz],
+            "required": True,
             "deform.widget": deform.widget.Select2Widget(
                 values=[(x, x) for x in pytz.all_timezones]
             ),
         },
     )
-    is_administrator: typing.Optional[bool] = field(default=False)
+    is_administrator: typing.Optional[bool] = field(
+        default=False, metadata={"searchable": True}
+    )
 
 
 @App.identifierfield(schema=UserSchema)
