@@ -70,9 +70,9 @@ class UserModel(Model):
     def identity(self):
         return morepath.Identity(self.userid)
 
-    def change_password(self, password: str, new_password: str):
+    def change_password(self, password: str, new_password: str, secure: bool = True):
         rules = self.rulesprovider()
-        result = rules.change_password(password, new_password)
+        result = rules.change_password(password, new_password, secure=secure)
         self["nonce"] = secrets.token_hex(8)
         return result
 
