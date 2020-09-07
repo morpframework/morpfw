@@ -167,7 +167,7 @@ def update(context, request):
 
 
 @App.json(
-    model=Model, name="statemachine", request_method="POST", permission=permission.Edit
+    model=Model, name="statemachine", request_method="POST", permission=permission.StateUpdate
 )
 def statemachine(context, request):
     if not context.statemachine_view_enabled:
