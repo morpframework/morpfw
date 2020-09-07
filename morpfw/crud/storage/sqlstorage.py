@@ -129,7 +129,15 @@ class SQLStorage(BaseStorage):
             q = q.group_by(*group_bys)
 
         results = []
-        for o in q.all():
+        try:
+            q_res = q.all()
+        except StatementError:
+            empty_res = {}
+            for f in fields:
+                empty_res[f.key] = 0
+            return [empty_res]
+
+        for o in q_res:
             d = o._asdict()
             for k, v in d.items():
                 if isinstance(v, datetime):
@@ -171,11 +179,18 @@ class SQLStorage(BaseStorage):
 
         yield_per = self.request.environ.get("morpfw.sqlstorage.yield_per", None)
         if yield_per is None:
-            return [self.model(self.request, collection, o) for o in q.all()]
+            try:
+                return [self.model(self.request, collection, o) for o in q.all()]
+            except StatementError:
+                return []
         else:
-            return [
-                self.model(self.request, collection, o) for o in q.yield_per(yield_per)
-            ]
+            try:
+                return [
+                    self.model(self.request, collection, o)
+                    for o in q.yield_per(yield_per)
+                ]
+            except StatementError:
+                return []
 
     def get(self, collection, identifier):
         qs = []
