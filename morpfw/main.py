@@ -92,6 +92,7 @@ def create_admin(request: Request, username: str, password: str, email: str):
             "state": "active",
             "source": "local",
             "is_administrator": True,
+            "timezone": "UTC"
         }
     )
     gcol = get_group_collection(request)
