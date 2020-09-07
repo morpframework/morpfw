@@ -20,3 +20,6 @@ class Search(All):
 
 class Aggregate(All):
     pass
+
+class StateUpdate(MFWAll):
+    pass
