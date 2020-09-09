@@ -77,7 +77,8 @@ setup(name='morpfw',
           'deform',
           'more.chameleon',
           'more.static',
-          'RestrictedPython'
+          'RestrictedPython',
+          'python-ldap',
       ],
       extras_require={
           'test': [

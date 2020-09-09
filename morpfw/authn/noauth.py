@@ -1,12 +1,12 @@
 from morepath import NO_IDENTITY
+
 from ..identity import Identity
 from .base import AuthnPolicy as BaseAuthnPolicy
 
 
 class NoAuthIdentityPolicy(object):
-
     def identify(self, request):
-        return Identity('ANONYMOUS')
+        return Identity(request=request, userid=None)
 
     def remember(self, response, request, identity):
         pass
@@ -16,7 +16,6 @@ class NoAuthIdentityPolicy(object):
 
 
 class AuthnPolicy(BaseAuthnPolicy):
-
     def get_identity_policy(self, settings):
         return NoAuthIdentityPolicy()
 

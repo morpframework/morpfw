@@ -43,6 +43,13 @@ def allow_users_management(identity, context, permission):
     return False
 
 
+@DefaultAuthzPolicy.permission_rule(model=UserModel, permission=crudperm.StateUpdate)
+def allow_users_state_management(identity, context, permission):
+    if _has_admin_role(context):
+        return True
+    return False
+
+
 @DefaultAuthzPolicy.permission_rule(model=GroupCollection, permission=crudperm.All)
 def allow_groups_management(identity, context, permission):
     if _has_admin_role(context):

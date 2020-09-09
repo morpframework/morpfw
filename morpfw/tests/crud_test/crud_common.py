@@ -41,6 +41,11 @@ def allow_all_model_access(identity, context, permission):
     return True
 
 
+@App.permission_rule(model=Model, permission=crudperm.StateUpdate)
+def allow_all_model_state_access(identity, context, permission):
+    return True
+
+
 @App.permission_rule(model=Collection, permission=crudperm.All)
 def allow_all_collection_access(identity, context, permission):
     return True
