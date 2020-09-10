@@ -26,8 +26,10 @@ def has_role(request, role, userid=None, groupname="__default__"):
             return False
 
     group_col = get_group_collection(request)
-    defgroup = group_col.get(groupname)
+    defgroup = group_col.get_by_groupname(groupname)
     if not userid:
         userid = request.identity.userid
     roles = defgroup.get_member_roles(userid)
+    users = request.get_collection("morpfw.pas.user")
+    user = users.get_by_userid(userid)
     return role in roles

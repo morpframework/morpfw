@@ -33,7 +33,7 @@ class UserCollection(Collection):
         if re.match(EMAIL_PATTERN, username):
             user = self.storage.get_by_email(self, username)
         else:
-            user = self.storage.get(self, username)
+            user = self.storage.get_by_username(self, username)
 
         if user is None:
             return None
@@ -46,6 +46,9 @@ class UserCollection(Collection):
 
     def get_by_email(self, email):
         return self.storage.get_by_email(self, email)
+
+    def get_by_username(self, username):
+        return self.storage.get_by_username(self, username)
 
     def _create(self, data):
         return super(UserCollection, self)._create(data)
@@ -98,7 +101,12 @@ class UserModel(Model):
         links.append({"rel": "userid", "value": self.userid})
         for g in self.groups():
             links.append(
-                {"rel": "group", "name": g.identifier, "href": self.request.link(g)}
+                {
+                    "rel": "group",
+                    "uuid": g.identifier,
+                    "name": g.data["groupname"],
+                    "href": self.request.link(g),
+                }
             )
         return links
 
@@ -121,7 +129,7 @@ def userstatemachine(context):
 def add_user_to_default_group(app, request, obj, signal):
     request = obj.request
     gcol = get_group_collection(request)
-    g = gcol.get("__default__")
+    g = gcol.get_by_groupname("__default__")
     if g is None:
         g = gcol.create({"groupname": "__default__"})
     g.add_members([obj.userid])

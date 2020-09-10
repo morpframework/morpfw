@@ -57,6 +57,12 @@ class APIKeyMemoryStorage(MemoryStorage):
 class GroupMemoryStorage(MemoryStorage, IGroupStorage):
     model = GroupModel
 
+    def get_by_groupname(self, collection, groupname):
+        res = self.search(collection, rulez.field["groupname"] == groupname)
+        if res:
+            return res[0]
+        return None
+
     def get_user_by_userid(self, collection, userid, as_model=True):
         user_storage = self.app.get_storage(UserModel, self.request)
         user_collection = UserCollection(self.request, user_storage)
@@ -65,7 +71,7 @@ class GroupMemoryStorage(MemoryStorage, IGroupStorage):
     def get_user_by_username(self, collection, username, as_model=True):
         user_storage = self.app.get_storage(UserModel, self.request)
         user_collection = UserCollection(self.request, user_storage)
-        return user_storage.get(user_collection, username)
+        return user_storage.get_by_username(user_collection, username)
 
     def get_user_groups(self, userid, collection):
         res = []
@@ -74,8 +80,8 @@ class GroupMemoryStorage(MemoryStorage, IGroupStorage):
                 res.append(group)
         return res
 
-    def get_members(self, groupname, collection):
-        group = self.get(groupname, collection)
+    def get_members(self, collection, groupid):
+        group = self.get(collection, groupid)
         userstorage = self.request.app.get_storage(UserModel, self.request)
         usercol = UserCollection(self.request, userstorage)
         res = []
@@ -86,8 +92,8 @@ class GroupMemoryStorage(MemoryStorage, IGroupStorage):
             res.append(userstorage.get_by_userid(usercol, m))
         return res
 
-    def add_group_members(self, collection, groupname, userids):
-        group = self.get(collection, groupname)
+    def add_group_members(self, collection, groupid, userids):
+        group = self.get(collection, groupid)
         group.data.setdefault("xattrs", {})
         attrs = group.data["xattrs"]
         attrs.setdefault("members", [])
@@ -97,8 +103,8 @@ class GroupMemoryStorage(MemoryStorage, IGroupStorage):
                 attrs["members"].append(u)
         group.data["xattrs"] = attrs
 
-    def remove_group_members(self, collection, groupname, userids):
-        group = self.get(collection, groupname)
+    def remove_group_members(self, collection, groupid, userids):
+        group = self.get(collection, groupid)
         group.data.setdefault("xattrs", {})
         attrs = group.data["xattrs"]
         attrs.setdefault("members", [])
@@ -107,25 +113,25 @@ class GroupMemoryStorage(MemoryStorage, IGroupStorage):
                 attrs["members"].remove(u)
         group.data["xattrs"] = attrs
 
-    def get_group_user_roles(self, collection, groupname, userid):
+    def get_group_user_roles(self, collection, groupid, userid):
         rolemap = DB["rolemap"]
-        rolemap.setdefault(groupname, {})
-        rolemap[groupname].setdefault(userid, [])
-        return rolemap[groupname][userid]
+        rolemap.setdefault(groupid, {})
+        rolemap[groupid].setdefault(userid, [])
+        return rolemap[groupid][userid]
 
-    def grant_group_user_role(self, collection, groupname, userid, rolename):
+    def grant_group_user_role(self, collection, groupid, userid, rolename):
         rolemap = DB["rolemap"]
-        rolemap.setdefault(groupname, {})
-        rolemap[groupname].setdefault(userid, [])
-        if rolename not in rolemap[groupname][userid]:
-            rolemap[groupname][userid].append(rolename)
+        rolemap.setdefault(groupid, {})
+        rolemap[groupid].setdefault(userid, [])
+        if rolename not in rolemap[groupid][userid]:
+            rolemap[groupid][userid].append(rolename)
 
-    def revoke_group_user_role(self, collection, groupname, userid, rolename):
+    def revoke_group_user_role(self, collection, groupid, userid, rolename):
         rolemap = DB["rolemap"]
-        rolemap.setdefault(groupname, {})
-        rolemap[groupname].setdefault(userid, [])
-        if rolename in rolemap[groupname][userid]:
-            rolemap[groupname][userid].remove(rolename)
+        rolemap.setdefault(groupid, {})
+        rolemap[groupid].setdefault(userid, [])
+        if rolename in rolemap[groupid][userid]:
+            rolemap[groupid][userid].remove(rolename)
 
 
 SINGLETON: dict = {}

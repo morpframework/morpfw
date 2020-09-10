@@ -92,7 +92,4 @@ class UserSchema(Schema):
         default=False, metadata={"searchable": True}
     )
 
-
-@App.identifierfield(schema=UserSchema)
-def user_identifierfield(schema):
-    return "username"
+    __unique_constraint__ = ["username", "deleted"]

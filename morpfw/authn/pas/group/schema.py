@@ -27,10 +27,7 @@ class GroupSchema(Schema):
         },
     )
 
-
-@App.identifierfield(schema=GroupSchema)
-def group_identifierfield(schema):
-    return "groupname"
+    __unique_constraint__ = ["groupname", "deleted"]
 
 
 @dataclass

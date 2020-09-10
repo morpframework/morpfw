@@ -32,7 +32,7 @@ class UserSQLStorage(SQLStorage, IUserStorage):
         q = self.session.query(db.User).filter(db.User.uuid == userid)
         u = q.first()
         if not u:
-            raise exc.UserDoesNotExistsError(userid)
+            return None
         if not as_model:
             return u
         return self.model(self.request, collection, u)
@@ -43,7 +43,7 @@ class UserSQLStorage(SQLStorage, IUserStorage):
         )
         u = q.first()
         if not u:
-            raise exc.UserDoesNotExistsError(username)
+            return None
         if not as_model:
             return u
         return self.model(self.request, collection, u)
@@ -99,14 +99,14 @@ class GroupSQLStorage(SQLStorage, IGroupStorage):
         user_collection = UserCollection(self.request, user_storage)
         return user_storage.get_by_username(user_collection, username, as_model)
 
-    def get_members(self, collection, groupname):
+    def get_members(self, collection, groupid):
         q = (
             self.session.query(db.User)
             .join(db.Membership)
             .join(db.Group)
             .filter(
                 sa.and_(
-                    db.Group.groupname == groupname,
+                    db.Group.uuid == groupid,
                     db.Group.deleted.is_(None),
                     db.User.deleted.is_(None),
                 )
@@ -120,17 +120,15 @@ class GroupSQLStorage(SQLStorage, IGroupStorage):
             members.append(user_storage.model(self.request, user_collection, m))
         return members
 
-    def add_group_members(self, collection, groupname, userids):
+    def add_group_members(self, collection, groupid, userids):
         # FIXME: not using sqlalchemy relations might impact performance
         g = (
             self.session.query(db.Group)
-            .filter(
-                sa.and_(db.Group.groupname == groupname, db.Group.deleted.is_(None))
-            )
+            .filter(sa.and_(db.Group.uuid == groupid, db.Group.deleted.is_(None)))
             .first()
         )
         if not g:
-            raise ValueError("Group Does Not Exist %s" % groupname)
+            raise ValueError("Group Does Not Exist %s" % groupid)
         gid = g.id
         for userid in userids:
             u = self.get_user_by_userid(collection, userid, as_model=False)
@@ -153,16 +151,14 @@ class GroupSQLStorage(SQLStorage, IGroupStorage):
                 m.user_id = uid
                 self.session.add(m)
 
-    def remove_group_members(self, collection, groupname, userids):
+    def remove_group_members(self, collection, groupid, userids):
         g = (
             self.session.query(db.Group)
-            .filter(
-                sa.and_(db.Group.groupname == groupname, db.Group.deleted.is_(None))
-            )
+            .filter(sa.and_(db.Group.uuid == groupid, db.Group.deleted.is_(None)))
             .first()
         )
         if not g:
-            raise exc.GroupDoesNotExistsError(groupname)
+            raise exc.GroupDoesNotExistsError(groupid)
         gid = g.id
         for userid in userids:
             u = self.get_user_by_userid(collection, userid, as_model=False)
@@ -182,16 +178,14 @@ class GroupSQLStorage(SQLStorage, IGroupStorage):
             for m in members:
                 self.session.delete(m)
 
-    def get_group_user_roles(self, collection, groupname, userid):
+    def get_group_user_roles(self, collection, groupid, userid):
         g = (
             self.session.query(db.Group)
-            .filter(
-                sa.and_(db.Group.groupname == groupname, db.Group.deleted.is_(None))
-            )
+            .filter(sa.and_(db.Group.uuid == groupid, db.Group.deleted.is_(None)))
             .first()
         )
         if not g:
-            raise exc.GroupDoesNotExistsError(groupname)
+            raise exc.GroupDoesNotExistsError(groupid)
         gid = g.id
         u = self.get_user_by_userid(collection, userid, as_model=False)
         uid = u.id
@@ -210,7 +204,7 @@ class GroupSQLStorage(SQLStorage, IGroupStorage):
         )
         return [r.rolename for r in roles]
 
-    def grant_group_user_role(self, collection, groupname, userid, rolename):
+    def get_by_groupname(self, collection, groupname):
         g = (
             self.session.query(db.Group)
             .filter(
@@ -219,7 +213,17 @@ class GroupSQLStorage(SQLStorage, IGroupStorage):
             .first()
         )
         if not g:
-            raise exc.GroupDoesNotExistsError(groupname)
+            return None
+        return self.model(self.request, collection, g)
+
+    def grant_group_user_role(self, collection, groupid, userid, rolename):
+        g = (
+            self.session.query(db.Group)
+            .filter(sa.and_(db.Group.uuid == groupid, db.Group.deleted.is_(None)))
+            .first()
+        )
+        if not g:
+            raise exc.GroupDoesNotExistsError(groupid)
         gid = g.id
         u = self.get_user_by_userid(collection, userid, as_model=False)
         uid = u.id
@@ -236,7 +240,7 @@ class GroupSQLStorage(SQLStorage, IGroupStorage):
             .first()
         )
         if not m:
-            raise exc.MembershipError(userid, groupname)
+            raise exc.MembershipError(userid, groupid)
         ra = (
             self.session.query(db.RoleAssignment)
             .filter(
@@ -252,16 +256,14 @@ class GroupSQLStorage(SQLStorage, IGroupStorage):
         r.rolename = rolename
         self.session.add(r)
 
-    def revoke_group_user_role(self, collection, groupname, userid, rolename):
+    def revoke_group_user_role(self, collection, groupid, userid, rolename):
         g = (
             self.session.query(db.Group)
-            .filter(
-                sa.and_(db.Group.groupname == groupname, db.Group.deleted.is_(None))
-            )
+            .filter(sa.and_(db.Group.uuid == groupid, db.Group.deleted.is_(None)))
             .first()
         )
         if not g:
-            raise exc.GroupDoesNotExistsError(groupname)
+            raise exc.GroupDoesNotExistsError(groupid)
         gid = g.id
         u = self.get_user_by_userid(collection, userid, as_model=False)
         uid = u.id
@@ -278,7 +280,7 @@ class GroupSQLStorage(SQLStorage, IGroupStorage):
             .first()
         )
         if not m:
-            raise exc.MembershipError(userid, groupname)
+            raise exc.MembershipError(userid, groupid)
         ra = (
             self.session.query(db.RoleAssignment)
             .filter(

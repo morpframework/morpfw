@@ -12,13 +12,13 @@ def create_group(request, groupname):
 
 def delete_group(request, groupname):
     collection = get_group_collection(request)
-    group = collection.get(groupname)
+    group = collection.get_by_groupname(groupname)
     group.delete()
 
 
 def get_user(request, username):
     collection = get_user_collection(request)
-    return collection.get(username)
+    return collection.get_by_username(username)
 
 
 def get_user_by_userid(request, userid):

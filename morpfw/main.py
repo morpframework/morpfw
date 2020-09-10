@@ -92,11 +92,11 @@ def create_admin(request: Request, username: str, password: str, email: str):
             "state": "active",
             "source": "local",
             "is_administrator": True,
-            "timezone": "UTC"
+            "timezone": "UTC",
         }
     )
-    gcol = get_group_collection(request)
-    group = gcol.get("__default__")
+    gcol = request.get_collection("morpfw.pas.group")
+    group = gcol.get_by_groupname("__default__")
     group.add_members([userobj.userid])
     group.grant_member_role(userobj.userid, "administrator")
     transaction.manager.commit()

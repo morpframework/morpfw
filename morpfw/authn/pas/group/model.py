@@ -15,6 +15,9 @@ class GroupCollection(Collection):
     schema = GroupSchema
     exist_exc = GroupExistsError
 
+    def get_by_groupname(self, groupname):
+        return self.storage.get_by_groupname(self, groupname)
+
 
 class GroupModel(Model):
     schema = GroupSchema

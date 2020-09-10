@@ -93,6 +93,25 @@ class Request(BaseRequest):
             klass = permission
         return self.app._permits(self.identity, model, klass)
 
+    def get_collection(self, type_name):
+        typeinfo = self.app.config.type_registry.get_typeinfo(
+            name=type_name, request=self
+        )
+        col = typeinfo["collection_factory"](self)
+        return col
+
+    def resolve_path(self, path, app=SAME_APP):
+        if app is None:
+            raise LinkError("Cannot path: app is None")
+
+        if app is SAME_APP:
+            app = self.app
+
+        request = self.__class__(self.environ.copy(), app, path_info=path)
+        # try to resolve imports..
+
+        return resolve_model(request)
+
 
 class DBSessionRequest(Request):
     @property
@@ -199,25 +218,6 @@ class DBSessionRequest(Request):
                 self._db_engines[k].dispose()
                 del self._db_engines[k]
         self.environ["morpfw.memoize"] = {}  # noqa
-
-    def get_collection(self, type_name):
-        typeinfo = self.app.config.type_registry.get_typeinfo(
-            name=type_name, request=self
-        )
-        col = typeinfo["collection_factory"](self)
-        return col
-
-    def resolve_path(self, path, app=SAME_APP):
-        if app is None:
-            raise LinkError("Cannot path: app is None")
-
-        if app is SAME_APP:
-            app = self.app
-
-        request = self.__class__(self.environ.copy(), app, path_info=path)
-        # try to resolve imports..
-
-        return resolve_model(request)
 
 
 COMMITTED_APPS = []
