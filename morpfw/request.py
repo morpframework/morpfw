@@ -11,6 +11,7 @@ import morepath
 import morpfw
 import sqlalchemy.orm
 import transaction
+from cryptography.fernet import Fernet
 from morepath.publish import resolve_model
 from morepath.request import SAME_APP, LinkError
 from morepath.request import Request as BaseRequest
@@ -111,6 +112,17 @@ class Request(BaseRequest):
         # try to resolve imports..
 
         return resolve_model(request)
+
+    def fernet_encrypt(self, text, encoding="utf8"):
+        key = self.app.get_config("morpfw.secret.fernet_key")
+        fernet = Fernet(key)
+        return fernet.encrypt(text.encode(encoding))
+
+    def fernet_decrypt(self, token, ttl=None, encoding="utf8"):
+        token = token.encode(encoding)
+        key = self.app.get_config("morpfw.secret.fernet_key")
+        fernet = Fernet(key)
+        return fernet.decrypt(token, ttl=ttl).decode(encoding)
 
 
 class DBSessionRequest(Request):
