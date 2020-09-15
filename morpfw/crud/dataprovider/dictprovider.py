@@ -31,9 +31,9 @@ class DictProvider(IDataProvider):
             return data
         if key not in self.data.keys():
             field = self.schema.__dataclass_fields__[key]
-            if field.default is not _MISSING_TYPE:
+            if not isinstance(field.default, _MISSING_TYPE):
                 return field.default
-            if field.default_factory is not _MISSING_TYPE:
+            if not isinstance(field.default_factory, _MISSING_TYPE):
                 return field.default_factory()
             return None
         return self.data[key]

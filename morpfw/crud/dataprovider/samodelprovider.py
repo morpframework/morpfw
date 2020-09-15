@@ -47,10 +47,7 @@ class SQLAlchemyModelProvider(IDataProvider):
             except AttributeError:
                 raise KeyError(key)
             if data:
-                user = self.request.identity
-                if isinstance(user, Identity):
-                    tz = user.timezone()
-                    data = data.astimezone(tz)
+                data = data.astimezone(self.request.timezone())
                 return data
             return None
         if isinstance(self.columns[key].type, GUID):
@@ -99,9 +96,9 @@ class SQLAlchemyModelProvider(IDataProvider):
             attr = self.schema.__dataclass_fields__.get(key, None)
             if attr:
                 # t = dataclass_get_type(attr)
-                if attr.default is not _MISSING_TYPE:
+                if not isinstance(attr.default, _MISSING_TYPE):
                     default = attr.default
-                elif attr.default_factory is not _MISSING_TYPE:
+                elif not isinstance(attr.default_factory, _MISSING_TYPE):
                     default = attr.default_factory()
                 else:
                     default = None
