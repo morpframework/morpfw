@@ -53,44 +53,108 @@ class CollectionBatching(object):
             return (
                 parsed_url.scheme
                 + "://"
-                + parsed_url.hostname
+                + parsed_url.netloc
                 + parsed_url.path
                 + "?"
                 + urlencode(qso)
             )
 
         pages = []
+
+        minpage = 0
+        if (self.pagenumber - size) > 0:
+            minpage = self.pagenumber - size
+            if self.total_pages() - self.pagenumber <= size:
+                minpage -= 1 + size - (self.total_pages() - self.pagenumber)
+                if minpage < 0:
+                    minpage = 0
+            if (self.pagenumber + 1 + size) < self.total_pages():
+                minpage += 1
+
+        maxpage = self.total_pages()
+        if (self.pagenumber + 1 + size) < self.total_pages():
+            maxpage = self.pagenumber + 1 + size
+            if self.pagenumber < size:
+                maxpage += size - self.pagenumber
+                if maxpage > self.total_pages():
+                    maxpage = self.total_pages()
+            if (self.pagenumber - size) > 0:
+                maxpage -= 1
+
         if self.pagenumber > 0:
             pages.append(
                 {
                     "page": self.pagenumber - 1,
-                    "title": "Previous",
+                    "title": "<",
                     "url": get_page_url(self.pagenumber - 1),
                 }
             )
+        elif self.pagenumber == 0:
+            pages.append(
+                {"page": self.pagenumber, "title": "<", "state": "disabled",}
+            )
+
+        if self.pagenumber - size > 0:
+            if minpage > 0:
+                if self.pagenumber != 0:
+                    pages.append({"page": 0, "title": "1", "url": get_page_url(0)})
+                pages.append(
+                    {"page": None, "title": "...", "url": None, "state": "disabled"}
+                )
+
+        # pre
         if self.pagenumber > 0:
-            minpage = 0
-            if (self.pagenumber - size) > 0:
-                minpage = self.pagenumber - size
+
             for i in range(minpage, self.pagenumber):
                 qs = qs.copy()
                 qs["page"] = i
                 pages.append({"page": i, "title": str(i + 1), "url": get_page_url(i)})
-        pages.append({"page": self.pagenumber, "title": str(self.pagenumber + 1)})
+        pages.append(
+            {
+                "page": self.pagenumber,
+                "title": str(self.pagenumber + 1),
+                "url": None,
+                "state": "active",
+            }
+        )
+
+        # post
         if self.pagenumber < self.total_pages():
-            maxpage = self.total_pages()
-            if (self.pagenumber + 1 + size) < self.total_pages():
-                maxpage = self.pagenumber + 1 + size
+
             for i in range(self.pagenumber + 1, maxpage):
                 qs = qs.copy()
                 qs["page"] = i
                 pages.append({"page": i, "title": str(i + 1), "url": get_page_url(i)})
+
+        if self.pagenumber + 1 + size < self.total_pages():
+            if maxpage < self.total_pages():
+                pages.append(
+                    {"page": None, "title": "...", "url": None, "state": "disabled"}
+                )
+                if self.pagenumber != self.total_pages() - 1:
+                    pages.append(
+                        {
+                            "page": self.total_pages() - 1,
+                            "title": str(self.total_pages()),
+                            "url": get_page_url(self.total_pages() - 1),
+                        }
+                    )
         if self.pagenumber + 1 < self.total_pages():
             pages.append(
                 {
                     "page": self.pagenumber + 1,
-                    "title": "Next",
+                    "title": ">",
                     "url": get_page_url(self.pagenumber + 1),
                 }
             )
+        elif self.pagenumber + 1 == self.total_pages():
+            pages.append(
+                {
+                    "page": self.pagenumber,
+                    "title": ">",
+                    "url": None,
+                    "state": "disabled",
+                }
+            )
+
         return pages
