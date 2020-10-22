@@ -32,6 +32,8 @@ class LDAP3SQLUserStorage(UserSQLStorage):
         self.ldap_username_attr = username_attr
         self.ldap_email_attr = email_attr
         self.ldap_search_scope = search_scope
+        self.ldap_bind_dn = bind_dn
+        self.ldap_bind_password = bind_password
         self.ldap_attr_mapping = [
             v.split("=") for v in (attributes or "").strip().split(",") if v
         ]
@@ -46,6 +48,9 @@ class LDAP3SQLUserStorage(UserSQLStorage):
 
     def ldap_connect(self):
         conn = ldap.initialize(self.ldap_uri)
+        # disable referral chasing
+        # https://www.python-ldap.org/en/python-ldap-3.3.0/faq.html
+        conn.set_option(ldap.OPT_REFERRALS, 0)
         if self.ldap_start_tls:
             conn.start_tls_s()
         return conn
@@ -69,7 +74,7 @@ class LDAP3SQLUserStorage(UserSQLStorage):
         if not result:
             return None
 
-        userdata = {"dn": result[0]}
+        userdata = {"dn": result[0][0]}
         for attr in attrs:
             userdata[attr] = result[0][1][attr]
         return userdata
@@ -101,11 +106,8 @@ class LDAP3SQLUserStorage(UserSQLStorage):
         user = super().get_by_userid(collection, userid)
         if user["source"] == "ldap":
             ldap_client = self.ldap_connect()
-            dn = "%s=%s,%s" % (
-                self.ldap_username_attr,
-                user["username"],
-                self.ldap_base_dn,
-            )
+            ldapuser = self.ldap_get_user(user["username"])
+            dn = ldapuser["dn"]
             try:
                 ldap_client.bind_s(dn, password)
             except ldap.INVALID_CREDENTIALS:
