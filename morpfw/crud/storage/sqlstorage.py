@@ -245,15 +245,26 @@ class SQLStorage(BaseStorage):
         for k, v in data.items():
             if d.get(k, None) != v:
                 d[k] = v
-
+        self.session.flush()
         return self.model(self.request, collection, r)
 
     def delete(self, identifier, model, **kwargs):
         permanent = kwargs.get("permanent", False)
         if permanent:
             model.delete()
-        else:
-            model["deleted"] = datetime.now(tz=pytz.UTC)
+            return
+
+        qs = []
+        idfield = self.app.get_identifierfield(self.model.schema)
+        qs.append(getattr(self.orm_model, idfield) == identifier)
+        q = self.session.query(self.orm_model).filter(sa.and_(*qs))
+
+        r = q.first()
+        if not r:
+            raise ValueError(identifier)
+
+        d = self.app.get_dataprovider(self.model.schema, r, self)
+        d["deleted"] = datetime.now(tz=pytz.UTC)
 
 
 class GUID(TypeDecorator):
