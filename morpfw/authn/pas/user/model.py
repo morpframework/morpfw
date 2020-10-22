@@ -76,7 +76,7 @@ class UserModel(Model):
     def change_password(self, password: str, new_password: str, secure: bool = True):
         rules = self.rulesprovider()
         result = rules.change_password(password, new_password, secure=secure)
-        self["nonce"] = secrets.token_hex(8)
+        self.update({"nonce": secrets.token_hex(8)}, deserialize=False)
         return result
 
     def validate(self, password: str, check_state: bool = True):

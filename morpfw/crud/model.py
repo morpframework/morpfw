@@ -1,5 +1,6 @@
 import copy
 import json
+from logging import warn
 import re
 from uuid import uuid4
 import dataclasses
@@ -14,7 +15,7 @@ from rulez import OperatorNotAllowedError
 from rulez import field as rfield
 from rulez import parse_dsl, validate_condition
 from transitions import Machine
-
+import logging
 from ..interfaces import ICollection, IModel, IStorage
 from ..memoizer import requestmemoize
 from . import permission, signals
@@ -30,6 +31,7 @@ from .errors import (
 from .log import logger
 from inverter import dc2colanderjson
 from inverter import dc2jsl
+import warnings
 
 ALLOWED_SEARCH_OPERATORS = [
     "and",
@@ -114,15 +116,15 @@ class Collection(ICollection):
 
     @requestmemoize()
     def max_id(self):
-        return self.aggregate(group={"max_id": {"function": "max", "field": "id"}})[
-            0
-        ]["max_id"]
+        return self.aggregate(group={"max_id": {"function": "max", "field": "id"}})[0][
+            "max_id"
+        ]
 
     @requestmemoize()
     def min_id(self):
-        return self.aggregate(group={"min_id": {"function": "min", "field": "id"}})[
-            0
-        ]["min_id"]
+        return self.aggregate(group={"min_id": {"function": "min", "field": "id"}})[0][
+            "min_id"
+        ]
 
     def _search(self, query=None, offset=0, limit=None, order_by=None, secure=False):
         if query:
@@ -262,20 +264,26 @@ class Model(IModel):
     hidden_fields: list = []
 
     def __setitem__(self, key, value):
+        warnings.warn(
+            "Value assignment through model will be removed", DeprecationWarning
+        )
         self.data[key] = value
 
     def __getitem__(self, key):
         return self.data[key]
 
     def __delitem__(self, key):
+        warnings.warn(
+            "Value deletion through model will be removed", DeprecationWarning
+        )
         del self.data[key]
 
     def __dict__(self):
         return self.data.as_dict()
 
     def title(self):
-        return self['uuid']
-        
+        return self["uuid"]
+
     @property
     def statemachine_view_enabled(self):
         if self.statemachine():

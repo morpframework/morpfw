@@ -1,7 +1,8 @@
 import abc
+from typing import Any, BinaryIO, List, Optional, Sequence, Type, Union
+
 import morepath
 import webob
-from typing import Optional, Union, BinaryIO, List, Sequence, Type, Any
 
 _marker = object()
 
@@ -256,15 +257,7 @@ class IModel(abc.ABC):
         super().__init__()
 
     @abc.abstractmethod
-    def __setitem__(self, key, value):
-        raise NotImplementedError
-
-    @abc.abstractmethod
     def __getitem__(self, key):
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def __delitem__(self, key):
         raise NotImplementedError
 
     @abc.abstractmethod
