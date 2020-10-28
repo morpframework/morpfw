@@ -240,6 +240,8 @@ def request_factory(
     extra_environ: typing.Optional[dict] = None,
     scan: bool = True,
     app_factory_opts: typing.Optional[dict] = None,
+    path: str = "/",
+    request_method: str = "GET",
 ):
     app_factory_opts = app_factory_opts or {}
     app_factory_opts["scan"] = scan
@@ -262,12 +264,16 @@ def request_factory(
 
     server_url = settings.get("server", {}).get("server_url", "http://localhost")
     parsed = urlparse(server_url)
+    if "?" not in path:
+        path += "?"
+    path_info, qs = path.split("?")
     environ = {
-        "PATH_INFO": "/",
+        "PATH_INFO": path,
+        "QUERY_STRING": qs,
         "wsgi.url_scheme": parsed.scheme,
         "SERVER_PROTOCOL": "HTTP/1.1",
         "HTTP_HOST": parsed.netloc,
-        "REQUEST_METHOD": "GET",
+        "REQUEST_METHOD": request_method,
     }
     environ.update(extra_environ)
 
