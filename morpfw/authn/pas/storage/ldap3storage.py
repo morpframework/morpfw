@@ -42,8 +42,6 @@ class LDAP3SQLUserStorage(UserSQLStorage):
             filterstr = "(%s)" % filterstr
         self.ldap_filterstr = filterstr
         self.ldap_default_timezone = "UTC"
-        self.ldap_client = self.ldap_connect()
-        self.ldap_client.bind_s(bind_dn, bind_password)
         super().__init__(request, blobstorage=blobstorage)
 
     def ldap_connect(self):
@@ -55,13 +53,19 @@ class LDAP3SQLUserStorage(UserSQLStorage):
             conn.start_tls_s()
         return conn
 
+    def ldap_admin_connect(self):
+        client = self.ldap_connect()
+        client.bind_s(self.ldap_bind_dn, self.ldap_bind_password)
+        return client
+
     def ldap_get_user(self, username):
         attrs = [self.ldap_username_attr, self.ldap_email_attr] + [
             x[0] for x in self.ldap_attr_mapping
         ]
 
+        ldap_client = self.ldap_admin_connect()
         try:
-            result = self.ldap_client.search_ext_s(
+            result = ldap_client.search_ext_s(
                 self.ldap_base_dn,
                 self.ldap_search_scope,
                 filterstr=self.ldap_filterstr.replace(r"{username}", username),
@@ -87,8 +91,12 @@ class LDAP3SQLUserStorage(UserSQLStorage):
                 random_passwd = uuid4().hex
                 user = collection.create(
                     {
-                        "username": ldapuser[self.ldap_username_attr][0].decode("utf8"),
-                        "email": ldapuser[self.ldap_email_attr][0].decode("utf8"),
+                        "username": ldapuser[self.ldap_username_attr][0]
+                        .decode("utf8")
+                        .lower(),
+                        "email": ldapuser[self.ldap_email_attr][0]
+                        .decode("utf8")
+                        .lower(),
                         "source": "ldap",
                         "timezone": self.ldap_default_timezone,
                         "password": random_passwd,
@@ -97,17 +105,19 @@ class LDAP3SQLUserStorage(UserSQLStorage):
         return user
 
     def change_password(self, collection, userid, new_password):
-        user = super().get_by_userid()
+        user = super().get_by_userid(collection, userid)
         if user["source"] == "ldap":
             raise webob.exc.HTTPForbidden()
-        raise super().change_password(collection, userid, new_password)
+        return super().change_password(collection, userid, new_password)
 
     def validate(self, collection, userid, password):
         user = super().get_by_userid(collection, userid)
         if user["source"] == "ldap":
-            ldap_client = self.ldap_connect()
             ldapuser = self.ldap_get_user(user["username"])
+            if not ldapuser:
+                return False
             dn = ldapuser["dn"]
+            ldap_client = self.ldap_connect()
             try:
                 ldap_client.bind_s(dn, password)
             except ldap.INVALID_CREDENTIALS:
