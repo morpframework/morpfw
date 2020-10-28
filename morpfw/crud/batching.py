@@ -41,7 +41,7 @@ class CollectionBatching(object):
     def next_page(self):
         return self.pagenumber + 1
 
-    def navigator(self, url=None, size=3):
+    def navigator(self, url=None, page_opt="page", size=3):
         if url is None:
             url = self.request.url
         parsed_url = urlparse(url)
@@ -49,7 +49,11 @@ class CollectionBatching(object):
 
         def get_page_url(page):
             qso = qs.copy()
-            qso["page"] = page
+            for k, v in list(qso.items()):
+                if isinstance(v, list) and len(v) == 1:
+                    v = v[0]
+                qso[k] = v
+            qso[page_opt] = page
             return (
                 parsed_url.scheme
                 + "://"
