@@ -109,7 +109,9 @@ def run(app, settings, host="127.0.0.1", port=5000, ignore_cli=True):
 
 def runprod(app, settings, host="127.0.0.1", port=5000, ignore_cli=True, workers=None):
     service = "gunicorn"
-    server = {"listen_address": host, "listen_port": port}
+    server_listen = {"listen_address": host, "listen_port": port}
+    server = settings["server"].copy()
+    server.update(server_listen)
     opts = {}
     opts["loglevel"] = server.get("log_level", "INFO")
     opts["log_directory"] = settings.get("logging", {}).get("log_directory", "/tmp")
