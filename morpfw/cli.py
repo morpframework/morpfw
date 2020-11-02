@@ -298,6 +298,9 @@ def main():
 
 
 def run_module(argv=sys.argv):
+    if len(argv) <= 1:
+        print("Usage: %s [module]" % argv[0])
+        sys.exit(1)
     mod = argv[1]
     sys.argv = argv[0:1] + argv[2:]
     runpy.run_module(mod, run_name="__main__", alter_sys=True)
