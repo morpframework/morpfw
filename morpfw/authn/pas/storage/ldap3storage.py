@@ -78,6 +78,9 @@ class LDAP3SQLUserStorage(UserSQLStorage):
         if not result:
             return None
 
+        if result[0][0] is None:
+            return None
+
         userdata = {"dn": result[0][0]}
         for attr in attrs:
             userdata[attr] = result[0][1][attr]
