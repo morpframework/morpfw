@@ -78,10 +78,18 @@ class Request(BaseRequest):
         self.dispose_db_engines()
 
     def timezone(self):
+        cache_key = ("morpfw.cache.timezone",)
+        self.environ.setdefault(cache_key, None)
+        cached_tz = self.environ[cache_key]
+        if cached_tz:
+            return cached_tz
+
         user_tz = getattr(self.identity, "timezone", None)
         if user_tz:
-            return user_tz()
-        return pytz.UTC
+            self.environ[cache_key] = user_tz()
+        else:
+            self.environ[cache_key] = pytz.UTC
+        return self.environ[cache_key]
 
     def permits(self, model, permission):
         if isinstance(model, str):
@@ -95,23 +103,41 @@ class Request(BaseRequest):
         return self.app._permits(self.identity, model, klass)
 
     def get_collection(self, type_name):
+        self.environ.setdefault("morpfw.cache.collection", {})
+        cachemgr = self.environ["morpfw.cache.collection"]
+        if type_name in cachemgr:
+            return cachemgr[type_name]
+
         typeinfo = self.app.config.type_registry.get_typeinfo(
             name=type_name, request=self
         )
         col = typeinfo["collection_factory"](self)
+
+        cachemgr[type_name] = col
         return col
 
-    def resolve_path(self, path, app=SAME_APP):
+    def resolve_path(self, path=None, app=SAME_APP):
+
+        if path is None:
+            path = self.path
+
         if app is None:
             raise LinkError("Cannot path: app is None")
 
         if app is SAME_APP:
             app = self.app
 
+        self.environ.setdefault("morpfw.cache.path_resolver", {})
+        cachemgr = self.environ["morpfw.cache.path_resolver"]
+        cache_key = ",".join([str(hash(app)), path])
+        if cache_key in cachemgr:
+            return cachemgr[cache_key]
+
         request = self.__class__(self.environ.copy(), app, path_info=path)
         # try to resolve imports..
-
-        return resolve_model(request)
+        result = resolve_model(request)
+        cachemgr[cache_key] = result
+        return result
 
     def fernet_encrypt(self, text, encoding="utf8"):
         key = self.app.get_config("morpfw.secret.fernet_key")
