@@ -31,6 +31,9 @@ from .model import (
 )
 def register(context, request):
     """Validate the username and password and create the user."""
+    enabled = request.app.get_config("morpfw.new_registration.enabled", True)
+    if not enabled:
+        raise HTTPNotFound()
     data = request.json
     RegistrationSchema.validate(request, data)
 
