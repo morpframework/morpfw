@@ -66,7 +66,8 @@ def get_pagecollection(request):
 @App.path(model=PageModel, path="/{identifier}")
 def get_page(request, identifier):
     storage = PageStorage(request)
-    return storage.get(identifier)
+    collection = PageCollection(request, storage)
+    return storage.get(collection, identifier)
 
 
 @App.periodic(name="test-tick", seconds=1)
