@@ -339,8 +339,13 @@ class IModel(abc.ABC):
     def after_updated(self) -> None:
         """Triggered after resource have been created"""
 
-    def before_delete(self) -> None:
-        """Triggered before deleting resource"""
+    def before_delete(self) -> bool:
+        """
+        Triggered before deleting resource
+        
+        If the return value is False-ish, delete will be prevented
+        """
+        return True
 
     def before_blobput(
         self,
@@ -357,7 +362,12 @@ class IModel(abc.ABC):
         """Triggered after BLOB is stored"""
 
     def before_blobdelete(self, field: str) -> None:
-        """Triggered before BLOB is deleted"""
+        """
+        Triggered before BLOB is deleted
+        
+        If the return value is False-ish, delete will be prevented
+        """
+        return True
 
 
 class ICollection(abc.ABC):

@@ -32,6 +32,7 @@ from .log import logger
 from inverter import dc2colanderjson
 from inverter import dc2jsl
 import warnings
+from ..request import Request
 
 ALLOWED_SEARCH_OPERATORS = [
     "and",
@@ -78,7 +79,7 @@ class Collection(ICollection):
             raise KeyError(key)
         del self.data[key]
 
-    def __init__(self, request: morepath.Request, storage: IStorage, data=None):
+    def __init__(self, request: Request, storage: IStorage, data=None):
         self.request = request
         self.app = request.app
         self.storage = storage
@@ -374,7 +375,8 @@ class Model(IModel):
     def delete(self, **kwargs):
         dispatch = self.request.app.dispatcher(signals.OBJECT_TOBEDELETED)
         dispatch.dispatch(self.request, self)
-        self.before_delete()
+        if not self.before_delete():
+            return
         blob_uuids = []
         for blobfield in self.blob_fields:
             if self.blobstorage_field not in self.data.keys():
@@ -528,6 +530,7 @@ class Model(IModel):
         if not field in self.data[self.blobstorage_field]:
             return None
         uuid = self.data[self.blobstorage_field][field]
-        self.before_blobdelete(field)
+        if not self.before_blobdelete(field):
+            return
         self.storage.delete_blob(uuid)
         self.save()
