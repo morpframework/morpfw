@@ -1,6 +1,5 @@
-import pytz
-
 import morepath
+import pytz
 import rulez
 from more.jwtauth import JWTIdentityPolicy
 from morepath import NO_IDENTITY
@@ -73,26 +72,19 @@ class DefaultAuthnPolicy(BaseAuthnPolicy):
         return True
 
 
-SQLStorageAuthApp = SQLApp
-
-
-@SQLStorageAuthApp.storage(model=UserModel)
+@SQLApp.storage(model=UserModel)
 def get_user_sqlstorage(model, request, blobstorage):
     return UserSQLStorage(request, blobstorage=blobstorage)
 
 
-@SQLStorageAuthApp.storage(model=GroupModel)
+@SQLApp.storage(model=GroupModel)
 def get_group_sqlstorage(model, request, blobstorage):
     return GroupSQLStorage(request, blobstorage=blobstorage)
 
 
-@SQLStorageAuthApp.storage(model=APIKeyModel)
+@SQLApp.storage(model=APIKeyModel)
 def get_apikey_sqlstorage(model, request, blobstorage):
     return APIKeySQLStorage(request, blobstorage=blobstorage)
-
-
-class SQLStorageAuthnPolicy(DefaultAuthnPolicy):
-    pass
 
 
 class MemoryStorageAuthApp(BaseAuthApp):
@@ -112,7 +104,3 @@ def get_group_memorystorage(model, request, blobstorage):
 @MemoryStorageAuthApp.storage(model=APIKeyModel)
 def get_apikey_memorystorage(model, request, blobstorage):
     return APIKeyMemoryStorage(request, blobstorage=blobstorage)
-
-
-class MemoryStorageAuthnPolicy(DefaultAuthnPolicy):
-    pass
