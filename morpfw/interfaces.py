@@ -200,7 +200,8 @@ class IStorage(IStorageBase):
 
 
 class IModel(abc.ABC):
-    """Model is a representation of a data object. It
+    """
+    Model is a representation of a data object. It
     provide a common set of API which is then delegated down
     to the storage provider.
 
