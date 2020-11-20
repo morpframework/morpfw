@@ -2,5 +2,5 @@ application:
   class: morpfw.tests.auth_test.test_auth_memorystorage:MemoryStorageApp
 
 configuration:
-  morpfw.authn.policy: morpfw.tests.auth_test.test_auth_memorystorage:AuthnPolicy
+  morpfw.authn.policy: morpfw.authn.pas.policy:DefaultAuthnPolicy
   morpfw.valid_roles: ['member','administrator', 'manager', 'editor']

@@ -6,7 +6,6 @@ from morpfw.app import BaseApp
 from morpfw.authn.pas.app import App
 from morpfw.authn.pas.path import hook_auth_models
 from morpfw.authn.pas.policy import MemoryStorageAuthApp as BaseAuthApp
-from morpfw.authn.pas.policy import MemoryStorageAuthnPolicy
 from morpfw.authz.pas import DefaultAuthzPolicy
 
 from ..common import create_admin, get_client
@@ -14,10 +13,6 @@ from .test_auth import _test_authentication
 
 
 class MemoryStorageApp(BaseAuthApp, DefaultAuthzPolicy):
-    pass
-
-
-class AuthnPolicy(MemoryStorageAuthnPolicy):
     pass
 
 

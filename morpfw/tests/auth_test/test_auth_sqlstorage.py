@@ -8,8 +8,6 @@ from morepath.request import Request
 from morpfw.app import SQLApp
 from morpfw.authn.pas.app import App
 from morpfw.authn.pas.path import hook_auth_models
-from morpfw.authn.pas.policy import SQLStorageAuthApp as BaseAuthApp
-from morpfw.authn.pas.policy import SQLStorageAuthnPolicy
 from morpfw.authz.pas import DefaultAuthzPolicy
 from morpfw.sql import Base
 
@@ -18,10 +16,6 @@ from .test_auth import _test_authentication
 
 
 class SQLStorageApp(SQLApp, DefaultAuthzPolicy):
-    pass
-
-
-class AuthnPolicy(SQLStorageAuthnPolicy):
     pass
 
 

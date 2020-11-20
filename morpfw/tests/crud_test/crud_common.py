@@ -7,11 +7,10 @@ from dataclasses import dataclass, field
 from datetime import date, datetime
 from uuid import uuid4
 
-import pytz
-
 import jsl
 import morepath
 import morpfw.crud.signals as signals
+import pytz
 import yaml
 from more.basicauth import BasicAuthIdentityPolicy
 from morpfw.app import BaseApp
@@ -271,7 +270,7 @@ def run_jslcrud_test(c, skip_aggregate=False):
         assert r.json[0]["count"] == 11
         assert r.json[0]["avg"] == 4.5
 
-    r = c.get("/pages/+search", {"q": 'title in ("Hello","something")'})
+    r = c.get("/pages/+search", {"q": 'title in ["Hello","something"]'})
 
     assert r.json["results"][0]["data"]["title"] == "Hello"
 
@@ -429,7 +428,8 @@ def run_jslcrud_test(c, skip_aggregate=False):
 
     message_date = (date(2019, 1, 1) - epoch).days
     r = c.patch_json(
-        obj_xattr_link, {"message": "hello world", "message_date": message_date},
+        obj_xattr_link,
+        {"message": "hello world", "message_date": message_date},
     )
 
     assert r.status_code == 200
@@ -444,7 +444,10 @@ def run_jslcrud_test(c, skip_aggregate=False):
         "message_date": message_date,
     }
 
-    r = c.patch_json(obj_xattr_link, {"message": "hello world", "anotherkey": "boo"},)
+    r = c.patch_json(
+        obj_xattr_link,
+        {"message": "hello world", "anotherkey": "boo"},
+    )
 
     assert r.status_code == 200
 

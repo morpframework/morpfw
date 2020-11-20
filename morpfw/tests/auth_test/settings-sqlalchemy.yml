@@ -2,6 +2,6 @@ application:
   class: morpfw.tests.auth_test.test_auth_sqlstorage:SQLStorageApp
 
 configuration:
-  morpfw.authn.policy: morpfw.tests.auth_test.test_auth_sqlstorage:AuthnPolicy
+  morpfw.authn.policy: morpfw.authn.pas.policy:DefaultAuthnPolicy
   morpfw.storage.sqlstorage.dburi: 'postgresql://postgres@localhost:45678/morp_tests'
   morpfw.valid_roles: ['member','administrator', 'manager', 'editor']
