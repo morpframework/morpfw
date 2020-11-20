@@ -1,7 +1,26 @@
-0.3.1 (unreleased)
+0.4.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+  * ``dataclass`` based schema definition powered by ``inverter``
+
+  * Simpler authn integration steps
+
+  * ``colander`` based data validation
+
+  * Simpler configuration structure with ``configuration`` option.
+
+  * Async tasks does not create request by default, but rather provide
+    parameter for instantiating request. Allowing finer control over commits
+    and database connection locks.
+
+  * Added memoization helpers and memoize regularly used model functions
+
+  * Added timezone support in PAS 
+
+  * Stability fixes
+  
+  * And many others ....
+
 
 
 0.3.0 (2019-10-15)
