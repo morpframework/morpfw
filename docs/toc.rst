@@ -11,3 +11,4 @@ Documentation
    features
    advanced
    community
+   versionlock

@@ -24,6 +24,9 @@ First, lets get ``morpfw`` installed
 
    $ pip install morpfw
 
+If you are using buildout, version locks files are available at
+``mfw_workspace`` repository: https://github.com/morpframework/mfw_workspace/tree/master/versions
+
 Lets create an ``app.py``. In this example, we are creating a ``SQLApp`` application,
 which meant to use ``SQLAlchemy`` as its primary data source, and provides ``SQLAlchemy``
 transaction & session management.
