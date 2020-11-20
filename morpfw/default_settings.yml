@@ -15,7 +15,7 @@ configuration:
   morpfw.authn.policy: morpfw.authn.noauth:AuthnPolicy
   morpfw.authn.policy.settings: {}
   morpfw.user.new_user_state: active
-  morpfw.storage.sqlstorage.dburi: 'sqlite:///%(here)s/app.db'
+  # morpfw.storage.sqlstorage.dburi: 'postgresql://postgres:postgres@localhost:5432/app'
   morpfw.security.allowed_nets: 
     - 127.0.0.1/32
   morpfw.security.jwt: 
