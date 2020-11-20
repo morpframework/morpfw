@@ -20,7 +20,9 @@ class XattrProvider(IXattrProvider):
 
     def jsonschema(self):
         schema = dc2jsl.convert(
-            self.schema, nullable=True, additional_properties=self.additional_properties
+            self.schema,
+            ignore_required=True,
+            additional_properties=self.additional_properties,
         ).get_schema(ordered=True)
         return {"schema": schema}
 
