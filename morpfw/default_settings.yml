@@ -5,6 +5,8 @@ server:
 
 application:
   factory: morpfw.main:create_app
+# class: 
+# title:
 
 configuration:
   app.development_mode: true
