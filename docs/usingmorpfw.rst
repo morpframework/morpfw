@@ -1,5 +1,5 @@
 ===========
-Using Morp
+Quickstart
 ===========
 
 Bootstrapping a new project
@@ -8,72 +8,150 @@ Bootstrapping a new project
 MorpFW requires Python 3.7 or newer to run. Python 3.6 is also supported but
 you will need to install ``dataclasses`` backport into your environment.
 
-The recommended way to install morpfw is to use
-`pipenv <http://pipenv.rtfd.org>`_, or you can also use pip or virtualenv.
+The recommended way to install morpfw is to use `buildout <http://www.buildout.org>`_,
+skeleton that is generated using ``mfw-template``. Please head to 
+`mfw-template documentation <http://mfw-template.rtfd.org>`_ for tutorial.
 
-If you don't have pipenv installed yet, do:
+Bootstrapping without ``mfw-template``
+======================================
 
-.. code-block:: console
+If you prefer to use ``virtualenv``, or other methods, you can follow these
+steps.
 
-   $ sudo pip install pipenv>=2018.11.26
-
-Lets create a new project. You can initialize new project using
-``mfw-template`` tool:
-
-.. code-block:: console
-
-   $ sudo pip install mfw-template
-   $ mfw-template create-project
-   project_name [myproject]:
-   project_url [http://myproject.com]:
-   version [0.1.0]:
-   author_name [John Doe]:
-   author_email [johndoe@example.com]:
-   short_description []:
-   license [AGPLv3+]:
-
-
-And start your project using:
+First, lets get ``morpfw`` installed
 
 .. code-block:: console
 
-   $ cd myproject/ # replace with your project directory name
-   $ pipenv install --python=python3.7 -e .
-   $ pipenv run morpfw -s settings.yml start
+   $ pip install morpfw
 
+Lets create an ``app.py``. In this example, we are creating a ``SQLApp`` application,
+which meant to use ``SQLAlchemy`` as its primary data source, and provides ``SQLAlchemy``
+transaction & session management.
+
+.. literalinclude:: _code/app.py
+   :language: python
+
+``morpfw`` boot up application using a ``settings.yml`` file, so lets create one:
+
+.. code-block:: yaml
+
+   application:
+      title: My First App
+      class: app:App
+   
+Make sure you change your working directory to where ``app.py`` is, and you can 
+then start the application using
+
+.. code-block:: console
+
+   $ PYTHONPATH=. morpfw -s settings.yml start
 
 Creating a simple resource type / CRUD model
 =============================================
 
-``mfw-template`` tool provide a quick way for you to generate a skeleton
-resource type. Lets say you want to create a resource type called ``Page``
+``morpfw`` adds a type engine with RESTful CRUD on top of ``morepath``. To utilize
+it, your models will need to follow a particular convention:
+
+- A ``Collection`` is created that inherits ``morpfw.Collection`` 
+- A ``Model`` is created that inherits ``morpfw.Model``
+- Both ``Collection`` and ``Model`` class have a ``schema`` attribute that reference
+  to a ``dataclass`` based schema
+- Schema must be written using ``dataclass``, `following convention <https://inverter.rtfd.io>`_ 
+  from ``inverter`` project. 
+- A ``Storage`` class is implemented following the storage component API, and 
+  registered against the ``Model`` class.
+- A named typeinfo component is registered with details of the resource type. 
+
+Following is an example boilerplate declaration of a resource type called ``page``, 
+which will hook up the necessary RESTful API CRUD views for a simple data model
+with ``title`` and ``body`` text.
+
+.. literalinclude:: _code/page.py
+
+Configuring Database Connection
+--------------------------------
+
+At the moment, ``morpfw.SQLStorage`` requires PostgreSQL to work correctly (due to
+coupling to some PostgreSQL specific dialect feature). To configure the database
+connection URI for SQLStorage, in ``settings.yml``, add in ``configuration`` option:
+
+.. code-block:: yaml
+   
+   configuration:
+      morpfw.storage.sqlstorage.dburi: 'postgresql://postgres:postgres@localhost:5432/app_db'
+
+Initializing Database Tables
+------------------------------
+
+``morpfw`` provide integration with `Alembic <https://alembic.sqlalchemy.org/>`_ for 
+generating SQLAlchemy based migrations. 
+
+To initialize alembic directory, you can run:
 
 .. code-block:: console
 
-   $ mfw-template create-resource
-   type_name [Content]: Page
-   module_name [page]:
-   api_mount_path [/api/v1/page]: /pages
+   $ morpfw migration init migrations
+
+To hook up your application SQLAlchemy models for alembic scan, you will
+need to edit ``env.py`` and add following imports, and configure ``target_metadata``
+to include SQLStorage metadata:
+
+.. code-block:: python
+
+   from morpfw.crud.storage.sqlstorage import Base
+   import app
+   ...
+   # configure target_metadata
+   target_metadata = Base.metadata
+
+As ``morpfw`` uses some additional sqlalchemy libraries, ``script.py.mako`` need
+to also be edited to add additional imports:
+
+.. code-block:: python
+
+   import sqlalchemy_utils.types
+   import sqlalchemy_jsonfield.jsonfield
 
 
-Lets start your application:
+Then, configure ``alembic.ini`` (generated together during ``migration init``) to
+point to your database:
+
+.. code-block:: ini
+
+   [alembic]
+   ...
+   sqlalchemy.url: 'postgresql://postgres:postgres@localhost:5432/app_db'
+   ...
+
+Now you can use ``morpfw migration`` to generate a migration script based on defined
+SQLAlchemy models.
 
 .. code-block:: console
 
-   $ pipenv run morpfw -s settings.yml start
+   $ PYTHONPATH=. morpfw migration revision --autogenerate -m "initialize"
 
+You can then apply the migration using:
 
-Accessing API
-==============
+.. code-block:: console
 
-Morp API endpoints requires authentication (we haven't figure out how to make
-it optional yet), and the default authentication policy is to acquire current
-username from ``user.id`` GET parameter.
+   $ PYTHONPATH=. morpfw migration upgrade head
+
+Finally you can start you application:
+
+.. code-block:: console
+
+   $ PYTHONPATH=. morpfw -s settings.yml start
+
+CRUD REST API
+=======================
+
+If nothing goes wrong, you should get a CRUD REST API registered at 
+``http://localhost:5000/pages/``.
 
 .. code-block:: python
 
    >>> import requests
-   >>> resp = requests.get('http://localhost:5000/pages?user.id=foo')
+   >>> resp = requests.get('http://localhost:5000/pages')
    >>> resp.json()
    {...}
 
@@ -81,11 +159,11 @@ Lets create a page
 
 .. code-block:: python
 
-   >>> resp = requests.post('http://localhost:5000/pages/?user.id=foo', json={
+   >>> resp = requests.post('http://localhost:5000/pages/', json={
    ...     'body': 'hello world'
    ... })
    >>> objid = resp.json()['data']['uuid']
-   >>> resp = requests.get('http://localhost:5000/pages/%s?user.id=foo' % objid)
+   >>> resp = requests.get('http://localhost:5000/pages/%s' % objid)
    >>> resp.json()
    {...}
 
@@ -95,7 +173,7 @@ Lets update the body text
    ...   'http://localhost:5000/pages/%s?user.id=foo' % objid, json={
    ...       'body': 'foo bar baz'
    ... })
-   >>> resp = requests.get('http://localhost:5000/pages/%s?user.id=foo' % objid)
+   >>> resp = requests.get('http://localhost:5000/pages/%s' % objid)
    >>> resp.json()
    {...}
 
@@ -107,6 +185,20 @@ Lets do a search
 
 Lets delete the object
 
-   >>> resp = requests.delete('http://localhost:5000/pages/%s?user.id=foo' % objid)
+   >>> resp = requests.delete('http://localhost:5000/pages/%s' % objid)
    >>> resp.status_code
    200
+
+Python CRUD API
+=================
+
+Python CRUD API is handled by ``Collection`` and ``Model`` objects. The
+``typeinfo`` registry allows name based getter to ``Collection` from
+the ``request`` object.
+
+.. code-block:: python
+
+   page_collection = request.get_collection('test.page')
+   page = page_collection.get(page_uuid)
+
+For more details, please refer to the :doc:`type system <resourcetype>` documentation.

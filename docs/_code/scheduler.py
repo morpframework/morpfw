@@ -1,7 +1,7 @@
-import morpfw
 import time
-import pytest
 
+import morpfw
+import pytest
 
 # lets setup a skeleton app
 
@@ -22,11 +22,11 @@ def get_root(request):
 
 # run this code every 5 seconds
 @App.periodic(name='myproject.every-5-seconds', seconds=5)
-def run_5_secs(request):
+def run_5_secs(request_options):
     print('periodic tick!')
 
 
 # run this code every 1 minute, using cron style scheduling
 @App.cron(name='myproject.minutely', minute='*')
-def run_every_1_minute(request):
+def run_every_1_minute(request_options):
     print('cron tick!')

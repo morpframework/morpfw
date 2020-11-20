@@ -39,7 +39,7 @@ as it defines the core metadata required for correct function of the framework.
    class MySchema(morpfw.Schema):
 
        field1: typing.Optional[str] = None
-       field2: str = 'hello world'
+       field2: typing.Optional[str] = 'hello world'
 
 Due to the nature of `dataclass inheritance <https://docs.python.org/3/library/dataclasses.html#inheritance>`_,
 your field definition must include default values, and if it does not have any,

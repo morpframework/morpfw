@@ -22,7 +22,7 @@ subscriber to the signal.
 
 To create an async task subscribing to a signal, you can use the
 ``async_subscribe`` decorator on your ``App`` object. . The task can then be
-triggered using ``async_dispatcher``.
+triggered using ``request.async_dispatch``.
 
 .. warning:: Because request object is passed to the worker, avoid using this
              in pages with uploads as it involves transfering the upload to the
@@ -55,7 +55,7 @@ Worker and beat scheduler can be easily started up using:
 .. code-block:: console
 
    $ # start worker
-   $ pipenv run morpfw -s settings.yml solo-worker
+   $ morpfw -s settings.yml worker
 
    $ # start scheduler
-   $ pipenv run morpfw -s settings.yml scheduler
+   $ morpfw -s settings.yml scheduler

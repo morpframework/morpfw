@@ -4,56 +4,61 @@ server:
   listen_port: 5000
   server_url: http://localhost:5000
 
+environment:
+  # environment variables to set when launching the app
+  HTTP_PROXY: http://localhost:3128
+  HTTPS_PROXY: http://localhost:3128
+
 # core application configuration
 application:
-  
+  # title of application 
+  title: My App
   # path to App class
-  app: myproject.app:App 
+  class: myproject.app:App 
+  # application object factory function, default: morpfw.main:create_app
+  factory: morpfw.main:create_app 
 
-  # SQLAlchemy database URI
-  dburi: 'sqlite:///%(here)s/app.db'
 
-  # Authentication policy
-  authn_policy: morpfw.authn.noauth:AuthnPolicy
-  authn_policy_settings: {}
+# This section defines key-value pair of config options for the app.
+# Config keys are expected to be using namespacing to separate their
+# purposes, and your program can make use of this section to store
+# configurations.
+# 
+# Following are some default configurations
+configuration:
+  # mark application as in development mode, default: true
+  app.development_mode: true
+  
+  # list of additional packages to scan in string, default: []
+  morpfw.scan: 
+    - library1
+    - library2
 
-  # set development node
-  development_mode: true
+  # sqlalchemy database URI, default: undefined
+  morpfw.storage.sqlstorage.dburi: 'postgresql://postgres:postgres@localhost:5432/app'
+  
+  # Authentication policy, defaults to noauth
+  morpfw.authn.policy: morpfw.authn.noauth:AuthnPolicy
+  morpfw.authn.policy.settings: {}
 
-  # list of mounted apps
-  mounted_apps: 
-    - name: appname
-      app: someotherproject.app:App
-      authn_policy: policy.of.this.app:AuthnPolicy
-    - name: app2name
-      app: anotherproject.app:App
-      authn_policy: policy.of.this.app:AuthnPolicy
-    
-  # default state of new users
-  new_user_state: active
+  # what would be the new user state 
+  morpfw.user.new_user_state: active
 
-# celery configuration
-worker:
-  # celery settings variables
-  celery_settings:
+  # celery configuration
+  morpfw.celery: 
+    # celery settings variables
     broker_url: 'amqp://guest:guest@localhost:5672/'
     result_backend: 'db+postgresql://postgres@localhost:5432/morp_tests'
 
-
-# security locking
-security:
-  # only allow this network to access the service
-  allowed_nets:
+  # network ACL
+  morpfw.security.allowed_nets:
+    # only allow this network to access the service
     - 127.0.0.1/32
 
   # more.jwtauth configuration
-  jwt:
+  morpfw.security.jwt:
     master_secret: secret
     leeway: 10
     allow_refresh: true
-
-# list of extra python modules to scan
-morpfw:
-  scan: 
-    - module1
-    - module2.myapp
+    refresh_nonce-handler: morpfw.auth.pas.user.path.refresh_nonce_handler
+    

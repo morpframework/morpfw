@@ -5,7 +5,9 @@ Documentation
 .. toctree::
    :maxdepth: 2
 
-   intro
+   index
+   usingmorpfw
+   cli
    features
    advanced
    community

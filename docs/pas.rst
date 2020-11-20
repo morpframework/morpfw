@@ -10,15 +10,16 @@ is handled through JWT.
 PAS provides several key API endpoints such as registration, login, logout,
 user management, group management, and api key management.
 
-To enable PAS, you will need to mount the auth application on your application
-by adding the following code in a new file. (eg: ``authn.py``)
+To enable PAS, your application have to be a subclass of ``morpfw.SQLApp``. 
+``App.hook_auth_models()`` method should then be called to register PAS related
+views. 
 
 .. literalinclude:: authapp.py
    :language: python
 
-Afterwards, load the authentication policy on your application:
+Afterwards, load the PAS authentication policy in your application
 
 .. code-block:: yaml
 
-   application:
-      authn_policy: myproject.authn:AuthnPolicy
+   configuration:
+      morpfw.authn.policy: morpfw.authn.pas.policy:DefaultAuthnPolicy
