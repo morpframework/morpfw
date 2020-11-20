@@ -19,9 +19,10 @@ from urllib.parse import urlparse
 import click
 import hydra
 import morepath
-import morpfw
 import transaction
 import yaml
+
+import morpfw
 from alembic.config import main as alembic_main
 
 from .alembic import drop_all
@@ -129,9 +130,19 @@ def start(ctx, host, port, prod, workers):
         )
 
 
-@cli.command(help="start celery worker")
+@cli.command(help="alias to 'worker'")
 @click.pass_context
 def solo_worker(ctx):
+    return start_worker(ctx)
+
+
+@cli.command(help="start celery worker")
+@click.pass_context
+def worker(ctx):
+    return start_worker(ctx)
+
+
+def start_worker(ctx):
     print(threading.get_ident())
     param = load(ctx.obj["settings"])
     hostname = socket.gethostname()
