@@ -1,5 +1,5 @@
-0.4.0 (unreleased)
-------------------
+0.4.0b1 (2020-11-20)
+-------------------
 
   * ``dataclass`` based schema definition powered by ``inverter``
 
