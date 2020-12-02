@@ -91,6 +91,7 @@ setup(name='morpfw',
               'pytest-annotate',
               'pytest-cov',
               'pika',
+              'mirakuru',
           ]
       },
       entry_points={

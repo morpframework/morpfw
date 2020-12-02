@@ -284,13 +284,13 @@ class BaseMixin(MappedTable):
         default=lambda: datetime.now(tz=pytz.UTC),
         index=True,
     )
-    creator = sa.Column(sa.String(length=1024))
+    creator = sa.Column(sa.String(length=256))
     modified = sa.Column(
         sa.DateTime(timezone=True),
         default=lambda: datetime.now(tz=pytz.UTC),
         index=True,
     )
-    state = sa.Column(sa.String(length=1024), index=True)
+    state = sa.Column(sa.String(length=64), index=True)
     deleted = sa.Column(sa.DateTime(timezone=True), index=True)
     blobs = sa.Column(sajson.JSONField)
     xattrs = sa.Column(sajson.JSONField)
