@@ -203,5 +203,10 @@ class=logging.Formatter
 
 def set_buildout_environ(config: str) -> None:
     envs=[l.split('=') for l in config.strip().split('\n') if l]
-    for k,v in envs:
-        os.environ[k.strip()] = v.strip()
+    envs=dict([(k.strip(), v.strip()) for k,v in envs])
+    for k,v in envs.items():
+        os.environ[k] = v
+
+    if 'BUILDOUT_BINDIR' in envs.keys():
+        bindir = envs['BUILDOUT_BINDIR']
+        os.environ['PATH'] = '%s:%s' % (bindir, os.environ['PATH'])
