@@ -200,3 +200,8 @@ class=logging.Formatter
     ]
 
     subprocess.call([service] + opts + ["morpfw.wsgi:app"])
+
+def set_buildout_environ(config: str) -> None:
+    envs=[l.split('=') for l in config.strip().split('\n') if l]
+    for k,v in envs:
+        os.environ[k.strip()] = v.strip()
