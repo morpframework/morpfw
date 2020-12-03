@@ -13,6 +13,7 @@ from .errors import FieldValidationError, FormValidationError, ValidationError
 from inverter import dc2colander
 from inverter import dc2colanderjson
 
+
 @dataclass
 class BaseSchema(ISchema):
     @classmethod
@@ -25,7 +26,9 @@ class BaseSchema(ISchema):
             if json:
                 cschema = dc2colanderjson.convert(cls, request=request)
             else:
-                cschema = dc2colander.convert(cls, request=request, default_tzinfo=request.timezone())
+                cschema = dc2colander.convert(
+                    cls, request=request, default_tzinfo=request.timezone()
+                )
 
         else:
             if json:
@@ -34,8 +37,11 @@ class BaseSchema(ISchema):
                 )
             else:
                 cschema = dc2colander.convert(
-                    cls, request=request, include_fields=data.keys(), mode="update", 
-                    default_tzinfo=request.timezone()
+                    cls,
+                    request=request,
+                    include_fields=data.keys(),
+                    mode="update",
+                    default_tzinfo=request.timezone(),
                 )
         cs = cschema()
         # FIXME: need to pass context here
@@ -68,14 +74,16 @@ class Schema(BaseSchema):
         default_factory=lambda: uuid4().hex,
         metadata={"format": "uuid", "index": True, "unique": True},
     )
-    creator: typing.Optional[str] = None
+    creator: typing.Optional[str] = field(default=None, metadata={"length": 256})
     created: typing.Optional[datetime] = field(
         default_factory=lambda: datetime.now(tz=pytz.UTC), metadata={"index": True}
     )
     modified: typing.Optional[datetime] = field(
         default_factory=lambda: datetime.now(tz=pytz.UTC), metadata={"index": True}
     )
-    state: typing.Optional[str] = field(default=None, metadata={"index": True})
+    state: typing.Optional[str] = field(
+        default=None, metadata={"index": True, "length": 64}
+    )
     deleted: typing.Optional[datetime] = field(default=None, metadata={"index": True})
 
     blobs: typing.Optional[dict] = field(
