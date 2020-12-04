@@ -7,6 +7,7 @@ from importlib import import_module
 from urllib.parse import urlparse
 
 import morepath
+import morpfw
 import pytz
 import sqlalchemy.orm
 import transaction
@@ -20,8 +21,6 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.pool import NullPool, QueuePool
 from zope.sqlalchemy import ZopeTransactionEvents
 from zope.sqlalchemy import register as register_session
-
-import morpfw
 
 from .exc import ConfigurationError
 
@@ -126,6 +125,12 @@ class Request(BaseRequest):
 
         cachemgr[type_name] = col
         return col
+
+    def get_typeinfo(self, type_name):
+        typeinfo = self.app.config.type_registry.get_typeinfo(
+            name=type_name, request=self
+        )
+        return typeinfo
 
     def resolve_path(self, path=None, app=SAME_APP):
 
