@@ -13,7 +13,9 @@ from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.exc import StatementError
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.sql import select
 from sqlalchemy.types import CHAR, TypeDecorator
+from zope.sqlalchemy import mark_changed
 
 from ..app import App
 from .base import BaseStorage
@@ -268,10 +270,17 @@ class SQLStorage(BaseStorage):
         d["deleted"] = datetime.now(tz=pytz.UTC)
 
     def vacuum(self):
+        affected = select([func.count(self.orm_model.__table__.c.uuid)]).where(
+            self.orm_model.deleted.isnot(None)
+        )
         delete_q = self.orm_model.__table__.delete().where(
             self.orm_model.deleted.isnot(None)
         )
+        items = self.session.execute(affected)
+        total = items.fetchone()[0]
         self.session.execute(delete_q)
+        mark_changed(self.session())
+        return total
 
 
 GUID = sautils.UUIDType
