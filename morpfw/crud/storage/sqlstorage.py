@@ -267,6 +267,12 @@ class SQLStorage(BaseStorage):
         d = self.app.get_dataprovider(self.model.schema, r, self)
         d["deleted"] = datetime.now(tz=pytz.UTC)
 
+    def vacuum(self):
+        delete_q = self.orm_model.__table__.delete().where(
+            self.orm_model.deleted.isnot(None)
+        )
+        self.session.execute(delete_q)
+
 
 GUID = sautils.UUIDType
 

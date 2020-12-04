@@ -79,6 +79,18 @@ class UserSQLStorage(SQLStorage, IUserStorage):
         u = self.get_by_userid(collection, userid)
         return u.data["password"] == hash(password)
 
+    def vacuum(self):
+        roleassignment_delete = db.RoleAssignment.__table__.delete().where(
+            db.User.deleted.isnot(None)
+        )
+
+        membership_delete = db.Membership.__table__.delete().where(
+            db.User.deleted.isnot(None)
+        )
+        self.session.execute(roleassignment_delete)
+        self.session.execute(membership_delete)
+        return super().vacuum()
+
 
 class APIKeySQLStorage(SQLStorage):
     model = APIKeyModel
@@ -291,3 +303,14 @@ class GroupSQLStorage(SQLStorage, IGroupStorage):
         )
         if ra:
             self.session.delete(ra)
+
+    def vacuum(self):
+        roleassignment_delete = db.RoleAssignment.__table__.delete().where(
+            db.Group.deleted.isnot(None)
+        )
+        membership_delete = db.Membership.__table__.delete().where(
+            db.Group.deleted.isnot(None)
+        )
+        self.session.execute(roleassignment_delete)
+        self.session.execute(membership_delete)
+        return super().vacuum()

@@ -28,7 +28,6 @@ from alembic.config import main as alembic_main
 from .alembic import drop_all
 from .main import create_admin, default_settings
 from .request import request_factory
-from .util import mock_request
 
 
 def load_settings(settings_file, default=default_settings):
@@ -184,10 +183,10 @@ def scheduler(ctx):
 def register_admin(ctx, username, email, password):
     param = load(ctx.obj["settings"])
     settings = param["settings"]
-    request = request_factory(settings, extra_environ={"morpfw.nomemoize": True})
-    user = create_admin(request, username=username, password=password, email=email)
-    if user is None:
-        print("Application is not using Pluggable Auth Service")
+    with request_factory(settings, extra_environ={"morpfw.nomemoize": True}) as request:
+        user = create_admin(request, username=username, password=password, email=email)
+        if user is None:
+            print("Application is not using Pluggable Auth Service")
 
 
 @cli.command(help="Start MorpFW shell")
@@ -242,26 +241,26 @@ def _start_shell(ctx, script, spawn_shell=True):
 
     param = load(ctx.obj["settings"])
     settings = param["settings"]
-    request = request_factory(settings)
-    session = request.db_session
-    localvars = {
-        "session": session,
-        "request": request,
-        "app": request.app,
-        "settings": settings,
-        "Identity": Identity,
-    }
-    if script:
-        with open(script) as f:
-            src = f.read()
-            glob = globals().copy()
-            filepath = os.path.abspath(script)
-            sys.path.insert(0, os.path.dirname(filepath))
-            glob["__file__"] = filepath
-            bytecode = compile(src, filepath, "exec")
-            exec(bytecode, glob, localvars)
-    if spawn_shell:
-        _shell(localvars)
+    with request_factory(settings) as request:
+        session = request.db_session
+        localvars = {
+            "session": session,
+            "request": request,
+            "app": request.app,
+            "settings": settings,
+            "Identity": Identity,
+        }
+        if script:
+            with open(script) as f:
+                src = f.read()
+                glob = globals().copy()
+                filepath = os.path.abspath(script)
+                sys.path.insert(0, os.path.dirname(filepath))
+                glob["__file__"] = filepath
+                bytecode = compile(src, filepath, "exec")
+                exec(bytecode, glob, localvars)
+        if spawn_shell:
+            _shell(localvars)
 
 
 def _shell(vars):
@@ -278,20 +277,30 @@ def _shell(vars):
 @click.pass_context
 def resetdb(ctx):
     param = load(ctx.obj["settings"])
-    app = param["factory"](param["settings"])
-
-    while not isinstance(app, morepath.App):
-        wrapped = getattr(app, "app", None)
-        if wrapped:
-            app = wrapped
-        else:
-            raise ValueError("Unable to locate app object from middleware")
 
     settings = param["settings"]
 
-    request = mock_request(app, settings)
+    with request_factory(settings) as request:
+        drop_all(request)
 
-    drop_all(request)
+
+@cli.command(help="Vacuum database")
+@click.pass_context
+def vacuum(ctx):
+    param = load(ctx.obj["settings"])
+
+    settings = param["settings"]
+
+    with request_factory(settings) as request:
+
+        types = request.app.config.type_registry.get_typeinfos(request)
+        for typeinfo in types.values():
+
+            collection = request.get_collection(typeinfo["name"])
+            vacuum_f = getattr(collection.storage, "vacuum", None)
+            if vacuum_f:
+                print("Vacuuming %s" % typeinfo["name"])
+                vacuum_f()
 
 
 @cli.command(help="manage alembic migration")

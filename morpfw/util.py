@@ -26,13 +26,3 @@ def get_user_by_userid(request, userid):
     return collection.get_by_userid(userid)
 
 
-def mock_request(app, settings):
-    server_url = settings.get("server", {}).get("server_url", "http://localhost")
-    parsed = urlparse(server_url)
-    environ = {
-        "PATH_INFO": "/",
-        "wsgi.url_scheme": parsed.scheme,
-        "SERVER_PROTOCOL": "HTTP/1.1",
-        "HTTP_HOST": parsed.netloc,
-    }
-    return app.request_class(app=app, environ=environ)
