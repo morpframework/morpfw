@@ -372,9 +372,16 @@ class Model(IModel):
         dispatch.dispatch(self.request, self)
         self.after_updated()
 
-    def delete(self, **kwargs):
+    def delete(self, *, cascade=True, **kwargs):
         dispatch = self.request.app.dispatcher(signals.OBJECT_TOBEDELETED)
         dispatch.dispatch(self.request, self)
+
+        if cascade:
+            brefs = getattr(self.schema, "__backreferences__", [])
+            for bref in brefs:
+                for refitem in bref.resolve(self, self.request):
+                    refitem.delete(cascade=cascade)
+
         if not self.before_delete():
             return
         blob_uuids = []

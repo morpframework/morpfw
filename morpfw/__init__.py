@@ -15,6 +15,7 @@ from .crud.searchprovider.base import SearchProvider
 from .crud.statemachine.base import StateMachine
 from .crud.storage.elasticsearchstorage import ElasticSearchStorage
 from .crud.storage.sqlstorage import SQLStorage
+from .crud.relationship import Reference, BackReference
 from .main import create_admin, create_app, run, runprod
 from .memoizer import memoize, requestmemoize
 from .request import request_factory

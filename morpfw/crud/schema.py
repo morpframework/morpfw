@@ -4,14 +4,15 @@ from datetime import datetime
 from pprint import pprint
 from uuid import uuid4
 
-import colander
 import pytz
+
+import colander
+from inverter import dc2colander, dc2colanderjson
 
 from ..interfaces import ISchema
 from .app import App
 from .errors import FieldValidationError, FormValidationError, ValidationError
-from inverter import dc2colander
-from inverter import dc2colanderjson
+from .relationship import BackReference, Reference
 
 
 @dataclass
@@ -92,6 +93,10 @@ class Schema(BaseSchema):
     xattrs: typing.Optional[dict] = field(
         default_factory=dict, metadata={"exclude_if_empty": True}
     )
+
+    __unique_constraint__ = []  # type: ignore
+    __references__ = []  # type: ignore
+    __backreferences__ = []  # type: ignore
 
 
 @App.identifierfield(schema=Schema)
