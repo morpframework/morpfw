@@ -1,12 +1,16 @@
 import copy
-import json
-from logging import warn
-import re
-from uuid import uuid4
 import dataclasses
+import json
+import logging
+import re
+import warnings
+from logging import warn
+from uuid import uuid4
+
 import morepath
 import rulez
 from DateTime import DateTime
+from inverter import dc2colanderjson, dc2jsl
 from jsonschema import ValidationError as JSLValidationError
 from jsonschema import validate
 from jsonschema.validators import Draft4Validator
@@ -15,9 +19,10 @@ from rulez import OperatorNotAllowedError
 from rulez import field as rfield
 from rulez import parse_dsl, validate_condition
 from transitions import Machine
-import logging
+
 from ..interfaces import ICollection, IModel, IStorage
 from ..memoizer import requestmemoize
+from ..request import Request
 from . import permission, signals
 from .const import SEPARATOR
 from .errors import (
@@ -29,10 +34,7 @@ from .errors import (
     ValidationError,
 )
 from .log import logger
-from inverter import dc2colanderjson
-from inverter import dc2jsl
-import warnings
-from ..request import Request
+from .relationship import BackReferenceResolver, ReferenceResolver
 
 ALLOWED_SEARCH_OPERATORS = [
     "and",
@@ -541,3 +543,28 @@ class Model(IModel):
             return
         self.storage.delete_blob(uuid)
         self.save()
+
+    def references(self):
+        result = {}
+        refs = getattr(self.schema, "__references__", None)
+        if refs:
+            for ref in refs:
+                result[ref.name] = ref
+        return result
+
+    def backreferences(self):
+        result = {}
+        refs = getattr(self.schema, "__backreferences__", None)
+        if refs:
+            for ref in refs:
+                result[ref.name] = ref
+        return result
+
+    def resolve_reference(self, reference):
+        resolver = ReferenceResolver(self.request, self, reference)
+        return resolver.resolve()
+
+    def resolve_backreference(self, backreference):
+        resolver = BackReferenceResolver(self.request, self, backreference)
+        return resolver.resolve()
+
