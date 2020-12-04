@@ -2,7 +2,6 @@ import re
 from morepath.publish import resolve_model as _resolve_model
 from ..interfaces import ISchema
 import jsl
-import jsonobject
 import dataclasses
 from copy import copy
 import typing
