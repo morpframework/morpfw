@@ -1,3 +1,4 @@
+import copy
 import importlib
 import os
 import threading
@@ -5,12 +6,11 @@ import typing
 from importlib import import_module
 from urllib.parse import urlparse
 
-import pytz
-
 import morepath
-import morpfw
+import pytz
 import sqlalchemy.orm
 import transaction
+import yaml
 from cryptography.fernet import Fernet
 from morepath.publish import resolve_model
 from morepath.request import SAME_APP, LinkError
@@ -21,9 +21,17 @@ from sqlalchemy.pool import NullPool, QueuePool
 from zope.sqlalchemy import ZopeTransactionEvents
 from zope.sqlalchemy import register as register_session
 
+import morpfw
+
 from .exc import ConfigurationError
 
 threadlocal = threading.local()
+
+default_settings = open(
+    os.path.join(os.path.dirname(__file__), "default_settings.yml")
+).read()
+default_settings = default_settings.replace(r"%(here)s", os.getcwd())
+default_settings: dict = yaml.load(default_settings, Loader=yaml.Loader)
 
 
 class Request(BaseRequest):
@@ -72,6 +80,9 @@ class Request(BaseRequest):
     def __exit__(self, exc_type, exc_value, exc_traceback):
         if exc_type is not None:
             self.savepoint.rollback()
+        self.commit()
+
+    def commit(self):
         transaction.commit()
         if os.path.exists(self._cm_cwd):
             os.chdir(self._cm_cwd)
@@ -272,6 +283,16 @@ def request_factory(
     app_factory_opts = app_factory_opts or {}
     app_factory_opts["scan"] = scan
     extra_environ = extra_environ or {}
+
+    s = copy.deepcopy(default_settings)
+    for k in settings.keys():
+        if k in s.keys():
+            for j, v in settings[k].items():
+                s[k][j] = v
+        else:
+            s[k] = settings[k]
+
+    settings = s
 
     if "application" not in settings:
         raise KeyError("'application' section is required in settings")

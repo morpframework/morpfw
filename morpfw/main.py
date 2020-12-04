@@ -20,14 +20,8 @@ from .authn.pas.group.path import get_group_collection
 from .authn.pas.user.model import UserCollection, UserModel, UserSchema
 from .authn.pas.user.path import get_user_collection
 from .exc import ConfigurationError
-from .request import Request, request_factory
+from .request import Request, request_factory, default_settings
 from .sql import Base
-
-default_settings = open(
-    os.path.join(os.path.dirname(__file__), "default_settings.yml")
-).read()
-default_settings = default_settings.replace(r"%(here)s", os.getcwd())
-default_settings = yaml.load(default_settings, Loader=yaml.Loader)
 
 
 def create_app(settings, scan=True, **kwargs):
@@ -201,19 +195,21 @@ class=logging.Formatter
 
     subprocess.call([service] + opts + ["morpfw.wsgi:app"])
 
+
 def set_buildout_environ(config: str) -> None:
     envs = {}
-    for l in config.strip().split('\n'):
-        sep = l.find(':')
+    for l in config.strip().split("\n"):
+        sep = l.find(":")
         if sep < 0:
             raise ValueError(l)
         k = l[:sep].strip()
-        v = l[sep + 1:].strip()
+        v = l[sep + 1 :].strip()
         envs[k] = v
 
-    for k,v in envs.items():
+    for k, v in envs.items():
         os.environ[k] = v
 
-    if 'BUILDOUT_BINDIR' in envs.keys():
-        bindir = envs['BUILDOUT_BINDIR']
-        os.environ['PATH'] = '%s:%s' % (bindir, os.environ['PATH'])
+    if "BUILDOUT_BINDIR" in envs.keys():
+        bindir = envs["BUILDOUT_BINDIR"]
+        os.environ["PATH"] = "%s:%s" % (bindir, os.environ["PATH"])
+
