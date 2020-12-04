@@ -31,9 +31,9 @@ from .request import request_factory
 
 
 def load_settings(settings_file, default=default_settings):
-    default_settings = os.environ.get("MORP_SETTINGS", {})
+    dsettings = os.environ.get("MORP_SETTINGS", {})
     if settings_file is None:
-        settings = default_settings
+        settings = dsettings
     elif not os.path.exists(settings_file):
         raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), settings_file)
     else:
@@ -241,26 +241,26 @@ def _start_shell(ctx, script, spawn_shell=True):
 
     param = load(ctx.obj["settings"])
     settings = param["settings"]
-    with request_factory(settings) as request:
-        session = request.db_session
-        localvars = {
-            "session": session,
-            "request": request,
-            "app": request.app,
-            "settings": settings,
-            "Identity": Identity,
-        }
-        if script:
-            with open(script) as f:
-                src = f.read()
-                glob = globals().copy()
-                filepath = os.path.abspath(script)
-                sys.path.insert(0, os.path.dirname(filepath))
-                glob["__file__"] = filepath
-                bytecode = compile(src, filepath, "exec")
-                exec(bytecode, glob, localvars)
-        if spawn_shell:
-            _shell(localvars)
+    request = request_factory(settings)
+    session = request.db_session
+    localvars = {
+        "session": session,
+        "request": request,
+        "app": request.app,
+        "settings": settings,
+        "Identity": Identity,
+    }
+    if script:
+        with open(script) as f:
+            src = f.read()
+            glob = globals().copy()
+            filepath = os.path.abspath(script)
+            sys.path.insert(0, os.path.dirname(filepath))
+            glob["__file__"] = filepath
+            bytecode = compile(src, filepath, "exec")
+            exec(bytecode, glob, localvars)
+    if spawn_shell:
+        _shell(localvars)
 
 
 def _shell(vars):
@@ -300,7 +300,8 @@ def vacuum(ctx):
             vacuum_f = getattr(collection.storage, "vacuum", None)
             if vacuum_f:
                 print("Vacuuming %s" % typeinfo["name"])
-                vacuum_f()
+                items = vacuum_f()
+                print("%s record(s) affected" % items)
 
 
 @cli.command(help="manage alembic migration")
