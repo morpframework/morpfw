@@ -1,10 +1,10 @@
+import typing
 import uuid
 from datetime import datetime
 from decimal import Decimal
 
-import pytz
-
 import jsl
+import pytz
 import sqlalchemy as sa
 import sqlalchemy_jsonfield as sajson
 import sqlalchemy_utils as sautils
@@ -106,10 +106,14 @@ class SQLStorage(BaseStorage):
         else:
             fields = [self.orm_model]
 
+        include_deleted = self.request.environ.get(
+            "morpfw.sqlstorage.include_deleted", False
+        )
         if query:
             f = compile_condition("sqlalchemy", query)
             filterquery = f(self.orm_model)
-            filterquery = sa.and_(self.orm_model.deleted.is_(None), filterquery)
+            if not include_deleted:
+                filterquery = sa.and_(self.orm_model.deleted.is_(None), filterquery)
             q = self.session.query(*fields).filter(filterquery)
         else:
             q = self.session.query(*fields).filter(self.orm_model.deleted.is_(None))
@@ -154,16 +158,25 @@ class SQLStorage(BaseStorage):
         return results
 
     def search(self, collection, query=None, offset=None, limit=None, order_by=None):
+        include_deleted = self.request.environ.get(
+            "morpfw.sqlstorage.include_deleted", False
+        )
         if query:
             f = compile_condition("sqlalchemy", query)
             filterquery = f(self.orm_model)
-            q = self.session.query(self.orm_model).filter(
-                sa.and_(self.orm_model.deleted.is_(None), filterquery)
-            )
+            if not include_deleted:
+                q = self.session.query(self.orm_model).filter(
+                    sa.and_(self.orm_model.deleted.is_(None), filterquery)
+                )
+            else:
+                q = self.session.query(self.orm_model).filter(filterquery)
         else:
-            q = self.session.query(self.orm_model).filter(
-                self.orm_model.deleted.is_(None)
-            )
+            if not include_deleted:
+                q = self.session.query(self.orm_model).filter(
+                    self.orm_model.deleted.is_(None)
+                )
+            else:
+                q = self.session.query(self.orm_model)
 
         if order_by is not None:
             col = order_by[0]
@@ -198,12 +211,21 @@ class SQLStorage(BaseStorage):
     def get(self, collection, identifier):
         qs = []
         idfield = self.app.get_identifierfield(self.model.schema)
-        q = self.session.query(self.orm_model).filter(
-            sa.and_(
-                self.orm_model.deleted.is_(None),
+        include_deleted = self.request.environ.get(
+            "morpfw.sqlstorage.include_deleted", False
+        )
+
+        if not include_deleted:
+            q = self.session.query(self.orm_model).filter(
+                sa.and_(
+                    self.orm_model.deleted.is_(None),
+                    getattr(self.orm_model, idfield) == identifier,
+                )
+            )
+        else:
+            q = self.session.query(self.orm_model).filter(
                 getattr(self.orm_model, idfield) == identifier,
             )
-        )
         try:
             r = q.first()
         except StatementError:
@@ -236,8 +258,12 @@ class SQLStorage(BaseStorage):
         qs = []
 
         idfield = self.app.get_identifierfield(self.model.schema)
+        include_deleted = self.request.environ.get(
+            "morpfw.sqlstorage.include_deleted", False
+        )
         qs.append(getattr(self.orm_model, idfield) == identifier)
-        qs.append(self.orm_model.deleted.is_(None))
+        if not include_deleted:
+            qs.append(self.orm_model.deleted.is_(None))
         q = self.session.query(self.orm_model).filter(sa.and_(*qs))
 
         r = q.first()
