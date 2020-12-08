@@ -25,14 +25,9 @@ from ..memoizer import requestmemoize
 from ..request import Request
 from . import permission, signals
 from .const import SEPARATOR
-from .errors import (
-    AlreadyExistsError,
-    BlobStorageNotImplementedError,
-    FormValidationError,
-    StateUpdateProhibitedError,
-    UnprocessableError,
-    ValidationError,
-)
+from .errors import (AlreadyExistsError, BlobStorageNotImplementedError,
+                     FormValidationError, StateUpdateProhibitedError,
+                     UnprocessableError, ValidationError)
 from .log import logger
 from .relationship import BackReferenceResolver, ReferenceResolver
 
@@ -379,9 +374,8 @@ class Model(IModel):
         dispatch.dispatch(self.request, self)
 
         if cascade:
-            brefs = getattr(self.schema, "__backreferences__", [])
-            for bref in brefs:
-                for refitem in bref.resolve(self, self.request):
+            for bref in self.backreferences().values():
+                for refitem in self.resolve_backreference(bref):
                     refitem.delete(cascade=cascade)
 
         if not self.before_delete():
