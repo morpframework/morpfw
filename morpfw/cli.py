@@ -19,10 +19,10 @@ from urllib.parse import urlparse
 import click
 import hydra
 import morepath
+import morpfw
+import rulez
 import transaction
 import yaml
-
-import morpfw
 from alembic.config import main as alembic_main
 
 from .alembic import drop_all
@@ -243,12 +243,20 @@ def _start_shell(ctx, script, spawn_shell=True):
     settings = param["settings"]
     request = request_factory(settings)
     session = request.db_session
+
+    def commit():
+        transaction.commit()
+        sys.exit()
+
     localvars = {
         "session": session,
         "request": request,
         "app": request.app,
         "settings": settings,
         "Identity": Identity,
+        "commit": commit,
+        "morpfw": morpfw,
+        "rulez": rulez,
     }
     if script:
         with open(script) as f:
@@ -269,8 +277,11 @@ def _shell(vars):
 
     readline.set_completer(rlcompleter.Completer(vars).complete)
     readline.parse_and_bind("tab: complete")
+    banner = "\nMorpFW Interactive Console\nAvailable globals : %s\n" % (
+        ", ".join(vars.keys())
+    )
     shell = code.InteractiveConsole(vars)
-    shell.interact()
+    shell.interact(banner=banner)
 
 
 @cli.command(help="Reset database")
