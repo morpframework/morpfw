@@ -25,9 +25,14 @@ from ..memoizer import requestmemoize
 from ..request import Request
 from . import permission, signals
 from .const import SEPARATOR
-from .errors import (AlreadyExistsError, BlobStorageNotImplementedError,
-                     FormValidationError, StateUpdateProhibitedError,
-                     UnprocessableError, ValidationError)
+from .errors import (
+    AlreadyExistsError,
+    BlobStorageNotImplementedError,
+    FormValidationError,
+    StateUpdateProhibitedError,
+    UnprocessableError,
+    ValidationError,
+)
 from .log import logger
 from .relationship import BackReferenceResolver, ReferenceResolver
 
@@ -280,7 +285,12 @@ class Model(IModel):
         return self.data.as_dict()
 
     def title(self):
-        return self["uuid"]
+        fields = list(self.schema.__dataclass_fields__.keys())
+        if "title" in fields:
+            return self["title"]
+        if "name" in fields:
+            return self["name"]
+        return "%s:%s" % (str(self.__class__.__name__), self["uuid"])
 
     @property
     def statemachine_view_enabled(self):
