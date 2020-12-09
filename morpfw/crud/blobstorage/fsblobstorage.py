@@ -1,4 +1,5 @@
 import datetime
+import hashlib
 import json
 import os
 import typing
@@ -60,11 +61,13 @@ class FSBlobStorage(BlobStorage):
         Path(self._uuid_path(uuid)).mkdir(parents=True, exist_ok=True)
 
         fileobj.seek(0)
+        hash = hashlib.sha256()
         with open(obj_path, "wb") as o:
             while True:
                 data = fileobj.read(WRITE_BUFF_SIZE)
                 if not data:
                     break
+                hash.update(data)
                 o.write(data)
 
         meta = {
@@ -73,6 +76,7 @@ class FSBlobStorage(BlobStorage):
             "mimetype": mimetype,
             "size": size,
             "encoding": encoding,
+            "sha256sum": hash.hexdigest()
         }
         with open(meta_path, "w") as mo:
             mo.write(json.dumps(meta))
