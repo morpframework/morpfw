@@ -33,13 +33,14 @@ def drop_all(request):
         param = dict([(k, v) for k, v in conf.items() if k != "dburi"])
         engine = create_engine(conf["dburi"], **param)
         inspect = Inspector(engine)
+        print("Clearing engine: %s" % n)
         for schema in inspect.get_schema_names():
             if schema in ['information_schema']:
                 continue
             if schema.startswith('pg_'):
                 continue
             meta = MetaData(engine, schema=schema)
-            print("Clearing tables from schema {}".format(schema))
+            print(".. Clearing tables from schema {}".format(schema))
             meta.reflect()
             meta.drop_all()
             if schema in ['public', 'dbo']:
@@ -47,3 +48,4 @@ def drop_all(request):
 
             print("Dropping schema {}".format(schema))
             engine.execute(DropSchema(schema))
+        print("Done")
