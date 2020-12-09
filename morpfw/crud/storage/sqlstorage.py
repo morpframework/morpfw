@@ -325,7 +325,7 @@ class BaseMixin(MappedTable):
         default=lambda: datetime.now(tz=pytz.UTC),
         index=True,
     )
-    creator = sa.Column(sa.String(length=256))
+    creator = sa.Column(GUID, index=True)
     modified = sa.Column(
         sa.DateTime(timezone=True),
         default=lambda: datetime.now(tz=pytz.UTC),

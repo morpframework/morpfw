@@ -26,7 +26,7 @@ def set_created(app, request, obj, signal):
 @App.subscribe(signal=signals.OBJECT_CREATED, model=model.Model)
 def set_creator(app, request, obj, signal):
     if "creator" in obj.schema.__dataclass_fields__.keys():
-        obj.data["creator"] = request.identity.userid or ""
+        obj.data["creator"] = request.identity.userid or None
 
 
 @App.subscribe(signal=signals.OBJECT_UPDATED, model=model.Model)

@@ -7,7 +7,8 @@ from more.basicauth import BasicAuthIdentityPolicy
 from more.transaction import TransactionApp
 from morpfw.app import SQLApp
 from morpfw.crud.blobstorage.fsblobstorage import FSBlobStorage
-from morpfw.crud.storage.pgsqlstorage import PgSQLStorage, db_meta
+from morpfw.crud.storage.pgsqlstorage import PgSQLStorage
+from sqlalchemy import MetaData
 
 from ..common import get_client, make_request
 from .crud_common import FSBLOB_DIR
@@ -24,6 +25,8 @@ from .crud_common import (
     PageSchema,
     run_jslcrud_test,
 )
+
+db_meta = MetaData()
 
 
 class App(BaseApp, SQLApp):

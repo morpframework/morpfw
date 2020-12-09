@@ -187,12 +187,23 @@ class BlobObjectModel(Model):
     blob_fields = ["blobfile"]
 
 
+_USERUIDS = {}
+
+
 class IdentityPolicy(BasicAuthIdentityPolicy):
     def identify(self, request):
         identity = super().identify(request)
         if isinstance(identity, morepath.Identity):
+            uuid = _USERUIDS.get(identity.userid, None)
+            if not uuid:
+                uuid = uuid4().hex
+                _USERUIDS[identity.userid] = uuid
+
             return Identity(
-                request=request, userid=identity.userid, password=identity.password
+                request=request,
+                userid=uuid,
+                username=identity.userid,
+                password=identity.password,
             )
         return identity
 
@@ -202,7 +213,7 @@ class AuthnPolicy(BaseAuthnPolicy):
         return IdentityPolicy()
 
     def verify_identity(self, app, identity):
-        if identity.userid == "admin" and identity.password == "admin":
+        if identity.username == "admin" and identity.password == "admin":
             return True
         return False
 
@@ -399,7 +410,7 @@ def run_jslcrud_test(c, skip_aggregate=False):
     assert r.json["data"]["body"] == "hello"
     assert r.json["data"]["created_flag"] is True
     assert r.json["data"]["created"]
-    assert r.json["data"]["creator"] == "admin"
+    assert r.json["data"]["creator"] == _USERUIDS["admin"]
 
     obj_link = r.json["links"][0]["href"]
     obj_xattr_link = obj_link + "/+xattr"
@@ -428,8 +439,7 @@ def run_jslcrud_test(c, skip_aggregate=False):
 
     message_date = (date(2019, 1, 1) - epoch).days
     r = c.patch_json(
-        obj_xattr_link,
-        {"message": "hello world", "message_date": message_date},
+        obj_xattr_link, {"message": "hello world", "message_date": message_date},
     )
 
     assert r.status_code == 200
@@ -444,10 +454,7 @@ def run_jslcrud_test(c, skip_aggregate=False):
         "message_date": message_date,
     }
 
-    r = c.patch_json(
-        obj_xattr_link,
-        {"message": "hello world", "anotherkey": "boo"},
-    )
+    r = c.patch_json(obj_xattr_link, {"message": "hello world", "anotherkey": "boo"},)
 
     assert r.status_code == 200
 

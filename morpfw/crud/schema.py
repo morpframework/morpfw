@@ -75,7 +75,11 @@ class Schema(BaseSchema):
         default_factory=lambda: uuid4().hex,
         metadata={"format": "uuid", "index": True, "unique": True},
     )
-    creator: typing.Optional[str] = field(default=None, metadata={"length": 256})
+    creator: typing.Optional[str] = field(default=None, metadata={
+        "format":"uuid",
+        "index": True,
+        "length": 256
+    })
     created: typing.Optional[datetime] = field(
         default_factory=lambda: datetime.now(tz=pytz.UTC), metadata={"index": True}
     )
