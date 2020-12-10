@@ -46,7 +46,7 @@ class Page(Base):
     publish_datetime = sa.Column(sa.DateTime(timezone=True))
     value = sa.Column(sa.Integer)
     footer = sa.Column(sa.String(length=1024), default="")
-
+    computed_title = sa.Column(sa.String(length=1024), default="")
 
 class PageStorage(SQLStorage):
     model = PageModel

@@ -199,6 +199,7 @@ class Collection(ICollection):
             if self.search(rulez.and_(*unique_search)):
                 raise self.exist_exc(" ".join(msg))
 
+        self.update_computed_fields(data)
         obj = self._create(data)
         obj.set_initial_state()
         dispatch = self.request.app.dispatcher(signals.OBJECT_CREATED)
@@ -206,6 +207,12 @@ class Collection(ICollection):
         obj.after_created()
         obj.save()
         return obj
+
+    def update_computed_fields(self, data):
+        for fn, field in self.schema.__dataclass_fields__.items():
+            compute = field.metadata.get("compute_value", None)
+            if compute:
+                data[fn] = compute(self.request, data, None)
 
     def _create(self, data):
         return self.storage.create(self, data)
@@ -354,6 +361,7 @@ class Model(IModel):
             data = self.data.as_dict()
         self.before_update(newdata)
         data.update(newdata)
+        self.update_computed_fields(data)
         self.schema.validate(
             self.request, data, deserialize=deserialize, update_mode=True, context=self
         )
@@ -378,6 +386,12 @@ class Model(IModel):
         dispatch = self.request.app.dispatcher(signals.OBJECT_UPDATED)
         dispatch.dispatch(self.request, self)
         self.after_updated()
+
+    def update_computed_fields(self, data):
+        for fn, field in self.schema.__dataclass_fields__.items():
+            compute = field.metadata.get("compute_value", None)
+            if compute:
+                data[fn] = compute(self.request, data, self)
 
     def delete(self, *, cascade=True, **kwargs):
         dispatch = self.request.app.dispatcher(signals.OBJECT_TOBEDELETED)

@@ -67,6 +67,8 @@ class PageSchema(Schema):
     publish_datetime: typing.Optional[datetime] = None
     value: typing.Optional[int] = None
     footer: typing.Optional[str] = ""
+    computed_title: typing.Optional[str] = field(default=None,
+            metadata={'compute_value': lambda req, d, m: 'computed title'})
 
 
 @App.formvalidators(schema=PageSchema)
@@ -245,7 +247,7 @@ def run_jslcrud_test(c, skip_aggregate=False):
     assert r.json["data"]["title"] == "Hello"
     assert r.json["data"]["publish_date"] == publish_date
     assert r.json["data"]["publish_datetime"] == publish_datetime
-
+    assert r.json['data']['computed_title'] == 'computed title'
     uuid = r.json["data"]["uuid"]
     assert uuid
     assert len(uuid) == 32
