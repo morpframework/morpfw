@@ -2,7 +2,6 @@ import os
 import time
 
 import pytest
-
 from more.basicauth import BasicAuthIdentityPolicy
 from morpfw.app import SQLApp
 from morpfw.request import request_factory
@@ -48,6 +47,7 @@ def index(context, request):
 
 @App.async_subscribe("test_signal")
 def handler1(request_options, obj):
+    request_options["scan"] = False
     with request_factory(**request_options) as request:
         obj["handler"] = "handler1"
         obj["data"] += 1
@@ -56,6 +56,7 @@ def handler1(request_options, obj):
 
 @App.async_subscribe("test_signal")
 def handler2(request_options, obj):
+    request_options["scan"] = False
     with request_factory(**request_options) as request:
         obj["handler"] = "handler2"
         obj["data"] += 5
@@ -64,6 +65,7 @@ def handler2(request_options, obj):
 
 @App.async_subscribe("test_signal")
 def handler3(request_options, obj):
+    request_options["scan"] = False
     with request_factory(**request_options) as request:
         obj["handler"] = "handler3"
     raise Exception("Error")

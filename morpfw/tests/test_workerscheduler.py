@@ -4,11 +4,10 @@ import typing
 import uuid
 from dataclasses import dataclass
 
-import pytest
-
 import jsl
 import morepath
 import morpfw
+import pytest
 import sqlalchemy as sa
 from morpfw import sql as morpsql
 from morpfw.crud import Collection, Model
@@ -72,6 +71,8 @@ def get_page(request, identifier):
 
 @App.periodic(name="test-tick", seconds=1)
 def tick(request_options):
+    request_options["scan"] = False
+    morepath.scan(morpfw)
     with morpfw.request_factory(**request_options) as request:
         collection = get_pagecollection(request)
         collection.create({"title": "Hello", "body": "World"})
