@@ -13,41 +13,27 @@ from morpfw.crud.blobstorage.fsblobstorage import FSBlobStorage
 from morpfw.crud.model import Collection, Model
 from morpfw.crud.schema import Schema
 from morpfw.crud.storage.elasticsearchstorage import ElasticSearchStorage
+from morpfw.request import ESCapableRequest
 from sqlalchemy.orm import sessionmaker
 from zope.sqlalchemy import register as register_session
 
 from ..common import get_client
 from .crud_common import FSBLOB_DIR
 from .crud_common import App as BaseApp
-from .crud_common import (
-    BlobObjectCollection,
-    BlobObjectModel,
-    NamedObjectCollection,
-    NamedObjectModel,
-)
+from .crud_common import (BlobObjectCollection, BlobObjectModel,
+                          NamedObjectCollection, NamedObjectModel)
 from .crud_common import ObjectSchema as BaseObjectSchema
-from .crud_common import (
-    ObjectXattrProvider,
-    ObjectXattrSchema,
-    PageCollection,
-    PageModel,
-    PageSchema,
-    run_jslcrud_test,
-)
+from .crud_common import (ObjectXattrProvider, ObjectXattrSchema,
+                          PageCollection, PageModel, PageSchema,
+                          run_jslcrud_test)
 
 Session = sessionmaker()
 register_session(Session)
 
 
-class ESClientRequest(Request):
-    @reify
-    def es_client(self):
-        return Elasticsearch(hosts="127.0.0.1:9085")
-
-
 class App(BaseApp, TransactionApp):
 
-    request_class = ESClientRequest
+    request_class = ESCapableRequest
 
 
 class PageStorage(ElasticSearchStorage):

@@ -1,4 +1,5 @@
 import copy
+import json
 from pprint import pprint
 from typing import Optional
 
@@ -101,6 +102,10 @@ class Aggregate(object):
         if self._finalized:
             raise ValueError("Aggregate has been finalized")
 
+        if not self.groups:
+            self._finalized = True
+            return
+
         prev = None
         first = None
         for g in self.groups:
@@ -122,6 +127,8 @@ class Aggregate(object):
     def json(self):
         if not self._finalized:
             self.finalize()
+        if not self.groups:
+            return {}
         return self.groups[0].json()
 
     def parse(self, result):
@@ -143,7 +150,7 @@ class ElasticSearchStorage(BaseStorage):
 
     @property
     def client(self):
-        return self.request.es_client
+        return self.request.get_es_client()
 
     def create_index(self):
         if not self.client.indices.exists(self.index_name):
@@ -201,6 +208,7 @@ class ElasticSearchStorage(BaseStorage):
             params["size"] = limit
         if order_by:
             params["sort"] = [":".join(order_by)]
+
         res = self.client.search(
             index=self.index_name, doc_type=self.doc_type, body=q, **params
         )
@@ -304,6 +312,14 @@ class ElasticSearchStorage(BaseStorage):
         res = self.client.search(
             index=self.index_name, doc_type=self.doc_type, body=q, **params
         )
+
+        if "aggregations" not in res:
+            if len(group) == 1 and "count" in group.keys():
+                return [{"count": res["hits"]["total"]["value"]}]
+            raise AssertionError(
+                "Unsupported query\n  Query: %s\n  Result: %s"
+                % (json.dumps(q, indent=4), json.dumps(res, indent=4))
+            )
         data = aggs.parse(res["aggregations"])
 
         return list(data)
