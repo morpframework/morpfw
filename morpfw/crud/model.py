@@ -294,9 +294,11 @@ class Model(IModel):
     def title(self):
         fields = list(self.schema.__dataclass_fields__.keys())
         if "title" in fields:
-            return self["title"]
+            if self["title"]:
+                return self["title"]
         if "name" in fields:
-            return self["name"]
+            if self["name"]:
+                return self["name"]
         return "%s:%s" % (str(self.__class__.__name__), self["uuid"])
 
     @property
