@@ -4,7 +4,7 @@ from pprint import pprint
 from typing import Optional
 
 import elasticsearch.exceptions as es_exc
-from inverter import dc2colanderESjson
+from inverter import dc2colanderESjson, dc2esmapping
 from rulez import compile_condition
 
 from ..app import App
@@ -152,17 +152,30 @@ class ElasticSearchStorage(BaseStorage):
     def client(self):
         return self.request.get_es_client()
 
-    def create_index(self):
-        if not self.client.indices.exists(self.index_name):
-            try:
-                self.client.indices.create(
-                    index=self.index_name,
-                    body={"settings": {"number_of_shards": 1, "number_of_replicas": 0}},
-                )
-            except es_exc.TransportError as e:
-                if e.error == "index_already_exists_exception":
-                    return
-                raise e
+    def create_index(self, collection, recreate=False):
+        if self.client.indices.exists(self.index_name) and recreate == False:
+            return False
+
+        if recreate == True:
+            self.client.indices.delete(self.index_name)
+
+        settings = self.request.app.get_config(
+            "morpfw.storage.elasticsearch.index_settings.%s" % self.index_name, None,
+        )
+        body = {}
+        if settings:
+            body["settings"] = settings or {
+                "number_of_shards": 1,
+                "number_of_replicas": 0,
+            }
+
+        mapping = dc2esmapping.convert(collection.schema)
+        body.update(mapping)
+        self.client.indices.create(
+            index=self.index_name, body=body,
+        )
+
+        return True
 
     def create(self, collection, data):
         m = self.model(self.request, collection, data)
@@ -170,7 +183,6 @@ class ElasticSearchStorage(BaseStorage):
             collection.schema, request=collection.request
         )
         esdata = cschema().serialize(data)
-        self.create_index()
         try:
             r = self.client.index(
                 index=self.index_name,
@@ -200,7 +212,6 @@ class ElasticSearchStorage(BaseStorage):
             q["from"] = 0
             q["size"] = limit
 
-        self.create_index()
         params = {}
         if offset is not None:
             params["from_"] = offset
@@ -234,7 +245,6 @@ class ElasticSearchStorage(BaseStorage):
 
         q["size"] = 0
 
-        self.create_index()
         params = {}
         if order_by:
             params["sort"] = [":".join(order_by)]
@@ -325,7 +335,6 @@ class ElasticSearchStorage(BaseStorage):
         return list(data)
 
     def get(self, collection, identifier):
-        self.create_index()
         try:
             res = self.client.get(
                 index=self.index_name,
@@ -366,7 +375,6 @@ class ElasticSearchStorage(BaseStorage):
             collection.schema, include_fields=data.keys(), request=collection.request
         )
         data = cschema().serialize(data)
-        self.create_index()
         self.client.update(
             index=self.index_name,
             doc_type=self.doc_type,
@@ -376,7 +384,6 @@ class ElasticSearchStorage(BaseStorage):
         )
 
     def delete(self, identifier, model, **kwargs):
-        self.create_index()
         self.client.delete(
             index=self.index_name, doc_type=self.doc_type, id=identifier, refresh=True
         )

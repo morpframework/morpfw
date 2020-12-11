@@ -321,6 +321,27 @@ def migration(ctx, options):
     pass
 
 
+@cli.command(help="create elasticsearch indexes")
+@click.pass_context
+def create_esindex(ctx):
+    param = load(ctx.obj["settings"])
+
+    settings = param["settings"]
+
+    with request_factory(settings) as request:
+
+        types = request.app.config.type_registry.get_typeinfos(request)
+        for typeinfo in types.values():
+            collection = request.get_collection(typeinfo["name"])
+            storage = collection.storage
+            if isinstance(storage, morpfw.ElasticSearchStorage):
+                print("Creating index %s .. " % storage.index_name, end="")
+                if storage.create_index(collection):
+                    print("OK")
+                else:
+                    print("EXIST")
+
+
 def main():
     if "migration" in sys.argv:
         argv = sys.argv[sys.argv.index("migration") + 1 :]
