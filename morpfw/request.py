@@ -13,6 +13,7 @@ import sqlalchemy.orm
 import transaction
 import yaml
 from cryptography.fernet import Fernet
+from elasticsearch import Elasticsearch
 from morepath.publish import resolve_model
 from morepath.request import SAME_APP, LinkError
 from morepath.request import Request as BaseRequest
@@ -272,6 +273,35 @@ class DBSessionRequest(Request):
                 self._db_engines[k].dispose()
                 del self._db_engines[k]
         self.environ["morpfw.memoize"] = {}  # noqa
+
+
+class ESCapableRequest(DBSessionRequest):
+    @property
+    def _es_client(self):
+        clients = getattr(threadlocal, "mfw_es_clients", None)
+        if clients is None:
+            clients = {}
+            threadlocal.mfw_es_clients = clients
+
+        return threadlocal.mfw_es_clients
+
+    def get_es_client(self, name="default"):
+
+        settings = self.app._raw_settings
+        config = settings["configuration"]
+
+        if self._es_client.get(name, None) is None:
+            if name == "default":
+                key = "morpfw.storage.elasticsearch.hosts"
+            else:
+                key = "morpfw.storage.elasticsearch.hosts.%s" % name
+            hosts = config.get(key, None)
+            if not hosts:
+                raise ConfigurationError("%s not configured" % key)
+            client = Elasticsearch(hosts=hosts)
+            self._es_client[name] = client
+
+        return self._es_client[name]
 
 
 COMMITTED_APPS = []
