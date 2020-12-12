@@ -68,7 +68,9 @@ class Collection(ICollection):
 
     @property
     def name(self):
-        typeinfo = self.request.app.get_typeinfo_by_schema(self.schema)
+        typeinfo = self.request.app.get_typeinfo_by_schema(
+            request=self.request, schema=self.schema
+        )
         return typeinfo["name"]
 
     def __setitem__(self, key, value):

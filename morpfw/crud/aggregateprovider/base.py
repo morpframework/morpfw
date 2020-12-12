@@ -1,13 +1,15 @@
-from ..model import Collection
-from ..errors import UnprocessableError
-from ...interfaces import IAggregateProvider
 import re
-from rulez import parse_dsl, OperatorNotAllowedError
+
+from rulez import OperatorNotAllowedError, parse_dsl
+
+from ...interfaces import IAggregateProvider
+from ..errors import UnprocessableError
+from ..model import Collection
 
 
 class AggregateProvider(IAggregateProvider):
 
-    pattern = re.compile(r'(\w+):(\w+)\((\w+)\)')
+    pattern = re.compile(r"(\w+):([\_\w]+)\((\w+)\)")
 
     def __init__(self, context: Collection):
         self.context = context
@@ -15,14 +17,14 @@ class AggregateProvider(IAggregateProvider):
         self.request = context.request
 
     def _parse(self, qs):
-        tokens = [ss.strip() for ss in qs.strip().split(',')]
+        tokens = [ss.strip() for ss in qs.strip().split(",")]
         result = []
         for t in tokens:
             m = self.pattern.match(t)
             if not m:
                 raise ValueError(t)
             g = m.groups()
-            result.append((g[0], {'function': g[1], 'field': g[2]}))
+            result.append((g[0], {"function": g[1], "field": g[2]}))
         return dict(result)
 
     def parse_query(self, qs):

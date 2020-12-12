@@ -286,28 +286,28 @@ class ElasticSearchStorage(BaseStorage):
                             type="date_histogram",
                             opts={"interval": "day", "format": "dd"},
                         )
-                    elif ff == "interval-1m":
+                    elif ff == "interval_1m":
                         aggs.add_group(
                             k,
                             f,
                             type="date_histogram",
                             opts={"interval": "1m", "format": "yyyy-MM-dd'T'HH:mm"},
                         )
-                    elif ff == "interval-15m":
+                    elif ff == "interval_15m":
                         aggs.add_group(
                             k,
                             f,
                             type="date_histogram",
                             opts={"interval": "15m", "format": "yyyy-MM-dd'T'HH:mm"},
                         )
-                    elif ff == "interval-30m":
+                    elif ff == "interval_30m":
                         aggs.add_group(
                             k,
                             f,
                             type="date_histogram",
                             opts={"interval": "30m", "format": "yyyy-MM-dd'T'HH:mm"},
                         )
-                    elif ff == "interval-1h":
+                    elif ff == "interval_1h":
                         aggs.add_group(
                             k,
                             f,
