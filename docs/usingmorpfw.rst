@@ -83,6 +83,21 @@ connection URI for SQLStorage, in ``settings.yml``, add in ``configuration`` opt
    configuration:
       morpfw.storage.sqlstorage.dburi: 'postgresql://postgres:postgres@localhost:5432/app_db'
 
+
+If you want to use `beaker <https://beaker.readthedocs.io/en/latest/>`_ for session and 
+caching, you can also add:
+
+.. code-block:: yaml
+
+   configuration:
+      ...
+      morpfw.beaker.session.type: ext:database
+      morpfw.beaker.session.url: 'postgresql://postgres:postgres@localhost:5432/app_cache'
+      morpfw.beaker.cache.type: ext:database
+      morpfw.beaker.cache.url: 'postgresql://postgres:postgres@localhost:5432/app_cache'
+      ...
+
+
 Initializing Database Tables
 ------------------------------
 

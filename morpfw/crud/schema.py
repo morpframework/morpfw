@@ -101,6 +101,7 @@ class Schema(BaseSchema):
     __unique_constraint__ = []  # type: ignore
     __references__ = []  # type: ignore
     __backreferences__ = []  # type: ignore
+    __validators__ = []  # type: ignore
 
 
 @App.identifierfield(schema=Schema)

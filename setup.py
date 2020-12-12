@@ -78,6 +78,7 @@ setup(name='morpfw',
           'more.static',
           'RestrictedPython',
           'python-ldap',
+          'beaker',
       ],
       extras_require={
           'test': [

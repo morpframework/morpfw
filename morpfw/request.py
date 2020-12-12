@@ -35,6 +35,14 @@ default_settings: dict = yaml.load(default_settings, Loader=yaml.Loader)
 
 
 class Request(BaseRequest):
+    @property
+    def session(self):
+        return self.environ["beaker.session"]
+
+    @property
+    def cache(self):
+        return self.environ["beaker.cache"]
+
     def copy(self, *args, **kwargs):
         """
         Copy the request and environment object.

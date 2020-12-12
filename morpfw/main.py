@@ -10,6 +10,8 @@ import reg
 import sqlalchemy
 import transaction
 import yaml
+from beaker.middleware import CacheMiddleware as BeakerCacheMiddleware
+from beaker.middleware import SessionMiddleware as BeakerMiddleware
 from celery import Celery
 from more.basicauth import BasicAuthIdentityPolicy
 from zope.sqlalchemy import register as register_session
@@ -20,7 +22,7 @@ from .authn.pas.group.path import get_group_collection
 from .authn.pas.user.model import UserCollection, UserModel, UserSchema
 from .authn.pas.user.path import get_user_collection
 from .exc import ConfigurationError
-from .request import Request, request_factory, default_settings
+from .request import Request, default_settings, request_factory
 from .sql import Base
 
 
@@ -72,6 +74,20 @@ def create_app(settings, scan=True, **kwargs):
     celery_settings = config["morpfw.celery"]
     app.celery.conf.update(**celery_settings)
     application = app()
+
+    # wrap with beaker session and cache manager
+
+    beaker_settings = {}
+
+    for k, v in settings["configuration"].items():
+        if k.startswith("morpfw.beaker."):
+            keylen = len("morpfw.beaker.")
+            beaker_settings[k[keylen:]] = v
+
+    if "session.type" in beaker_settings:
+        application = BeakerMiddleware(application, beaker_settings)
+    if "cache.type" in beaker_settings:
+        application = BeakerCacheMiddleware(application, beaker_settings)
     return application
 
 
