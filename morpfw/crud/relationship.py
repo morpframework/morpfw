@@ -34,7 +34,7 @@ class ReferenceResolver(object):
 
     def resolve(self):
         value = self.context[self.ref.name]
-        collection = self.request.get_collection(self.ref.resource_type)
+        collection = self.ref.collection(self.request)
         items = collection.search(rulez.field(self.ref.attribute) == value)
         if items:
             return items[0]
@@ -93,7 +93,7 @@ class BackReferenceResolver(object):
             raise ValueError("Invalid reference name. %s" % self.bref.reference_name)
 
         value = context[reference.attribute]
-        collection = request.get_collection(self.bref.resource_type)
+        collection = self.bref.collection(request)
         items = collection.search(rulez.field(reference.name) == value)
         return items
 
