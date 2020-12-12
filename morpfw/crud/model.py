@@ -66,6 +66,11 @@ class Collection(ICollection):
     def schema(self):
         raise NotImplementedError
 
+    @property
+    def name(self):
+        typeinfo = self.request.app.get_typeinfo_by_schema(self.schema)
+        return typeinfo["name"]
+
     def __setitem__(self, key, value):
         if key not in self.schema.__dataclass_fields__:
             raise KeyError(key)
