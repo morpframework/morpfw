@@ -97,7 +97,7 @@ class Request(BaseRequest):
         self.dispose_db_engines()
 
     def timezone(self):
-        cache_key = ("morpfw.cache.timezone",)
+        cache_key = "morpfw.cache.timezone"
         self.environ.setdefault(cache_key, None)
         cached_tz = self.environ[cache_key]
         if cached_tz:

@@ -180,7 +180,9 @@ class ElasticSearchStorage(BaseStorage):
     def create(self, collection, data):
         m = self.model(self.request, collection, data)
         cschema = dc2colanderESjson.convert(
-            collection.schema, request=collection.request
+            collection.schema,
+            request=collection.request,
+            default_tzinfo=collection.request.timezone(),
         )
         esdata = cschema().serialize(data)
         try:
@@ -231,6 +233,7 @@ class ElasticSearchStorage(BaseStorage):
                 collection.schema,
                 include_fields=data.keys(),
                 request=collection.request,
+                default_tzinfo=collection.request.timezone(),
             )
             data = cschema().deserialize(data)
             models.append(self.model(self.request, collection, data))
@@ -347,7 +350,10 @@ class ElasticSearchStorage(BaseStorage):
 
         data = res["_source"]
         cschema = dc2colanderESjson.convert(
-            collection.schema, include_fields=data.keys(), request=collection.request,
+            collection.schema,
+            include_fields=data.keys(),
+            request=collection.request,
+            default_tzinfo=collection.request.timezone(),
         )
         data = cschema().deserialize(data)
         return self.model(self.request, collection, data)
@@ -365,14 +371,20 @@ class ElasticSearchStorage(BaseStorage):
         res = self.client.get(index=self.index_name, doc_type=self.doc_type, id=id)
         data = res["_source"]
         cschema = dc2colanderESjson.convert(
-            collection.schema, include_fields=data.keys(), request=collection.request,
+            collection.schema,
+            include_fields=data.keys(),
+            request=collection.request,
+            default_tzinfo=collection.request.timezone(),
         )
         data = cschema().deserialize(data)
         return self.model(self.request, collection, data)
 
     def update(self, collection, identifier, data):
         cschema = dc2colanderESjson.convert(
-            collection.schema, include_fields=data.keys(), request=collection.request
+            collection.schema,
+            include_fields=data.keys(),
+            request=collection.request,
+            default_tzinfo=collection.request.timezone(),
         )
         data = cschema().serialize(data)
         self.client.update(
