@@ -14,6 +14,7 @@ import sys
 import threading
 import time
 from datetime import datetime
+from random import randint
 from urllib.parse import urlparse
 
 import click
@@ -28,7 +29,7 @@ from alembic.config import main as alembic_main
 from .alembic import drop_all
 from .main import create_admin, default_settings
 from .request import request_factory
-from random import randint
+
 
 def load_settings(settings_file, default=default_settings):
     dsettings = os.environ.get("MORP_SETTINGS", {})
@@ -91,19 +92,19 @@ def load(settings_file: str = None, host: str = None, port: int = None):
     }
 
 
-def confirmation_dialog(message='Are you sure you want to proceed?',
-        token_length=6):
+def confirmation_dialog(message="Are you sure you want to proceed?", token_length=6):
 
-    token = ''
+    token = ""
     for i in range(token_length):
-        x = randint(0,9)
+        x = randint(0, 9)
         token += str(x)
 
     ans = input("%s \n(Please enter '%s' to confirm): " % (message, token))
     if ans.strip() != token:
-        print('Invalid confirmation token')
+        print("Invalid confirmation token")
         return False
     return True
+
 
 @click.group()
 @click.option("-s", "--settings", type=str, default=None, help="path to settings.yml")
@@ -306,7 +307,7 @@ def resetdb(ctx):
     settings = param["settings"]
 
     if not confirmation_dialog():
-        return 
+        return
 
     with request_factory(settings) as request:
         drop_all(request)
@@ -338,9 +339,9 @@ def migration(ctx, options):
     pass
 
 
-@cli.command(help="create elasticsearch indexes")
+@cli.command(help="Update elasticsearch indexes")
 @click.pass_context
-def create_esindex(ctx):
+def update_esindex(ctx):
     param = load(ctx.obj["settings"])
 
     settings = param["settings"]
@@ -356,7 +357,10 @@ def create_esindex(ctx):
                 if storage.create_index(collection):
                     print("OK")
                 else:
-                    print("EXIST")
+                    if storage.update_index(collection):
+                        print("UPDATED")
+                    else:
+                        raise AssertionError("Unknown error")
 
 
 @cli.command(help="delete all elasticsearch indexes")
@@ -364,7 +368,7 @@ def create_esindex(ctx):
 def reset_esindex(ctx):
 
     if not confirmation_dialog():
-        return 
+        return
 
     param = load(ctx.obj["settings"])
 
@@ -381,7 +385,6 @@ def reset_esindex(ctx):
                 print("Deleting index %s .. " % storage.index_name, end="")
                 client.indices.delete(storage.index_name)
                 print("OK")
-
 
 
 def main():

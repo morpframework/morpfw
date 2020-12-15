@@ -142,7 +142,6 @@ class ElasticSearchStorage(BaseStorage):
     refresh: Optional[str] = None
     auto_id = False
     use_transactions = False
-    doc_type = "_doc"
 
     @property
     def index_name(self):
@@ -177,6 +176,25 @@ class ElasticSearchStorage(BaseStorage):
 
         return True
 
+    def update_index(self, collection):
+        if not self.client.indices.exists(self.index_name):
+            return False
+
+        fields = list(collection.schema.__dataclass_fields__.keys())
+        mappings = self.client.indices.get_field_mapping(
+            fields, index=self.index_name, ignore_unavailable=True
+        )
+
+        existing_fields = list(mappings[self.index_name]["mappings"].keys())
+        new_fields = [x for x in fields if x not in existing_fields]
+        new_mapping = dc2esmapping.convert(
+            collection.schema, include_fields=list(new_fields)
+        )
+        self.client.indices.put_mapping(
+            index=self.index_name, body=new_mapping["mappings"],
+        )
+        return True
+
     def create(self, collection, data):
         m = self.model(self.request, collection, data)
         cschema = dc2colanderESjson.convert(
@@ -188,7 +206,6 @@ class ElasticSearchStorage(BaseStorage):
         try:
             r = self.client.index(
                 index=self.index_name,
-                doc_type=self.doc_type,
                 id=m.identifier,
                 body=esdata,
                 refresh=self.refresh,
@@ -222,9 +239,7 @@ class ElasticSearchStorage(BaseStorage):
         if order_by:
             params["sort"] = [":".join(order_by)]
 
-        res = self.client.search(
-            index=self.index_name, doc_type=self.doc_type, body=q, **params
-        )
+        res = self.client.search(index=self.index_name, body=q, **params)
 
         models = []
         for o in res["hits"]["hits"]:
@@ -322,9 +337,7 @@ class ElasticSearchStorage(BaseStorage):
 
             aggs.finalize()
             q["aggs"] = aggs.json()
-        res = self.client.search(
-            index=self.index_name, doc_type=self.doc_type, body=q, **params
-        )
+        res = self.client.search(index=self.index_name, body=q, **params)
 
         if "aggregations" not in res:
             if len(group) == 1 and "count" in group.keys():
@@ -340,10 +353,7 @@ class ElasticSearchStorage(BaseStorage):
     def get(self, collection, identifier):
         try:
             res = self.client.get(
-                index=self.index_name,
-                doc_type=self.doc_type,
-                id=identifier,
-                refresh=self.refresh,
+                index=self.index_name, id=identifier, refresh=self.refresh,
             )
         except es_exc.NotFoundError as e:
             return None
@@ -368,7 +378,7 @@ class ElasticSearchStorage(BaseStorage):
         return None
 
     def get_by_id(self, collection, id):
-        res = self.client.get(index=self.index_name, doc_type=self.doc_type, id=id)
+        res = self.client.get(index=self.index_name, id=id)
         data = res["_source"]
         cschema = dc2colanderESjson.convert(
             collection.schema,
@@ -389,13 +399,11 @@ class ElasticSearchStorage(BaseStorage):
         data = cschema().serialize(data)
         self.client.update(
             index=self.index_name,
-            doc_type=self.doc_type,
             id=identifier,
             body={"doc": data},
             refresh=self.refresh,
         )
 
     def delete(self, identifier, model, **kwargs):
-        self.client.delete(
-            index=self.index_name, doc_type=self.doc_type, id=identifier, refresh=True
-        )
+        self.client.delete(index=self.index_name, id=identifier, refresh=True)
+
