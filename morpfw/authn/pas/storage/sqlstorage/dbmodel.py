@@ -23,7 +23,7 @@ class APIKey(Base):
     __tablename__ = "authmanager_apikey"
 
     userid = sa.Column(GUID)
-    label = sa.Column(sa.String(length=256))
+    name = sa.Column(sa.String(length=256))
     api_identity = sa.Column(sa.String(length=40))
     api_secret = sa.Column(sa.String(length=40))
 
