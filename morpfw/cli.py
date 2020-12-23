@@ -18,7 +18,6 @@ from random import randint
 from urllib.parse import urlparse
 
 import click
-import hydra
 import morepath
 import morpfw
 import rulez
