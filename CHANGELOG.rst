@@ -1,7 +1,22 @@
 0.4.0b2 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- reduce default size of creator/state fields to 256
+- added vacumming capability to clean soft-deleted items
+- added cascading deletion support
+- remove dependencies on jsonobject, hydra
+- added type referencing/backreferencing support
+- allow including deleted items when querying
+- added automated constructor of SQLA ORM model from dataclass
+- save sha256sum of uploaded blobs
+- added title provider for models and collection
+- stop using autoscan in tests 
+- added ESCapableRequests which provide ES client 
+- fix count() implementation in ES storage
+- added cli tools for elasticsearch index update
+- added beaker.session and beaker.cache support
+- fix ES aggregation issue and timezone issue
+- added limit support in aggregate methods
 
 
 0.4.0b1 (2020-11-20)
