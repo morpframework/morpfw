@@ -1,4 +1,4 @@
-0.4.0b2 (unreleased)
+0.4.0b2 (2020-12-24)
 --------------------
 
 - reduce default size of creator/state fields to 256
