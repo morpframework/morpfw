@@ -9,7 +9,8 @@ from ..model import Collection
 
 class AggregateProvider(IAggregateProvider):
 
-    pattern = re.compile(r"(\w+):([\_\w]+)\((\w+)\)")
+    field_pattern = re.compile(r"(\w+):(\w+)")
+    function_pattern = re.compile(r"(\w+):([\_\w]+)\((\w+)\)")
 
     def __init__(self, context: Collection):
         self.context = context
@@ -20,11 +21,18 @@ class AggregateProvider(IAggregateProvider):
         tokens = [ss.strip() for ss in qs.strip().split(",")]
         result = []
         for t in tokens:
-            m = self.pattern.match(t)
-            if not m:
-                raise ValueError(t)
-            g = m.groups()
-            result.append((g[0], {"function": g[1], "field": g[2]}))
+            m = self.function_pattern.match(t)
+            if m:
+                g = m.groups()
+                result.append((g[0], {"function": g[1], "field": g[2]}))
+                continue
+            m = self.field_pattern.match(t)
+            if m:
+                f, v = t.split(":")
+                result.append((f, v))
+                continue
+            raise ValueError(t)
+
         return dict(result)
 
     def parse_query(self, qs):

@@ -12,9 +12,13 @@ from webob.exc import HTTPForbidden, HTTPInternalServerError, HTTPNotFound
 
 from . import permission
 from .app import App
-from .errors import (AlreadyExistsError, FieldValidationError,
-                     StateUpdateProhibitedError, UnprocessableError,
-                     ValidationError)
+from .errors import (
+    AlreadyExistsError,
+    FieldValidationError,
+    StateUpdateProhibitedError,
+    UnprocessableError,
+    ValidationError,
+)
 from .model import Collection, Model
 from .validator import get_data, validate_schema
 
@@ -46,6 +50,8 @@ def aggregate(context, request):
         query = aggregateprovider.parse_query(qs)
 
     order_by = request.GET.get("order_by", None)
+    limit = request.GET.get("limit", None)
+
     gs = request.GET.get("group", "").strip()
     group = None
     if gs:
@@ -55,7 +61,7 @@ def aggregate(context, request):
         order_by = order_by.split(":")
         if len(order_by) == 1:
             order_by = order_by + ["asc"]
-    objs = context.aggregate(query, group=group, order_by=order_by)
+    objs = context.aggregate(query, group=group, order_by=order_by, limit=limit)
     return objs
 
 
@@ -71,8 +77,8 @@ def search(context, request):
         searchprovider = context.searchprovider()
         query = searchprovider.parse_query(qs)
 
-    default_limit = request.app.get_config('morpfw.crud.search.default_limit', 20)
-    max_limit = request.app.get_config('morpfw.crud.search.max_limit', 100)
+    default_limit = request.app.get_config("morpfw.crud.search.default_limit", 20)
+    max_limit = request.app.get_config("morpfw.crud.search.max_limit", 100)
     limit = int(request.GET.get("limit", 0)) or default_limit
     if limit > max_limit:
         limit = max_limit
@@ -113,7 +119,14 @@ def search(context, request):
         params["order_by"] = request.GET.get("order_by", "")
     params["offset"] = offset + (limit or 0)
     qs = urlencode(params)
-    res = {"results": results, "q": query, "limit": limit, "order_by": order_by, "offset": offset, "result_count": len(results)}
+    res = {
+        "results": results,
+        "q": query,
+        "limit": limit,
+        "order_by": order_by,
+        "offset": offset,
+        "result_count": len(results),
+    }
     if has_next:
         res.setdefault("links", [])
         res["links"].append(
@@ -167,7 +180,10 @@ def update(context, request):
 
 
 @App.json(
-    model=Model, name="statemachine", request_method="POST", permission=permission.StateUpdate
+    model=Model,
+    name="statemachine",
+    request_method="POST",
+    permission=permission.StateUpdate,
 )
 def statemachine(context, request):
     if not context.statemachine_view_enabled:

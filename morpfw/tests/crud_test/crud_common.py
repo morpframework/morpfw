@@ -61,7 +61,9 @@ def validate_body(request, schema, data, mode=None, **kw):
 @dataclass
 class PageSchema(Schema):
 
-    title: str = ""
+    title: str = field(
+        default="", metadata={"format": "text",},
+    )
     body: str = ""
     publish_date: typing.Optional[date] = None
     publish_datetime: typing.Optional[datetime] = None
@@ -288,6 +290,10 @@ def run_jslcrud_test(c, skip_aggregate=False):
         assert r.json[0]["sum"] == 45
         assert r.json[0]["count"] == 11
         assert r.json[0]["avg"] == 4.5
+
+        r = c.get("/pages/+aggregate", {"group": ("created:created"), "limit": 1},)
+
+        assert len(r.json) == 1
 
     r = c.get("/pages/+search", {"q": 'title in ["Hello","something"]'})
 

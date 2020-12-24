@@ -46,7 +46,7 @@ class SQLStorage(BaseStorage):
         self.session.refresh(o)
         return m
 
-    def aggregate(self, query=None, group=None, order_by=None):
+    def aggregate(self, query=None, group=None, order_by=None, limit=None):
         group_bys = []
         group_bys_map = {}
 
@@ -101,6 +101,11 @@ class SQLStorage(BaseStorage):
                         fields.append(op)
                         group_bys.append(op)
                         group_bys_map[k] = op
+                    elif ff == "hourly":
+                        op = func.to_char(c, "YYYY-MM-DD HH24:00 TZ").label(k)
+                        fields.append(op)
+                        group_bys.append(op)
+                        group_bys_map[k] = op
                     else:
                         raise ValueError("Unknown function %s" % ff)
         else:
@@ -134,6 +139,9 @@ class SQLStorage(BaseStorage):
 
         if group_bys:
             q = q.group_by(*group_bys)
+
+        if limit is not None:
+            q = q.limit(limit)
 
         results = []
         try:

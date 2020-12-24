@@ -34,7 +34,7 @@ class MemoryStorage(BaseStorage):
         DATA[self.typekey][identifier] = obj
         return obj
 
-    def aggregate(self, query=None, group=None, order_by=None):
+    def aggregate(self, query=None, group=None, order_by=None, limit=None):
         items = self.search(query)
 
         result = []

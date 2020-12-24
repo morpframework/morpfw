@@ -157,11 +157,11 @@ class Collection(ICollection):
             )
         return list(objs)
 
-    def aggregate(self, query=None, group=None, order_by=None):
+    def aggregate(self, query=None, group=None, order_by=None, limit=None):
         if query:
             validate_condition(query, ALLOWED_SEARCH_OPERATORS)
         prov = self.aggregateprovider()
-        objs = prov.aggregate(query, group=group, order_by=order_by)
+        objs = prov.aggregate(query, group=group, order_by=order_by, limit=limit)
         return list(objs)
 
     def searchprovider(self):

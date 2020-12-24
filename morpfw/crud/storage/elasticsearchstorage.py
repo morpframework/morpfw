@@ -137,6 +137,18 @@ class Aggregate(object):
         return self.groups[0].parse(result)
 
 
+def is_text_mapping(collection, field):
+    schema = collection.schema
+    f = schema.__dataclass_fields__[field]
+    fmt = f.metadata.get("format", None)
+    if not fmt:
+        return False
+
+    if fmt.startswith("text"):
+        return True
+    return False
+
+
 class ElasticSearchStorage(BaseStorage):
 
     refresh: Optional[str] = None
@@ -237,7 +249,10 @@ class ElasticSearchStorage(BaseStorage):
         if limit:
             params["size"] = limit
         if order_by:
-            params["sort"] = [":".join(order_by)]
+            if is_text_mapping(collection, order_by[0]):
+                params["sort"] = [":".join(["%s.raw" % order_by[0], order_by[1]])]
+            else:
+                params["sort"] = [":".join(order_by)]
 
         res = self.client.search(index=self.index_name, body=q, **params)
 
@@ -255,7 +270,10 @@ class ElasticSearchStorage(BaseStorage):
 
         return list(models)
 
-    def aggregate(self, query=None, group=None, order_by=None):
+    def aggregate(self, query=None, group=None, order_by=None, limit=None):
+        if group is None:
+            return []
+
         if query:
             q = {"query": compile_condition("elasticsearch", query)()}
         else:
@@ -266,77 +284,134 @@ class ElasticSearchStorage(BaseStorage):
         params = {}
         if order_by:
             params["sort"] = [":".join(order_by)]
+        if limit is not None:
+            params["size"] = limit
 
+        aggs = {}
+        sources = []
+        result_converters = {}
         if group:
-            aggs = Aggregate()
 
             for k, v in group.items():
                 if isinstance(v, str):
-                    aggs.add_group(k, v)
+                    sources.append({k: {"terms": {"field": v}}})
 
                 elif isinstance(v, dict):
                     ff = v["function"]
                     f = v["field"]
                     if ff == "count":
-                        aggs.add(k, "count", f)
+                        aggs[k] = {"value_count": {"field": f}}
                     elif ff == "sum":
-                        aggs.add(k, "sum", f)
+                        aggs[k] = {"sum": {"field": f}}
                     elif ff == "avg":
-                        aggs.add(k, "avg", f)
+                        aggs[k] = {"avg": {"field": f}}
                     elif ff == "year":
-                        aggs.add_group(
-                            k,
-                            f,
-                            type="date_histogram",
-                            opts={"interval": "year", "format": "yyyy"},
+                        sources.append(
+                            {
+                                k: {
+                                    "date_histogram": {
+                                        "field": f,
+                                        "interval": "year",
+                                        "format": "yyyy",
+                                    }
+                                }
+                            }
                         )
+                        result_converters[k] = lambda request, value: int(value)
+
                     elif ff == "month":
-                        aggs.add_group(
-                            k,
-                            f,
-                            type="date_histogram",
-                            opts={"interval": "month", "format": "MM"},
+                        sources.append(
+                            {
+                                k: {
+                                    "date_histogram": {
+                                        "field": f,
+                                        "interval": "month",
+                                        "format": "MM",
+                                    }
+                                }
+                            }
                         )
+
+                        result_converters[k] = lambda request, value: int(value)
+
                     elif ff == "day":
-                        aggs.add_group(
-                            k,
-                            f,
-                            type="date_histogram",
-                            opts={"interval": "day", "format": "dd"},
+                        sources.append(
+                            {
+                                k: {
+                                    "date_histogram": {
+                                        "field": f,
+                                        "interval": "day",
+                                        "format": "dd",
+                                    }
+                                }
+                            }
                         )
+
+                        result_converters[k] = lambda request, value: int(value)
+
                     elif ff == "interval_1m":
-                        aggs.add_group(
-                            k,
-                            f,
-                            type="date_histogram",
-                            opts={"interval": "1m", "format": "yyyy-MM-dd'T'HH:mm"},
+                        sources.append(
+                            {
+                                k: {
+                                    "date_histogram": {
+                                        "field": f,
+                                        "interval": "1m",
+                                        "format": "yyyy-MM-dd'T'HH:mmZ",
+                                    }
+                                }
+                            }
                         )
+
                     elif ff == "interval_15m":
-                        aggs.add_group(
-                            k,
-                            f,
-                            type="date_histogram",
-                            opts={"interval": "15m", "format": "yyyy-MM-dd'T'HH:mm"},
+                        sources.append(
+                            {
+                                k: {
+                                    "date_histogram": {
+                                        "field": f,
+                                        "interval": "15m",
+                                        "format": "yyyy-MM-dd'T'HH:mmZ",
+                                    }
+                                }
+                            }
                         )
                     elif ff == "interval_30m":
-                        aggs.add_group(
-                            k,
-                            f,
-                            type="date_histogram",
-                            opts={"interval": "30m", "format": "yyyy-MM-dd'T'HH:mm"},
+                        sources.append(
+                            {
+                                k: {
+                                    "date_histogram": {
+                                        "field": f,
+                                        "interval": "30m",
+                                        "format": "yyyy-MM-dd'T'HH:mmZ",
+                                    }
+                                }
+                            }
                         )
+
                     elif ff == "interval_1h":
-                        aggs.add_group(
-                            k,
-                            f,
-                            type="date_histogram",
-                            opts={"interval": "1h", "format": "yyyy-MM-dd'T'HH:mm"},
+                        sources.append(
+                            {
+                                k: {
+                                    "date_histogram": {
+                                        "field": f,
+                                        "interval": "1h",
+                                        "format": "yyyy-MM-dd'T'HH:mmZ",
+                                    }
+                                }
+                            }
                         )
+
                     else:
                         raise ValueError("Unknown function %s" % ff)
 
-            aggs.finalize()
-            q["aggs"] = aggs.json()
+            if sources:
+                q["aggs"] = {
+                    "results": {"composite": {"sources": sources}, "aggs": aggs}
+                }
+                if limit is not None:
+                    q["aggs"]["results"]["composite"]["size"] = limit
+            else:
+                q["aggs"] = aggs
+
         res = self.client.search(index=self.index_name, body=q, **params)
 
         if "aggregations" not in res:
@@ -346,9 +421,24 @@ class ElasticSearchStorage(BaseStorage):
                 "Unsupported query\n  Query: %s\n  Result: %s"
                 % (json.dumps(q, indent=4), json.dumps(res, indent=4))
             )
-        data = aggs.parse(res["aggregations"])
 
-        return list(data)
+        result = []
+        if sources:
+            data = res["aggregations"]["results"]["buckets"]
+            for row in data:
+                r = row["key"].copy()
+                for k in aggs:
+                    r[k] = row[k]["value"]
+                for k, f in result_converters.items():
+                    r[k] = f(self.request, r[k])
+                result.append(r)
+            return result
+
+        data = res["aggregations"]
+        r = {}
+        for k in aggs:
+            r[k] = data[k]["value"]
+        return [r]
 
     def get(self, collection, identifier):
         try:

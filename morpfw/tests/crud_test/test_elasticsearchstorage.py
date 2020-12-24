@@ -20,12 +20,21 @@ from zope.sqlalchemy import register as register_session
 from ..common import get_client
 from .crud_common import FSBLOB_DIR
 from .crud_common import App as BaseApp
-from .crud_common import (BlobObjectCollection, BlobObjectModel,
-                          NamedObjectCollection, NamedObjectModel)
+from .crud_common import (
+    BlobObjectCollection,
+    BlobObjectModel,
+    NamedObjectCollection,
+    NamedObjectModel,
+)
 from .crud_common import ObjectSchema as BaseObjectSchema
-from .crud_common import (ObjectXattrProvider, ObjectXattrSchema,
-                          PageCollection, PageModel, PageSchema,
-                          run_jslcrud_test)
+from .crud_common import (
+    ObjectXattrProvider,
+    ObjectXattrSchema,
+    PageCollection,
+    PageModel,
+    PageSchema,
+    run_jslcrud_test,
+)
 
 Session = sessionmaker()
 register_session(Session)
@@ -178,18 +187,10 @@ def blobobject_model_factory(request, identifier):
 
 
 def test_elasticsearchstorage(es_client):
-    es_client.indices.create(
-        "test-page", body={"settings": {"number_of_shards": 1, "number_of_replicas": 0}}
-    )
-
-    es_client.transport.perform_request(
-        "PUT",
-        "/test-page/_mapping/",
-        body={"properties": {"title": {"type": "text", "fielddata": True}}},
-    )
-
     config = os.path.join(
         os.path.dirname(__file__), "test_elasticsearchstorage-settings.yml"
     )
     client = get_client(config)
+    col = client.mfw_request.get_collection("tests.page")
+    col.storage.create_index(col)
     run_jslcrud_test(client)
