@@ -174,3 +174,5 @@ texinfo_documents = [
      author, 'MorpFramework', 'One line description of project.',
      'Miscellaneous'),
 ]
+
+autodoc_mock_imports = ["ldap"]
