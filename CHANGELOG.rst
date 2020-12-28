@@ -1,4 +1,4 @@
-0.4.0b3 (unreleased)
+0.4.0b3 (2020-12-28)
 --------------------
 
 - fix rtfd build issue
