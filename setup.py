@@ -97,6 +97,10 @@ setup(
             "pytest-cov",
             "pika",
             "mirakuru",
+        ],
+        'docs': [
+            'sphinxcontrib-httpdomain',
+            'sphinx-click'
         ]
     },
     entry_points={
