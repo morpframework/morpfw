@@ -65,6 +65,7 @@ install_requires = [
     "more.static",
     "RestrictedPython",
     "beaker",
+    "zstandard",
 ]
 
 if IS_RTD is None:
