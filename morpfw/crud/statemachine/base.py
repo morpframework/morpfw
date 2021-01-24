@@ -6,17 +6,20 @@ from ...interfaces import IStateMachine
 
 
 class StateMachine(IStateMachine):
-    def __init__(self, context):
+    def __init__(self, context, **kwargs):
         self._context = context
         self._request = context.request
         self._app = context.request.app
         initial = self.state or self.states[0]
-        self._machine = Machine(
-            model=self,
-            transitions=self.transitions,
-            states=self.states,
-            initial=initial,
+        kwargs.update(
+            {
+                "model": self,
+                "transitions": self.transitions,
+                "states": self.states,
+                "initial": initial,
+            }
         )
+        self._machine = Machine(**kwargs)
 
     def _get_state(self) -> typing.Optional[str]:
         try:
