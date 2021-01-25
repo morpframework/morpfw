@@ -1,10 +1,14 @@
 import morepath
 import reg
 
-from .model import Model
+from .model import Collection, Model
 
 
-class Workflow(Model):
+class WorkflowCollection(Collection):
+    pass
+
+
+class WorkflowModel(Model):
     @classmethod
     def transition(klass, model):
         def apply_transition(func):

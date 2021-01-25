@@ -10,7 +10,7 @@ from morpfw.app import BaseApp
 from morpfw.crud import permission as crudperm
 from morpfw.crud.model import Collection, Model
 from morpfw.crud.statemachine.base import StateMachine
-from morpfw.crud.workflow import Workflow
+from morpfw.crud.workflow import WorkflowCollection, WorkflowModel
 
 FSBLOB_DIR = tempfile.mkdtemp()
 
@@ -264,11 +264,11 @@ class ProcessWorkflowSchema(Schema):
     pass
 
 
-class ProcessWorkflowCollection(Collection):
+class ProcessWorkflowCollection(WorkflowCollection):
     schema = ProcessWorkflowSchema
 
 
-class ProcessWorkflowModel(Workflow):
+class ProcessWorkflowModel(WorkflowModel):
     schema = ProcessWorkflowSchema
 
 
