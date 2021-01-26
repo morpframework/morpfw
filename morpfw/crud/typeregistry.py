@@ -35,5 +35,5 @@ class TypeRegistry(object):
     def get_typeinfo_by_schema(self, schema, request):
         name = self.schema_name.get(schema, None)
         if name is None:
-            raise KeyError('To type info registered for %s' % schema)
+            raise KeyError('No type info registered for %s' % schema)
         return self.get_typeinfo(name, request)

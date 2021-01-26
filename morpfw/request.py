@@ -175,6 +175,12 @@ class Request(BaseRequest):
         fernet = Fernet(key)
         return fernet.decrypt(token, ttl=ttl).decode(encoding)
 
+    def metalink(self, obj):
+        return self.app.get_metalink(obj, self)
+
+    def resolve_metalink(self, link):
+        return self.app.resolve_metalink(link, self)
+
 
 class DBSessionRequest(Request):
     @property

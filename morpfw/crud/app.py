@@ -34,6 +34,7 @@ class App(JsonSchemaApp, signals.SignalApp):
     blobstorage = dectate.directive(actions.BlobStorageAction)
     blobstorage_factory = dectate.directive(actions.BlobStorageFactoryAction)
     typeinfo = dectate.directive(actions.TypeInfoFactoryAction)
+    metalink = dectate.directive(actions.MetalinkAction)
 
     def get_storage(self, model, request):
         blobstorage = self.get_blobstorage(model, request)
@@ -135,13 +136,27 @@ class App(JsonSchemaApp, signals.SignalApp):
         raise NotImplementedError
 
     @reg.dispatch_method(reg.match_key("name"))
+    def _get_metalinkprovider_by_name(self, name, request):
+        raise NotImplementedError
+
+    @reg.dispatch_method(reg.match_instance("model"))
+    def _get_metalinkprovider_by_model(self, model, request):
+        raise NotImplementedError
+
+    def get_metalink(self, obj: object, request):
+        metalink = self._get_metalinkprovider_by_model(obj, request)
+        return metalink.link(obj)
+
+    def resolve_metalink(self, link: dict, request):
+        metalink = self._get_metalinkprovider_by_name(link["type"], request)
+        return metalink.resolve(link)
+
+    @reg.dispatch_method(reg.match_key("name"))
     def get_typeinfo_factory(self, name):
         raise NotImplementedError
 
     def get_typeinfo(self, name, request):
-        typeinfo = self.config.type_registry.get_typeinfo(
-            name=name, request=request
-        )
+        typeinfo = self.config.type_registry.get_typeinfo(name=name, request=request)
         return typeinfo
 
     def get_typeinfo_by_schema(self, schema, request):

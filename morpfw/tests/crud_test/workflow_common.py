@@ -12,10 +12,6 @@ from morpfw.crud.model import Collection, Model
 from morpfw.crud.statemachine.base import StateMachine
 from morpfw.crud.workflow import WorkflowCollection, WorkflowModel
 
-FSBLOB_DIR = tempfile.mkdtemp()
-
-epoch = date(1970, 1, 1)
-
 
 class App(BaseApp):
     pass
@@ -34,19 +30,6 @@ def allow_all_model_state_access(identity, context, permission):
 @App.permission_rule(model=Collection, permission=crudperm.All)
 def allow_all_collection_access(identity, context, permission):
     return True
-
-
-@dataclass
-class OrderWorkflowSchema(Schema):
-    pass
-
-
-class OrderWorkflowCollection(Collection):
-    schema = OrderWorkflowSchema
-
-
-class OrderWorkflowModel(Model):
-    schema = OrderWorkflowSchema
 
 
 def generate_workflow(request, data, model):

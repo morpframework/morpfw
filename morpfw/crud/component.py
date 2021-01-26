@@ -263,3 +263,29 @@ class BlobStorageFactoryAction(dectate.Action):
             reg.methodify(factory), name=self.name
         )
 
+
+class MetalinkAction(dectate.Action):
+
+    app_class_arg = True
+
+    def __init__(self, name, model):
+        self.name = name
+        self.model = model
+
+    def identifier(self, app_class):
+        return self.name
+
+    def perform(self, obj, app_class):
+        def name_factory(name, request):
+            return obj(request)
+
+        app_class._get_metalinkprovider_by_name.register(
+            reg.methodify(name_factory), name=self.name
+        )
+
+        def model_factory(model, request):
+            return obj(request)
+
+        app_class._get_metalinkprovider_by_model.register(
+            reg.methodify(model_factory), model=self.model
+        )
