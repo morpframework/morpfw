@@ -7,7 +7,7 @@ class MetalinkProvider(object):
         self.request = request
         self.app = request.app
 
-    def link(self, obj) -> dict:
+    def link(self, obj, **kwargs) -> dict:
         raise NotImplementedError
 
     def resolve(self, link) -> str:
@@ -15,11 +15,12 @@ class MetalinkProvider(object):
 
 
 class CollectionMetalinkProvider(MetalinkProvider):
-    def link(self, obj) -> dict:
+    def link(self, obj, view_name=None, **kwargs) -> dict:
         typeinfo = self.app.get_typeinfo_by_schema(obj.schema, self.request)
         return {
             "type": "morpfw.collection",
             "resource_type": typeinfo["name"],
+            "view_name": view_name,
         }
 
     def resolve(self, link) -> str:
@@ -28,12 +29,13 @@ class CollectionMetalinkProvider(MetalinkProvider):
 
 
 class ModelMetalinkProvider(MetalinkProvider):
-    def link(self, obj) -> dict:
+    def link(self, obj, view_name=None, **kwargs) -> dict:
         typeinfo = self.app.get_typeinfo_by_schema(obj.schema, self.request)
         return {
             "type": "morpfw.model",
             "resource_type": typeinfo["name"],
             "uuid": obj.uuid,
+            "view_name": view_name,
         }
 
     def resolve(self, link) -> str:

@@ -143,9 +143,9 @@ class App(JsonSchemaApp, signals.SignalApp):
     def _get_metalinkprovider_by_model(self, model, request):
         raise NotImplementedError
 
-    def get_metalink(self, obj: object, request):
+    def get_metalink(self, obj: object, request, **kwargs):
         metalink = self._get_metalinkprovider_by_model(obj, request)
-        return metalink.link(obj)
+        return metalink.link(obj, **kwargs)
 
     def resolve_metalink(self, link: dict, request):
         metalink = self._get_metalinkprovider_by_name(link["type"], request)
@@ -164,6 +164,7 @@ class App(JsonSchemaApp, signals.SignalApp):
             schema=schema, request=request
         )
         return typeinfo
+
 
     def get_compositekey_separator(self):
         raise Exception("BOOO")

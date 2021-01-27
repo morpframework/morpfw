@@ -175,8 +175,8 @@ class Request(BaseRequest):
         fernet = Fernet(key)
         return fernet.decrypt(token, ttl=ttl).decode(encoding)
 
-    def metalink(self, obj):
-        return self.app.get_metalink(obj, self)
+    def metalink(self, obj, view_name=None):
+        return self.app.get_metalink(obj, self, view_name=view_name)
 
     def resolve_metalink(self, link):
         return self.app.resolve_metalink(link, self)
@@ -379,6 +379,7 @@ def request_factory(
             os.environ[k] = v
 
     app = factory(settings, **app_factory_opts)
+    wrapped_app = app
     app(environ, lambda *args: (lambda chunk: None))
     while not isinstance(app, morepath.App):
         wrapped = getattr(app, "app", None)
@@ -386,5 +387,5 @@ def request_factory(
             app = wrapped
         else:
             raise ValueError("Unable to locate app object from middleware")
-
+    environ["morpfw.wsgi.app"] = wrapped_app
     return app.request_class(app=app, environ=environ)
