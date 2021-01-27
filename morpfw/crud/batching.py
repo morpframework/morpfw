@@ -1,10 +1,16 @@
-from urllib.parse import urlparse, parse_qs, urlencode
-from urllib.parse import urlunparse
+from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 
 class CollectionBatching(object):
     def __init__(
-        self, request, collection, query=None, order_by=None, pagesize=20, pagenumber=0
+        self,
+        request,
+        collection,
+        query=None,
+        order_by=None,
+        pagesize=20,
+        pagenumber=0,
+        page_opt="page",
     ):
         self.collection = collection
         self.request = request
@@ -14,6 +20,7 @@ class CollectionBatching(object):
         self.order_by = order_by
         self._items = None
         self._total = None
+        self.page_opt = page_opt
 
     def items(self):
         if self._items is None:
@@ -41,7 +48,7 @@ class CollectionBatching(object):
     def next_page(self):
         return self.pagenumber + 1
 
-    def navigator(self, url=None, page_opt="page", size=3):
+    def navigator(self, url=None, size=3):
         if url is None:
             url = self.request.url
         parsed_url = urlparse(url)
@@ -53,7 +60,7 @@ class CollectionBatching(object):
                 if isinstance(v, list) and len(v) == 1:
                     v = v[0]
                 qso[k] = v
-            qso[page_opt] = page
+            qso[self.page_opt] = page
             return (
                 parsed_url.scheme
                 + "://"
