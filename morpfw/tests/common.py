@@ -5,12 +5,12 @@ import time
 from multiprocessing import Process
 
 import morepath
+import morpfw
+import morpfw.tests
 import transaction
 import yaml
 from more.basicauth import BasicAuthIdentityPolicy
 from more.jwtauth import JWTIdentityPolicy
-import morpfw
-import morpfw.tests
 from morpfw import cli
 from morpfw.authn.pas.exc import UserExistsError
 from morpfw.main import create_admin as morpfw_create_admin
@@ -36,10 +36,9 @@ def make_request(appobj):
 def get_client(config="settings.yml", **kwargs):
     param = cli.load(config)
     morepath.scan(morpfw)
-    request = request_factory(param["settings"], app_factory_opts=kwargs,
-            scan=False)
+    request = request_factory(param["settings"], app_factory_opts=kwargs, scan=False)
 
-    c = Client(request.app)
+    c = Client(request.environ["morpfw.wsgi.app"])
     c.mfw_request = request
     return c
 
