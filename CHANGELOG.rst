@@ -1,7 +1,9 @@
 0.4.0b4 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- added workflow engine
+- added metalink feature, where objects link can be recomputed
+  from json data structure
 
 
 0.4.0b3 (2020-12-28)
