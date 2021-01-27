@@ -1,4 +1,4 @@
-0.4.0b4 (unreleased)
+0.4.0b4 (2021-01-27)
 --------------------
 
 - added workflow engine
