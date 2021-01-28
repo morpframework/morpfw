@@ -3,9 +3,8 @@ import secrets
 from datetime import datetime
 from uuid import uuid4
 
-import pytz
-
 import morepath
+import pytz
 import sqlalchemy as sa
 import sqlalchemy_jsonfield as sajson
 from morpfw.crud import Collection, Model, StateMachine
@@ -59,7 +58,6 @@ class UserModel(Model):
     schema = UserSchema
 
     blob_fields = ["profile-photo"]
-    protected_fields = Model.protected_fields + ["username", "password"]
     hidden_fields = Model.hidden_fields + ["password"]
 
     def title(self):

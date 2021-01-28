@@ -245,9 +245,6 @@ class IModel(abc.ABC):
     #: Data provider
     data: IDataProvider
 
-    #: List of fields that are not allowed to be updated
-    protected_fields: list
-
     #: List of fields that should be hidden from output
     hidden_fields: list
 

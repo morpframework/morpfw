@@ -2,9 +2,8 @@ import secrets
 import typing
 from dataclasses import dataclass, field
 
-import pytz
-
 import deform.widget
+import pytz
 from morpfw.crud.schema import BaseSchema, Schema
 from morpfw.crud.validator import regex_validator
 
@@ -69,7 +68,11 @@ class UserSchema(Schema):
 
     password: typing.Optional[str] = field(
         default=None,
-        metadata={"required": True, "deform.widget": deform.widget.PasswordWidget()},
+        metadata={
+            "required": True,
+            "editable": False,
+            "deform.widget": deform.widget.PasswordWidget(),
+        },
     )
     nonce: typing.Optional[str] = field(
         default_factory=lambda: secrets.token_hex(8),

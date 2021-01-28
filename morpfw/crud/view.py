@@ -149,7 +149,7 @@ def search(context, request):
 def create(context, request):
     if not context.create_view_enabled:
         raise HTTPNotFound()
-    obj = context.create(request.json)
+    obj = context.create(request.json, secure=True)
     return obj.json()
 
 

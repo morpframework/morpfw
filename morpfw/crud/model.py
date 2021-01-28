@@ -174,7 +174,20 @@ class Collection(ICollection):
             return self.app.get_aggregateprovider(self)
         return None
 
-    def create(self, data, deserialize=True):
+    def create(self, data, deserialize=True, secure=False):
+        if secure:
+            if "state" in data:
+                raise StateUpdateProhibitedError()
+            for protected in self.schema.__protected_fields__:
+                if protected in data.keys():
+                    raise UnprocessableError(
+                        "%s is not allowed to be set in this context" % protected
+                    )
+            for fn, fo in self.schema.__dataclass_fields__.items():
+                if fn in data.keys() and not fo.metadata.get("initializable", True):
+                    raise UnprocessableError(
+                        "%s is not allowed to be set in this context" % fn
+                    )
         data = self.schema.validate(
             self.request, data, deserialize=deserialize, context=self
         )
@@ -267,17 +280,6 @@ class Model(IModel):
     blobstorage_field: str = "blobs"
     blob_fields: list = []
     blob_field_options: dict = {}
-    protected_fields: list = [
-        "id",
-        "blobs",
-        "state",
-        "xattrs",
-        "modified",
-        "created",
-        "uuid",
-        "creator",
-        "deleted",
-    ]
     hidden_fields: list = []
 
     def __setitem__(self, key, value):
@@ -358,10 +360,15 @@ class Model(IModel):
         if secure:
             if "state" in newdata:
                 raise StateUpdateProhibitedError()
-            for protected in self.protected_fields:
+            for protected in self.schema.__protected_fields__:
                 if protected in newdata.keys():
                     raise UnprocessableError(
                         "%s is not allowed to be updated in this context" % protected
+                    )
+            for fn, fo in self.schema.__dataclass_fields__.items():
+                if fn in newdata.keys() and not fo.metadata.get("editable", True):
+                    raise UnprocessableError(
+                        "%s is not allowed to be updated in this context" % fn
                     )
 
         if deserialize:
