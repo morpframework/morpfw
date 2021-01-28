@@ -100,7 +100,11 @@ def test_metalink(pgsql_db):
     app = request.app
     col = request.get_collection("tests.object")
     link = request.metalink(col)
-    assert link == {"type": "morpfw.collection", "resource_type": "tests.object"}
+    assert link == {
+        "type": "morpfw.collection",
+        "resource_type": "tests.object",
+        "view_name": None,
+    }
     assert request.resolve_metalink(link) == "http://localhost:5000/objects"
 
     obj = col.create({})
@@ -109,6 +113,7 @@ def test_metalink(pgsql_db):
         "type": "morpfw.model",
         "resource_type": "tests.object",
         "uuid": obj.uuid,
+        "view_name": None,
     }
     assert (
         request.resolve_metalink(link) == "http://localhost:5000/objects/%s" % obj.uuid
