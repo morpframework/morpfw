@@ -6,6 +6,9 @@ from ...interfaces import IStateMachine
 
 
 class StateMachine(IStateMachine):
+
+    readonly_states: list = []
+
     def __init__(self, context, **kwargs):
         self._context = context
         self._request = context.request
@@ -36,3 +39,8 @@ class StateMachine(IStateMachine):
         return [
             i for i in self._machine.get_triggers(self.state) if not i.startswith("to_")
         ]
+
+    def is_readonly(self):
+        if self.state in self.readonly_states:
+            return True
+        return False

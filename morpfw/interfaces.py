@@ -452,6 +452,11 @@ class IStateMachine(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractproperty
+    def readonly_states(self) -> List:
+        """List of readonly states"""
+        raise NotImplementedError
+
+    @abc.abstractproperty
     def transitions(self) -> List:
         """List of ``pytransitions`` transitions"""
         raise NotImplementedError

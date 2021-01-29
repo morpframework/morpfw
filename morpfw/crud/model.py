@@ -356,6 +356,13 @@ class Model(IModel):
         self._cached_identifier = None
         super().__init__(request, collection, data)
 
+    def is_editable(self):
+        sm = self.statemachine()
+        if sm:
+            if sm.is_readonly():
+                return False
+        return True
+
     def update(self, newdata: dict, secure: bool = False, deserialize: bool = True):
         if secure:
             if "state" in newdata:
@@ -370,6 +377,10 @@ class Model(IModel):
                     raise UnprocessableError(
                         "%s is not allowed to be updated in this context" % fn
                     )
+            if not self.is_editable():
+                raise UnprocessableError(
+                    "Record is not allowed to be updated in state %s" % sm.state
+                )
 
         if deserialize:
             data = self.data.as_json()
