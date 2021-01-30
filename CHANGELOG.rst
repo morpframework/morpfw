@@ -1,7 +1,7 @@
 0.4.0b6 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Added transition guarding capability
 
 
 0.4.0b5 (2021-01-31)
