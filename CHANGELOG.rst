@@ -1,7 +1,9 @@
 0.4.0b5 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Added permission configuration method in settings.yml
+- Added ability to define readonly states
+- Improvement in field protection implementation
 
 
 0.4.0b4 (2021-01-27)
