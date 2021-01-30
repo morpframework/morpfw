@@ -191,7 +191,8 @@ def statemachine(context, request):
 
     sm = context.statemachine()
     transition = request.json["transition"]
-    if transition in getattr(sm, "protected_transitions", []):
+    transition_callable = getattr(sm, transition, None)
+    if transition_callable and (transition not in sm.get_triggers()):
 
         @request.after
         def adjust_status(response):
@@ -202,15 +203,14 @@ def statemachine(context, request):
             "message": "Transition %s is not allowed" % transition,
         }
 
-    attr = getattr(sm, transition, None)
-    if attr is None:
+    if not transition_callable:
 
         @request.after
         def adjust_status(response):
             response.status = 422
 
         return {"status": "error", "message": "Unknown transition %s" % transition}
-    attr()
+    transition_callable()
     context.save()
     return {"status": "success"}
 

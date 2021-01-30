@@ -8,6 +8,7 @@ from ...interfaces import IStateMachine
 class StateMachine(IStateMachine):
 
     readonly_states: list = []
+    transition_guards: dict = {}  # key-value, transition_name->permission
 
     def __init__(self, context, **kwargs):
         self._context = context
@@ -36,9 +37,20 @@ class StateMachine(IStateMachine):
     state = property(_get_state, _set_state)
 
     def get_triggers(self):
-        return [
+        context = self._context
+        request = self._request
+        triggers = [
             i for i in self._machine.get_triggers(self.state) if not i.startswith("to_")
         ]
+        result = []
+        for trigger in triggers:
+            guard = self.transition_guards.get(trigger, None)
+            if not guard:
+                result.append(trigger)
+            else:
+                if request.permits(context, guard):
+                    result.append(trigger)
+        return result
 
     def is_readonly(self):
         if self.state in self.readonly_states:
