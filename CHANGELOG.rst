@@ -1,4 +1,4 @@
-0.4.0b5 (unreleased)
+0.4.0b5 (2021-01-31)
 --------------------
 
 - Added permission configuration method in settings.yml
