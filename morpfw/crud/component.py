@@ -162,6 +162,13 @@ class StateMachineAction(dectate.Action):
     def perform(self, obj, app_class):
         app_class.get_statemachine.register(reg.methodify(obj), model=self.model)
 
+        def factory(model):
+            return obj
+
+        app_class.get_statemachine_factory.register(
+            reg.methodify(factory), model=self.model
+        )
+
 
 class SearchProviderAction(dectate.Action):
 

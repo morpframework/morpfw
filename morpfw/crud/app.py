@@ -128,6 +128,12 @@ class App(JsonSchemaApp, signals.SignalApp):
     def get_statemachine(self, context):
         raise NotImplementedError
 
+    @reg.dispatch_method(reg.match_class("model"))
+    def get_statemachine_factory(self, model):
+        return None
+
+
+
     @reg.dispatch_method(reg.match_instance("model", lambda self, context: context))
     def get_searchprovider(self, context):
         raise NotImplementedError
