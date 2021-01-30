@@ -289,3 +289,21 @@ class MetalinkAction(dectate.Action):
         app_class._get_metalinkprovider_by_model.register(
             reg.methodify(model_factory), model=self.model
         )
+
+
+class AuthzRuleAction(dectate.Action):
+
+    app_class_arg = True
+
+    def __init__(self, name):
+        self.name = name
+
+    def identifier(self, app_class):
+        return self.name
+
+    def perform(self, obj, app_class):
+        def factory(name):
+            return obj
+
+        app_class.get_authz_rule.register(reg.methodify(factory), name=self.name)
+

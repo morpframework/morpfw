@@ -11,7 +11,6 @@ from more.basicauth import BasicAuthIdentityPolicy
 from more.jwtauth import JWTIdentityPolicy
 from morpfw.authn.pas.app import App
 from morpfw.authn.pas.user.model import GroupSchema, UserCollection, UserSchema
-from morpfw.main import create_admin, create_app
 from webtest import TestApp as Client
 
 

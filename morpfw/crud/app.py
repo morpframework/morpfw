@@ -35,6 +35,7 @@ class App(JsonSchemaApp, signals.SignalApp):
     blobstorage_factory = dectate.directive(actions.BlobStorageFactoryAction)
     typeinfo = dectate.directive(actions.TypeInfoFactoryAction)
     metalink = dectate.directive(actions.MetalinkAction)
+    authz_rule = dectate.directive(actions.AuthzRuleAction)
 
     def get_storage(self, model, request):
         blobstorage = self.get_blobstorage(model, request)
@@ -82,6 +83,10 @@ class App(JsonSchemaApp, signals.SignalApp):
     @reg.dispatch_method(reg.match_key("name"))
     def _get_blobstorage_factory(self, name):
         raise NotImplementedError
+
+    @reg.dispatch(reg.match_key("name"))
+    def get_authz_rule(self, name):
+        raise NotImplementedError(name)
 
     @reg.dispatch_method(
         reg.match_class("schema", lambda self, schema, obj, storage: schema),
@@ -164,7 +169,6 @@ class App(JsonSchemaApp, signals.SignalApp):
             schema=schema, request=request
         )
         return typeinfo
-
 
     def get_compositekey_separator(self):
         raise Exception("BOOO")
