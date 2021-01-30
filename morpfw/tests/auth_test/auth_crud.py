@@ -124,7 +124,11 @@ def run_test(c):
 
     r = c.delete("/object1/%s" % obj_uuid)
 
-    r = c.get("/object2/+search", expect_errors=True)
+    r = c.get("/object2/")
+
+    r = c.get("/object2/+search")
+
+    r = c.post_json("/object2/", {"title": "Hello"}, expect_errors=True)
 
     assert r.status_code == 403
 
@@ -135,10 +139,6 @@ def run_test(c):
     obj2_uuid = r.json["data"]["uuid"]
 
     login(c, "user1")
-
-    r = c.post_json("/object2/", {"title": "Hello"}, expect_errors=True)
-
-    assert r.status_code == 403
 
     r = c.get("/object2/%s" % obj2_uuid, expect_errors=True)
 

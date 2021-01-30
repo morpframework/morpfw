@@ -8,3 +8,6 @@ configuration:
   morpfw.authz.type_permissions:
     tests.object1:
       __default__: morpfw.fullaccess
+  morpfw.authz.model_permissions:
+    morpfw.tests.auth_test.auth_crud:Object2Collection: 
+      __default__: morpfw.readonly
