@@ -528,6 +528,20 @@ class Model(IModel):
         return None
 
     @requestmemoize()
+    def state_title(self):
+        sm = self.statemachine()
+        if sm:
+            return sm.state.replace("_", " ").title()
+        return None
+
+    @requestmemoize()
+    def state(self):
+        sm = self.statemachine()
+        if sm:
+            return sm.state
+        return None
+
+    @requestmemoize()
     def xattrprovider(self):
         if self.app.get_xattrprovider.by_args(self).all_matches:
             return self.app.get_xattrprovider(self)
