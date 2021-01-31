@@ -21,6 +21,7 @@ class StateMachine(IStateMachine):
                 "transitions": self.transitions,
                 "states": self.states,
                 "initial": initial,
+                "auto_transitions": False,
             }
         )
         self._machine = Machine(**kwargs)
@@ -56,3 +57,4 @@ class StateMachine(IStateMachine):
         if self.state in self.readonly_states:
             return True
         return False
+
