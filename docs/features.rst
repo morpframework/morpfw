@@ -7,6 +7,7 @@ Features
 
    settings
    resourcetype
+   resourcetype-api
    restapi
    hooks
    views
@@ -17,4 +18,5 @@ Features
    pas
    pas-restapi
    worker
+   scripting
 
