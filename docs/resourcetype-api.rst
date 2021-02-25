@@ -65,7 +65,7 @@ Searching for records
 
 To search for records, you can use the ``search`` method. Filtering of search
 results is using ``rulez`` JSON boolean statements, which you can refer
-to ``rulez documentation <https://rulez.readthedocs.io/en/latest/quickstart.html>``_
+to `rulez documentation <https://rulez.readthedocs.io/en/latest/quickstart.html>`_
 for details.
 
 .. code-block:: python
@@ -91,6 +91,22 @@ is done through a ``group`` query which uses the following structure:
          "field": "<field_name2>"
       },
    }
+
+For example:
+
+.. code-block:: python
+
+   group = {
+      'hour': {
+         'function': 'hourly',
+         'field': 'created'
+      },
+      'count': {
+         'function': 'count',
+         'field': 'uuid'
+      }
+   }
+   results = col.aggregate(group=group)
 
 Only basic aggregation is supported through this API, primarily for the
 purpose for presenting data for analytics. For more complex aggregation,
