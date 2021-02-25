@@ -189,6 +189,84 @@ To delete a record, you can call the ``delete`` method.
    page1.delete()
 
 
+BLOB management
+-----------------
+
+As BLOBs are not stored in the main data storage, but rather in a separate
+``blobstorage``, manipulating BLOBs are done usine a separate API.
+
+
+Saving BLOB
+............
+
+To save a BLOB into a model, the API would be:
+
+.. code-block:: python
+
+   import os
+   import mimetypes
+   file_path = '/path/to/file'
+
+   # in a view, you likely can get these information from
+   # the request itself
+   stat = os.stat(file_path)
+   filename = os.path.basename(file_path)
+   mt = mimetypes.guess_type(filename)
+
+   with open('file','b') as f:
+      page1.put_blob('attachment', f, 
+                      filename=filename, 
+                      mimetype=mt[0], size=stat.st_size)
+
+   
+If you are in a view, and file is uploaded as ``multipart/form-data``, you
+can get ``mimetype`` and ``file`` object using following example:
+
+.. code-block:: python
+
+   # assuming file is uploaded as ``upload`` field
+
+   @App.json(model=Page, name='upload-attachment', request_method='POST')
+   def view(context, request):
+       upload = request.POST.get('upload')
+
+       filename = os.path.basename(upload.filename)
+       mimetype = upload.type
+       fileobj = upload.file
+
+       context.put_blob('attachment', fileobj, filename=filename, mimetype=mimetype)
+       return {"status": "ok"}
+
+Reading BLOB
+...............
+
+Saved BLOBs can be read using:
+
+.. code-block:: python
+
+   blob = page1.get_blob('attachment')
+
+   with blob.open() as f:
+       data = f.read()
+
+You can also return a BLOB as a streaming response in a view
+
+.. code-block:: python
+
+   @App.view(model=Page, name='get-attachment')
+   def get_blob(context, request):
+       blob = context.get_blob('attachment')
+       return request.get_response(blob)
+
+Deleting BLOBs
+...............
+
+To delete BLOBs, you can use:
+
+.. code-block:: python
+
+   page1.delete_blob('attachment')
+
 Accessing state machine
 -------------------------
 
@@ -202,3 +280,6 @@ the state machine object using ``statemachine`` method.
    # trigger ``approve`` transition
    sm.approve()
 
+To learn more about state machine object, you can refer to `PyTransitions 
+documentation <https://github.com/pytransitions/transitions>`_ as the 
+state machine is built using it.

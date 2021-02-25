@@ -48,6 +48,7 @@ class PageCollection(morpfw.Collection):
 class PageModel(morpfw.Model):
     schema = PageSchema
 
+    blob_fields = ['attachment']
 
 # SQLALchemy model
 class Page(morpfw.sql.Base):
