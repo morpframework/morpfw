@@ -283,3 +283,5 @@ the state machine object using ``statemachine`` method.
 To learn more about state machine object, you can refer to `PyTransitions 
 documentation <https://github.com/pytransitions/transitions>`_ as the 
 state machine is built using it.
+
+
