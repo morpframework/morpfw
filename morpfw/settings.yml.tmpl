@@ -1,0 +1,27 @@
+server:
+  listen_host: 127.0.0.1
+  listen_port: 5000
+  server_url: http://localhost:5000
+
+configuration:
+  morpfw.scan:
+    - morpfw
+  morpfw.authn.policy: morpfw.authn.useridparam:AuthnPolicy
+
+  morpfw.storage.sqlstorage.dburi: '{{ dburi }}'
+  morpfw.blobstorage.uri: '{{ blobstorage_uri }}'
+  morpfw.secret.fernet_key: {{ fernet_key }}
+  morpfw.beaker.session.type: {{ beaker_session_type }}
+  morpfw.beaker.session.url: '{{ beaker_session_uri }}'
+  morpfw.beaker.cache.type: {{ beaker_cache_type }}
+  morpfw.beaker.cache.url: '{{ beaker_cache_uri }}'
+
+  morpfw.celery:
+    # celery settings variables
+    broker_url: '{{ celery_broker_url }}'
+    result_backend: '{{ celery_result_backend }}'
+
+application:
+  title: Morp Framework
+  class: morpfw.app:App
+  development_mode: true

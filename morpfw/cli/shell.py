@@ -1,8 +1,6 @@
 import code
 import cProfile
 import os
-import readline
-import rlcompleter
 import sys
 import time
 
@@ -98,7 +96,9 @@ def _start_shell(ctx, script, spawn_shell=True):
 
 def _shell(vars):
 
-    # do something here
+    # readline is imported here because it screws up with click.prompt
+    import readline
+    import rlcompleter
 
     readline.set_completer(rlcompleter.Completer(vars).complete)
     readline.parse_and_bind("tab: complete")
