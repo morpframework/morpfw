@@ -10,7 +10,7 @@ version = "0.4.0b7.dev0"
 long_description = open(os.path.join(os.path.dirname(__file__), "README.rst")).read()
 
 install_requires = [
-    "morepath>=0.18,<0.19",
+    "morepath==0.19",
     "alembic",
     "rulez>=0.1.4,<0.2.0",
     "inverter>=0.1.0<0.2.0",
@@ -66,6 +66,7 @@ install_requires = [
     "RestrictedPython",
     "beaker",
     "zstandard",
+    "oauthlib",
 ]
 
 if IS_RTD is None:
