@@ -24,6 +24,7 @@ from zope.sqlalchemy import ZopeTransactionEvents
 from zope.sqlalchemy import register as register_session
 
 from .exc import ConfigurationError
+import warnings
 
 threadlocal = threading.local()
 
@@ -216,7 +217,15 @@ class DBSessionRequest(Request):
 
         settings = self.app._raw_settings
         config = settings["configuration"]
-        cwd = os.environ.get("MORP_WORKDIR", os.getcwd())
+       
+        home_env = self.app.home_env
+        if home_env not in os.environ:
+            if 'MORP_WORKDIR' in os.environ:
+                warnings.warn("MORP_WORKDIR environment is deprecated, use %s" %
+                        home_env, DeprecationWarning)
+                home_env = 'MORP_WORKDIR'
+
+        cwd = os.environ.get(home_env, os.getcwd())
         os.chdir(cwd)
 
         key = "morpfw.storage.sqlstorage.dburi"

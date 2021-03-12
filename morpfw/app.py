@@ -31,6 +31,7 @@ from .signal.app import SignalApp
 
 class BaseApp(CRUDApp, cors.CORSApp, SignalApp):
 
+    home_env = 'MFW_HOME'
     request_class = Request
 
     @classmethod

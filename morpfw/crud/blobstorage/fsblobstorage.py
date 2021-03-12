@@ -112,11 +112,18 @@ class FSBlobStorage(BlobStorage):
 @App.blobstorage_factory("fsblob")
 def get_fsblobstorage(request, uri):
     parsed = urlparse(uri)
+    home_env = request.app.home_env
+    if home_env not in os.environ:
+        if 'MORP_WORKDIR' in os.environ:
+            warnings.warn("MORP_WORKDIR environment is deprecated, use %s" %
+                        home_env, DeprecationWarning)
+            home_env = 'MORP_WORKDIR'
+
     if parsed.netloc == "":
         path = parsed.path
     else:
         path = os.path.join(
-            os.environ.get("MORP_WORKDIR", os.getcwd()),
+            os.environ.get(home_env, os.getcwd()),
             parsed.netloc,
             *parsed.path.split("/")
         )
