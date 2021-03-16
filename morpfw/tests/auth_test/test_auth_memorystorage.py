@@ -17,6 +17,7 @@ class MemoryStorageApp(BaseAuthApp, DefaultAuthzPolicy):
 
 
 MemoryStorageApp.hook_auth_models()
+MemoryStorageApp.hook_oauth_models()
 
 
 def test_authentication_memorystorage():

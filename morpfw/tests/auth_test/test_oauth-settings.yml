@@ -1,0 +1,9 @@
+application:
+  class: morpfw.tests.auth_test.test_oauth:App
+
+configuration:
+  morpfw.authn.policy: morpfw.oauth:AuthnPolicy
+  morpfw.storage.sqlstorage.dburi: 'postgresql://postgres@localhost:45678/morp_tests'
+  morpfw.valid_roles: ['member','administrator', 'manager', 'editor']
+  morpfw.beaker.session.type: memory
+  morpfw.beaker.cache.type: memory

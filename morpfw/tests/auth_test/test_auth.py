@@ -11,7 +11,11 @@ from more.basicauth import BasicAuthIdentityPolicy
 from more.jwtauth import JWTIdentityPolicy
 from morpfw.authn.pas.app import App
 from morpfw.authn.pas.user.model import GroupSchema, UserCollection, UserSchema
+from morpfw.oauth import OAuthRoot
+from oauthlib.oauth2 import BackendApplicationClient
 from webtest import TestApp as Client
+
+from ..common import WebTestOAuth2Session
 
 
 def login(c, username, password="password"):
@@ -22,7 +26,7 @@ def login(c, username, password="password"):
 
     token = r.headers.get("Authorization").split()[1]
 
-    c.authorization = ("JWT", token)
+    c.authorization = ("Bearer", token)
 
     return r.json
 
@@ -32,6 +36,8 @@ def logout(c):
 
 
 def _test_authentication(c):
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+
     r = c.get("/user/+login")
 
     # test schema access
@@ -84,7 +90,7 @@ def _test_authentication(c):
 
     assert c.authorization[1] != n[1]
 
-    c.authorization = ("JWT", n[1])
+    c.authorization = ("Bearer", n[1])
 
     r = c.get("/user/admin")
 
@@ -326,7 +332,7 @@ def _test_authentication(c):
     admin_user = r.json
 
     # api keys
-    r = c.post_json("/apikey/", {"label": "samplekey", "password": "password"})
+    r = c.post_json("/apikey/+generate", {"name": "samplekey", "password": "password"})
 
     key_identity = r.json["data"]["api_identity"]
     key_secret = r.json["data"]["api_secret"]
@@ -338,7 +344,7 @@ def _test_authentication(c):
     r = c.get("/apikey/%s" % key_uuid)
 
     assert key_identity == r.json["data"]["api_identity"]
-    assert key_secret == r.json["data"]["api_secret"]
+    assert "api_secret" not in r.json["data"]
     assert key_uuid == r.json["data"]["uuid"]
 
     # user1 shouldnt see admin's apikey
@@ -351,27 +357,36 @@ def _test_authentication(c):
 
     logout(c)
 
-    # lets try deactivating user1 using API key
+    # lets try deactivating user1 using API Oauth
+
     r = c.post_json(
         "/user/user1/+statemachine", {"transition": "deactivate"}, expect_errors=True
     )
 
     assert r.status_code == 403
 
-    r = c.post_json(
-        "/user/user1/+statemachine",
-        {"transition": "deactivate"},
-        headers=[("X-API-KEY", ".".join([key_identity, key_secret]))],
+    client = BackendApplicationClient(client_id=key_identity)
+    oauth = WebTestOAuth2Session(c, client=client)
+    oauth.fetch_token(
+        token_url="/oauth2/token", client_id=key_identity, client_secret=key_secret,
     )
+
+    r = oauth.post("/user/user1/+statemachine", json={"transition": "deactivate"})
+    # r = c.post_json(
+    #    "/user/user1/+statemachine",
+    #    {"transition": "deactivate"},
+    #    headers=[("X-API-KEY", ".".join([key_identity, key_secret]))],
+    # )
 
     assert r.status_code == 200
 
     # activate back
-    r = c.post_json(
-        "/user/user1/+statemachine",
-        {"transition": "activate"},
-        headers=[("X-API-KEY", ".".join([key_identity, key_secret]))],
-    )
+    r = oauth.post("/user/user1/+statemachine", json={"transition": "activate"})
+    # r = c.post_json(
+    #    "/user/user1/+statemachine",
+    #    {"transition": "activate"},
+    #    headers=[("X-API-KEY", ".".join([key_identity, key_secret]))],
+    # )
 
     assert r.status_code == 200
 

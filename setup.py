@@ -66,7 +66,8 @@ install_requires = [
     "RestrictedPython",
     "beaker",
     "zstandard",
-    "oauthlib",
+    "oauthlib[signedtoken]",
+    "requests-oauthlib",
 ]
 
 if IS_RTD is None:
@@ -100,10 +101,7 @@ setup(
             "pika",
             "mirakuru",
         ],
-        'docs': [
-            'sphinxcontrib-httpdomain',
-            'sphinx-click'
-        ]
+        "docs": ["sphinxcontrib-httpdomain", "sphinx-click"],
     },
     entry_points={
         "morepath": ["scan=morpfw"],

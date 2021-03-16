@@ -20,6 +20,7 @@ class SQLStorageApp(SQLApp, DefaultAuthzPolicy):
 
 
 SQLStorageApp.hook_auth_models()
+SQLStorageApp.hook_oauth_models()
 
 
 def test_authentication_sqlstorage(pgsql_db):

@@ -56,6 +56,7 @@ def verify_refresh_request(request):
     jwtauth_settings = request.app.settings.configuration.__dict__[
         "morpfw.security.jwt"
     ].copy()
+    jwtauth_settings["auth_header_prefix"] = "Bearer"
     identity_policy = JWTWithAPIKeyIdentityPolicy(**jwtauth_settings)
     return identity_policy.verify_refresh(request)
 
@@ -64,6 +65,7 @@ class DefaultAuthnPolicy(BaseAuthnPolicy):
     def get_identity_policy(self, settings):
         jwtauth_settings = settings.configuration.__dict__["morpfw.security.jwt"]
         if jwtauth_settings:
+            jwtauth_settings["auth_header_prefix"] = "Bearer"
             # Pass the settings dictionary to the identity policy.
             return JWTWithAPIKeyIdentityPolicy(**jwtauth_settings)
         raise Exception("JWTAuth configuration is not set")

@@ -24,8 +24,8 @@ class APIKey(Base):
 
     userid = sa.Column(GUID)
     name = sa.Column(sa.String(length=256))
-    api_identity = sa.Column(sa.String(length=40))
-    api_secret = sa.Column(sa.String(length=40))
+    api_identity = sa.Column(sa.String(length=64))
+    api_secret = sa.Column(sa.String(length=128))
 
 
 class Group(Base):
