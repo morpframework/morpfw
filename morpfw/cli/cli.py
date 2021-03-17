@@ -10,6 +10,7 @@ import click
 import yaml
 
 from ..main import default_settings
+from .generate_config import genconfig
 
 
 def load_settings(settings_file, default=default_settings):
@@ -95,3 +96,6 @@ def cli(ctx, settings):
     ctx.ensure_object(dict)
     ctx.obj["settings"] = settings
 
+
+if __name__ == "__main__":
+    main()
