@@ -11,10 +11,10 @@ from jinja2 import Template
 
 @reg.dispatch(reg.match_class("app", lambda app_cls: app_cls))
 def get_settings_opts(app_cls):
-    raise NotImplementedError
+    raise NotImplementedError()
 
 
-@get_settings_opts.register(app=morpfw.App)
+@get_settings_opts.register(app=morpfw.BaseApp)
 def default_get_settings_opts(app_cls):
     proj_name = app_cls.__module__.split(".")[0]
 
@@ -49,6 +49,9 @@ def default_get_settings_opts(app_cls):
         "beaker_cache_uri": beaker_cache_uri,
         "celery_broker_uri": celery_broker_uri,
         "celery_result_backend": celery_result_backend,
+        "app_cls": "%s:%s" % (app_cls.__module__, app_cls.__name__),
+        "app_module": app_cls.__module__.split(".")[0],
+        "app_title": "Application",
     }
 
 

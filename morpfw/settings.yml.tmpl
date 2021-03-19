@@ -5,7 +5,7 @@ server:
 
 configuration:
   morpfw.scan:
-    - morpfw
+    - {{ app_module }}
   morpfw.authn.policy: morpfw.authn.useridparam:AuthnPolicy
 
   morpfw.storage.sqlstorage.dburi: '{{ dburi }}'
@@ -22,6 +22,6 @@ configuration:
     result_backend: '{{ celery_result_backend }}'
 
 application:
-  title: Morp Framework
-  class: morpfw.app:App
+  title: {{ app_title }}
+  class: {{ app_cls }}
   development_mode: true
