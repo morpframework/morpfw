@@ -24,12 +24,15 @@ class APIKeySchema(Schema):
 
     userid: typing.Optional[str] = field(
         default=None,
-        metadata={"format": "uuid", "index": True, "compute_value": current_userid,},
+        metadata={"format": "uuid", "index": True, "compute_value":
+            current_userid, 'editable': False, 'initializable': False},
     )
     name: typing.Optional[str] = field(default=None, metadata={"required": True})
     api_identity: typing.Optional[str] = field(
-        default=None, metadata={"compute_value": generate_identity, "index": True},
+        default=None, metadata={"compute_value": generate_identity, "index":
+            True, 'initializable': False, 'editable': False},
     )
     api_secret: typing.Optional[str] = field(
-        default=None, metadata={"editable": False, "hidden": True}
+        default=None, metadata={"editable": False, "hidden": True,
+            'initializable':False}
     )
