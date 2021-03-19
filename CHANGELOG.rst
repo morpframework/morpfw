@@ -1,4 +1,4 @@
-0.4.0b8 (unreleased)
+0.4.0b8 (2021-03-19)
 --------------------
 
 - hidden fields marker support
