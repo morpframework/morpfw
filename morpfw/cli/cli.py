@@ -95,7 +95,3 @@ def cli(ctx, settings):
     """Manage Morp application services"""
     ctx.ensure_object(dict)
     ctx.obj["settings"] = settings
-
-
-if __name__ == "__main__":
-    main()
