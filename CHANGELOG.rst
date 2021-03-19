@@ -1,7 +1,11 @@
 0.4.0b7 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- Added OAuth2 BackendAuthenticationWorkflow support
+- Update to morepath 0.19
+- Deprecate MORP_WORKDIR in favor of app specific homedir
+- Added initial implementation for app level config generator
+- Refactor cli components
 
 
 0.4.0b6 (2021-01-31)
