@@ -1,17 +1,10 @@
 import random
+import secrets
 import string
 import typing
 from dataclasses import dataclass, field
 
 from morpfw.crud import Schema
-
-
-def random_str(length):
-    ds = string.ascii_letters + "!^@_"
-    out = random.sample(string.ascii_letters, 1)[0]
-    for i in range(length - 1):
-        out += random.sample(ds, 1)[0]
-    return out
 
 
 def current_userid(request, data, model):
@@ -20,10 +13,10 @@ def current_userid(request, data, model):
     return data["userid"]
 
 
-def generate_identity(request, data, model):
+def generate_identity(request, data, model) -> str:
     if data["api_identity"]:
         return data["api_identity"]
-    return random_str(32)
+    return secrets.token_urlsafe(32)
 
 
 @dataclass

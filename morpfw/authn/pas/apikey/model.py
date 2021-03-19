@@ -1,11 +1,12 @@
 import hashlib
+import secrets
 from uuid import uuid4
 
 import rulez
 from morpfw.crud import Collection, Model, Schema
 
 from ..app import App
-from .schema import APIKeySchema, random_str
+from .schema import APIKeySchema
 
 
 class APIKeyModel(Model):
@@ -18,7 +19,7 @@ class APIKeyModel(Model):
         return self["api_identity"]
 
     def generate_secret(self):
-        api_secret = random_str(32)
+        api_secret = secrets.token_urlsafe(32)
         pwhash = hashlib.sha256(api_secret.encode("utf-8")).hexdigest()
         self.update({"api_secret": pwhash})
         return api_secret
