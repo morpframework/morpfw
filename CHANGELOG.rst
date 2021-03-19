@@ -1,4 +1,4 @@
-0.4.0b7 (unreleased)
+0.4.0b7 (2021-03-19)
 --------------------
 
 - Added OAuth2 BackendAuthenticationWorkflow support
