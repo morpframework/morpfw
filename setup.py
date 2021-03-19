@@ -106,7 +106,7 @@ setup(
     entry_points={
         "morepath": ["scan=morpfw"],
         "console_scripts": [
-            "morpfw=morpfw.cli:main",
+            "morpfw=morpfw.cli.main:main",
             "mfw-runmodule=morpfw.cli:run_module",
             "mfw-profilemodule=morpfw.cli:run_module_profile",
         ],
