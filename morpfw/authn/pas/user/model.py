@@ -58,7 +58,6 @@ class UserModel(Model):
     schema = UserSchema
 
     blob_fields = ["profile-photo"]
-    hidden_fields = Model.hidden_fields + ["password"]
 
     def title(self):
         return self["username"]

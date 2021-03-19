@@ -12,7 +12,6 @@ from .schema import APIKeySchema
 class APIKeyModel(Model):
     schema = APIKeySchema
     update_view_enabled = False
-    hidden_fields = Model.hidden_fields + ["api_secret"]
 
     @property
     def client_id(self):

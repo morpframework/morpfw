@@ -13,8 +13,8 @@ import webob
 import yaml
 from more.basicauth import BasicAuthIdentityPolicy
 from more.jwtauth import JWTIdentityPolicy
-from morpfw import cli
 from morpfw.authn.pas.exc import UserExistsError
+from morpfw.cli import cli
 from morpfw.main import create_admin as morpfw_create_admin
 from morpfw.main import create_app
 from morpfw.request import request_factory

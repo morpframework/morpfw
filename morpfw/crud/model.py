@@ -280,7 +280,14 @@ class Model(IModel):
     blobstorage_field: str = "blobs"
     blob_fields: list = []
     blob_field_options: dict = {}
-    hidden_fields: list = []
+
+    @property
+    def hidden_fields(self) -> list:
+        hidden = set()
+        for fn, fo in self.schema.__dataclass_fields__.items():
+            if fo.metadata.get("hidden", False):
+                hidden.add(fn)
+        return hidden
 
     def __setitem__(self, key, value):
         warnings.warn(

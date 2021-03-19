@@ -71,12 +71,13 @@ class UserSchema(Schema):
         metadata={
             "required": True,
             "editable": False,
+            "hidden": True,
             "deform.widget": deform.widget.PasswordWidget(),
         },
     )
     nonce: typing.Optional[str] = field(
         default_factory=lambda: secrets.token_hex(8),
-        metadata={"deform.widget": deform.widget.HiddenWidget()},
+        metadata={"deform.widget": deform.widget.HiddenWidget(), "hidden": True},
     )
     source: typing.Optional[str] = field(
         default="local", metadata={"validators": [valid_source]}

@@ -93,7 +93,7 @@ def _test_authentication(c):
     c.authorization = ("Bearer", n[1])
 
     r = c.get("/user/admin")
-
+    assert "password" not in r.json["data"]
     assert r.json["data"]["username"] == "admin"
     assert list([l["name"] for l in r.json["links"] if l["rel"] == "group"]) == [
         "__default__"
@@ -337,8 +337,8 @@ def _test_authentication(c):
     key_identity = r.json["data"]["api_identity"]
     key_secret = r.json["data"]["api_secret"]
     key_uuid = r.json["data"]["uuid"]
-    assert len(key_identity) == 32
-    assert len(key_secret) == 32
+    assert len(key_identity) == 43
+    assert len(key_secret) == 43
     assert r.json["data"]["userid"] == admin_user["data"]["uuid"]
 
     r = c.get("/apikey/%s" % key_uuid)
