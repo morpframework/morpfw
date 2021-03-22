@@ -1,6 +1,8 @@
 import sys
 
 import click
+from alembic.config import CommandLine as AlembicCLI
+from alembic.config import Config as AlembicCfg
 from alembic.config import main as alembic_main
 
 from . import db, elasticstore, register_admin, scheduler, shell, start, worker
@@ -15,9 +17,6 @@ def genconfig(ctx, options):
 
 
 def main():
-    if "migration" in sys.argv:
-        argv = sys.argv[sys.argv.index("migration") + 1 :]
-        sys.exit(alembic_main(argv, "morpfw migration"))
     if "genconfig" in sys.argv:
         argv = sys.argv[sys.argv.index("genconfig") + 1 :]
         sys.exit(genconfig_main(argv))
@@ -27,3 +26,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
