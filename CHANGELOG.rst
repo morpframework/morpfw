@@ -1,7 +1,8 @@
 0.4.0b9 (unreleased)
 --------------------
 
-- Nothing changed yet.
+- alembic.ini is no longer required
+- migration logging now uses dictConfig
 
 
 0.4.0b8 (2021-03-19)
