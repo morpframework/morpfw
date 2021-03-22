@@ -29,25 +29,25 @@ def alembic_logging_config(app_cls, settings: dict) -> dict:
 @alembic_logging_config.register(app=morpfw.BaseApp)
 def default_alembic_logging_config(app_cls, settings: dict):
     return {
-        "loggers": {"keys": "root,sqlalchemy,alembic"},
-        "handlers": {"keys": "console"},
-        "formatters": {"keys": "generic",},
-        "logger_root": {"level": "WARN", "handlers": "console", "qualname": None},
-        "logger_sqlalchemy": {
-            "level": "WARN",
-            "handlers": None,
-            "qualname": "sqlalchemy.engine",
+        "version": 1,
+        "loggers": {
+            "": {"level": "WARN", "handlers": ["console"], "qualname": ""},
+            "sqlalchemy": {"level": "WARN", "qualname": "sqlalchemy.engine",},
+            "alembic": {"level": "INFO", "qualname": "alembic"},
         },
-        "logger_alembic": {"level": "INFO", "handlers": None, "qualname": "alembic"},
-        "handler_console": {
-            "class": "StreamHandler",
-            "args": "(sys.stderr,)",
-            "level": "NOTSET",
-            "formatter": "generic",
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+                "stream": "ext://sys.stderr",
+                "level": "NOTSET",
+                "formatter": "generic",
+            }
         },
-        "formatter_generic": {
-            "format": r"%(levelname)-5.5s [%(name)s] %(message)s",
-            "datefmt": r"%H:%M:%S",
+        "formatters": {
+            "generic": {
+                "format": r"%(levelname)-5.5s [%(name)s] %(message)s",
+                "datefmt": r"%H:%M:%S",
+            }
         },
     }
 
@@ -67,18 +67,7 @@ def default_alembic_config(app_cls, settings: dict) -> AlembicCfg:
     )
     logging_cfg = alembic_logging_config(app_cls, settings)
 
-    log_cfg = RawConfigParser()
-    for section, opts in logging_cfg.items():
-        for k, v in opts.items():
-            v = str(v) if v is not None else ""
-            log_cfg.setdefault(section, {})
-            log_cfg[section][k] = v
-
-    cfg_tmp = tempfile.mktemp(prefix="mfw-logging", suffix=".ini")
-    with open(cfg_tmp, "w") as f:
-        log_cfg.write(f)
-
-    acfg.logging_config_file_name = cfg_tmp
+    acfg.logging_config = logging_cfg
     return acfg
 
 
