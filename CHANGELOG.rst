@@ -1,4 +1,4 @@
-0.4.0b9 (unreleased)
+0.4.0b9 (2021-03-22)
 --------------------
 
 - alembic.ini is no longer required
