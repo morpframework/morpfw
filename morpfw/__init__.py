@@ -23,3 +23,4 @@ from .memoizer import memoize, requestmemoize
 from .request import Request, request_factory
 from .sql import Base as SQLBase
 from .util import get_group, get_user, get_user_by_userid
+from .oauth import OAuthRoot
