@@ -47,9 +47,9 @@ class App(JsonSchemaApp, signals.SignalApp):
     def get_config_blobstorage(self, request: morepath.Request, name: str = None):
         config = self.settings.configuration.__dict__
         if name is None:
-            uri = config["morpfw.blobstorage.uri"]
+            uri = config["morpfw.blobstorage.url"]
         else:
-            uri = config["morpfw.blobstorage.uri.{}".format(name)]
+            uri = config["morpfw.blobstorage.url.{}".format(name)]
 
         scheme = uri.split(":")[0]
         return self._get_blobstorage_factory(scheme)(request=request, uri=uri)
@@ -131,8 +131,6 @@ class App(JsonSchemaApp, signals.SignalApp):
     @reg.dispatch_method(reg.match_class("model"))
     def get_statemachine_factory(self, model):
         return None
-
-
 
     @reg.dispatch_method(reg.match_instance("model", lambda self, context: context))
     def get_searchprovider(self, context):
