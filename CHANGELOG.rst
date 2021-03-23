@@ -1,7 +1,8 @@
 0.4.0b10 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- semantic change dburi to dburl (BREAKS COMPAT)
+- import oauth in root module so that hook_oauth_models is available
 
 
 0.4.0b9 (2021-03-22)
