@@ -3,17 +3,18 @@ import functools
 import secrets
 
 import morepath
-import morpfw
 from jwt import InvalidTokenError
 from more.jwtauth import JWTIdentityPolicy
-from morpfw.authn.base import AuthnPolicy as BaseAuthnPolicy
-from morpfw.authn.pas.policy import Identity
-from morpfw.crud.util import resolve_model
 from oauthlib.common import Request as OAuthRequest
 from oauthlib.oauth2 import RequestValidator as BaseRequestValidator
 from oauthlib.oauth2 import Server
 from oauthlib.oauth2.rfc6749 import errors
 from webob.exc import HTTPBadRequest, HTTPForbidden
+
+import morpfw
+from morpfw.authn.base import AuthnPolicy as BaseAuthnPolicy
+from morpfw.authn.pas.policy import Identity
+from morpfw.crud.util import resolve_model
 
 from .authn.pas.app import App
 
@@ -147,8 +148,9 @@ def oauthserver(request: morpfw.Request) -> Server:
 
 
 class OAuthRoot(object):
-    def __init__(self, request) -> None:
+    def __init__(self, request, server_factory=oauthserver) -> None:
         self.request = request
+        self.server = server_factory(request)
 
 
 def extract_params(request: morepath.Request):
@@ -163,7 +165,7 @@ class OAuthProvider(object):
     def __init__(self, context, request) -> None:
         self.context = context
         self.request = request
-        self.server = oauthserver(request)
+        self.server = context.server
 
     def authorization_form(self):
         request = self.request
@@ -236,9 +238,6 @@ class OAuthProvider(object):
     def refresh_token(self):
         request = self.request
         uri, http_method, body, headers = extract_params(request)
-        # If you wish to include request specific extra credentials for
-        # use in the validator, do so here.
-        credentials = {}
 
         headers, body, status = self.server.create_revocation_response(
             uri, http_method, body, headers
