@@ -63,7 +63,7 @@ def default_alembic_config(app_cls, settings: dict) -> AlembicCfg:
     acfg.set_main_option("script_location", script_location)
     acfg.set_main_option("databases", proj)
     acfg.set_section_option(
-        proj, "sqlalchemy.url", config["morpfw.storage.sqlstorage.dburi"]
+        proj, "sqlalchemy.url", config["morpfw.storage.sqlstorage.dburl"]
     )
     logging_cfg = alembic_logging_config(app_cls, settings)
 

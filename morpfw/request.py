@@ -3,11 +3,11 @@ import importlib
 import os
 import threading
 import typing
+import warnings
 from importlib import import_module
 from urllib.parse import urlparse
 
 import morepath
-import morpfw
 import pytz
 import sqlalchemy.orm
 import transaction
@@ -23,8 +23,9 @@ from sqlalchemy.pool import NullPool, QueuePool
 from zope.sqlalchemy import ZopeTransactionEvents
 from zope.sqlalchemy import register as register_session
 
+import morpfw
+
 from .exc import ConfigurationError
-import warnings
 
 threadlocal = threading.local()
 
@@ -217,30 +218,32 @@ class DBSessionRequest(Request):
 
         settings = self.app._raw_settings
         config = settings["configuration"]
-       
+
         home_env = self.app.home_env
         if home_env not in os.environ:
-            if 'MORP_WORKDIR' in os.environ:
-                warnings.warn("MORP_WORKDIR environment is deprecated, use %s" %
-                        home_env, DeprecationWarning)
-                home_env = 'MORP_WORKDIR'
+            if "MORP_WORKDIR" in os.environ:
+                warnings.warn(
+                    "MORP_WORKDIR environment is deprecated, use %s" % home_env,
+                    DeprecationWarning,
+                )
+                home_env = "MORP_WORKDIR"
 
         cwd = os.environ.get(home_env, os.getcwd())
         os.chdir(cwd)
 
-        key = "morpfw.storage.sqlstorage.dburi"
+        key = "morpfw.storage.sqlstorage.dburl"
         if "://" in name:
-            dburi = name
+            dburl = name
         else:
             if name != "default":
-                key = "morpfw.storage.sqlstorage.dburi.{}".format(name)
+                key = "morpfw.storage.sqlstorage.dburl.{}".format(name)
 
             if not config.get(key, None):
                 raise ConfigurationError("{} not found".format(key))
 
-            dburi = config[key]
+            dburl = config[key]
         engine = sqlalchemy.create_engine(
-            dburi, poolclass=NullPool, connect_args={"options": "-c timezone=utc"}
+            dburl, poolclass=NullPool, connect_args={"options": "-c timezone=utc"}
         )
 
         self._db_engines[name] = engine

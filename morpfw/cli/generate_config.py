@@ -1,6 +1,7 @@
 import argparse
 import importlib
 import os
+import sys
 
 import click
 import morpfw
@@ -18,22 +19,22 @@ def get_settings_opts(app_cls):
 def default_get_settings_opts(app_cls):
     proj_name = app_cls.__module__.split(".")[0]
 
-    dburi = click.prompt(
-        "Application DB URI",
+    dburl = click.prompt(
+        "Application DB URL",
         default="postgresql://postgres:postgres@localhost:5432/%s" % proj_name,
     )
-    blobstorage_uri = click.prompt(
-        "Blobstorage URI", default=r"fsblob://%(here)s/blobstorage"
+    blobstorage_url = click.prompt(
+        "Blobstorage URL", default=r"fsblob://%(here)s/blobstorage"
     )
     beaker_session_type = click.prompt("Beaker Session Type", default="ext:database")
-    beaker_session_uri = click.prompt(
-        "Beaker Session URI",
+    beaker_session_url = click.prompt(
+        "Beaker Session URL",
         default="postgresql://postgres:postgres@localhost:5432/%s_cache" % proj_name,
     )
     beaker_cache_type = click.prompt("Beaker Cache Type", default=beaker_session_type)
-    beaker_cache_uri = click.prompt("Beaker Cache URI", default=beaker_session_uri,)
-    celery_broker_uri = click.prompt(
-        "Celery Broker URI", default="amqp://guest:guest@localhost:5672/%s" % proj_name
+    beaker_cache_url = click.prompt("Beaker Cache URL", default=beaker_session_url,)
+    celery_broker_url = click.prompt(
+        "Celery Broker URL", default="amqp://guest:guest@localhost:5672/%s" % proj_name
     )
     celery_result_backend = click.prompt(
         "Celery Result Backend",
@@ -41,13 +42,13 @@ def default_get_settings_opts(app_cls):
     )
     return {
         "fernet_key": Fernet.generate_key().decode("utf-8"),
-        "dburi": dburi,
-        "blobstorage_uri": blobstorage_uri,
+        "dburl": dburl,
+        "blobstorage_url": blobstorage_url,
         "beaker_session_type": beaker_session_type,
-        "beaker_session_uri": beaker_session_uri,
+        "beaker_session_url": beaker_session_url,
         "beaker_cache_type": beaker_cache_type,
-        "beaker_cache_uri": beaker_cache_uri,
-        "celery_broker_uri": celery_broker_uri,
+        "beaker_cache_url": beaker_cache_url,
+        "celery_broker_url": celery_broker_url,
         "celery_result_backend": celery_result_backend,
         "app_cls": "%s:%s" % (app_cls.__module__, app_cls.__name__),
         "app_module": app_cls.__module__.split(".")[0],
@@ -58,9 +59,7 @@ def default_get_settings_opts(app_cls):
 def genconfig(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument("application", help="Application class, in format module:Class")
-    parser.add_argument(
-        "-o", "--output", default=None, help="Output file (default to stdout)"
-    )
+    parser.add_argument("-o", "--output", default=None, help="Output file")
     args = parser.parse_args(argv)
 
     mod_name, cls_name = args.application.split(":")
@@ -81,10 +80,16 @@ def genconfig(argv):
             break
 
     if args.output is None:
-        print("\n\n")
-        print("# ---- Generated Config ----")
-        print(out)
-        print("# ---- End Of Generated Config ----")
+        home_env = app_cls.home_env
+        if home_env in os.environ:
+            output = os.path.join(os.environ[home_env], "settings.yml")
+        else:
+            print("%s is not set. Using current directory" % home_env, file=sys.stderr)
+            output = "settings.yml"
     else:
-        with open(args.output) as of:
-            of.write(out)
+        output = args.output
+
+    with open(output, "w") as of:
+        of.write(out)
+
+    print("Written %s" % output)

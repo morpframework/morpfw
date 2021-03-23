@@ -1,18 +1,19 @@
 import os
 import sys
 
-from alembic import command
-from alembic.config import Config
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy import inspect as Inspector
 from sqlalchemy.schema import DropSchema
+
+from alembic import command
+from alembic.config import Config
 
 
 def _load_engines(config):
     engines = {}
     for k, v in config.items():
         k = k.strip()
-        prefix = "morpfw.storage.sqlstorage.dburi"
+        prefix = "morpfw.storage.sqlstorage.dburl"
         if k.startswith(prefix):
             name = k.replace(prefix, "").strip()
             if name == "":
@@ -20,7 +21,7 @@ def _load_engines(config):
             elif name.startswith("."):
                 name = name[1:]
 
-            engines[name] = {"dburi": v}
+            engines[name] = {"dburl": v}
     return engines
 
 
@@ -30,20 +31,20 @@ def drop_all(request):
     engines = _load_engines(config)
 
     for n, conf in engines.items():
-        param = dict([(k, v) for k, v in conf.items() if k != "dburi"])
-        engine = create_engine(conf["dburi"], **param)
+        param = dict([(k, v) for k, v in conf.items() if k != "dburl"])
+        engine = create_engine(conf["dburl"], **param)
         inspect = Inspector(engine)
         print("Clearing engine: %s" % n)
         for schema in inspect.get_schema_names():
-            if schema in ['information_schema']:
+            if schema in ["information_schema"]:
                 continue
-            if schema.startswith('pg_'):
+            if schema.startswith("pg_"):
                 continue
             meta = MetaData(engine, schema=schema)
             print(".. Clearing tables from schema {}".format(schema))
             meta.reflect()
             meta.drop_all()
-            if schema in ['public', 'dbo']:
+            if schema in ["public", "dbo"]:
                 continue
 
             print("Dropping schema {}".format(schema))

@@ -12,13 +12,13 @@ from .generate_config import genconfig as genconfig_main
 
 @cli.command(help="generate config file")
 @click.pass_context
-def genconfig(ctx, options):
+def generate_config(ctx, options):
     pass
 
 
 def main():
-    if "genconfig" in sys.argv:
-        argv = sys.argv[sys.argv.index("genconfig") + 1 :]
+    if "generate-config" in sys.argv:
+        argv = sys.argv[sys.argv.index("generate-config") + 1 :]
         sys.exit(genconfig_main(argv))
     else:
         cli()
