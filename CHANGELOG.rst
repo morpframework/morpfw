@@ -1,4 +1,4 @@
-0.4.0b12 (unreleased)
+0.4.0b12 (2021-03-23)
 ---------------------
 
 - CLI now uses MFW_APP and MFW_HOME environment variable 
