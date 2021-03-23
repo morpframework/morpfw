@@ -1,7 +1,7 @@
 0.4.0b11 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- fix issue with forgotten rename of ldap_uri to ldap_url
 
 
 0.4.0b10 (2021-03-23)
