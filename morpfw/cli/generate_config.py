@@ -58,11 +58,24 @@ def default_get_settings_opts(app_cls):
 
 def genconfig(argv):
     parser = argparse.ArgumentParser()
-    parser.add_argument("application", help="Application class, in format module:Class")
+    parser.add_argument(
+        "-a",
+        "--application",
+        default=None,
+        help="Application class, in format module:Class",
+    )
     parser.add_argument("-o", "--output", default=None, help="Output file")
     args = parser.parse_args(argv)
 
-    mod_name, cls_name = args.application.split(":")
+    if args.application is None:
+        if "MFW_APP" in os.environ:
+            application = os.environ["MFW_APP"]
+        else:
+            parser.error("Application argument is required")
+    else:
+        application = args.application
+
+    mod_name, cls_name = application.split(":")
     mod = importlib.import_module(mod_name)
     app_cls = getattr(mod, cls_name)
 

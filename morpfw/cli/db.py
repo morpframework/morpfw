@@ -131,4 +131,7 @@ def db(ctx):
     prog = "%s %s" % (argv[0], argv[1])
     acli = AlembicCLI(prog=prog)
     options = acli.parser.parse_args(argv[2:])
-    acli.run_cmd(acfg, options)
+    if not hasattr(options, "cmd"):
+        acli.parser.error("too few arguments")
+    else:
+        acli.run_cmd(acfg, options)

@@ -14,8 +14,21 @@ from .generate_config import genconfig
 
 
 def load_settings(settings_file, default=default_settings):
+    if settings_file is None:
+        if "MFW_APP" in os.environ:
+            app_path = os.environ["MFW_APP"]
+            modname, cname = app_path.split(":")
+            mod = importlib.import_module(modname)
+            app_cls = getattr(mod, cname)
+            home_env = app_cls.home_env
+            if home_env in os.environ:
+                settings_file = os.path.join(os.environ[home_env], "settings.yml")
+
     dsettings = os.environ.get("MORP_SETTINGS", {})
     if settings_file is None:
+        print(
+            "WARNING: settings.yml not found, using default settings", file=sys.stderr
+        )
         settings = dsettings
     elif not os.path.exists(settings_file):
         raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), settings_file)
