@@ -102,6 +102,10 @@ def genconfig(argv):
     else:
         output = args.output
 
+    if os.path.exists(output):
+        print("%s already exist" % output, file=sys.stderr)
+        sys.exit(1)
+
     with open(output, "w") as of:
         of.write(out)
 

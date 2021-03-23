@@ -1,8 +1,10 @@
 0.4.0b12 (unreleased)
 ---------------------
 
-- Nothing changed yet.
-
+- CLI now uses MFW_APP and MFW_HOME environment variable 
+- if MFW_APP and MFW_HOME are set, settings file will be loaded
+  from MFW_HOME
+- generate-config avoids overwriting settings.yml if already exist
 
 0.4.0b11 (2021-03-23)
 ---------------------
