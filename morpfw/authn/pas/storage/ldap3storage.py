@@ -14,7 +14,7 @@ class LDAP3SQLUserStorage(UserSQLStorage):
     def __init__(
         self,
         request,
-        ldap_uri: str,
+        ldap_url: str,
         base_dn: str,
         bind_dn: typing.Optional[str] = None,
         bind_password: typing.Optional[str] = None,
@@ -27,7 +27,7 @@ class LDAP3SQLUserStorage(UserSQLStorage):
         blobstorage=None,
     ):
         self.ldap_base_dn = base_dn
-        self.ldap_uri = ldap_uri
+        self.ldap_url = ldap_url
         self.ldap_start_tls = start_tls
         self.ldap_username_attr = username_attr
         self.ldap_email_attr = email_attr
@@ -45,7 +45,7 @@ class LDAP3SQLUserStorage(UserSQLStorage):
         super().__init__(request, blobstorage=blobstorage)
 
     def ldap_connect(self):
-        conn = ldap.initialize(self.ldap_uri)
+        conn = ldap.initialize(self.ldap_url)
         # disable referral chasing
         # https://www.python-ldap.org/en/python-ldap-3.3.0/faq.html
         conn.set_option(ldap.OPT_REFERRALS, 0)
