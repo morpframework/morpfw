@@ -57,9 +57,9 @@ class App(JsonSchemaApp, signals.SignalApp):
     def get_config_storage(self, request: morepath.Request, name: str = None):
         config = self.settings.configuration.__dict__
         if name is None:
-            uri = config["morpfw.storage.uri"]
+            uri = config["morpfw.storage.url"]
         else:
-            uri = config["morpfw.storage.uri.{}".format(name)]
+            uri = config["morpfw.storage.url.{}".format(name)]
 
         parsed = urlparse(uri)
         return self._get_storage_factory(parsed.scheme)(request, uri)
