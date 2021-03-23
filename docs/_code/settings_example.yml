@@ -35,7 +35,7 @@ configuration:
     - library2
 
   # sqlalchemy database URI, default: undefined
-  morpfw.storage.sqlstorage.dburi: 'postgresql://postgres:postgres@localhost:5432/app'
+  morpfw.storage.sqlstorage.dburl: 'postgresql://postgres:postgres@localhost:5432/app'
   
   # Authentication policy, defaults to noauth
   morpfw.authn.policy: morpfw.authn.noauth:AuthnPolicy
