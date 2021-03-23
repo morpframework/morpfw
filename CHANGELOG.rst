@@ -1,7 +1,8 @@
 0.4.0b13 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- generate path to migration script location when running genconfig
+- fix config generator bug for dburi/dburl
 
 
 0.4.0b12 (2021-03-23)

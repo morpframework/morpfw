@@ -17,6 +17,12 @@ def get_settings_opts(app_cls):
 
 @get_settings_opts.register(app=morpfw.BaseApp)
 def default_get_settings_opts(app_cls):
+    home_env = app_cls.home_env
+    if home_env in os.environ:
+        home_dir = os.environ[home_env]
+    else:
+        home_dir = os.getcwd()
+
     proj_name = app_cls.__module__.split(".")[0]
 
     dburl = click.prompt(
@@ -24,7 +30,7 @@ def default_get_settings_opts(app_cls):
         default="postgresql://postgres:postgres@localhost:5432/%s" % proj_name,
     )
     blobstorage_url = click.prompt(
-        "Blobstorage URL", default=r"fsblob://%(here)s/blobstorage"
+        "Blobstorage URL", default="fsblob://%s/blobstorage" % home_dir
     )
     beaker_session_type = click.prompt("Beaker Session Type", default="ext:database")
     beaker_session_url = click.prompt(
@@ -53,6 +59,7 @@ def default_get_settings_opts(app_cls):
         "app_cls": "%s:%s" % (app_cls.__module__, app_cls.__name__),
         "app_module": app_cls.__module__.split(".")[0],
         "app_title": "Application",
+        "migration_script_location": os.path.join(home_dir, "migrations"),
     }
 
 

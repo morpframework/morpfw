@@ -8,18 +8,20 @@ configuration:
     - {{ app_module }}
   morpfw.authn.policy: morpfw.authn.useridparam:AuthnPolicy
 
-  morpfw.storage.sqlstorage.dburi: '{{ dburi }}'
-  morpfw.blobstorage.uri: '{{ blobstorage_uri }}'
+  morpfw.storage.sqlstorage.dburi: '{{ dburl }}'
+  morpfw.blobstorage.url: '{{ blobstorage_url }}'
   morpfw.secret.fernet_key: {{ fernet_key }}
   morpfw.beaker.session.type: {{ beaker_session_type }}
-  morpfw.beaker.session.url: '{{ beaker_session_uri }}'
+  morpfw.beaker.session.url: '{{ beaker_session_url }}'
   morpfw.beaker.cache.type: {{ beaker_cache_type }}
-  morpfw.beaker.cache.url: '{{ beaker_cache_uri }}'
+  morpfw.beaker.cache.url: '{{ beaker_cache_url }}'
 
   morpfw.celery:
     # celery settings variables
     broker_url: '{{ celery_broker_url }}'
     result_backend: '{{ celery_result_backend }}'
+
+  alembic.migration_script_location: '{{ migration_script_location }}'
 
 application:
   title: {{ app_title }}
