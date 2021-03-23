@@ -1,4 +1,4 @@
-0.4.0b10 (unreleased)
+0.4.0b10 (2021-03-23)
 ---------------------
 
 - semantic change dburi to dburl (BREAKS COMPAT)
