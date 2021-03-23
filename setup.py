@@ -5,7 +5,7 @@ from setuptools import find_packages, setup
 
 IS_RTD = os.environ.get("READTHEDOCS", None)
 
-version = "0.4.0b13.dev0"
+version = "0.4.0b13"
 
 long_description = open(os.path.join(os.path.dirname(__file__), "README.rst")).read()
 

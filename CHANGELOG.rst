@@ -1,4 +1,4 @@
-0.4.0b13 (unreleased)
+0.4.0b13 (2021-03-23)
 ---------------------
 
 - generate path to migration script location when running genconfig
