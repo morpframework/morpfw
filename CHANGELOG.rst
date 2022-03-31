@@ -1,7 +1,7 @@
 0.4.0b14 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- stable release
 
 
 0.4.0b13 (2021-03-23)
