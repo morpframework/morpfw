@@ -68,6 +68,7 @@ def default_alembic_config(app_cls, settings: dict) -> AlembicCfg:
     logging_cfg = alembic_logging_config(app_cls, settings)
 
     acfg.logging_config = logging_cfg
+    acfg.config_file_name = 'alembic.ini'
     return acfg
 
 
