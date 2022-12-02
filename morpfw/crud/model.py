@@ -582,6 +582,8 @@ class Model(IModel):
         self.update({self.blobstorage_field: blob_data})
         if existing:
             self.storage.delete_blob(existing)
+        dispatch = self.request.app.dispatcher(signals.BLOB_UPDATED)
+        dispatch.dispatch(self.request, self)
         self.after_blobput(field, blob)
         self.save()
         return blob

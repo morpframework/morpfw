@@ -9,7 +9,7 @@ from . import pubsub
 OBJECT_CREATED = "morpfw.object_created"
 OBJECT_UPDATED = "morpfw.object_updated"
 OBJECT_TOBEDELETED = "morpfw.object_tobedeleted"
-
+BLOB_UPDATED = "morpfw.blob_updated"
 
 def _get_identifier(obj):
     if inspect.isclass(obj):

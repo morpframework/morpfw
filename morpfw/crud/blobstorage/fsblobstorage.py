@@ -22,8 +22,8 @@ class FSBlob(Blob):
         super().__init__(*args, **kwargs)
         self.path = path
 
-    def open(self):
-        return open(self.path, "rb")
+    def open(self, mode='rb'):
+        return open(self.path, mode)
 
     def get_size(self):
         stat = os.stat(self.path)

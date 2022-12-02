@@ -96,7 +96,7 @@ class IBlob(abc.ABC):
         super().__init__()
 
     @abc.abstractmethod
-    def open(self) -> BinaryIO:
+    def open(self, mode: Optional[str] = 'rb') -> BinaryIO:
         raise NotImplementedError
 
     @abc.abstractmethod
